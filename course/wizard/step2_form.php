@@ -8,7 +8,8 @@ require_once($CFG->libdir.'/completionlib.php');
 class course_wizard_step2_form extends moodleform {
 
     function definition() {
-        global $USER, $CFG, $DB;
+       // global $USER, $CFG, $DB;
+       global  $SESSION;
 
         $mform    = $this->_form;
 
@@ -25,6 +26,9 @@ class course_wizard_step2_form extends moodleform {
         make_categories_list($displaylist, $parentlist, 'moodle/course:create');
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
         $mform->addHelpButton('category', 'category');
+        if (isset($SESSION->wizard['form_step2']['category'])) {
+			 $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
+		}
 
         $mform->addElement('header','general', 'Informations générales de l\'espace de cours');
 
@@ -32,21 +36,35 @@ class course_wizard_step2_form extends moodleform {
         $mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');
         $mform->setType('fullname', PARAM_MULTILANG);
+        if (isset($SESSION->wizard['form_step2']['fullname'])) {
+            $mform->setConstant('fullname', $SESSION->wizard['form_step2']['fullname']);
+ 	    }
 
         $mform->addElement('text', 'shortname', get_string('shortnamecourse'), 'maxlength="100" size="20"');
         $mform->addHelpButton('shortname', 'shortnamecourse');
         $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
         $mform->setType('shortname', PARAM_MULTILANG);
+        if (isset($SESSION->wizard['form_step2']['shortname'])) {
+            $mform->setConstant('shortname', $SESSION->wizard['form_step2']['shortname']);
+ 	    }
 
         $mform->addElement('editor','summary_editor', get_string('coursesummary'), null, $editoroptions);
         $mform->addHelpButton('summary_editor', 'coursesummary');
         $mform->setType('summary_editor', PARAM_RAW);
+        if (isset($SESSION->wizard['form_step2']['summary_editor'])) {
+            $mform->setConstant('summary_editor', $SESSION->wizard['form_step2']['summary_editor']);
+ 	    }
 
         $mform->addElement('header','parametre', 'Paramétrage de l\'espace de cours');
 
         $mform->addElement('date_selector', 'startdate', get_string('startdate'));
         $mform->addHelpButton('startdate', 'startdate');
-        $mform->setDefault('startdate', time() + 3600 * 24);
+        if (isset($SESSION->wizard['form_step2']['startdate'])) {
+			$date = $SESSION->wizard['form_step2']['startdate'];
+			$mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
+		} else {
+            $mform->setDefault('startdate', time() + 3600 * 24);
+        }
 
         /**
          * liste des paramètres de cours ayant une valeur par défaut
