@@ -4,8 +4,12 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->libdir.'/completionlib.php');
+require_once($CFG->libdir.'/custominfo/lib.php');
 
 class course_wizard_step3_form extends moodleform {
+
+	protected $custominfo;
+
     function definition() {
         global $USER, $DB, $SESSION;
 
@@ -46,6 +50,13 @@ class course_wizard_step3_form extends moodleform {
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 3);
 
+//--------------------------------------------------------------------------------
+        // Next the customisable fields
+        $this->custominfo = new custominfo_form_extension('course');
+        $canviewall = has_capability('moodle/course:update', get_context_instance(CONTEXT_SYSTEM));
+        $this->custominfo->definition($mform, $canviewall);
+
+//--------------------------------------------------------------------------------
 
         $buttonarray=array();
         $buttonarray[] = &$mform->createElement('submit', 'stepgo_2', 'étape précédente');

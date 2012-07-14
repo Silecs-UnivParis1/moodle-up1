@@ -63,6 +63,9 @@ if (isset($stepgo)) {
 		case 3 :
 		    $steptitle = 'Etape 3 - Description de l\'espace de cours';
 		    $editform = new course_wizard_step3_form();
+		    if (isset($SESSION->wizard['form_step3'])) {
+		        $editform->set_data((object)$SESSION->wizard['form_step3']);
+		    }
 		    break;
 		case 4 :
 		    $steptitle = 'Etape 4, il faut créer le cours dans la base et renvoyer sur inscription : enrol/user.php';
