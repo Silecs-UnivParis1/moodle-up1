@@ -6,9 +6,12 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+/**
+ * This class declares the form that describes a custominfo field.
+ */
 class field_form extends moodleform {
 
-    var $field;
+    public $field;
 
 /// Define the form
     function definition () {
@@ -17,10 +20,10 @@ class field_form extends moodleform {
         $mform =& $this->_form;
 
         /// Everything else is dependant on the data type
-        $datatype = $this->_customdata;
+        $datatype = $this->_customdata['datatype'];
         require_once(__DIR__.'/field/'.$datatype.'/define.class.php');
         $newfield = 'profile_define_'.$datatype;
-        $this->field = new $newfield();
+        $this->field = new $newfield($this->_customdata['objectname']);
 
         $strrequired = get_string('required');
 

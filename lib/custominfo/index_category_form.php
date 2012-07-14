@@ -6,12 +6,13 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+/**
+ * This class declares the form that describes a custominfo category.
+ */
 class category_form extends moodleform {
 
     // Define the form
     function definition () {
-        global $USER, $CFG;
-
         $mform =& $this->_form;
 
         $strrequired = get_string('required');
@@ -27,7 +28,6 @@ class category_form extends moodleform {
         $mform->addRule('name', $strrequired, 'required', null, 'client');
 
         $this->add_action_buttons(true);
-
     } /// End of function
 
 /// perform some moodle validation
@@ -38,12 +38,12 @@ class category_form extends moodleform {
         $data  = (object)$data;
 
         $duplicate = $DB->record_exists('custom_info_category',
-                array('objectname' => 'user', 'name' => $data->name));
+                array('objectname' => $this->_customdata['objectname'], 'name' => $data->name));
 
         /// Check the name is unique
         if (!empty($data->id)) { // we are editing an existing record
             $olddata = $DB->get_record('custom_info_category',
-                    array('objectname' => 'user', 'id' => $data->id));
+                    array('objectname' => $this->_customdata['objectname'], 'id' => $data->id));
             // name has changed, new name in use, new name in use by another record
             $dupfound = (($olddata->name !== $data->name) && $duplicate && ($data->id != $duplicate->id));
         }

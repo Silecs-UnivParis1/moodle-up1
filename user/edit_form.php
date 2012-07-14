@@ -7,6 +7,10 @@ if (!defined('MOODLE_INTERNAL')) {
 require_once($CFG->dirroot.'/lib/formslib.php');
 
 class user_edit_form extends moodleform {
+    /**
+     * @var custominfo_form_extension
+     */
+    protected $custominfo;
 
     // Define the form
     function definition () {
@@ -47,7 +51,9 @@ class user_edit_form extends moodleform {
         }
 
         /// Next the customisable profile fields
-        profile_definition($mform);
+        $this->custominfo = new custominfo_form_extension('user');
+        $canviewall = has_capability('moodle/user:update', get_context_instance(CONTEXT_SYSTEM));
+        $this->custominfo->definition($mform, $canviewall);
 
         $this->add_action_buttons(false, get_string('updatemyprofile'));
     }
@@ -114,10 +120,10 @@ class user_edit_form extends moodleform {
             }
 
             /// Next the customisable profile fields
-            profile_definition_after_data($mform, $user->id);
+            $this->custominfo->definition_after_data($mform, $user->id);
 
         } else {
-            profile_definition_after_data($mform, 0);
+            $this->custominfo->definition_after_data($mform, 0);
         }
     }
 
@@ -150,7 +156,7 @@ class user_edit_form extends moodleform {
         }
 
         /// Next the customisable profile fields
-        $errors += profile_validation($usernew, $files);
+        $errors += $this->custominfo->validation($usernew, $files);
 
         return $errors;
     }

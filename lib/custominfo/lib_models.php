@@ -181,7 +181,7 @@ class custominfo_category extends custominfo_record {
 
         /// Finally we get to delete the category
         $DB->delete_records('custom_info_category', array('objectname' => $this->objectname, 'id' => $this->record->id));
-        profile_reorder_categories();
+        $this->reorder();
         return true;
     }
 
@@ -255,7 +255,7 @@ class custominfo_category extends custominfo_record {
      */
     public function get_form() {
         if (empty($this->form)) {
-            $this->form = new category_form();
+            $this->form = new category_form(null, array('objectname' => $this->objectname));
 
             if ($this->id && $this->record) {
                 $this->form->set_data($this->record);
@@ -400,7 +400,9 @@ class custominfo_field extends custominfo_record {
             return self::EDIT_CANCELLED;
         } else {
             if ($data = $form->get_data()) {
-                $formfield = custiominfo_field_factory($this->objectname, $datatype);
+                require_once(__DIR__.'/field/'.$datatype.'/define.class.php');
+                $newfield = 'profile_define_'.$datatype;
+                $formfield = new $newfield($this->objectname);
 
                 // Collect the description and format back into the proper data structure from the editor
                 // Note: This field will ALWAYS be an editor
@@ -437,7 +439,7 @@ class custominfo_field extends custominfo_record {
 
     /**
      * Return the form for this record
-     * @return category_form
+     * @return field_form
      */
     public function get_form() {
         if (empty($this->form)) {
@@ -448,7 +450,7 @@ class custominfo_field extends custominfo_record {
                 'itemid' => 0
             );
 
-            $this->form = new field_form(null, $this->record->datatype);
+            $this->form = new field_form(null, array('datatype' => $this->record->datatype, 'objectname' => $this->objectname));
 
             // Convert the data format for
             if (is_array($this->form->editors())) {

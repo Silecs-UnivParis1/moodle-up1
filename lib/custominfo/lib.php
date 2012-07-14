@@ -6,6 +6,7 @@ define ('CUSTOMINFO_VISIBLE_ALL',     '2'); // visible for all users
 define ('CUSTOMINFO_VISIBLE_PRIVATE', '1'); // either it's our own profile or course, or we have moodle/user:update capability
 define ('CUSTOMINFO_VISIBLE_NONE',    '0'); // only visible for moodle/user:update (or course) capability
 
+require_once(__DIR__ . '/lib_data.php');
 require_once(__DIR__ . '/lib_models.php');
 require_once(__DIR__ . '/lib_define.php');
 require_once(__DIR__ . '/index_category_form.php');
@@ -44,6 +45,7 @@ abstract class custominfo_field_base {
         global $CFG;
         $modelclass = 'custominfo_field_extension_' . $objectname;
         require_once($CFG->dirroot.'/'.$objectname.'/custominfo/locallib.php');
+        $this->objectname = $objectname;
         $this->extension = new $modelclass();
         $this->capability = $this->extension->get_capability();
         $this->set_fieldid($fieldid);
