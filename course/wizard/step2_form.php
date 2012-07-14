@@ -23,7 +23,7 @@ class course_wizard_step2_form extends moodleform {
 
         $displaylist = array();
         $parentlist = array();
-        make_categories_list($displaylist, $parentlist, 'moodle/course:create');
+        make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
         $mform->addHelpButton('category', 'category');
         if (isset($SESSION->wizard['form_step2']['category'])) {
@@ -138,7 +138,7 @@ class course_wizard_step2_form extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray=array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_1', 'étape précédente');
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_1', 'étape précédente', array('onclick'=>'skipClientValidation = true; return true;'));
         $buttonarray[] = &$mform->createElement('submit', 'stepgo_3', 'étape suivante');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
