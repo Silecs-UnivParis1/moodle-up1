@@ -58,9 +58,10 @@ class course_wizard_step3_form extends moodleform {
 
 //--------------------------------------------------------------------------------
 
+        $message = "Attention, vous ne pourrez plus modifier vos données.\\nConfirmez-vous le passage à l\'étape suivante ?";
         $buttonarray=array();
         $buttonarray[] = &$mform->createElement('submit', 'stepgo_2', 'étape précédente');
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_4', 'étape suivante');
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_4', 'étape suivante', array('onclick'=>"return confirm('".$message."');"));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }
