@@ -71,10 +71,16 @@ if (isset($stepgo)) {
 		    $steptitle = 'Etape 4 : création du cours';
 		    $date = $SESSION->wizard['form_step2']['startdate'];
 		    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-		    $mydata = (object)$SESSION->wizard['form_step2'];
+
+            $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
+		    $mydata = (object) $datamerge;
 		    $mydata->startdate = $startdate;
             $course = create_course($mydata);
-            //redirect(new moodle_url('/enrol/users.php', array('id'=>$course->id)));
+            // save custom fields data
+            $mydata->id = $course->id;
+            $custominfo_data = custominfo_data::type('course');
+            $custominfo_data->save_data($mydata);
+
             $context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
             if (!is_enrolled($context)) {
                 // Redirect to manual enrolment page if possible
