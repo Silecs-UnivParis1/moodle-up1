@@ -119,10 +119,15 @@ if (isset($stepgo)) {
 		    break;
 	    case 8 :
 		    // envoi message
+		    $message = $SESSION->wizard['form_step7']['message'];
+		    if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
+				$message .= '<p>La demande est accompagnée de la remarque suivante : '
+				    . $SESSION->wizard['form_step7']['remarques'] . '</p>';
+			}
 			$res = send_course_request('bonjour');
 			// var_dump($res);
 			// die();
-		    unset($SESSION->wizard);
+		  //  unset($SESSION->wizard);
 		    // on renvoie quelque part ?
 		    break;
 	}
