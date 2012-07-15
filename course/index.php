@@ -107,6 +107,10 @@ if (!$adminediting) {
         $options = array('category' => $CFG->defaultrequestcategory);
         echo $OUTPUT->single_button(new moodle_url('edit.php', $options), get_string('addnewcourse'), 'get');
     }
+	// Wizard for course creation - doesn't demand course:create
+	//** @todo get_string fr/en "coursewizardbutton"
+	echo $OUTPUT->single_button(new moodle_url('wizard/index.php'), 'Assistant création de cours', 'get');
+
     print_course_request_buttons($systemcontext);
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
