@@ -120,6 +120,9 @@ if (isset($stepgo)) {
 		    break;
 	    case 8 :
 		    // envoi message
+			$res = send_course_request('bonjour');
+			// var_dump($res);
+			// die();
 		    unset($SESSION->wizard);
 		    // on renvoie quelque part ?
 		    break;

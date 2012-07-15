@@ -43,3 +43,33 @@ function validation_shortname($shortname) {
     }
     return $errors;
 }
+
+function send_course_request($message) {
+	global $DB, $USER;
+
+	$result = $DB->get_records('user', array('username' => 'admin')); //** @todo on envoie à qui ? plusieurs ?
+
+	//** @todo maybe replace all this by a call to course/lib.php course_request::notify +4394
+    $eventdata = new object();
+    $eventdata->component         = 'moodle';
+    $eventdata->name              = 'courserequested';
+    $eventdata->userfrom          = $USER;
+    $eventdata->subject           = '[CourseWizardRequest]'; //** @todo get_string()
+    $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
+    $eventdata->fullmessage       = $message;
+    // $eventdata->fullmessagehtml   = $message;
+    $eventdata->smallmessage      = $message; // USED BY DEFAULT !
+
+    // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
+	$count = array('err' => 0, 'ok' => 0);
+    foreach ($result as $userto) {
+        $eventdata->userto = $userto;
+        $res = message_send($eventdata);
+        if ($res) {
+            $count['ok']++;
+        } else {
+            $count['err']++;
+        }
+    }
+    return $count;
+}
