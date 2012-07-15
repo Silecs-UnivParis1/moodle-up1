@@ -115,7 +115,6 @@ if (isset($stepgo)) {
 		case 7 :
 		    // on vient de inscription et on va à la fin
 		    $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
-		    echo $steptitle ;
 		    $editform = new course_wizard_step_confirm();
 		    break;
 	    case 8 :
