@@ -68,7 +68,26 @@ if (isset($stepgo)) {
 		    }
 		    break;
 		case 4 :
-		    $steptitle = 'Etape 4, il faut créer le cours dans la base et renvoyer sur inscription : enrol/user.php';
+		    $steptitle = 'Etape 4 : création du cours';
+		    $date = $SESSION->wizard['form_step2']['startdate'];
+		    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+		    $mydata = (object)$SESSION->wizard['form_step2'];
+		    $mydata->startdate = $startdate;
+            $course = create_course($mydata);
+            //redirect(new moodle_url('/enrol/users.php', array('id'=>$course->id)));
+            $context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
+            if (!is_enrolled($context)) {
+                // Redirect to manual enrolment page if possible
+                $instances = enrol_get_instances($course->id, true);
+                foreach($instances as $instance) {
+                    if ($plugin = enrol_get_plugin($instance->enrol)) {
+                        if ($plugin->get_manual_enrol_link($instance)) {
+                            // we know that the ajax enrol UI will have an option to enrol
+                            redirect(new moodle_url('/enrol/users.php', array('id'=>$course->id)));
+                        }
+                    }
+                }
+            }
 		    break;
 	}
 }
