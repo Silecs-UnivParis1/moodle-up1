@@ -28,3 +28,18 @@ function get_stepgo($stepin, $POST){
 	 }
 	return $stepgo;
 }
+
+function validation_shortname($shortname) {
+    global $DB, $CFG;
+    $errors = array();
+    if ($foundcourses = $DB->get_records('course', array('shortname'=>$shortname))) {
+        if (!empty($foundcourses)) {
+            foreach ($foundcourses as $foundcourse) {
+                $foundcoursenames[] = $foundcourse->fullname;
+            }
+            $foundcoursenamestring = implode(',', $foundcoursenames);
+            $errors['shortname']= get_string('shortnametaken', '', $foundcoursenamestring);
+        }
+    }
+    return $errors;
+}

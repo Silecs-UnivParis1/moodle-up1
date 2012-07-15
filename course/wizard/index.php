@@ -62,10 +62,19 @@ if (isset($stepgo)) {
 		    $editform = new course_wizard_step2_form(NULL, array('editoroptions'=>$editoroptions));
 		    break;
 		case 3 :
-		    $steptitle = 'Etape 3 - Description de l\'espace de cours';
-		    $editform = new course_wizard_step3_form();
-		    if (isset($SESSION->wizard['form_step3'])) {
-		        $editform->set_data((object)$SESSION->wizard['form_step3']);
+		    $data = $SESSION->wizard['form_step2'];
+		    $errors = validation_shortname($data['shortname']);
+		    if (count($errors)) {
+				$data['erreurs'] = $errors;
+				$SESSION->wizard['form_step2'] = $data;
+				$editform = new course_wizard_step2_form(NULL);
+				$steptitle = 'Etape 2 - Identification de l\'espace de cours';
+			} else {
+		        $steptitle = 'Etape 3 - Description de l\'espace de cours';
+		        $editform = new course_wizard_step3_form();
+		        if (isset($SESSION->wizard['form_step3'])) {
+		            $editform->set_data((object)$SESSION->wizard['form_step3']);
+		        }
 		    }
 		    break;
 		case 4 :

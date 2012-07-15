@@ -47,6 +47,9 @@ class course_wizard_step2_form extends moodleform {
         if (isset($SESSION->wizard['form_step2']['shortname'])) {
             $mform->setConstant('shortname', $SESSION->wizard['form_step2']['shortname']);
  	    }
+        if (isset($SESSION->wizard['form_step2']['erreurs'])) {
+            $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['shortname'], array('class' => 'required')));
+ 	    }
 
         $mform->addElement('editor','summary_editor', get_string('coursesummary'), null, $editoroptions);
         $mform->addHelpButton('summary_editor', 'coursesummary');
