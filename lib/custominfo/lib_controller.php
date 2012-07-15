@@ -2,6 +2,9 @@
 
 require_once(__DIR__.'/lib.php');
 
+/**
+ * This class is used by the web pages that administrate the custom categories and fields.
+ */
 class custominfo_controller {
     /**
      * @var string
@@ -36,7 +39,7 @@ class custominfo_controller {
      * @param string $action   Name of the action requested
      */
     public function dispatch_action($action) {
-        global $DB, $OUTPUT;
+        global $DB, $OUTPUT, $PAGE;
         switch ($action) {
             case 'movecategory':
                 $id  = required_param('id', PARAM_INT);
@@ -206,11 +209,11 @@ class custominfo_controller {
             $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
             if ($fields) {
                 foreach ($fields as $field) {
-                    $table->data[] = array(format_string($field->name), $this->profile_field_icons($field));
+                    $table->data[] = array(format_string($field->name), $this->field_icons($field));
                 }
             }
 
-            echo $OUTPUT->heading(format_string($category->name) .' '.$this->profile_category_icons($category));
+            echo $OUTPUT->heading(format_string($category->name) .' '.$this->category_icons($category));
             if (count($table->data)) {
                 echo html_writer::table($table);
             } else {
@@ -225,8 +228,8 @@ class custominfo_controller {
      * @param   object   the category object
      * @return  string   the icon string
      */
-    protected function profile_category_icons($category) {
-        global $CFG, $DB, $OUTPUT;
+    protected function category_icons($category) {
+        global $DB, $OUTPUT;
 
         $strdelete   = get_string('delete');
         $strmoveup   = get_string('moveup');
@@ -270,8 +273,8 @@ class custominfo_controller {
      * @param   object   the field object
      * @return  string   the icon string
      */
-    protected function profile_field_icons($field) {
-        global $CFG, $DB, $OUTPUT;
+    protected function field_icons($field) {
+        global $DB, $OUTPUT;
 
         $strdelete   = get_string('delete');
         $strmoveup   = get_string('moveup');
@@ -279,7 +282,7 @@ class custominfo_controller {
         $stredit     = get_string('edit');
 
         $fieldcount = $DB->count_records('custom_info_field', array('categoryid' => $field->categoryid));
-        $datacount  = $DB->count_records('custom_info_data', array('fieldid' => $field->id));
+        //$datacount  = $DB->count_records('custom_info_data', array('fieldid' => $field->id));
 
         /// Edit
         $editstr = '<a title="'.$stredit.'" href="index.php?id='.$field->id.'&amp;action=editfield"><img src="'.$OUTPUT->pix_url('t/edit') . '" alt="'.$stredit.'" class="iconsmall" /></a> ';

@@ -1,4 +1,7 @@
 <?php
+/**
+ * This file contains 2 classes that can be used to put/read data in the custom fields of some object.
+ */
 
 /**
  * Contains some methods for reading and writing the data in the custom fields.
@@ -32,6 +35,9 @@ class custominfo_data {
     public function load_data($object) {
         global $DB;
 
+        if (empty($object)) {
+            return;
+        }
         $fields = $DB->get_records('custom_info_field', array('objectname' => $this->objectname));
         if ($fields) {
             foreach ($fields as $field) {

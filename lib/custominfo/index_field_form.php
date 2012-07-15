@@ -4,6 +4,7 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
 
+global $CFG;
 require_once($CFG->dirroot.'/lib/formslib.php');
 
 /**
@@ -13,10 +14,10 @@ class field_form extends moodleform {
 
     public $field;
 
-/// Define the form
-    function definition () {
-        global $CFG;
-
+    /**
+     * Define the form
+     */
+    public function definition () {
         $mform =& $this->_form;
 
         /// Everything else is dependant on the data type
@@ -24,8 +25,6 @@ class field_form extends moodleform {
         require_once(__DIR__.'/field/'.$datatype.'/define.class.php');
         $newfield = 'profile_define_'.$datatype;
         $this->field = new $newfield($this->_customdata['objectname']);
-
-        $strrequired = get_string('required');
 
         /// Add some extra hidden fields
         $mform->addElement('hidden', 'id');
@@ -40,20 +39,22 @@ class field_form extends moodleform {
         $this->add_action_buttons(true);
     }
 
-
-/// alter definition based on existing or submitted data
-    function definition_after_data () {
+    /**
+     * Alter definition based on existing or submitted data
+     */
+    public function definition_after_data () {
         $mform =& $this->_form;
         $this->field->define_after_data($mform);
     }
 
-
-/// perform some moodle validation
-    function validation($data, $files) {
+    /**
+     * perform some moodle validation
+     */
+    public function validation($data, $files) {
         return $this->field->define_validate($data, $files);
     }
 
-    function editors() {
+    public function editors() {
         return $this->field->define_editors();
     }
 }
