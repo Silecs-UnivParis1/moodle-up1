@@ -16,6 +16,15 @@ function get_stepgo($stepin, $POST){
 				$stepgo = 2;
 			}
 	        break;
+	    case 5 :
+	        $stepgo = 6;
+	        break;
+	   case 6 :
+	        $stepgo = 7;
+	         break;
+	   case 7 :
+	        $stepgo = 8;
+	         break;
 	 }
 	return $stepgo;
 }

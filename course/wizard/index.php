@@ -29,6 +29,7 @@ require_once('lib_wizard.php');
 require_once('step1_form.php');
 require_once('step2_form.php');
 require_once('step3_form.php');
+require_once('step_confirm.php');
 
 $PAGE->set_pagelayout('admin');
 $PAGE->set_url('/course/wizard/index.php');
@@ -68,7 +69,7 @@ if (isset($stepgo)) {
 		    }
 		    break;
 		case 4 :
-		    $steptitle = 'Etape 4 : création du cours';
+		    $steptitle = 'Etape 4 : création du cours + inscription profs';
 		    $date = $SESSION->wizard['form_step2']['startdate'];
 		    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
@@ -89,11 +90,29 @@ if (isset($stepgo)) {
                     if ($plugin = enrol_get_plugin($instance->enrol)) {
                         if ($plugin->get_manual_enrol_link($instance)) {
                             // we know that the ajax enrol UI will have an option to enrol
-                            redirect(new moodle_url('/enrol/users.php', array('id'=>$course->id)));
+                            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
                         }
                     }
                 }
             }
+		    break;
+		case 5 :
+		    echo ' inscription cohortes';
+		    break;
+		case 6 :
+		    echo ' si inscription avec clef';
+		    break;
+
+		case 7 :
+		    // on vient de inscription et on va à la fin
+		    $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
+		    echo $steptitle ;
+		    $editform = new course_wizard_step_confirm();
+		    break;
+	    case 8 :
+		    // envoi message
+		    unset($SESSION->wizard);
+		    // on renvoie quelque part ?
 		    break;
 	}
 }
