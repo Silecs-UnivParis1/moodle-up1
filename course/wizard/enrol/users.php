@@ -42,7 +42,7 @@ if ($course->id == SITEID) {
 
 require_login($course);
 require_capability('moodle/course:enrolreview', $context);
-$PAGE->set_pagelayout('admin');
+//$PAGE->set_pagelayout('admin');
 
 $manager = new course_enrolment_manager($PAGE, $course, $filter);
 $table = new course_enrolment_users_table($manager, $PAGE);
@@ -215,11 +215,13 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('enrolledusers', 'enrol'));
 echo $renderer->render($table);
 
+echo '<div align="center" style="margin:50px;">';
 echo $OUTPUT->single_button(
     new moodle_url('/course/wizard/index.php',
         array('stepin' => 6, 'stepgo_7' => 7, 'courseid' => $id)),
     'Etape suivante',
     'post'
 );
+echo '</div>';
 
 echo $OUTPUT->footer();
