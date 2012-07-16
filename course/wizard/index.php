@@ -121,7 +121,7 @@ if (isset($stepgo)) {
 			}
 			$res = send_course_request($message);
 		    unset($SESSION->wizard);
-		    redirect(new moodle_url('/my'));
+		    redirect(new moodle_url('/'));
 		    break;
 	}
 }
