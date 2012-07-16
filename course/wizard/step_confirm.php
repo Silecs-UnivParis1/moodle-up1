@@ -3,6 +3,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir.'/custominfo/lib.php');
 
 class course_wizard_step_confirm extends moodleform {
 
