@@ -24,8 +24,9 @@
  * derived from package report_outline
  */
 
-require('../../config.php');
-require_once($CFG->dirroot.'/report/outline/locallib.php');
+require('../../../config.php');
+require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
+require_once($CFG->libdir.'/custominfo/lib.php');
 
 $id = required_param('id',PARAM_INT);       // course id
 
@@ -36,7 +37,7 @@ $PAGE->set_pagelayout('report');
 
 require_login($course);
 $context = get_context_instance(CONTEXT_COURSE, $course->id);
-require_capability('report/outline:view', $context);
+require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
 
 // add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
 
@@ -47,20 +48,45 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($course->fullname));
 
+echo "<h2>" . "Description" . "</h2>\n";
+
+echo "<ul>\n";
+echo "<li>Abrégé : ". $course->shortname ."</li>\n";
+echo "<li>Code : ". $course->idnumber ."</li>\n";
+echo "</ul>\n";
+echo '<div id="summary">' . $course->summary . '</div>';
 
 
-$gentable = new html_table();
-$gentable->attributes['class'] = 'generaltable boxaligncenter';
-$gentable->cellpadding = 5;
-$gentable->id = 'outlinetable';
-$gentable->head = array($stractivity, $strviews);
+//** @todo utiliser les fonctions prévues
+// $customdata = custominfo_data::type('course')->get_record($course->id);
+// $customdata = custominfo_data::type('course')->display_fields($course->id);
+// var_dump($customdata);
 
+$custominfo_data = custominfo_data::type('course');
+$cinfos = $custominfo_data->get_record($course->id);
+echo "<ul>\n";
+foreach ($cinfos as $label=>$info) {
+	echo "<li>" . $label ." : ". $info. "</li>\n";
+}
+echo "</ul>\n";
+
+
+
+echo "<h2>" . "Enseignants" . "</h2>\n";
+
+
+echo "<h2>" . "Plan du cours (sections)" . "</h2>\n";
 $sections = get_all_sections($course->id);
-// $sectiontitle = get_section_name($course, $sections[$sectionnum]);
+echo "<ol>\n";
+foreach ($sections as $section) {
+	$sectiontitle = get_section_name($course, $section);
+	echo "<li>" . $sectiontitle . "</li>";
+}
+echo "</ol>\n";
 
-var_dump($sections);
 
-echo html_writer::table($gentable);
+echo "<h2>" . "Groupes d'étudiants" . "</h2>\n";
+
 
 echo $OUTPUT->footer();
 
