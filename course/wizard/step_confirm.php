@@ -62,9 +62,10 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setConstant('stepin', 7);
 
         $urlCategory = new moodle_url('/course/category.php', array('id' => $idcat, 'edit' => 'on' ));
-        $message = 'Ce message concerne la demande de création de cours'. $fullname . ' ( ' . $shortname . ' )'
-            .' faite par ' . $user_name . '. Vous pouvez valider ou supprimer ce cours : '
-            . html_writer::link($urlCategory, $urlCategory);
+        $message = '<div>Ce message concerne la demande de création de cours '. $fullname . ' ( ' . $shortname . ' )'
+            .' faite par ' . $user_name . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
+            . html_writer::link($urlCategory, $urlCategory)
+            . '</div>';
         $mform->addElement('hidden', 'message', null);
         $mform->setType('message', PARAM_RAW);
         $mform->setConstant('message', $message);

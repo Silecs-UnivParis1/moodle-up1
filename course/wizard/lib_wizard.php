@@ -57,8 +57,8 @@ function send_course_request($message) {
     $eventdata->subject           = '[CourseWizardRequest]'; //** @todo get_string()
     $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
     $eventdata->fullmessage       = $message;
-    // $eventdata->fullmessagehtml   = $message;
-    $eventdata->smallmessage      = $message; // USED BY DEFAULT !
+    $eventdata->fullmessagehtml   = $message;
+  //  $eventdata->smallmessage      = $message; // USED BY DEFAULT !
 
     // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
 	$count = array('err' => 0, 'ok' => 0);
