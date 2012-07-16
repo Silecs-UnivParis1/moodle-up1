@@ -40,7 +40,11 @@ if ($course->id == SITEID) {
     redirect(new moodle_url('/'));
 }
 
+if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$id) {
+	require_login($course);
+}
 //require_login($course);
+
 //require_capability('moodle/course:enrolreview', $context);
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 has_capability('moodle/course:request', $systemcontext);
