@@ -40,8 +40,11 @@ if ($course->id == SITEID) {
     redirect(new moodle_url('/'));
 }
 
-require_login($course);
-require_capability('moodle/course:enrolreview', $context);
+//require_login($course);
+//require_capability('moodle/course:enrolreview', $context);
+$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+has_capability('moodle/course:request', $systemcontext);
+
 //$PAGE->set_pagelayout('admin');
 
 $manager = new course_enrolment_manager($PAGE, $course, $filter);

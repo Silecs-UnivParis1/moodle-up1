@@ -34,6 +34,10 @@ require_once('step_confirm.php');
 $PAGE->set_pagelayout('admin');
 $PAGE->set_url('/course/wizard/index.php');
 
+$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+has_capability('moodle/course:request', $systemcontext);
+
+
 if (!isset($_POST['stepin'])) {
 	$stepin = optional_param('stepin', 1, PARAM_INT);
 	$stepgo = $stepin;
