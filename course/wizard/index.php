@@ -114,12 +114,15 @@ if (isset($stepgo)) {
 		    break;
 	    case 8 :
 		    // envoi message
+		    $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
 		    $message = $SESSION->wizard['form_step7']['message'];
 		    if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-				$message .= '<p>La demande est accompagnée de la remarque suivante : <div>'
+				$messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
 				    . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
+				$message .= "\n".'La demande est accompagnée de la remarque suivante : '."\n"
+				    . $SESSION->wizard['form_step7']['remarques'];
 			}
-			$res = send_course_request($message);
+			$res = send_course_request($message, $messagehtml);
 		    unset($SESSION->wizard);
 		    redirect(new moodle_url('/'));
 		    break;

@@ -44,7 +44,7 @@ function validation_shortname($shortname) {
     return $errors;
 }
 
-function send_course_request($message) {
+function send_course_request($message, $messagehtml) {
 	global $DB, $USER;
 
 	$result = $DB->get_records('user', array('username' => 'admin')); //** @todo on envoie à qui ? plusieurs ?
@@ -57,8 +57,8 @@ function send_course_request($message) {
     $eventdata->subject           = '[CourseWizardRequest]'; //** @todo get_string()
     $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
     $eventdata->fullmessage       = $message;
-    $eventdata->fullmessagehtml   = $message;
-  //  $eventdata->smallmessage      = $message; // USED BY DEFAULT !
+    $eventdata->fullmessagehtml   = $messagehtml;
+    $eventdata->smallmessage      = $message; // USED BY DEFAULT !
 
     // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
 	$count = array('err' => 0, 'ok' => 0);
