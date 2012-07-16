@@ -91,19 +91,10 @@ if (isset($stepgo)) {
             $custominfo_data = custominfo_data::type('course');
             $custominfo_data->save_data($mydata);
 
+            // tester si le cours existe bien ?
             $context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
-            if (!is_enrolled($context)) {
-                // Redirect to manual enrolment page if possible
-                $instances = enrol_get_instances($course->id, true);
-                foreach($instances as $instance) {
-                    if ($plugin = enrol_get_plugin($instance->enrol)) {
-                        if ($plugin->get_manual_enrol_link($instance)) {
-                            // we know that the ajax enrol UI will have an option to enrol
-                            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
-                        }
-                    }
-                }
-            }
+
+            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
 		    break;
 		case 5 :
 		    echo ' inscription cohortes';
