@@ -57,6 +57,21 @@ class course_wizard_step_confirm extends moodleform {
 		$mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
 
+        //--------------------------------------------------------------------------------
+        if (isset($SESSION->wizard['idcourse'])) {
+		    $idcourse = (int) $SESSION->wizard['idcourse'];
+            $custominfo_data = custominfo_data::type('course');
+            $cinfos = $custominfo_data->get_record($idcourse);
+
+            foreach ($cinfos as $label=>$info) {
+			    $htmlinfo = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
+                    . $label . '</label></div></div>'
+                    . '<div class="felement fstatic">' . $info . '</div>';
+                $mform->addElement('html', html_writer::tag('div', $htmlinfo, array('class' => 'fitem')));
+		    }
+		}
+//--------------------------------------------------------------------------------
+
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 7);

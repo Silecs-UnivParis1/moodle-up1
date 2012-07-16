@@ -94,9 +94,9 @@ if (isset($stepgo)) {
             $mydata->id = $course->id;
             $custominfo_data = custominfo_data::type('course');
             $custominfo_data->save_data($mydata);
-
+            $SESSION->wizard['idcourse'] = $course->id;
             // tester si le cours existe bien ?
-            $context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
+            //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
 
             redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
 		    break;
