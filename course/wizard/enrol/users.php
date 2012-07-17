@@ -40,16 +40,18 @@ if ($course->id == SITEID) {
     redirect(new moodle_url('/'));
 }
 
+require_login();
 if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$id) {
 	require_login($course);
+	// ou redirect(new moodle_url('/'));
 }
-//require_login($course);
 
-//require_capability('moodle/course:enrolreview', $context);
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
-has_capability('moodle/course:request', $systemcontext);
 
-//$PAGE->set_pagelayout('admin');
+// donner un context à $PAGE
+$PAGE->set_context($systemcontext);
+
+has_capability('moodle/course:request', $systemcontext);
 
 $manager = new course_enrolment_manager($PAGE, $course, $filter);
 $table = new course_enrolment_users_table($manager, $PAGE);
