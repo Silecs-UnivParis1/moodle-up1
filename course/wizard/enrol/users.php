@@ -27,7 +27,6 @@ require_once('../../../config.php');
 require_once("$CFG->dirroot/enrol/locallib.php");
 require_once("$CFG->dirroot/enrol/users_forms.php");
 require_once("$CFG->dirroot/enrol/renderer.php");
-require_once("$CFG->dirroot/group/lib.php");
 
 $id      = required_param('id', PARAM_INT); // course id
 $action  = optional_param('action', '', PARAM_ACTION);
@@ -189,7 +188,6 @@ $fields = array(
     'userdetails' => $userdetails,
     'lastseen' => get_string('lastaccess'),
     'role' => get_string('roles', 'role'),
-    'group' => get_string('groups', 'group'),
     'enrol' => get_string('enrolmentinstances', 'enrol')
 );
 
@@ -206,12 +204,11 @@ if (!has_capability('moodle/course:viewhiddenuserfields', $context)) {
 
 $table->set_fields($fields, $renderer);
 
-$canassign = has_capability('moodle/role:assign', $manager->get_context());
+$canassign = 0;
 $users = $manager->get_users_for_display($manager, $table->sort, $table->sortdirection, $table->page, $table->perpage);
 foreach ($users as $userid=>&$user) {
     $user['picture'] = $OUTPUT->render($user['picture']);
-    $user['role'] = $renderer->user_roles_and_actions($userid, $user['roles'], $manager->get_assignable_roles(), $canassign, $PAGE->url);
-    $user['group'] = $renderer->user_groups_and_actions($userid, $user['groups'], $manager->get_all_groups(), has_capability('moodle/course:managegroups', $manager->get_context()), $PAGE->url);
+    $user['role'] = $renderer->user_roles_and_actions($userid, $user['roles'], $manager->get_assignable_roles(), 0, $PAGE->url);
     $user['enrol'] = $renderer->user_enrolments_and_actions($user['enrolments']);;
 }
 $table->set_total_users($manager->get_total_users());
