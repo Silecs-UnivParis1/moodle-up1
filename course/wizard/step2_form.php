@@ -94,10 +94,6 @@ class course_wizard_step2_form extends moodleform {
         $mform->setType('hiddensections', PARAM_INT);
         $mform->setConstant('hiddensections', $courseconfig->hiddensections);
 
-        $mform->addElement('hidden', 'newsitemsnumber', null);
-        $mform->setType('newsitemsnumber', PARAM_INT);
-        $mform->setConstant('newsitemsnumber', $courseconfig->newsitemsnumber);
-
         $mform->addElement('hidden', 'newsitems', null);
         $mform->setType('newsitems', PARAM_INT);
         $mform->setConstant('newsitems', $courseconfig->newsitems);
@@ -124,7 +120,7 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('hidden', 'defaultgroupingid', null);
         $mform->setType('defaultgroupingid', PARAM_INT);
-        $mform->setConstant('defaultgroupingid', $courseconfig->defaultgroupingid);
+        $mform->setConstant('defaultgroupingid', 0);
 
         $mform->addElement('hidden', 'lang', null);
         $mform->setType('lang', PARAM_INT);

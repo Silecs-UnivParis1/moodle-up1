@@ -31,12 +31,12 @@ require_once('step2_form.php');
 require_once('step3_form.php');
 require_once('step_confirm.php');
 
-$PAGE->set_pagelayout('admin');
-$PAGE->set_url('/course/wizard/index.php');
+require_login();
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+$PAGE->set_url('/course/wizard/index.php');
+$PAGE->set_context($systemcontext);
 has_capability('moodle/course:request', $systemcontext);
-
 
 if (!isset($_POST['stepin'])) {
 	$stepin = optional_param('stepin', 1, PARAM_INT);
@@ -130,14 +130,9 @@ if (isset($stepgo)) {
 }
 $site = get_site();
 
-$streditcoursesettings = get_string("editcoursesettings");
 $straddnewcourse = get_string("addnewcourse");
-$stradministration = get_string("administration");
-$strcategories = get_string("categories");
-
-$PAGE->navbar->add($stradministration, new moodle_url('/admin/index.php'));
-$PAGE->navbar->add($strcategories, new moodle_url('/course/index.php'));
 $PAGE->navbar->add($straddnewcourse);
+
 $title = "$site->shortname: $straddnewcourse";
 $fullname = $site->fullname;
 
