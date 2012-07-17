@@ -27,6 +27,7 @@ require_once('../../../config.php');
 require_once("$CFG->dirroot/enrol/locallib.php");
 require_once("$CFG->dirroot/enrol/users_forms.php");
 require_once("$CFG->dirroot/enrol/renderer.php");
+require_once("$CFG->dirroot/course/wizard/enrol/locallib.php");
 
 $id      = required_param('id', PARAM_INT); // course id
 $action  = optional_param('action', '', PARAM_ACTION);
@@ -172,8 +173,8 @@ if ($action) {
     }
 }
 
+$renderer = $PAGE->get_renderer('core_enrol', 'wizard');
 
-$renderer = $PAGE->get_renderer('core_enrol');
 $userdetails = array (
     'picture' => false,
     'firstname' => get_string('firstname'),
