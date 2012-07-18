@@ -222,10 +222,26 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('enrolledusers', 'enrol'));
 echo $renderer->render($table);
 
+$stepin = 5;
+$stepgo = 5;
+$buttonpre = '';
+if (isset($SESSION->wizard['idenrolment'])) {
+    if ($SESSION->wizard['idenrolment'] == 'cohort') {
+        $stepgo = 7;
+		$buttonpre = $OUTPUT->single_button(
+        new moodle_url('/course/wizard/index.php',
+            array('stepin' => $stepin, 'stepgo' => 5, 'courseid' => $id, 'idenrolment' => 'manual')),
+            'Etape précédente',
+            'post'
+        );
+	}
+}
+
 echo '<div align="center" style="margin:50px;">';
+echo $buttonpre;
 echo $OUTPUT->single_button(
     new moodle_url('/course/wizard/index.php',
-        array('stepin' => 6, 'stepgo_7' => 7, 'courseid' => $id)),
+        array('stepin' => $stepin, 'stepgo' => $stepgo, 'courseid' => $id, 'idenrolment' => 'cohort')),
     'Etape suivante',
     'post'
 );
