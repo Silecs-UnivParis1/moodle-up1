@@ -71,8 +71,17 @@ foreach ($cinfos as $label=>$info) {
 echo "</ul>\n";
 
 
-
 echo "<h2>" . "Enseignants" . "</h2>\n";
+// output based on roles ; only editingteacher for now
+// for an output based on capabilities, use instead get_users_by_capability(): much heavier
+$teach_context = get_context_instance(CONTEXT_COURSE, $course->id);
+$role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+$teachers = get_role_users($role->id, $teach_context);
+echo "<ul>\n";
+foreach ($teachers as $teacher) {
+	echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
+}
+echo "</ul>\n";
 
 
 echo "<h2>" . "Plan du cours (sections)" . "</h2>\n";
