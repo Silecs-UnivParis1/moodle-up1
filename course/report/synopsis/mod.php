@@ -24,5 +24,5 @@
  */
 
 $url = new moodle_url('/course/report/synopsis/index.php', array('id'=>$id));
-echo '<a href="'. $url .'">' . 'Synopsis du cours' . '</a>';
+echo '<a href="'. $url .'">' . get_string('Synopsis', 'coursereport_synopsis') . '</a>';
 
