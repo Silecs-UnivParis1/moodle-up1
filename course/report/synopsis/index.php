@@ -41,14 +41,14 @@ require_capability('report/outline:view', $context); //** @todo trouver une meil
 
 // add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
 
-$strreport = get_string('pluginname', 'report_synopsis');
+$strreport = get_string('pluginname', 'coursereport_synopsis');
 
 $PAGE->set_title($course->shortname .': '. $strreport);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($course->fullname));
 
-echo "<h2>" . "Description" . "</h2>\n";
+echo "<h2>" . get_string('Description', 'coursereport_synopsis') . "</h2>\n";
 
 echo "<ul>\n";
 echo "<li>Abrégé : ". $course->shortname ."</li>\n";
@@ -71,7 +71,7 @@ foreach ($cinfos as $label=>$info) {
 echo "</ul>\n";
 
 
-echo "<h2>" . "Enseignants" . "</h2>\n";
+echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
 // output based on roles ; only editingteacher for now
 // for an output based on capabilities, use instead get_users_by_capability(): much heavier
 $teach_context = get_context_instance(CONTEXT_COURSE, $course->id);
@@ -84,7 +84,10 @@ foreach ($teachers as $teacher) {
 echo "</ul>\n";
 
 
-echo "<h2>" . "Plan du cours (sections)" . "</h2>\n";
+echo "<h2>" . get_string('Cohorts', 'coursereport_synopsis') . "</h2>\n";
+
+
+echo "<h2>" . get_string('Outline', 'coursereport_synopsis') . "</h2>\n";
 $sections = get_all_sections($course->id);
 echo "<ol>\n";
 foreach ($sections as $section) {
@@ -92,9 +95,6 @@ foreach ($sections as $section) {
 	echo "<li>" . $sectiontitle . "</li>";
 }
 echo "</ol>\n";
-
-
-echo "<h2>" . "Groupes d'étudiants" . "</h2>\n";
 
 
 echo $OUTPUT->footer();

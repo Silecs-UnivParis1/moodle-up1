@@ -25,8 +25,12 @@
 
 $string['pluginname'] = 'Course synopsis';
 
-$string['coursereport_synopsis'] = 'Course synopsis 2';
-$string['report_synopsis'] = 'Course synopsis 3';
+$string['Synopsis'] = 'Synopsis';
+$string['Teachers'] = 'Teachers';
+$string['Outline'] = 'Course outline';
+$string['Cohorts'] = 'Students cohorts';
+$string['Description'] = 'Description';
+//$string[''] = '';
 
 $string['synopsis:view'] = 'View course synopsis';
 
