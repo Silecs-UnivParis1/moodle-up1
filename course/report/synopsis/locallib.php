@@ -17,7 +17,7 @@
 /**
  * This file contains functions used by the outline reports
  *
- * @package    report
+ * @package    coursereport
  * @subpackage synopsis
  * @copyright  2012 Silecs {@link http://www.silecs.info}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

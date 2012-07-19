@@ -17,7 +17,7 @@
 /**
  * Capabilities
  *
- * @package    report
+ * @package    coursereport
  * @subpackage synopsis
  * @copyright  2012 Silecs {@link http://www.silecs.info}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,20 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// si permission nécessaire, possible d'utiliser report/courseoverview:view
 $capabilities = array(
-
-    'report/outline:view' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-
-        'clonepermissionsfrom' => 'coursereport/outline:view',
-    )
 );
 
 

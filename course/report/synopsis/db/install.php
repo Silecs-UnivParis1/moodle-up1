@@ -17,7 +17,7 @@
 /**
  * Post installation and migration code.
  *
- * @package    report
+ * @package    coursereport
  * @subpackage synopsis
  * @copyright  2012 Silecs {@link http://www.silecs.info}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-function xmldb_report_outline_install() {
+function xmldb_coursereport_synopsis_install() {
     global $DB;
 
 }
