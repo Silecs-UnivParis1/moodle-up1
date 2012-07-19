@@ -75,11 +75,14 @@ echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
 // output based on roles ; only editingteacher for now
 // for an output based on capabilities, use instead get_users_by_capability(): much heavier
 $teach_context = get_context_instance(CONTEXT_COURSE, $course->id);
-$role = $DB->get_record('role', array('shortname' => 'editingteacher'));
-$teachers = get_role_users($role->id, $teach_context);
 echo "<ul>\n";
-foreach ($teachers as $teacher) {
-	echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
+$troles = array('editingteacher', 'teacher');
+foreach ($troles as $trole) {
+	$role = $DB->get_record('role', array('shortname' => $trole));
+	$teachers = get_role_users($role->id, $teach_context);
+	foreach ($teachers as $teacher) {
+		echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
+	}
 }
 echo "</ul>\n";
 
