@@ -67,5 +67,5 @@ function report_synopsis_page_type_list($pagetype, $parentcontext, $currentconte
 
 function synopsis_report_extend_navigation($reportnav, $course, $context) {
     $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $course->id));
-    $reportnav->add("Sypnosys", $url);
+    $reportnav->add(get_string('Synopsis', 'coursereport_synopsis'), $url);
 }
