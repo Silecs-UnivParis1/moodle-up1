@@ -66,7 +66,7 @@ $custominfo_data = custominfo_data::type('course');
 $cinfos = $custominfo_data->get_record($course->id);
 echo "<ul>\n";
 foreach ($cinfos as $label=>$info) {
-	echo "<li>" . $label ." : ". $info. "</li>\n";
+    echo "<li>" . $label ." : ". $info. "</li>\n";
 }
 echo "</ul>\n";
 
@@ -78,11 +78,11 @@ $teach_context = get_context_instance(CONTEXT_COURSE, $course->id);
 echo "<ul>\n";
 $troles = array('editingteacher', 'teacher');
 foreach ($troles as $trole) {
-	$role = $DB->get_record('role', array('shortname' => $trole));
-	$teachers = get_role_users($role->id, $teach_context);
-	foreach ($teachers as $teacher) {
-		echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
-	}
+    $role = $DB->get_record('role', array('shortname' => $trole));
+    $teachers = get_role_users($role->id, $teach_context);
+    foreach ($teachers as $teacher) {
+        echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
+    }
 }
 echo "</ul>\n";
 
@@ -94,8 +94,8 @@ echo "<h2>" . get_string('Outline', 'coursereport_synopsis') . "</h2>\n";
 $sections = get_all_sections($course->id);
 echo "<ol>\n";
 foreach ($sections as $section) {
-	$sectiontitle = get_section_name($course, $section);
-	echo "<li>" . $sectiontitle . "</li>";
+    $sectiontitle = get_section_name($course, $section);
+    echo "<li>" . $sectiontitle . "</li>";
 }
 echo "</ol>\n";
 
