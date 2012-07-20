@@ -29,8 +29,8 @@ require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
 $id = required_param('id',PARAM_INT);       // course id
-
 $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
+$context = get_context_instance(CONTEXT_COURSE, $course->id);
 
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout('report');
@@ -74,12 +74,12 @@ echo "</ul>\n";
 echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
 // output based on roles ; only editingteacher for now
 // for an output based on capabilities, use instead get_users_by_capability(): much heavier
-$teach_context = get_context_instance(CONTEXT_COURSE, $course->id);
+
 echo "<ul>\n";
 $troles = array('editingteacher', 'teacher');
 foreach ($troles as $trole) {
     $role = $DB->get_record('role', array('shortname' => $trole));
-    $teachers = get_role_users($role->id, $teach_context);
+    $teachers = get_role_users($role->id, $context);
     foreach ($teachers as $teacher) {
         echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
     }
@@ -88,6 +88,18 @@ echo "</ul>\n";
 
 
 echo "<h2>" . get_string('Cohorts', 'coursereport_synopsis') . "</h2>\n";
+$cohorts = get_enrolled_cohorts($course->id, array(5)); // 5 = students
+if (empty($cohorts)) {
+    echo get_string('Nocohort', 'coursereport_synopsis');
+} else {
+    echo "<ul>";
+        foreach ($cohorts as $cohort) {
+        echo "<li> (". $cohort->idnumber .") ". $cohort->name ;
+        // echo "(". $cohort->rolename .")
+        echo "</li>";
+    }
+}
+echo "</ul>";
 
 
 echo "<h2>" . get_string('Outline', 'coursereport_synopsis') . "</h2>\n";
@@ -101,6 +113,3 @@ echo "</ol>\n";
 
 
 echo $OUTPUT->footer();
-
-
-

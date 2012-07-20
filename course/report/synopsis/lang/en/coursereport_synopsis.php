@@ -30,6 +30,7 @@ $string['Teachers'] = 'Teachers';
 $string['Outline'] = 'Course outline';
 $string['Cohorts'] = 'Students cohorts';
 $string['Description'] = 'Description';
+$string['Nocohort'] = 'No enrolled cohort.';
 //$string[''] = '';
 
 $string['synopsis:view'] = 'View course synopsis';
