@@ -48,7 +48,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * Init plugin config from database settings depending on the plugin auth type.
      */
     function init_plugin($authtype) {
-        $this->pluginconfig = 'auth/'.$authtype;
+        $this->pluginconfig = 'auth/ldapup1';
         $this->config = get_config($this->pluginconfig);
         if (empty($this->config->ldapencoding)) {
             $this->config->ldapencoding = 'utf-8';
@@ -618,6 +618,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
+
+var_dump($this->config);
 
         ////
         //// get user's list from ldap to sql in a scalable fashion
@@ -1810,7 +1812,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         set_config('ntlmsso_enabled', (int)$config->ntlmsso_enabled, $this->pluginconfig);
         set_config('ntlmsso_subnet', trim($config->ntlmsso_subnet), $this->pluginconfig);
         set_config('ntlmsso_ie_fastpath', (int)$config->ntlmsso_ie_fastpath, $this->pluginconfig);
-        set_config('ntlmsso_type', $config->ntlmsso_type, 'auth/ldap');
+        set_config('ntlmsso_type', $config->ntlmsso_type, $this->pluginconfig);
 
         return true;
     }
