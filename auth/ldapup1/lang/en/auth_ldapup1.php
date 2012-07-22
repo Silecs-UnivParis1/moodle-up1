@@ -23,6 +23,9 @@
  * derived from official auth_ldap
  */
 
+$string['pluginname'] = 'LDAP sync - UP1 variant';
+$string['pluginnotenabled'] = 'Plugin not enabled!';
+
 $string['auth_ldapup1_ad_create_req'] = 'Cannot create the new account in Active Directory. Make sure you meet all the requirements for this to work (LDAPS connection, bind user with adequate rights, etc.)';
 $string['auth_ldapup1_attrcreators'] = 'List of groups or contexts whose members are allowed to create attributes. Separate multiple groups with \';\'. Usually something like \'cn=teachers,ou=staff,o=myorg\'';
 $string['auth_ldapup1_attrcreators_key'] = 'Attribute creators';
@@ -124,8 +127,6 @@ $string['ntlmsso_attempting'] = 'Attempting Single Sign On via NTLM...';
 $string['ntlmsso_failed'] = 'Auto-login failed, try the normal login page...';
 $string['ntlmsso_isdisabled'] = 'NTLM SSO is disabled.';
 $string['ntlmsso_unknowntype'] = 'Unknown ntlmsso type!';
-$string['pluginname'] = 'LDAP server';
-$string['pluginnotenabled'] = 'Plugin not enabled!';
 $string['renamingnotallowed'] = 'User renaming not allowed in LDAP';
 $string['rootdseerror'] = 'Error querying rootDSE for Active Directory';
 $string['updateremfail'] = 'Error updating LDAP record. Error code: {$a->errno}; Error string: {$a->errstring}<br/>Key ({$a->key}) - old moodle value: \'{$a->ouvalue}\' new value: \'{$a->nuvalue}\'';
