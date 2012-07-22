@@ -42,11 +42,8 @@ $string['auth_ldapup1_create_context_key'] = 'Context for new users';
 $string['auth_ldapup1_create_error'] = 'Error creating user in LDAP.';
 $string['auth_ldapup1_creators'] = 'List of groups or contexts whose members are allowed to create new courses. Separate multiple groups with \';\'. Usually something like \'cn=teachers,ou=staff,o=myorg\'';
 $string['auth_ldapup1_creators_key'] = 'Creators';
-$string['auth_ldapup1description'] = 'This method provides authentication against an external LDAP server.
-                                  If the given username and password are valid, Moodle creates a new user
-                                  entry in its database. This module can read user attributes from LDAP and prefill
-                                  wanted fields in Moodle.  For following logins only the username and
-                                  password are checked.';
+$string['auth_ldapup1description'] = 'This method specific to Paris 1 provides a simplified LDAP connection, allowing only to sync users.
+        No authentication authentication, no user update.'; 
 
 $string['auth_ldapup1_extrafields'] = 'These fields are optional.  You can choose to pre-fill some Moodle user fields with information from the <b>LDAP fields</b> that you specify here. <p>If you leave these fields blank, then nothing will be transferred from LDAP and Moodle defaults will be used instead.</p><p>In either case, the user will be able to edit all of these fields after they log in.</p>';
 
