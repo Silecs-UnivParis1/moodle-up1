@@ -1066,6 +1066,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         if (!isset($config->removeuser)) {
             $config->removeuser = AUTH_REMOVEUSER_KEEP;
         }
+        if (!isset($config->sync_condition)) {
+            $config->sync_condition = '';
+        }
 
         // Try to remove duplicates before storing the contexts (to avoid problems in sync_users()).
         $config->contexts = explode(';', $config->contexts);
@@ -1089,6 +1092,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         set_config('memberattribute', textlib::strtolower(trim($config->memberattribute)), $this->pluginconfig);
         set_config('memberattribute_isdn', $config->memberattribute_isdn, $this->pluginconfig);
         set_config('removeuser', $config->removeuser, $this->pluginconfig);
+        set_config('sync_condition', trim($config->sync_condition), $this->pluginconfig);
 
         return true;
     }

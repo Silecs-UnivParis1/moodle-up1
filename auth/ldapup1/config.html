@@ -44,6 +44,9 @@ if (!isset($config->memberattribute_isdn)) {
     $config->memberattribute_isdn = '';
 }
 
+if (!isset($config->sync_condition)) {
+    $config->sync_condition = '';
+}
 if (!isset($config->removeuser)) {
     $config->removeuser = AUTH_REMOVEUSER_KEEP;
 }
@@ -249,6 +252,18 @@ $yesno = array(get_string('no'), get_string('yes'));
 <tr>
     <td colspan="2">
         <h4><?php print_string('auth_sync_script', 'auth') ?></h4>
+    </td>
+</tr>
+<tr valign="top" class="required">
+    <td align="right">
+        <label for="sync_condition"><?php print_string('sync_condition_key', 'auth_ldapup1') ?></label>
+    </td>
+    <td>
+        <input name="sync_condition" id="sync_condition" type="text" size="30" value="<?php echo $config->sync_condition?>" />
+        <?php if (isset($err['sync_condition'])) { echo $OUTPUT->error_text($err['sync_condition']); } ?>
+    </td>
+    <td>
+        <?php print_string('sync_condition', 'auth_ldapup1') ?>
     </td>
 </tr>
 <tr valign="top">

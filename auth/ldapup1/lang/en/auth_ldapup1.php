@@ -114,3 +114,6 @@ $string['userentriestorevive'] = "User entries to be revived: {\$a}\n";
 $string['userentriestoupdate'] = "User entries to be updated: {\$a}\n";
 $string['usernotfound'] = 'User not found in LDAP';
 $string['useracctctrlerror'] = 'Error getting userAccountControl for {$a}';
+
+$string['sync_condition'] = 'Optional: eg. "modifyTimestamp>[%lastcron%]"';
+$string['sync_condition_key'] = 'Sync condition';
