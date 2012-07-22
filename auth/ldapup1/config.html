@@ -43,16 +43,6 @@ if (!isset($config->memberattribute)) {
 if (!isset($config->memberattribute_isdn)) {
     $config->memberattribute_isdn = '';
 }
-if (!isset($config->creators)) {
-    $config->creators = '';
-}
-if (!isset($config->create_context)) {
-    $config->create_context = '';
-}
-
-if (!isset($config->auth_user_create)) {
-    $config->auth_user_create = '';
-}
 
 if (!isset($config->removeuser)) {
     $config->removeuser = AUTH_REMOVEUSER_KEEP;
@@ -256,51 +246,6 @@ $yesno = array(get_string('no'), get_string('yes'));
     </td>
 </tr>
 
-
-    <td colspan="2">
-        <h4><?php print_string('auth_user_create', 'auth') ?></h4>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="menuauth_user_create"><?php print_string('auth_ldapup1_auth_user_create_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'auth_user_create', $config->auth_user_create, false); ?>
-    </td>
-    <td>
-        <?php print_string('auth_user_creation', 'auth'); ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="create_context"><?php print_string('auth_ldapup1_create_context_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="create_context" id="create_context" type="text" size="30" value="<?php echo $config->create_context?>" />
-        <?php if (isset($err['create_context'])) { echo $OUTPUT->error_text($err['create_context']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_create_context', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <h4><?php print_string('coursecreators') ?></h4>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="creators"><?php print_string('auth_ldapup1_creators_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="creators" id="creators" type="text" size="30" value="<?php echo $config->creators?>" />
-        <?php if (isset($err['creators'])) { echo $OUTPUT->error_text($err['creators']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_creators', 'auth_ldapup1') ?>
-    </td>
-</tr>
 <tr>
     <td colspan="2">
         <h4><?php print_string('auth_sync_script', 'auth') ?></h4>

@@ -37,14 +37,9 @@ $string['auth_ldapup1_bind_pw_key'] = 'Password';
 $string['auth_ldapup1_bind_settings'] = 'Bind settings';
 $string['auth_ldapup1_contexts'] = 'List of contexts where users are located. Separate different contexts with \';\'. For example: \'ou=users,o=org; ou=others,o=org\'';
 $string['auth_ldapup1_contexts_key'] = 'Contexts';
-$string['auth_ldapup1_create_context'] = 'If you enable user creation with email confirmation, specify the context where users are created. This context should be different from other users to prevent security issues. You don\'t need to add this context to ldap_context-variable, Moodle will search for users from this context automatically.<br /><b>Note!</b> You have to modify the method user_create() in file auth/ldap/auth.php to make user creation work';
-$string['auth_ldapup1_create_context_key'] = 'Context for new users';
 $string['auth_ldapup1_create_error'] = 'Error creating user in LDAP.';
-$string['auth_ldapup1_creators'] = 'List of groups or contexts whose members are allowed to create new courses. Separate multiple groups with \';\'. Usually something like \'cn=teachers,ou=staff,o=myorg\'';
-$string['auth_ldapup1_creators_key'] = 'Creators';
-$string['auth_ldapup1description'] = 'This method specific to Paris 1 provides a simplified LDAP connection, allowing only to sync users.
-        No authentication authentication, no user update.'; 
-
+$string['auth_ldapup1description'] = 'This method specific to Paris 1 provides a simplified LDAP connection,
+        allowing only to sync users. No authentication, no user update.';
 $string['auth_ldapup1_extrafields'] = 'These fields are optional.  You can choose to pre-fill some Moodle user fields with information from the <b>LDAP fields</b> that you specify here. <p>If you leave these fields blank, then nothing will be transferred from LDAP and Moodle defaults will be used instead.</p><p>In either case, the user will be able to edit all of these fields after they log in.</p>';
 
 $string['auth_ldapup1_groupecreators'] = 'List of groups or contexts whose members are allowed to create groups. Separate multiple groups with \';\'. Usually something like \'cn=teachers,ou=staff,o=myorg\'';
