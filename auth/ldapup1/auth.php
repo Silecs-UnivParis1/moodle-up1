@@ -1063,56 +1063,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         if (!isset($config->memberattribute_isdn)) {
             $config->memberattribute_isdn = '';
         }
-        if (!isset($config->creators)) {
-            $config->creators = '';
-        }
-        if (!isset($config->create_context)) {
-            $config->create_context = '';
-        }
-        if (!isset($config->expiration)) {
-            $config->expiration = '';
-        }
-        if (!isset($config->expiration_warning)) {
-            $config->expiration_warning = '10';
-        }
-        if (!isset($config->expireattr)) {
-            $config->expireattr = '';
-        }
-        if (!isset($config->gracelogins)) {
-            $config->gracelogins = '';
-        }
-        if (!isset($config->graceattr)) {
-            $config->graceattr = '';
-        }
-        if (!isset($config->auth_user_create)) {
-            $config->auth_user_create = '';
-        }
-        if (!isset($config->forcechangepassword)) {
-            $config->forcechangepassword = 0;
-        }
-        if (!isset($config->stdchangepassword)) {
-            $config->stdchangepassword = 0;
-        }
-        if (!isset($config->passtype)) {
-            $config->passtype = 'plaintext';
-        }
-        if (!isset($config->changepasswordurl)) {
-            $config->changepasswordurl = '';
-        }
         if (!isset($config->removeuser)) {
             $config->removeuser = AUTH_REMOVEUSER_KEEP;
-        }
-        if (!isset($config->ntlmsso_enabled)) {
-            $config->ntlmsso_enabled = 0;
-        }
-        if (!isset($config->ntlmsso_subnet)) {
-            $config->ntlmsso_subnet = '';
-        }
-        if (!isset($config->ntlmsso_ie_fastpath)) {
-            $config->ntlmsso_ie_fastpath = 0;
-        }
-        if (!isset($config->ntlmsso_type)) {
-            $config->ntlmsso_type = 'ntlm';
         }
 
         // Try to remove duplicates before storing the contexts (to avoid problems in sync_users()).
@@ -1136,23 +1088,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         set_config('objectclass', trim($config->objectclass), $this->pluginconfig);
         set_config('memberattribute', textlib::strtolower(trim($config->memberattribute)), $this->pluginconfig);
         set_config('memberattribute_isdn', $config->memberattribute_isdn, $this->pluginconfig);
-        set_config('creators', trim($config->creators), $this->pluginconfig);
-        set_config('create_context', trim($config->create_context), $this->pluginconfig);
-        set_config('expiration', $config->expiration, $this->pluginconfig);
-        set_config('expiration_warning', trim($config->expiration_warning), $this->pluginconfig);
-        set_config('expireattr', textlib::strtolower(trim($config->expireattr)), $this->pluginconfig);
-        set_config('gracelogins', $config->gracelogins, $this->pluginconfig);
-        set_config('graceattr', textlib::strtolower(trim($config->graceattr)), $this->pluginconfig);
-        set_config('auth_user_create', $config->auth_user_create, $this->pluginconfig);
-        set_config('forcechangepassword', $config->forcechangepassword, $this->pluginconfig);
-        set_config('stdchangepassword', $config->stdchangepassword, $this->pluginconfig);
-        set_config('passtype', $config->passtype, $this->pluginconfig);
-        set_config('changepasswordurl', trim($config->changepasswordurl), $this->pluginconfig);
         set_config('removeuser', $config->removeuser, $this->pluginconfig);
-        set_config('ntlmsso_enabled', (int)$config->ntlmsso_enabled, $this->pluginconfig);
-        set_config('ntlmsso_subnet', trim($config->ntlmsso_subnet), $this->pluginconfig);
-        set_config('ntlmsso_ie_fastpath', (int)$config->ntlmsso_ie_fastpath, $this->pluginconfig);
-        set_config('ntlmsso_type', $config->ntlmsso_type, $this->pluginconfig);
 
         return true;
     }
