@@ -89,15 +89,7 @@ $string['auth_ldapup1_usertypeundefined'] = 'config.user_type not defined or fun
 $string['auth_ldapup1_usertypeundefined2'] = 'config.user_type not defined or function ldap_unixi2expirationtime does not support selected type!';
 $string['auth_ldapup1_version'] = 'The version of the LDAP protocol your server is using.';
 $string['auth_ldapup1_version_key'] = 'Version';
-$string['auth_ntlmsso'] = 'NTLM SSO';
-$string['auth_ntlmsso_enabled'] = 'Set to yes to attempt Single Sign On with the NTLM domain. <strong>Note:</strong> this requires additional setup on the webserver to work, see <a href="http://docs.moodle.org/en/NTLM_authentication">http://docs.moodle.org/en/NTLM_authentication</a>';
-$string['auth_ntlmsso_enabled_key'] = 'Enable';
-$string['auth_ntlmsso_ie_fastpath'] = 'Set to yes to enable the NTLM SSO fast path (bypasses certain steps and only works if the client\'s browser is MS Internet Explorer).';
-$string['auth_ntlmsso_ie_fastpath_key'] = 'MS IE fast path?';
-$string['auth_ntlmsso_subnet'] = 'If set, it will only attempt SSO with clients in this subnet. Format: xxx.xxx.xxx.xxx/bitmask. Separate multiple subnets with \',\' (comma).';
-$string['auth_ntlmsso_subnet_key'] = 'Subnet';
-$string['auth_ntlmsso_type_key'] = 'Authentication type';
-$string['auth_ntlmsso_type'] = 'The authentication method configured in the web server to authenticate the users (if in doubt, choose NTLM)';
+
 $string['connectingldap'] = "Connecting to LDAP server...\n";
 $string['creatingtemptable'] = "Creating temporary table {\$a}\n";
 $string['didntfindexpiretime'] = 'password_expire() didn\'t find expiration time.';
@@ -113,10 +105,7 @@ $string['noupdatestobedone'] = "No updates to be done\n";
 $string['nouserentriestoremove'] = "No user entries to be removed\n";
 $string['nouserentriestorevive'] = "No user entries to be revived\n";
 $string['nouserstobeadded'] = "No users to be added\n";
-$string['ntlmsso_attempting'] = 'Attempting Single Sign On via NTLM...';
-$string['ntlmsso_failed'] = 'Auto-login failed, try the normal login page...';
-$string['ntlmsso_isdisabled'] = 'NTLM SSO is disabled.';
-$string['ntlmsso_unknowntype'] = 'Unknown ntlmsso type!';
+
 $string['renamingnotallowed'] = 'User renaming not allowed in LDAP';
 $string['rootdseerror'] = 'Error querying rootDSE for Active Directory';
 $string['updateremfail'] = 'Error updating LDAP record. Error code: {$a->errno}; Error string: {$a->errstring}<br/>Key ({$a->key}) - old moodle value: \'{$a->ouvalue}\' new value: \'{$a->nuvalue}\'';

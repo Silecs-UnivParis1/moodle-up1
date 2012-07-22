@@ -57,18 +57,6 @@ if (!isset($config->auth_user_create)) {
 if (!isset($config->removeuser)) {
     $config->removeuser = AUTH_REMOVEUSER_KEEP;
 }
-if (!isset($config->ntlmsso_enabled)) {
-    $config->ntlmsso_enabled = 0;
-}
-if (!isset($config->ntlmsso_subnet)) {
-    $config->ntlmsso_subnet = '';
-}
-if (!isset($config->ntlmsso_ie_fastpath)) {
-    $config->ntlmsso_ie_fastpath = 0;
-}
-if (!isset($config->ntlmsso_type)) {
-    $config->ntlmsso_type = 'ntlm';
-}
 
 $yesno = array(get_string('no'), get_string('yes'));
 
@@ -335,60 +323,7 @@ $yesno = array(get_string('no'), get_string('yes'));
         <?php print_string('auth_remove_user', 'auth') ?>
     </td>
 </tr>
-<tr>
-    <td colspan="2">
-        <h4><?php print_string('auth_ntlmsso', 'auth_ldapup1') ?></h4>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="menuntlmsso_enabled"><?php print_string('auth_ntlmsso_enabled_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'ntlmsso_enabled', $config->ntlmsso_enabled, false); ?>
-    </td>
-    <td>
-        <?php print_string('auth_ntlmsso_enabled', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="ntlmsso_subnet"><?php print_string('auth_ntlmsso_subnet_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="ntlmsso_subnet" id="ntlmsso_subnet" type="text" size="30" value="<?php p($config->ntlmsso_subnet) ?>" />
-    </td>
-    <td>
-        <?php print_string('auth_ntlmsso_subnet', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="menuntlmsso_ie_fastpath"><?php print_string('auth_ntlmsso_ie_fastpath_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'ntlmsso_ie_fastpath', $config->ntlmsso_ie_fastpath, false); ?>
-    </td>
-    <td>
-    <?php print_string('auth_ntlmsso_ie_fastpath', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="menuntlmsso_type"><?php print_string('auth_ntlmsso_type_key', 'auth_ldapup1')?></label>
-    </td>
-    <td>
-        <?php
-            $types = array();
-            $types['ntlm'] = 'NTLM';
-            $types['kerberos'] = 'Kerberos';
-            echo html_writer::select($types, 'ntlmsso_type', $config->ntlmsso_type, false);
-        ?>
-    </td>
-    <td>
-        <?php print_string('auth_ntlmsso_type','auth_ldapup1') ?>
-    </td>
-</tr>
+
 <?php
 $help  = get_string('auth_ldapup1_extrafields', 'auth_ldapup1');
 $help .= get_string('auth_updatelocal_expl', 'auth');
