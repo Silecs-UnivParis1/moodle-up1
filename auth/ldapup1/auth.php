@@ -12,22 +12,6 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
 
-// See http://support.microsoft.com/kb/305144 to interprete these values.
-if (!defined('AUTH_AD_ACCOUNTDISABLE')) {
-    define('AUTH_AD_ACCOUNTDISABLE', 0x0002);
-}
-if (!defined('AUTH_AD_NORMAL_ACCOUNT')) {
-    define('AUTH_AD_NORMAL_ACCOUNT', 0x0200);
-}
-if (!defined('AUTH_NTLMTIMEOUT')) {  // timewindow for the NTLM SSO process, in secs...
-    define('AUTH_NTLMTIMEOUT', 10);
-}
-
-// UF_DONT_EXPIRE_PASSWD value taken from MSDN directly
-if (!defined('UF_DONT_EXPIRE_PASSWD')) {
-    define ('UF_DONT_EXPIRE_PASSWD', 0x00010000);
-}
-
 // The Posix uid and gid of the 'nobody' account and 'nogroup' group.
 if (!defined('AUTH_UID_NOBODY')) {
     define('AUTH_UID_NOBODY', -2);
@@ -110,75 +94,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
     }
 
     /**
-     * Returns true if the username and password work and false if they are
-     * wrong or don't exist.
-     *
+     * Returns true if the username and password work => DISABLED
      * @param string $username The username (without system magic quotes)
      * @param string $password The password (without system magic quotes)
      *
      * @return bool Authentication success or failure.
      */
     function user_login($username, $password) {
-        if (! function_exists('ldap_bind')) {
-            print_error('auth_ldapup1notinstalled', 'auth_ldapup1');
-            return false;
-        }
-
-        if (!$username or !$password) {    // Don't allow blank usernames or passwords
-            return false;
-        }
-
-        $extusername = textlib::convert($username, 'utf-8', $this->config->ldapencoding);
-        $extpassword = textlib::convert($password, 'utf-8', $this->config->ldapencoding);
-
-        // Before we connect to LDAP, check if this is an AD SSO login
-        // if we succeed in this block, we'll return success early.
-        //
-        $key = sesskey();
-        if (!empty($this->config->ntlmsso_enabled) && $key === $password) {
-            $cf = get_cache_flags($this->pluginconfig.'/ntlmsess');
-            // We only get the cache flag if we retrieve it before
-            // it expires (AUTH_NTLMTIMEOUT seconds).
-            if (!isset($cf[$key]) || $cf[$key] === '') {
-                return false;
-            }
-
-            $sessusername = $cf[$key];
-            if ($username === $sessusername) {
-                unset($sessusername);
-                unset($cf);
-
-                // Check that the user is inside one of the configured LDAP contexts
-                $validuser = false;
-                $ldapconnection = $this->ldap_connect();
-                // if the user is not inside the configured contexts,
-                // ldap_find_userdn returns false.
-                if ($this->ldap_find_userdn($ldapconnection, $extusername)) {
-                    $validuser = true;
-                }
-                $this->ldap_close();
-
-                // Shortcut here - SSO confirmed
-                return $validuser;
-            }
-        } // End SSO processing
-        unset($key);
-
-        $ldapconnection = $this->ldap_connect();
-        $ldap_user_dn = $this->ldap_find_userdn($ldapconnection, $extusername);
-
-        // If ldap_user_dn is empty, user does not exist
-        if (!$ldap_user_dn) {
-            $this->ldap_close();
-            return false;
-        }
-
-        // Try to bind with current username and password
-        $ldap_login = @ldap_bind($ldapconnection, $ldap_user_dn, $extpassword);
-        $this->ldap_close();
-        if ($ldap_login) {
-            return true;
-        }
         return false;
     }
 
@@ -446,7 +368,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @return bool
      */
     function can_reset_password() {
-        return !empty($this->config->stdchangepassword);
+        return false;
     }
 
     /**
@@ -455,58 +377,16 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @return bool
      */
     function can_signup() {
-        return (!empty($this->config->auth_user_create) and !empty($this->config->create_context));
+        return false;
     }
 
     /**
-     * Sign up a new user ready for confirmation.
-     * Password is passed in plaintext.
-     *
+     * Sign up a new user ready for confirmation. => DISABLED
      * @param object $user new user object
      * @param boolean $notify print notice with link and terminate
      */
     function user_signup($user, $notify=true) {
-        global $CFG, $DB, $PAGE, $OUTPUT;
-
-        require_once($CFG->dirroot.'/user/profile/lib.php');
-
-        if ($this->user_exists($user->username)) {
-            print_error('auth_ldapup1_user_exists', 'auth_ldapup1');
-        }
-
-        $plainslashedpassword = $user->password;
-        unset($user->password);
-
-        if (! $this->user_create($user, $plainslashedpassword)) {
-            print_error('auth_ldapup1_create_error', 'auth_ldapup1');
-        }
-
-        $user->id = $DB->insert_record('user', $user);
-
-        // Save any custom profile field information
-        profile_save_data($user);
-
-        $this->update_user_record($user->username);
-        update_internal_user_password($user, $plainslashedpassword);
-
-        $user = $DB->get_record('user', array('id'=>$user->id));
-        events_trigger('user_created', $user);
-
-        if (! send_confirmation_email($user)) {
-            print_error('noemail', 'auth_ldapup1');
-        }
-
-        if ($notify) {
-            $emailconfirm = get_string('emailconfirm');
-            $PAGE->set_url('/auth/ldap/auth.php');
-            $PAGE->navbar->add($emailconfirm);
-            $PAGE->set_title($emailconfirm);
-            $PAGE->set_heading($emailconfirm);
-            echo $OUTPUT->header();
-            notice(get_string('emailconfirmsent', '', $user->email), "{$CFG->wwwroot}/index.php");
-        } else {
-            return true;
-        }
+        return false;
     }
 
     /**
@@ -515,79 +395,25 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @return bool
      */
     function can_confirm() {
-        return $this->can_signup();
+        return false;
     }
 
     /**
-     * Confirm the new user as registered.
-     *
+     * Confirm the new user as registered. => DISABLED
      * @param string $username
      * @param string $confirmsecret
      */
     function user_confirm($username, $confirmsecret) {
-        global $DB;
-
-        $user = get_complete_user_data('username', $username);
-
-        if (!empty($user)) {
-            if ($user->confirmed) {
-                return AUTH_CONFIRM_ALREADY;
-
-            } else if ($user->auth != $this->authtype) {
-                return AUTH_CONFIRM_ERROR;
-
-            } else if ($user->secret == $confirmsecret) {   // They have provided the secret key to get in
-                if (!$this->user_activate($username)) {
-                    return AUTH_CONFIRM_FAIL;
-                }
-                $DB->set_field('user', 'confirmed', 1, array('id'=>$user->id));
-                $DB->set_field('user', 'firstaccess', time(), array('id'=>$user->id));
-                return AUTH_CONFIRM_OK;
-            }
-        } else {
             return AUTH_CONFIRM_ERROR;
-        }
     }
 
     /**
-     * Return number of days to user password expires
-     *
-     * If userpassword does not expire it should return 0. If password is already expired
-     * it should return negative value.
-     *
+     * Return number of days to user password expires => DISABLED
      * @param mixed $username username
      * @return integer
      */
     function password_expire($username) {
-        $result = 0;
-
-        $extusername = textlib::convert($username, 'utf-8', $this->config->ldapencoding);
-
-        $ldapconnection = $this->ldap_connect();
-        $user_dn = $this->ldap_find_userdn($ldapconnection, $extusername);
-        $search_attribs = array($this->config->expireattr);
-        $sr = ldap_read($ldapconnection, $user_dn, '(objectClass=*)', $search_attribs);
-        if ($sr)  {
-            $info = ldap_get_entries_moodle($ldapconnection, $sr);
-            if (!empty ($info)) {
-                $info = array_change_key_case($info[0], CASE_LOWER);
-                if (!empty($info[$this->config->expireattr][0])) {
-                    $expiretime = $this->ldap_expirationtime2unix($info[$this->config->expireattr][0], $ldapconnection, $user_dn);
-                    if ($expiretime != 0) {
-                        $now = time();
-                        if ($expiretime > $now) {
-                            $result = ceil(($expiretime - $now) / DAYSECS);
-                        } else {
-                            $result = floor(($expiretime - $now) / DAYSECS);
-                        }
-                    }
-                }
-            }
-        } else {
-            error_log($this->errorlogtag.get_string('didtfindexpiretime', 'auth_ldapup1'));
-        }
-
-        return $result;
+        return 0;
     }
 
     /**
@@ -619,7 +445,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
 
-var_dump($this->config);
+// var_dump($this->config);
 
         ////
         //// get user's list from ldap to sql in a scalable fashion
@@ -876,6 +702,7 @@ var_dump($this->config);
      * @param string $username username
      * @param boolean $updatekeys true to update the local record with the external LDAP values.
      */
+
     function update_user_record($username, $updatekeys = false) {
         global $CFG, $DB;
 
@@ -932,371 +759,45 @@ var_dump($this->config);
     }
 
     /**
-     * Activates (enables) user in external LDAP so user can login
+     * Activates (enables) user in external LDAP so user can login => DISABLED
      *
      * @param mixed $username
      * @return boolean result
      */
     function user_activate($username) {
-        $extusername = textlib::convert($username, 'utf-8', $this->config->ldapencoding);
-
-        $ldapconnection = $this->ldap_connect();
-
-        $userdn = $this->ldap_find_userdn($ldapconnection, $extusername);
-        switch ($this->config->user_type)  {
-            case 'edir':
-                $newinfo['loginDisabled'] = 'FALSE';
-                break;
-            case 'rfc2307':
-            case 'rfc2307bis':
-                // Remember that we add a '*' character in front of the
-                // external password string to 'disable' the account. We just
-                // need to remove it.
-                $sr = ldap_read($ldapconnection, $userdn, '(objectClass=*)',
-                                array('userPassword'));
-                $info = ldap_get_entries($ldapconnection, $sr);
-                $info[0] = array_change_key_case($info[0], CASE_LOWER);
-                $newinfo['userPassword'] = ltrim($info[0]['userpassword'][0], '*');
-                break;
-            case 'ad':
-                // We need to unset the ACCOUNTDISABLE bit in the
-                // userAccountControl attribute ( see
-                // http://support.microsoft.com/kb/305144 )
-                $sr = ldap_read($ldapconnection, $userdn, '(objectClass=*)',
-                                array('userAccountControl'));
-                $info = ldap_get_entries($ldapconnection, $sr);
-                $info[0] = array_change_key_case($info[0], CASE_LOWER);
-                $newinfo['userAccountControl'] = $info[0]['useraccountcontrol'][0]
-                                                 & (~AUTH_AD_ACCOUNTDISABLE);
-                break;
-            default:
-                print_error('user_activatenotsupportusertype', 'auth_ldapup1', '', $this->config->user_type_name);
-        }
-        $result = ldap_modify($ldapconnection, $userdn, $newinfo);
-        $this->ldap_close();
-        return $result;
+        return true;
     }
 
     /**
-     * Returns true if user should be coursecreator.
+     * Returns true if user should be coursecreator => DISABLED
      *
      * @param mixed $username    username (without system magic quotes)
      * @return mixed result      null if course creators is not configured, boolean otherwise.
      */
     function iscreator($username) {
-        if (empty($this->config->creators) or empty($this->config->memberattribute)) {
-            return null;
-        }
-
-        $extusername = textlib::convert($username, 'utf-8', $this->config->ldapencoding);
-
-        $ldapconnection = $this->ldap_connect();
-
-        if ($this->config->memberattribute_isdn) {
-            if(!($userid = $this->ldap_find_userdn($ldapconnection, $extusername))) {
-                return false;
-            }
-        } else {
-            $userid = $extusername;
-        }
-
-        $group_dns = explode(';', $this->config->creators);
-        $creator = ldap_isgroupmember($ldapconnection, $userid, $group_dns, $this->config->memberattribute);
-
-        $this->ldap_close();
-
-        return $creator;
+        return null;
     }
 
     /**
-     * Called when the user record is updated.
-     *
-     * Modifies user in external LDAP server. It takes olduser (before
-     * changes) and newuser (after changes) compares information and
-     * saves modified information to external LDAP server.
-     *
+     * Called when the user record is updated => DISABLED
      * @param mixed $olduser     Userobject before modifications    (without system magic quotes)
      * @param mixed $newuser     Userobject new modified userobject (without system magic quotes)
      * @return boolean result
      *
      */
     function user_update($olduser, $newuser) {
-        global $USER;
-
-        if (isset($olduser->username) and isset($newuser->username) and $olduser->username != $newuser->username) {
-            error_log($this->errorlogtag.get_string('renamingnotallowed', 'auth_ldapup1'));
-            return false;
-        }
-
-        if (isset($olduser->auth) and $olduser->auth != $this->authtype) {
-            return true; // just change auth and skip update
-        }
-
-        $attrmap = $this->ldap_attributes();
-        // Before doing anything else, make sure we really need to update anything
-        // in the external LDAP server.
-        $update_external = false;
-        foreach ($attrmap as $key => $ldapkeys) {
-            if (!empty($this->config->{'field_updateremote_'.$key})) {
-                $update_external = true;
-                break;
-            }
-        }
-        if (!$update_external) {
-            return true;
-        }
-
-        $extoldusername = textlib::convert($olduser->username, 'utf-8', $this->config->ldapencoding);
-
-        $ldapconnection = $this->ldap_connect();
-
-        $search_attribs = array();
-        foreach ($attrmap as $key => $values) {
-            if (!is_array($values)) {
-                $values = array($values);
-            }
-            foreach ($values as $value) {
-                if (!in_array($value, $search_attribs)) {
-                    array_push($search_attribs, $value);
-                }
-            }
-        }
-
-        if(!($user_dn = $this->ldap_find_userdn($ldapconnection, $extoldusername))) {
-            return false;
-        }
-
-        $user_info_result = ldap_read($ldapconnection, $user_dn, '(objectClass=*)', $search_attribs);
-        if ($user_info_result) {
-            $user_entry = ldap_get_entries_moodle($ldapconnection, $user_info_result);
-            if (empty($user_entry)) {
-                $attribs = join (', ', $search_attribs);
-                error_log($this->errorlogtag.get_string('updateusernotfound', 'auth_ldapup1',
-                                                          array('userdn'=>$user_dn,
-                                                                'attribs'=>$attribs)));
-                return false; // old user not found!
-            } else if (count($user_entry) > 1) {
-                error_log($this->errorlogtag.get_string('morethanoneuser', 'auth_ldapup1'));
-                return false;
-            }
-
-            $user_entry = array_change_key_case($user_entry[0], CASE_LOWER);
-
-            foreach ($attrmap as $key => $ldapkeys) {
-                // Only process if the moodle field ($key) has changed and we
-                // are set to update LDAP with it
-                if (isset($olduser->$key) and isset($newuser->$key)
-                  and $olduser->$key !== $newuser->$key
-                  and !empty($this->config->{'field_updateremote_'. $key})) {
-                    // For ldap values that could be in more than one
-                    // ldap key, we will do our best to match
-                    // where they came from
-                    $ambiguous = true;
-                    $changed   = false;
-                    if (!is_array($ldapkeys)) {
-                        $ldapkeys = array($ldapkeys);
-                    }
-                    if (count($ldapkeys) < 2) {
-                        $ambiguous = false;
-                    }
-
-                    $nuvalue = textlib::convert($newuser->$key, 'utf-8', $this->config->ldapencoding);
-                    empty($nuvalue) ? $nuvalue = array() : $nuvalue;
-                    $ouvalue = textlib::convert($olduser->$key, 'utf-8', $this->config->ldapencoding);
-
-                    foreach ($ldapkeys as $ldapkey) {
-                        $ldapkey   = $ldapkey;
-                        $ldapvalue = $user_entry[$ldapkey][0];
-                        if (!$ambiguous) {
-                            // Skip update if the values already match
-                            if ($nuvalue !== $ldapvalue) {
-                                // This might fail due to schema validation
-                                if (@ldap_modify($ldapconnection, $user_dn, array($ldapkey => $nuvalue))) {
-                                    continue;
-                                } else {
-                                    error_log($this->errorlogtag.get_string ('updateremfail', 'auth_ldapup1',
-                                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)),
-                                                                                   'key'=>$key,
-                                                                                   'ouvalue'=>$ouvalue,
-                                                                                   'nuvalue'=>$nuvalue)));
-                                    continue;
-                                }
-                            }
-                        } else {
-                            // Ambiguous. Value empty before in Moodle (and LDAP) - use
-                            // 1st ldap candidate field, no need to guess
-                            if ($ouvalue === '') { // value empty before - use 1st ldap candidate
-                                // This might fail due to schema validation
-                                if (@ldap_modify($ldapconnection, $user_dn, array($ldapkey => $nuvalue))) {
-                                    $changed = true;
-                                    continue;
-                                } else {
-                                    error_log($this->errorlogtag.get_string ('updateremfail', 'auth_ldapup1',
-                                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)),
-                                                                                   'key'=>$key,
-                                                                                   'ouvalue'=>$ouvalue,
-                                                                                   'nuvalue'=>$nuvalue)));
-                                    continue;
-                                }
-                            }
-
-                            // We found which ldap key to update!
-                            if ($ouvalue !== '' and $ouvalue === $ldapvalue ) {
-                                // This might fail due to schema validation
-                                if (@ldap_modify($ldapconnection, $user_dn, array($ldapkey => $nuvalue))) {
-                                    $changed = true;
-                                    continue;
-                                } else {
-                                    error_log($this->errorlogtag.get_string ('updateremfail', 'auth_ldapup1',
-                                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)),
-                                                                                   'key'=>$key,
-                                                                                   'ouvalue'=>$ouvalue,
-                                                                                   'nuvalue'=>$nuvalue)));
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-
-                    if ($ambiguous and !$changed) {
-                        error_log($this->errorlogtag.get_string ('updateremfailamb', 'auth_ldapup1',
-                                                                 array('key'=>$key,
-                                                                       'ouvalue'=>$ouvalue,
-                                                                       'nuvalue'=>$nuvalue)));
-                    }
-                }
-            }
-        } else {
-            error_log($this->errorlogtag.get_string ('usernotfound', 'auth_ldapup1'));
-            $this->ldap_close();
-            return false;
-        }
-
-        $this->ldap_close();
-        return true;
-
+        return false;
     }
 
     /**
-     * Changes userpassword in LDAP
-     *
-     * Called when the user password is updated. It assumes it is
-     * called by an admin or that you've otherwise checked the user's
-     * credentials
-     *
+     * Changes userpassword in LDAP => DISABLED
      * @param  object  $user        User table object
      * @param  string  $newpassword Plaintext password (not crypted/md5'ed)
      * @return boolean result
      *
      */
     function user_update_password($user, $newpassword) {
-        global $USER;
-
-        $result = false;
-        $username = $user->username;
-
-        $extusername = textlib::convert($username, 'utf-8', $this->config->ldapencoding);
-        $extpassword = textlib::convert($newpassword, 'utf-8', $this->config->ldapencoding);
-
-        switch ($this->config->passtype) {
-            case 'md5':
-                $extpassword = '{MD5}' . base64_encode(pack('H*', md5($extpassword)));
-                break;
-            case 'sha1':
-                $extpassword = '{SHA}' . base64_encode(pack('H*', sha1($extpassword)));
-                break;
-            case 'plaintext':
-            default:
-                break; // plaintext
-        }
-
-        $ldapconnection = $this->ldap_connect();
-
-        $user_dn = $this->ldap_find_userdn($ldapconnection, $extusername);
-
-        if (!$user_dn) {
-            error_log($this->errorlogtag.get_string ('nodnforusername', 'auth_ldapup1', $user->username));
-            return false;
-        }
-
-        switch ($this->config->user_type) {
-            case 'edir':
-                // Change password
-                $result = ldap_modify($ldapconnection, $user_dn, array('userPassword' => $extpassword));
-                if (!$result) {
-                    error_log($this->errorlogtag.get_string ('updatepasserror', 'auth_ldapup1',
-                                                               array('errno'=>ldap_errno($ldapconnection),
-                                                                     'errstring'=>ldap_err2str(ldap_errno($ldapconnection)))));
-                }
-                // Update password expiration time, grace logins count
-                $search_attribs = array($this->config->expireattr, 'passwordExpirationInterval', 'loginGraceLimit');
-                $sr = ldap_read($ldapconnection, $user_dn, '(objectClass=*)', $search_attribs);
-                if ($sr) {
-                    $entry = ldap_get_entries_moodle($ldapconnection, $sr);
-                    $info = array_change_key_case($entry[0], CASE_LOWER);
-                    $newattrs = array();
-                    if (!empty($info[$this->config->expireattr][0])) {
-                        // Set expiration time only if passwordExpirationInterval is defined
-                        if (!empty($info['passwordexpirationinterval'][0])) {
-                           $expirationtime = time() + $info['passwordexpirationinterval'][0];
-                           $ldapexpirationtime = $this->ldap_unix2expirationtime($expirationtime);
-                           $newattrs['passwordExpirationTime'] = $ldapexpirationtime;
-                        }
-
-                        // Set gracelogin count
-                        if (!empty($info['logingracelimit'][0])) {
-                           $newattrs['loginGraceRemaining']= $info['logingracelimit'][0];
-                        }
-
-                        // Store attribute changes in LDAP
-                        $result = ldap_modify($ldapconnection, $user_dn, $newattrs);
-                        if (!$result) {
-                            error_log($this->errorlogtag.get_string ('updatepasserrorexpiregrace', 'auth_ldapup1',
-                                                                       array('errno'=>ldap_errno($ldapconnection),
-                                                                             'errstring'=>ldap_err2str(ldap_errno($ldapconnection)))));
-                        }
-                    }
-                }
-                else {
-                    error_log($this->errorlogtag.get_string ('updatepasserrorexpire', 'auth_ldapup1',
-                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)))));
-                }
-                break;
-
-            case 'ad':
-                // Passwords in Active Directory must be encoded as Unicode
-                // strings (UCS-2 Little Endian format) and surrounded with
-                // double quotes. See http://support.microsoft.com/?kbid=269190
-                if (!function_exists('mb_convert_encoding')) {
-                    error_log($this->errorlogtag.get_string ('needmbstring', 'auth_ldapup1'));
-                    return false;
-                }
-                $extpassword = mb_convert_encoding('"'.$extpassword.'"', "UCS-2LE", $this->config->ldapencoding);
-                $result = ldap_modify($ldapconnection, $user_dn, array('unicodePwd' => $extpassword));
-                if (!$result) {
-                    error_log($this->errorlogtag.get_string ('updatepasserror', 'auth_ldapup1',
-                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)))));
-                }
-                break;
-
-            default:
-                // Send LDAP the password in cleartext, it will md5 it itself
-                $result = ldap_modify($ldapconnection, $user_dn, array('userPassword' => $extpassword));
-                if (!$result) {
-                    error_log($this->errorlogtag.get_string ('updatepasserror', 'auth_ldapup1',
-                                                             array('errno'=>ldap_errno($ldapconnection),
-                                                                   'errstring'=>ldap_err2str(ldap_errno($ldapconnection)))));
-                }
-
-        }
-
-        $this->ldap_close();
-        return $result;
+        return false;
     }
 
     /**
@@ -1439,7 +940,7 @@ var_dump($this->config);
      * @return bool true means flag 'not_cached' stored instead of password hash
      */
     function prevent_local_passwords() {
-        return !empty($this->config->preventpassindb);
+        return true;
     }
 
     /**
@@ -1458,7 +959,7 @@ var_dump($this->config);
      * @return bool
      */
     function can_change_password() {
-        return !empty($this->config->stdchangepassword) or !empty($this->config->changepasswordurl);
+        return false;
     }
 
     /**
@@ -1468,170 +969,9 @@ var_dump($this->config);
      * @return moodle_url
      */
     function change_password_url() {
-        if (empty($this->config->stdchangepassword)) {
-            return new moodle_url($this->config->changepasswordurl);
-        } else {
-            return null;
-        }
+        return null;
     }
 
-    /**
-     * Will get called before the login page is shownr. Ff NTLM SSO
-     * is enabled, and the user is in the right network, we'll redirect
-     * to the magic NTLM page for SSO...
-     *
-     */
-    function loginpage_hook() {
-        global $CFG, $SESSION;
-
-        // HTTPS is potentially required
-        //httpsrequired(); - this must be used before setting the URL, it is already done on the login/index.php
-
-        if (($_SERVER['REQUEST_METHOD'] === 'GET'         // Only on initial GET of loginpage
-             || ($_SERVER['REQUEST_METHOD'] === 'POST'
-                 && (get_referer() != strip_querystring(qualified_me()))))
-                                                          // Or when POSTed from another place
-                                                          // See MDL-14071
-            && !empty($this->config->ntlmsso_enabled)     // SSO enabled
-            && !empty($this->config->ntlmsso_subnet)      // have a subnet to test for
-            && empty($_GET['authldap_skipntlmsso'])       // haven't failed it yet
-            && (isguestuser() || !isloggedin())           // guestuser or not-logged-in users
-            && address_in_subnet(getremoteaddr(), $this->config->ntlmsso_subnet)) {
-
-            // First, let's remember where we were trying to get to before we got here
-            if (empty($SESSION->wantsurl)) {
-                $SESSION->wantsurl = (array_key_exists('HTTP_REFERER', $_SERVER) &&
-                                      $_SERVER['HTTP_REFERER'] != $CFG->wwwroot &&
-                                      $_SERVER['HTTP_REFERER'] != $CFG->wwwroot.'/' &&
-                                      $_SERVER['HTTP_REFERER'] != $CFG->httpswwwroot.'/login/' &&
-                                      $_SERVER['HTTP_REFERER'] != $CFG->httpswwwroot.'/login/index.php')
-                    ? $_SERVER['HTTP_REFERER'] : NULL;
-            }
-
-            // Now start the whole NTLM machinery.
-            if(!empty($this->config->ntlmsso_ie_fastpath)) {
-                // Shortcut for IE browsers: skip the attempt page
-                if(check_browser_version('MSIE')) {
-                    $sesskey = sesskey();
-                    redirect($CFG->wwwroot.'/auth/ldap/ntlmsso_magic.php?sesskey='.$sesskey);
-                } else {
-                    redirect($CFG->httpswwwroot.'/login/index.php?authldap_skipntlmsso=1');
-                }
-            } else {
-                redirect($CFG->wwwroot.'/auth/ldap/ntlmsso_attempt.php');
-            }
-        }
-
-        // No NTLM SSO, Use the normal login page instead.
-
-        // If $SESSION->wantsurl is empty and we have a 'Referer:' header, the login
-        // page insists on redirecting us to that page after user validation. If
-        // we clicked on the redirect link at the ntlmsso_finish.php page (instead
-        // of waiting for the redirection to happen) then we have a 'Referer:' header
-        // we don't want to use at all. As we can't get rid of it, just point
-        // $SESSION->wantsurl to $CFG->wwwroot (after all, we came from there).
-        if (empty($SESSION->wantsurl)
-            && (get_referer() == $CFG->httpswwwroot.'/auth/ldap/ntlmsso_finish.php')) {
-
-            $SESSION->wantsurl = $CFG->wwwroot;
-        }
-    }
-
-    /**
-     * To be called from a page running under NTLM's
-     * "Integrated Windows Authentication".
-     *
-     * If successful, it will set a special "cookie" (not an HTTP cookie!)
-     * in cache_flags under the $this->pluginconfig/ntlmsess "plugin" and return true.
-     * The "cookie" will be picked up by ntlmsso_finish() to complete the
-     * process.
-     *
-     * On failure it will return false for the caller to display an appropriate
-     * error message (probably saying that Integrated Windows Auth isn't enabled!)
-     *
-     * NOTE that this code will execute under the OS user credentials,
-     * so we MUST avoid dealing with files -- such as session files.
-     * (The caller should define('NO_MOODLE_COOKIES', true) before including config.php)
-     *
-     */
-    function ntlmsso_magic($sesskey) {
-        if (isset($_SERVER['REMOTE_USER']) && !empty($_SERVER['REMOTE_USER'])) {
-
-            // HTTP __headers__ seem to be sent in ISO-8859-1 encoding
-            // (according to my reading of RFC-1945, RFC-2616 and RFC-2617 and
-            // my local tests), so we need to convert the REMOTE_USER value
-            // (i.e., what we got from the HTTP WWW-Authenticate header) into UTF-8
-            $username = textlib::convert($_SERVER['REMOTE_USER'], 'iso-8859-1', 'utf-8');
-
-            switch ($this->config->ntlmsso_type) {
-                case 'ntlm':
-                    // Format is DOMAIN\username
-                    $username = substr(strrchr($username, '\\'), 1);
-                    break;
-                case 'kerberos':
-                    // Format is username@DOMAIN
-                    $username = substr($username, 0, strpos($username, '@'));
-                    break;
-                default:
-                    error_log($this->errorlogtag.get_string ('ntlmsso_unknowntype', 'auth_ldapup1'));
-                    return false; // Should never happen!
-            }
-
-            $username = textlib::strtolower($username); // Compatibility hack
-            set_cache_flag($this->pluginconfig.'/ntlmsess', $sesskey, $username, AUTH_NTLMTIMEOUT);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Find the session set by ntlmsso_magic(), validate it and
-     * call authenticate_user_login() to authenticate the user through
-     * the auth machinery.
-     *
-     * It is complemented by a similar check in user_login().
-     *
-     * If it succeeds, it never returns.
-     *
-     */
-    function ntlmsso_finish() {
-        global $CFG, $USER, $SESSION;
-
-        $key = sesskey();
-        $cf = get_cache_flags($this->pluginconfig.'/ntlmsess');
-        if (!isset($cf[$key]) || $cf[$key] === '') {
-            return false;
-        }
-        $username   = $cf[$key];
-        // Here we want to trigger the whole authentication machinery
-        // to make sure no step is bypassed...
-        $user = authenticate_user_login($username, $key);
-        if ($user) {
-            add_to_log(SITEID, 'user', 'login', "view.php?id=$USER->id&course=".SITEID,
-                       $user->id, 0, $user->id);
-            complete_user_login($user);
-
-            // Cleanup the key to prevent reuse...
-            // and to allow re-logins with normal credentials
-            unset_cache_flag($this->pluginconfig.'/ntlmsess', $key);
-
-            // Redirection
-            if (user_not_fully_set_up($USER)) {
-                $urltogo = $CFG->wwwroot.'/user/edit.php';
-                // We don't delete $SESSION->wantsurl yet, so we get there later
-            } else if (isset($SESSION->wantsurl) and (strpos($SESSION->wantsurl, $CFG->wwwroot) === 0)) {
-                $urltogo = $SESSION->wantsurl;    // Because it's an address in this site
-                unset($SESSION->wantsurl);
-            } else {
-                // No wantsurl stored or external - go to homepage
-                $urltogo = $CFG->wwwroot.'/';
-                unset($SESSION->wantsurl);
-            }
-            redirect($urltogo);
-        }
-        // Should never reach here.
-        return false;
-    }
 
     /**
      * Sync roles for this user
@@ -1817,141 +1157,6 @@ var_dump($this->config);
         return true;
     }
 
-    /**
-     * Get password expiration time for a given user from Active Directory
-     *
-     * @param string $pwdlastset The time last time we changed the password.
-     * @param resource $lcapconn The open LDAP connection.
-     * @param string $user_dn The distinguished name of the user we are checking.
-     *
-     * @return string $unixtime
-     */
-    function ldap_get_ad_pwdexpire($pwdlastset, $ldapconn, $user_dn){
-        global $CFG;
-
-        if (!function_exists('bcsub')) {
-            error_log($this->errorlogtag.get_string ('needbcmath', 'auth_ldapup1'));
-            return 0;
-        }
-
-        // If UF_DONT_EXPIRE_PASSWD flag is set in user's
-        // userAccountControl attribute, the password doesn't expire.
-        $sr = ldap_read($ldapconn, $user_dn, '(objectClass=*)',
-                        array('userAccountControl'));
-        if (!$sr) {
-            error_log($this->errorlogtag.get_string ('useracctctrlerror', 'auth_ldapup1', $user_dn));
-            // Don't expire password, as we are not sure if it has to be
-            // expired or not.
-            return 0;
-        }
-
-        $entry = ldap_get_entries_moodle($ldapconn, $sr);
-        $info = array_change_key_case($entry[0], CASE_LOWER);
-        $useraccountcontrol = $info['useraccountcontrol'][0];
-        if ($useraccountcontrol & UF_DONT_EXPIRE_PASSWD) {
-            // Password doesn't expire.
-            return 0;
-        }
-
-        // If pwdLastSet is zero, the user must change his/her password now
-        // (unless UF_DONT_EXPIRE_PASSWD flag is set, but we already
-        // tested this above)
-        if ($pwdlastset === '0') {
-            // Password has expired
-            return -1;
-        }
-
-        // ----------------------------------------------------------------
-        // Password expiration time in Active Directory is the composition of
-        // two values:
-        //
-        //   - User's pwdLastSet attribute, that stores the last time
-        //     the password was changed.
-        //
-        //   - Domain's maxPwdAge attribute, that sets how long
-        //     passwords last in this domain.
-        //
-        // We already have the first value (passed in as a parameter). We
-        // need to get the second one. As we don't know the domain DN, we
-        // have to query rootDSE's defaultNamingContext attribute to get
-        // it. Then we have to query that DN's maxPwdAge attribute to get
-        // the real value.
-        //
-        // Once we have both values, we just need to combine them. But MS
-        // chose to use a different base and unit for time measurements.
-        // So we need to convert the values to Unix timestamps (see
-        // details below).
-        // ----------------------------------------------------------------
-
-        $sr = ldap_read($ldapconn, ROOTDSE, '(objectClass=*)',
-                        array('defaultNamingContext'));
-        if (!$sr) {
-            error_log($this->errorlogtag.get_string ('rootdseerror', 'auth_ldapup1'));
-            return 0;
-        }
-
-        $entry = ldap_get_entries_moodle($ldapconn, $sr);
-        $info = array_change_key_case($entry[0], CASE_LOWER);
-        $domaindn = $info['defaultnamingcontext'][0];
-
-        $sr = ldap_read ($ldapconn, $domaindn, '(objectClass=*)',
-                         array('maxPwdAge'));
-        $entry = ldap_get_entries_moodle($ldapconn, $sr);
-        $info = array_change_key_case($entry[0], CASE_LOWER);
-        $maxpwdage = $info['maxpwdage'][0];
-
-        // ----------------------------------------------------------------
-        // MSDN says that "pwdLastSet contains the number of 100 nanosecond
-        // intervals since January 1, 1601 (UTC), stored in a 64 bit integer".
-        //
-        // According to Perl's Date::Manip, the number of seconds between
-        // this date and Unix epoch is 11644473600. So we have to
-        // substract this value to calculate a Unix time, once we have
-        // scaled pwdLastSet to seconds. This is the script used to
-        // calculate the value shown above:
-        //
-        //    #!/usr/bin/perl -w
-        //
-        //    use Date::Manip;
-        //
-        //    $date1 = ParseDate ("160101010000 UTC");
-        //    $date2 = ParseDate ("197001010000 UTC");
-        //    $delta = DateCalc($date1, $date2, \$err);
-        //    $secs = Delta_Format($delta, 0, "%st");
-        //    print "$secs \n";
-        //
-        // MSDN also says that "maxPwdAge is stored as a large integer that
-        // represents the number of 100 nanosecond intervals from the time
-        // the password was set before the password expires." We also need
-        // to scale this to seconds. Bear in mind that this value is stored
-        // as a _negative_ quantity (at least in my AD domain).
-        //
-        // As a last remark, if the low 32 bits of maxPwdAge are equal to 0,
-        // the maximum password age in the domain is set to 0, which means
-        // passwords do not expire (see
-        // http://msdn2.microsoft.com/en-us/library/ms974598.aspx)
-        //
-        // As the quantities involved are too big for PHP integers, we
-        // need to use BCMath functions to work with arbitrary precision
-        // numbers.
-        // ----------------------------------------------------------------
-
-        // If the low order 32 bits are 0, then passwords do not expire in
-        // the domain. Just do '$maxpwdage mod 2^32' and check the result
-        // (2^32 = 4294967296)
-        if (bcmod ($maxpwdage, 4294967296) === '0') {
-            return 0;
-        }
-
-        // Add up pwdLastSet and maxPwdAge to get password expiration
-        // time, in MS time units. Remember maxPwdAge is stored as a
-        // _negative_ quantity, so we need to substract it in fact.
-        $pwdexpire = bcsub ($pwdlastset, $maxpwdage);
-
-        // Scale the result to convert it to Unix time units and return
-        // that value.
-        return bcsub( bcdiv($pwdexpire, '10000000'), '11644473600');
-    }
 
     /**
      * Connect to the LDAP server, using the plugin configured
