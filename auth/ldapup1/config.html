@@ -49,36 +49,11 @@ if (!isset($config->creators)) {
 if (!isset($config->create_context)) {
     $config->create_context = '';
 }
-if (!isset($config->expiration)) {
-    $config->expiration = '';
-}
-if (!isset($config->expiration_warning)) {
-    $config->expiration_warning = '10';
-}
-if (!isset($config->expireattr)) {
-    $config->expireattr = '';
-}
-if (!isset($config->gracelogins)) {
-    $config->gracelogins = '';
-}
-if (!isset($config->graceattr)) {
-    $config->graceattr = '';
-}
+
 if (!isset($config->auth_user_create)) {
     $config->auth_user_create = '';
 }
-if (!isset($config->forcechangepassword)) {
-    $config->forcechangepassword = 0;
-}
-if (!isset($config->stdchangepassword)) {
-    $config->stdchangepassword = 0;
-}
-if (!isset($config->passtype)) {
-    $config->passtype = 'plaintext';
-}
-if (!isset($config->changepasswordurl)) {
-    $config->changepasswordurl = '';
-}
+
 if (!isset($config->removeuser)) {
     $config->removeuser = AUTH_REMOVEUSER_KEEP;
 }
@@ -292,133 +267,8 @@ $yesno = array(get_string('no'), get_string('yes'));
         <?php print_string('auth_ldapup1_objectclass', 'auth_ldapup1') ?>
     </td>
 </tr>
-<tr>
-    <td colspan="2">
-        <h4><?php print_string('forcechangepassword', 'auth') ?></h4>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right" valign="top">
-        <label for="menuforcechangepassword"><?php print_string('forcechangepassword', 'auth') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'forcechangepassword', $config->forcechangepassword, false); ?>
-    </td>
-    <td align="left" valign="top">
-        <p><?php print_string('forcechangepasswordfirst_help', 'auth') ?></p>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right" valign="top">
-        <label for="menustdchangepassword"><?php print_string('stdchangepassword', 'auth') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'stdchangepassword', $config->stdchangepassword, false); ?>
-    </td>
-    <td align="left" valign="top">
-        <p><?php print_string('stdchangepassword_expl', 'auth') ?></p>
-        <p><?php print_string('stdchangepassword_explldap', 'auth') ?></p>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="menupasstype"><?php print_string('auth_ldapup1_passtype_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php
-            $passtype = array();
-            $passtype['plaintext'] = get_string('plaintext', 'auth');
-            $passtype['md5']       = get_string('md5', 'auth');
-            $passtype['sha1']      = get_string('sha1', 'auth');
-            echo html_writer::select($passtype, 'passtype', $config->passtype, false);
-        ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_passtype', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top">
-    <td align="right">
-        <label for="changepasswordurl"><?php print_string('auth_ldapup1_changepasswordurl_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="changepasswordurl" id="changepasswordurl" type="text" value="<?php echo $config->changepasswordurl ?>" />
-        <?php if (isset($err['changepasswordurl'])) { echo $OUTPUT->error_text($err['changepasswordurl']); } ?>
-    </td>
-    <td>
-        <?php print_string('changepasswordhelp', 'auth') ?>
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <h4><?php print_string('auth_ldapup1_passwdexpire_settings', 'auth_ldapup1') ?></h4>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="menuexpiration"><?php print_string('auth_ldapup1_expiration_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php
-           $expiration = array();
-           $expiration['0'] = 'no';
-           $expiration['1'] = 'LDAP';
-           echo html_writer::select($expiration, 'expiration', $config->expiration, false);
-           if (isset($err['expiration'])) { echo $OUTPUT->error_text($err['expiration']); }
-        ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_expiration_desc', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="expiration_warning"><?php print_string('auth_ldapup1_expiration_warning_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="expiration_warning" id="expiration_warning" type="text" size="2" value="<?php echo $config->expiration_warning?>" />
-        <?php if (isset($err['expiration_warning'])) { echo $OUTPUT->error_text($err['expiration_warning']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_expiration_warning_desc', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="expireattr"><?php print_string('auth_ldapup1_expireattr_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="expireattr" id="expireattr" type="text" size="30" value="<?php echo $config->expireattr?>" />
-        <?php if (isset($err['expireattr'])) { echo $OUTPUT->error_text($err['expireattr']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_expireattr_desc', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="menugracelogins"><?php print_string('auth_ldapup1_gracelogins_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <?php echo html_writer::select($yesno, 'gracelogins', $config->gracelogins, false); ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_gracelogins_desc', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="graceattr"><?php print_string('auth_ldapup1_gracelogin_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="graceattr" id="graceattr" type="text" size="30" value="<?php echo $config->graceattr?>" />
-        <?php if (isset($err['graceattr'])) { echo $OUTPUT->error_text($err['graceattr']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_graceattr_desc', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr>
+
+
     <td colspan="2">
         <h4><?php print_string('auth_user_create', 'auth') ?></h4>
     </td>

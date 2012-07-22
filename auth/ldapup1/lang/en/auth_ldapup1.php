@@ -47,17 +47,9 @@ $string['auth_ldapup1description'] = 'This method provides authentication agains
                                   entry in its database. This module can read user attributes from LDAP and prefill
                                   wanted fields in Moodle.  For following logins only the username and
                                   password are checked.';
-$string['auth_ldapup1_expiration_desc'] = 'Select No to disable expired password checking or LDAP to read passwordexpiration time directly from LDAP';
-$string['auth_ldapup1_expiration_key'] = 'Expiration';
-$string['auth_ldapup1_expiration_warning_desc'] = 'Number of days before password expiration warning is issued.';
-$string['auth_ldapup1_expiration_warning_key'] = 'Expiration warning';
-$string['auth_ldapup1_expireattr_desc'] = 'Optional: overrides ldap-attribute that stores password expiration time';
-$string['auth_ldapup1_expireattr_key'] = 'Expiration attribute';
+
 $string['auth_ldapup1_extrafields'] = 'These fields are optional.  You can choose to pre-fill some Moodle user fields with information from the <b>LDAP fields</b> that you specify here. <p>If you leave these fields blank, then nothing will be transferred from LDAP and Moodle defaults will be used instead.</p><p>In either case, the user will be able to edit all of these fields after they log in.</p>';
-$string['auth_ldapup1_graceattr_desc'] = 'Optional: Overrides  gracelogin attribute';
-$string['auth_ldapup1_gracelogin_key'] = 'Grace login attribute';
-$string['auth_ldapup1_gracelogins_desc'] = 'Enable LDAP gracelogin support. After password has expired user can login until gracelogin count is 0. Enabling this setting displays grace login message if password is expired.';
-$string['auth_ldapup1_gracelogins_key'] = 'Grace logins';
+
 $string['auth_ldapup1_groupecreators'] = 'List of groups or contexts whose members are allowed to create groups. Separate multiple groups with \';\'. Usually something like \'cn=teachers,ou=staff,o=myorg\'';
 $string['auth_ldapup1_groupecreators_key'] = 'Group creators';
 $string['auth_ldapup1_host_url'] = 'Specify LDAP host in URL-form like \'ldap://ldap.myorg.com/\' or \'ldaps://ldap.myorg.com/\' Separate multipleservers with \';\' to get failover support.';
@@ -79,9 +71,7 @@ $string['auth_ldapup1_objectclass'] = 'Optional: Overrides objectClass used to n
 $string['auth_ldapup1_objectclass_key'] = 'Object class';
 $string['auth_ldapup1_opt_deref'] = 'Determines how aliases are handled during search. Select one of the following values: "No" (LDAP_DEREF_NEVER) or "Yes" (LDAP_DEREF_ALWAYS)';
 $string['auth_ldapup1_opt_deref_key'] = 'Dereference aliases';
-$string['auth_ldapup1_passtype'] = 'Specify the format of new or changed passwords in LDAP server.';
-$string['auth_ldapup1_passtype_key'] = 'Password format';
-$string['auth_ldapup1_passwdexpire_settings'] = 'LDAP password expiration settings.';
+
 $string['auth_ldapup1_preventpassindb'] = 'Select yes to prevent passwords from being stored in Moodle\'s DB.';
 $string['auth_ldapup1_preventpassindb_key'] = 'Hide passwords';
 $string['auth_ldapup1_search_sub'] = 'Search users from subcontexts.';
