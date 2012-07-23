@@ -25,5 +25,5 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 // Ensure errors are well explained
 $CFG->debug = DEBUG_NORMAL;
 
-sync_cohorts(0, 0);
+sync_cohorts(0, 5);
 
