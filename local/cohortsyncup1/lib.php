@@ -85,7 +85,8 @@ function define_cohort($wscohort) {
                         'name' => (property_exists($wscohort, 'name') ? $wscohort->name : $wscohort->key),
                         'idnumber' => $wscohort->key,
                         'description' => (property_exists($wscohort, 'description') ? $wscohort->description : ''),
-                        'descriptionformat' => 0 //** @todo check
+                        'descriptionformat' => 0, //** @todo check
+                        'component' => 'local_cohortsyncup1'
                     );
     return ((object) $newcohort);
 }
