@@ -71,8 +71,10 @@ function sync_cohorts($timelast=0, $limit=0)
     } // foreach ($users)
     curl_close($ch);
 
-    echo "\n\nCohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created.";
-    echo "\nMembership: $cntAddmembers.\n\n";
+    $logmsg = "Cohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created. "
+        . "Membership: $cntAddmembers.";
+    echo "\n\n$logmsg\n\n";
+    add_to_log(0, 'local_cohortsyncup1', 'sync', '', $logmsg); //** @todo clean this hack if possible
     // print_r($cntUsers);
 }
 
