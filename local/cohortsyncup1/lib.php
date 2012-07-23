@@ -23,51 +23,56 @@ function sync_cohorts($timelast=0, $limit=0)
     $sql = 'SELECT u.id, username FROM {user} u JOIN {user_sync} us ON (u.id = us.id) '
          . 'WHERE us.ref_plugin = ? AND us.timemodified > ?';
     $users = $DB->get_records_sql_menu($sql, array($ref_plugin, $timelast), 0, $limit);
-//var_dump($users);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
     $cntUsers = array(); // users added in each cohort
     $cntCrcohorts = 0;
-    $cntAddusers = 0;
+    $cntAddmembers = 0;
 
     $res = cohort_get_cohorts(1); //context global
     $allcohorts = $res['cohorts'];
-    $flagcohort = array();
+    $idcohort = array();
 
     foreach ($allcohorts as $cohort) {
-        $flagcohort[$cohort->idnumber] = true;
+        $idcohort[$cohort->idnumber] = $cohort->id;
     }
+//var_dump($idcohort); die();
 
     foreach ($users as $userid => $username) {
         $requrl = $wsgroups . '?uid=' . $username;
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
-        echo ':';
- // print_r($data);
+        echo ':'; // progress bar
 
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
-            echo '.'; //$ckey;
+            echo '.'; // progress bar
             if ( isset($cntUsers[$ckey]) ) {
                 $cntUsers[$ckey]++;
             } else {
                 $cntUsers[$ckey] = 1;
-                if (! isset($flagcohort[$ckey])) { // cohort doesn't exist yet
+                if (! isset($idcohort[$ckey])) { // cohort doesn't exist yet
                     $newcohort = define_cohort($cohort);
-                    if ( cohort_add_cohort($newcohort) > 0) {
+                    $newid = cohort_add_cohort($newcohort);
+                    if ( $newid > 0 ) {
                         $cntCrcohorts++;
+                        $idcohort[$ckey] = $newid;
                     }
                 }
             }
-
-
+            if ( ! $DB->record_exists('cohort_members',
+                    array('cohortid' => $idcohort[$ckey], 'userid' => $userid) )) {
+                cohort_add_member($idcohort[$ckey], $userid);
+                $cntAddmembers++;
+            }
         } // foreach($data)
     } // foreach ($users)
     curl_close($ch);
 
-    print "\n\nCohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created\n\n";
+    echo "\n\nCohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created.";
+    echo "\nMembership: $cntAddmembers.\n\n";
     // print_r($cntUsers);
 }
 
