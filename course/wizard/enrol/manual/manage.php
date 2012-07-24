@@ -17,15 +17,14 @@
 /**
  * Manual user enrolment UI.
  *
- * @package    enrol
- * @subpackage manual
- * @copyright  2010 Petr Skoda {@link http://skodak.org}
+ * @package    course
+ * @subpackage wizard_enrol
+ * @copyright  silecs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * derived from core_enrol (enrol/manual/manage.php) by 2010 Petr Skoda {@link http://skodak.org}
  */
 
 // utile si il n'y a pas de javascript
-// à retravailler
-//error_log("Je suis dans manage.php\n", 3, '/home/cecile/projets/moodle-paris/moodle/messages_loc.txt');
 
 require_once('../../../../config.php');
 require_once($CFG->dirroot.'/enrol/manual/locallib.php');
@@ -80,9 +79,6 @@ navigation_node::override_active_url(new moodle_url('/course/wizard/enrol/users.
 
 // Create the user selector objects.
 $options = array('enrolid' => $enrolid);
-
-print_r($options);
-
 
 $potentialuserselector = new enrol_manual_potential_participant('addselect', $options);
 $currentuserselector = new enrol_manual_current_participant('removeselect', $options);
