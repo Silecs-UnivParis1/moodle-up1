@@ -17,18 +17,20 @@
 /**
  * Main course enrolment management UI, this is not compatible with frontpage course.
  *
- * @package    core
- * @subpackage enrol
- * @copyright  2010 Petr Skoda {@link http://skodak.org}
+ * @package    course
+ * @subpackage wizard_enrol
+ * @copyright  silecs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * derived from core_enrol (enrol/renderer.php) by 2010 Petr Skoda {@link http://skodak.org}
+
  */
 class core_enrol_wizard_renderer extends core_enrol_renderer {
     /**
      * Renders a user enrolment action
      * @param user_enrolment_action $icon
      * @return string
+     * modified
      */
-// je ne vois pas où elle est appelée mais est utilisée !!
     protected function render_user_enrolment_action(user_enrolment_action $icon) {
         if (strpos($icon->get_url()->get_path(), 'unenroluser')) {
 			$myurl = '/course/wizard/enrol/unenroluser.php?'.$icon->get_url()->get_query_string();

@@ -17,10 +17,11 @@
 /**
  * Main course enrolment management UI, this is not compatible with frontpage course.
  *
- * @package    core
- * @subpackage enrol
- * @copyright  2010 Petr Skoda {@link http://skodak.org}
+ * @package    course
+ * @subpackage wizard_enrol
+ * @copyright  silecs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * derived from core_enrol (enrol/users.php) by 2010 Petr Skoda {@link http://skodak.org}
  */
 
 require_once('../../../config.php');
