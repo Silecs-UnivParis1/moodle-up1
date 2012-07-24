@@ -17,16 +17,21 @@
 /**
  * Main course enrolment management UI, this is not compatible with frontpage course.
  *
- * @package    core
- * @subpackage enrol
- * @copyright  2010 Petr Skoda {@link http://skodak.org}
+ * @package    course
+ * @subpackage wizard_enrol
+ * @copyright  silecs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * derived from core_enrol (enrol/users.php) by 2010 Petr Skoda {@link http://skodak.org}
  */
 
 require_once('../../../config.php');
 require_once("$CFG->dirroot/enrol/locallib.php");
 require_once("$CFG->dirroot/enrol/users_forms.php");
 require_once("$CFG->dirroot/enrol/renderer.php");
+
+require_once("$CFG->dirroot/enrol/manual/lib.php");
+require_once("$CFG->dirroot/enrol/cohort/lib.php");
+
 require_once("$CFG->dirroot/course/wizard/enrol/locallib.php");
 
 $id      = required_param('id', PARAM_INT); // course id
@@ -53,7 +58,9 @@ $PAGE->set_context($systemcontext);
 
 has_capability('moodle/course:request', $systemcontext);
 
-$manager = new course_enrolment_manager($PAGE, $course, $filter);
+//$manager = new course_enrolment_manager($PAGE, $course, $filter);
+$manager = new course_enrolment_manager_wizard($PAGE, $course, $filter);
+
 $table = new course_enrolment_users_table($manager, $PAGE);
 $PAGE->set_url('/course/wizard/enrol/users.php', $manager->get_url_params()+$table->get_url_params());
 navigation_node::override_active_url(new moodle_url('/course/wizard/enrol/users.php', array('id' => $id)));
@@ -222,13 +229,29 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('enrolledusers', 'enrol'));
 echo $renderer->render($table);
 
-echo '<div align="center" style="margin:50px;">';
+$stepin = 5;
+$stepgo = 5;
+$buttonpre = '';
+if (isset($SESSION->wizard['idenrolment'])) {
+    if ($SESSION->wizard['idenrolment'] == 'cohort') {
+        $stepgo = 7;
+		$buttonpre = $OUTPUT->single_button(
+        new moodle_url('/course/wizard/index.php',
+            array('stepin' => $stepin, 'stepgo' => 5, 'courseid' => $id, 'idenrolment' => 'manual')),
+            'Etape précédente',
+            'post'
+        );
+	}
+}
+
+echo '<div align="center" style="margin:50px;"><div class="buttons">';
+echo $buttonpre;
 echo $OUTPUT->single_button(
     new moodle_url('/course/wizard/index.php',
-        array('stepin' => 6, 'stepgo_7' => 7, 'courseid' => $id)),
+        array('stepin' => $stepin, 'stepgo' => $stepgo, 'courseid' => $id, 'idenrolment' => 'cohort')),
     'Etape suivante',
     'post'
 );
-echo '</div>';
+echo '</div></div>';
 
 echo $OUTPUT->footer();

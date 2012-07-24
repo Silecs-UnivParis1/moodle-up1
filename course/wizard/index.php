@@ -95,6 +95,7 @@ if (isset($stepgo)) {
             $custominfo_data = custominfo_data::type('course');
             $custominfo_data->save_data($mydata);
             $SESSION->wizard['idcourse'] = $course->id;
+            $SESSION->wizard['idenrolment'] = 'manual';
             // tester si le cours existe bien ?
             //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
 
@@ -102,6 +103,8 @@ if (isset($stepgo)) {
 		    break;
 		case 5 :
 		    echo ' inscription cohortes';
+		    $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
+		    redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$SESSION->wizard['idcourse'])));
 		    break;
 		case 6 :
 		    echo ' si inscription avec clef';

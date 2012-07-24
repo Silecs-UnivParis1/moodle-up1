@@ -17,7 +17,7 @@ function get_stepgo($stepin, $POST){
 			}
 	        break;
 	    case 5 :
-	        $stepgo = 6;
+	        $stepgo =  $POST['stepgo'];
 	        break;
 	   case 6 :
 	        $stepgo = 7;

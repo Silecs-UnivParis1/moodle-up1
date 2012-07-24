@@ -20,10 +20,11 @@
  * Please note when unenrolling a user all of their grades are removed as well,
  * most ppl actually expect enrolments to be suspended only...
  *
- * @package    core
- * @subpackage enrol
- * @copyright  2011 Petr skoda
+ * @package    course
+ * @subpackage wizard_enrol
+ * @copyright  silecs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * derived from core_enrol (enrol/unenroluser.php) by 2010 Petr Skoda {@link http://skodak.org}
  */
 
 require_once('../../../config.php');
