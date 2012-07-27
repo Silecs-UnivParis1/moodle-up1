@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 
-$THEME->name = 'leatherbound_up1';
+$THEME->name = 'leatherbound-up1';
 
 ////////////////////////////////////////////////////
 // Name of the theme. Most likely the name of
