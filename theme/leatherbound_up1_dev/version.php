@@ -18,7 +18,7 @@
  * Theme version info
  *
  * @package    theme
- * @subpackage leatherbound-up1-dev
+ * @subpackage leatherbound_up1_dev
  * @copyright  2012 Université Paris 1 (UP1)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  derived from Leatherbound by Patrick Malley
@@ -28,4 +28,4 @@ defined('MOODLE_INTERNAL') || die;
 
 $plugin->version   = 2012072700; // The current module version (Date: YYYYMMDDXX)
 $plugin->requires  = 2011081700; // Requires this Moodle version
-$plugin->component = 'theme_leatherbound-up1-dev'; // Full name of the plugin (used for diagnostics)
+$plugin->component = 'theme_leatherbound_up1_dev'; // Full name of the plugin (used for diagnostics)

@@ -19,7 +19,7 @@
  * Strings for component 'theme_leatherbound', language 'en', branch 'MOODLE_20_STABLE'
  *
  * @package   theme
- * @subpackage leatherbound-up1
+ * @subpackage leatherbound_up1
  * @copyright 2012 Université Paris 1 (UP1), France
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
