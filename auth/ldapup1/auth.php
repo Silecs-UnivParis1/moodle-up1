@@ -807,27 +807,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
 
     /**
-     * Sync roles for this user
+     * Sync roles for this user => DISABLED
      *
      * @param $user object user object (without system magic quotes)
      */
     function sync_roles($user) {
-        $iscreator = $this->iscreator($user->username);
-        if ($iscreator === null) {
-            return; // Nothing to sync - creators not configured
-        }
-
-        if ($roles = get_archetype_roles('coursecreator')) {
-            $creatorrole = array_shift($roles);      // We can only use one, let's use the first one
-            $systemcontext = get_context_instance(CONTEXT_SYSTEM);
-
-            if ($iscreator) { // Following calls will not create duplicates
-                role_assign($creatorrole->id, $user->id, $systemcontext->id, $this->roleauth);
-            } else {
-                // Unassign only if previously assigned by this plugin!
-                role_unassign($creatorrole->id, $user->id, $systemcontext->id, $this->roleauth);
-            }
-        }
+        return false;
     }
 
     /**
