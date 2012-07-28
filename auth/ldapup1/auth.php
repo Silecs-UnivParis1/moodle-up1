@@ -229,137 +229,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @param mixed $plainpass   Plaintext password
      */
     function user_create($userobject, $plainpass) {
-        $extusername = textlib::convert($userobject->username, 'utf-8', $this->config->ldapencoding);
-        $extpassword = textlib::convert($plainpass, 'utf-8', $this->config->ldapencoding);
-
-        switch ($this->config->passtype) {
-            case 'md5':
-                $extpassword = '{MD5}' . base64_encode(pack('H*', md5($extpassword)));
-                break;
-            case 'sha1':
-                $extpassword = '{SHA}' . base64_encode(pack('H*', sha1($extpassword)));
-                break;
-            case 'plaintext':
-            default:
-                break; // plaintext
-        }
-
-        $ldapconnection = $this->ldap_connect();
-        $attrmap = $this->ldap_attributes();
-
-        $newuser = array();
-
-        foreach ($attrmap as $key => $values) {
-            if (!is_array($values)) {
-                $values = array($values);
-            }
-            foreach ($values as $value) {
-                if (!empty($userobject->$key) ) {
-                    $newuser[$value] = textlib::convert($userobject->$key, 'utf-8', $this->config->ldapencoding);
-                }
-            }
-        }
-
-        //Following sets all mandatory and other forced attribute values
-        //User should be creted as login disabled untill email confirmation is processed
-        //Feel free to add your user type and send patches to paca@sci.fi to add them
-        //Moodle distribution
-
-        switch ($this->config->user_type)  {
-            case 'edir':
-                $newuser['objectClass']   = array('inetOrgPerson', 'organizationalPerson', 'person', 'top');
-                $newuser['uniqueId']      = $extusername;
-                $newuser['logindisabled'] = 'TRUE';
-                $newuser['userpassword']  = $extpassword;
-                $uadd = ldap_add($ldapconnection, $this->config->user_attribute.'='.ldap_addslashes($extusername).','.$this->config->create_context, $newuser);
-                break;
-            case 'rfc2307':
-            case 'rfc2307bis':
-                // posixAccount object class forces us to specify a uidNumber
-                // and a gidNumber. That is quite complicated to generate from
-                // Moodle without colliding with existing numbers and without
-                // race conditions. As this user is supposed to be only used
-                // with Moodle (otherwise the user would exist beforehand) and
-                // doesn't need to login into a operating system, we assign the
-                // user the uid of user 'nobody' and gid of group 'nogroup'. In
-                // addition to that, we need to specify a home directory. We
-                // use the root directory ('/') as the home directory, as this
-                // is the only one can always be sure exists. Finally, even if
-                // it's not mandatory, we specify '/bin/false' as the login
-                // shell, to prevent the user from login in at the operating
-                // system level (Moodle ignores this).
-
-                $newuser['objectClass']   = array('posixAccount', 'inetOrgPerson', 'organizationalPerson', 'person', 'top');
-                $newuser['cn']            = $extusername;
-                $newuser['uid']           = $extusername;
-                $newuser['uidNumber']     = AUTH_UID_NOBODY;
-                $newuser['gidNumber']     = AUTH_GID_NOGROUP;
-                $newuser['homeDirectory'] = '/';
-                $newuser['loginShell']    = '/bin/false';
-
-                // IMPORTANT:
-                // We have to create the account locked, but posixAccount has
-                // no attribute to achive this reliably. So we are going to
-                // modify the password in a reversable way that we can later
-                // revert in user_activate().
-                //
-                // Beware that this can be defeated by the user if we are not
-                // using MD5 or SHA-1 passwords. After all, the source code of
-                // Moodle is available, and the user can see the kind of
-                // modification we are doing and 'undo' it by hand (but only
-                // if we are using plain text passwords).
-                //
-                // Also bear in mind that you need to use a binding user that
-                // can create accounts and has read/write privileges on the
-                // 'userPassword' attribute for this to work.
-
-                $newuser['userPassword']  = '*'.$extpassword;
-                $uadd = ldap_add($ldapconnection, $this->config->user_attribute.'='.ldap_addslashes($extusername).','.$this->config->create_context, $newuser);
-                break;
-            case 'ad':
-                // User account creation is a two step process with AD. First you
-                // create the user object, then you set the password. If you try
-                // to set the password while creating the user, the operation
-                // fails.
-
-                // Passwords in Active Directory must be encoded as Unicode
-                // strings (UCS-2 Little Endian format) and surrounded with
-                // double quotes. See http://support.microsoft.com/?kbid=269190
-                if (!function_exists('mb_convert_encoding')) {
-                    print_error('auth_ldapup1_no_mbstring', 'auth_ldapup1');
-                }
-
-                // Check for invalid sAMAccountName characters.
-                if (preg_match('#[/\\[\]:;|=,+*?<>@"]#', $extusername)) {
-                    print_error ('auth_ldapup1_ad_invalidchars', 'auth_ldapup1');
-                }
-
-                // First create the user account, and mark it as disabled.
-                $newuser['objectClass'] = array('top', 'person', 'user', 'organizationalPerson');
-                $newuser['sAMAccountName'] = $extusername;
-                $newuser['userAccountControl'] = AUTH_AD_NORMAL_ACCOUNT |
-                                                 AUTH_AD_ACCOUNTDISABLE;
-                $userdn = 'cn='.ldap_addslashes($extusername).','.$this->config->create_context;
-                if (!ldap_add($ldapconnection, $userdn, $newuser)) {
-                    print_error('auth_ldapup1_ad_create_req', 'auth_ldapup1');
-                }
-
-                // Now set the password
-                unset($newuser);
-                $newuser['unicodePwd'] = mb_convert_encoding('"' . $extpassword . '"',
-                                                             'UCS-2LE', 'UTF-8');
-                if(!ldap_modify($ldapconnection, $userdn, $newuser)) {
-                    // Something went wrong: delete the user account and error out
-                    ldap_delete ($ldapconnection, $userdn);
-                    print_error('auth_ldapup1_ad_create_req', 'auth_ldapup1');
-                }
-                $uadd = true;
-                break;
-            default:
-               print_error('auth_ldapup1_unsupportedusertype', 'auth_ldapup1', '', $this->config->user_type_name);
-        }
-        $this->ldap_close();
-        return $uadd;
+        return false;
     }
 
     /**
@@ -454,10 +324,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $filter = '(&('.$this->config->user_attribute.'=*)'.$this->config->objectclass.')';
 
         $contexts = explode(';', $this->config->contexts);
-
-        if (!empty($this->config->create_context)) {
-              array_push($contexts, $this->config->create_context);
-        }
 
         $fresult = array();
         foreach ($contexts as $context) {
@@ -864,9 +730,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         }
 
         $contexts = explode(';', $this->config->contexts);
-        if (!empty($this->config->create_context)) {
-              array_push($contexts, $this->config->create_context);
-        }
 
         foreach ($contexts as $context) {
             $context = trim($context);
@@ -1120,9 +983,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      */
     function ldap_find_userdn($ldapconnection, $extusername) {
         $ldap_contexts = explode(';', $this->config->contexts);
-        if (!empty($this->config->create_context)) {
-            array_push($ldap_contexts, $this->config->create_context);
-        }
 
         return ldap_find_userdn($ldapconnection, $extusername, $ldap_contexts, $this->config->objectclass,
                                 $this->config->user_attribute, $this->config->search_sub);
