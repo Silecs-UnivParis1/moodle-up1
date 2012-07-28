@@ -87,9 +87,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * Constructor with initialisation.
      */
     function auth_plugin_ldapup1() {
-        $this->authtype = 'ldapup1'; //** @todo really clean ??
-        $this->roleauth = 'auth_ldap'; //**@todo keep or change ?
-        $this->errorlogtag = '[AUTH LDAP] '; //**@todo keep or change ?
+        $this->authtype = 'ldapup1';
+        $this->roleauth = 'auth_ldapup1';
+        $this->errorlogtag = '[AUTH LDAPUP1] ';
         $this->init_plugin($this->authtype);
     }
 
