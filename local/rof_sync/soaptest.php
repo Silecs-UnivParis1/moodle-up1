@@ -29,15 +29,29 @@ $requestParams = array(
     '_lang' => 'fr-FR',
     );
 */
-$requestParams = array(
+$reqParams = array(
     '_cmd' => 'getFormation',
     '_lang' => 'fr-FR',
     '_oid' => 'UP1-PROG34252',
     );
 
+$n = array(); $v = array(); $i=0;
+foreach($reqParams as $key=>$value) {
+    $n[$i] = $key;
+    $v[$i] = array($value);
+    $i++;
+}
+$callParams = array(
+    'names' => $n,
+    'values' => $v,
+    );
+print_r($callParams);
+
+
 try {
-    // $formResponse = $soapClient->__soapCall('getParametersBean', $requestParams);
-    $formResponse = $soapClient->__soapCall('getResponse', $requestParams);
+    $formResponse = $soapClient->__soapCall('getResponse', $reqParams);
+    // $formResponse = $soapClient->__soapCall('getResponse', $callParams);
+    // $formResponse = $soapClient->__soapCall('getResponse', $reqParams);
 } catch (SoapFault $soapFault) {
     echo "SoapFault : \n";
     echo $soapFault;
