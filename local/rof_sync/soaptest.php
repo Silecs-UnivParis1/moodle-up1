@@ -5,9 +5,7 @@ $urlext ='cdm/services/cataManager';
 
 
 $url = $urlbase . $urlext . '?wsdl' ;
-$soapClient = new SoapClient($url);
-
-//print_r($soapClient);
+$soapClient = new SoapClient($url, array('trace' => 1));
 
 echo "Functions: ";
 $functions = $soapClient->__getFunctions();
@@ -19,21 +17,11 @@ print_r($types);
 
 echo "\n\n**************\n\n";
 
-//list of formations
-$url = $urlbase . $urlext . '?wsdl' ;
-$soapClient = new SoapClient($url, array('trace' => 1));
-
-/*
-$requestParams = array(
-    '_cmd' => 'getAllFormations',
-    '_lang' => 'fr-FR',
-    );
-*/
 $reqParams = array(
     '_cmd' => 'getFormation',
     '_lang' => 'fr-FR',
     '_oid' => 'UP1-PROG34252',
-    );
+);
 
 $n = array(); $v = array(); $i=0;
 foreach($reqParams as $key=>$value) {
@@ -44,31 +32,18 @@ foreach($reqParams as $key=>$value) {
 $callParams = array(
     'names' => $n,
     'values' => $v,
-    );
-print_r($callParams);
-
+);
 
 try {
-    $formResponse = $soapClient->__soapCall('getResponse', $reqParams);
-    // $formResponse = $soapClient->__soapCall('getResponse', $callParams);
+    //$formResponse = $soapClient->getResponse($reqParams);
+    $formResponse = $soapClient->getResponse($callParams, '1010');
     // $formResponse = $soapClient->__soapCall('getResponse', $reqParams);
+    var_dump($formResponse);
 } catch (SoapFault $soapFault) {
     echo "SoapFault : \n";
     echo $soapFault;
     echo "\nFin SoapFault\n\n" ;
 }
 
-$handle = fopen("lastrequest.xml", "w");
-fwrite ($handle, $soapClient->__getLastRequest());
-// echo "Request : \n", $soapClient->__getLastRequest(), "\n";
-fclose($handle);
-$handle = fopen("lastresponse.xml", "w");
-fwrite ($handle, $soapClient->__getLastResponse());
-// echo "Response : \n", $soapClient->__getLastResponse(), "\n";
-fclose($handle);
-
-
-// $formResponse = $soapClient->getResponse($requestParams);
-
-
-//var_dump($formResponse);
+file_put_contents("lastrequest.xml", $soapClient->__getLastRequest());
+file_put_contents("lastresponse.xml", $soapClient->__getLastResponse());
