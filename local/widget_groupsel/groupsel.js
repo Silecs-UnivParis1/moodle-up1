@@ -3,7 +3,13 @@
  */
 
 jQuery(function () {
+    $("<link/>", {
+        rel: "stylesheet",
+        type: "text/css",
+        href: "http://code.jquery.com/ui/1.8.22/themes/base/jquery-ui.css"
+    }).appendTo("head");
     $(".by-widget.group-select input.group-selector").autocomplete({
+        minLength: 4,
         source: function (request, response) {
             $.ajax({
                 url: "http://ticetest.univ-paris1.fr/web-service-groups/search",
