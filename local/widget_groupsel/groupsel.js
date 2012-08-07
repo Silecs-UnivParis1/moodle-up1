@@ -3,9 +3,7 @@
  */
 
 jQuery(function () {
-    var selector = $("input.by-widget#group-selector");
-    var groupInputName = selector.attr('data-inputname');
-    selector.autocomplete({
+    $(".by-widget.group-select input.group-selector").autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: "http://ticetest.univ-paris1.fr/web-service-groups/search",
@@ -16,31 +14,33 @@ jQuery(function () {
                 },
                 success: function (data) {
                     response($.merge(
-                    $.map(data.users, function (item) {
-                        return {
-                            label: item.displayName,
-                            value: item.uid
-                        }
-                    }), $.map(data.groups, function (item) {
-                        return {
-                            label: item.description,
-                            value: item.key
-                        }
+                        $.map(data.users, function (item) {
+                            return {
+                                label: item.displayName,
+                                value: item.uid
+                            }
+                        }), $.map(data.groups, function (item) {
+                            return {
+                                label: item.description,
+                                value: item.key
+                            }
                     })));
                 }
             });
         },
         minLength: 4,
         select: function (event, ui) {
-            jQuery(".by-widget#group-selected").prepend(buildSelectedBlock(ui.item));
+            var inputName = $(this).attr('data-inputname');
+            var widget = $(this).closest('.by-widget.group-select');
+            $(".group-selected", widget).prepend(buildSelectedBlock(ui.item, inputName));
             return false;
         },
         open: function () {},
         close: function () {}
     });
-    function buildSelectedBlock(item) {
-        return $('<div class="group-block"></div>').text(item.label)
-            .append('<input type="hidden" name="' + groupInputName + '[]" value="' + item.value + '" />');
+    function buildSelectedBlock(item, inputName) {
+        return $('<div class="group-item-block"></div>').text(item.label)
+            .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }
     /*
     $("<link/>", {
