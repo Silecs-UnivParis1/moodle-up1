@@ -1,31 +1,91 @@
 <?php
 
-$urlbase = 'http://formation.univ-paris1.fr/';
-$urlext ='cdm/services/cataManager';
-$url = $urlbase . $urlext . '?wsdl' ;
+define('CLI_SCRIPT', true);
+require(dirname(dirname(dirname(__FILE__))).'/config.php'); // global moodle config file.
 
-$soapClient = new SoapClient($url, array('trace' => 1));
+$rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
+
+// fetchConstants();
+
+return 0;
 
 
-$reqParams = array(
-    '_cmd' => 'getAllFormations',
-    '_lang' => 'fr-FR',
-    '__composante' => '00',
-    '__1' => '__composante',  // incompréhensible mais nécessaire
-//    '_oid' => 'UP1-PROG34252',
-);
+/**
+ * fetch "constantes" from webservice and insert them into table rof_constant
+ *
+ * @return lastinsertid
+ * @todo manage updates ?
+ */
+function fetchConstants() {
+global $DB;
 
-$callParams = setCallParams($reqParams);
+    $reqParams = array(
+        '_cmd' => 'getAllFormations',
+        '_lang' => 'fr-FR',
+        '__composante' => '00', // fausse composante, pour obtenir uniquement les constantes
+        '__1' => '__composante',  // incompréhensible mais nécessaire
+    );
+    $xmlResp = doSoapRequest($reqParams);
+    $xmlTree = new SimpleXMLElement($xmlResp);
+    $constants = $xmlTree->properties->infoBlock->extension->uniform->constantes;
 
-try {
-    $formResponse = $soapClient->getResponse($callParams, '1010');
-    echo $formResponse;
-} catch (SoapFault $soapFault) {
-    echo "SoapFault : \n";
-    echo $soapFault;
-    file_put_contents("lastrequest.xml", $soapClient->__getLastRequest());
-    // file_put_contents("lastresponse.xml", $soapClient->__getLastResponse());
-    echo "\nFin SoapFault\n\n" ;
+    // step 1 : element domaineDiplome
+    foreach ($constants->domaineDiplome as $dd) {
+        $elt='domaineDiplome';
+        $elttype = (string)$dd->attributes()->type;
+        foreach ($dd->data as $singledata) {
+            $record = new stdClass();
+            $record->element = $elt;
+            $record->elementtype = $elttype;
+            $record->dataid = (string)$singledata->attributes()->id;
+            $record->dataimport = (string)$singledata->attributes()->import;
+            $record->dataoai = (string)$singledata->attributes()->oai;
+            $record->value = (string)$singledata->value;
+            // print_r($record);
+            $lastinsertid = $DB->insert_record('rof_constant', $record);
+        }
+    }
+    // step 2 : other elements
+    foreach ($constants->children() as $element) {
+        $elt = (string)$element->getName();
+        if ($elt == 'domaineDiplome') continue;
+        foreach ($element->data as $singledata) {
+            $record = new stdClass();
+            $record->element = $elt;
+            $record->elementtype = '';
+            $record->dataid = (string)$singledata->attributes()->id;
+            $record->dataimport = (string)$singledata->attributes()->import;
+            $record->dataoai = (string)$singledata->attributes()->oai;
+            $record->value = (string)$singledata->value;
+            // print_r($record);
+            $lastinsertid = $DB->insert_record('rof_constant', $record);
+        }
+    }
+    return $lastinsertid;
+}
+
+
+/**
+ * turns "logical" parameters into the form needed by the webservice
+ * @param type $reqParams array of parameters
+ * @return string XML response
+ */
+function doSoapRequest($reqParams) {
+    global $rofUrl;
+
+    $callParams = setCallParams($reqParams);
+    $soapClient = new SoapClient($rofUrl, array('trace' => 1));
+
+    try {
+        $formResponse = $soapClient->getResponse($callParams, '1010');
+        return $formResponse;
+    } catch (SoapFault $soapFault) {
+        echo "SoapFault : \n";
+        echo $soapFault;
+        file_put_contents("lastrequest.xml", $soapClient->__getLastRequest());
+        echo "\nFin SoapFault\n\n" ;
+        return false;
+    }
 }
 
 
