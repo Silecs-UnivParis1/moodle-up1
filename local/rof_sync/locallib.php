@@ -9,7 +9,9 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchComponents();
 
-echo fetchProgramsByComponent('01');
+// fetchProgramsByComponent('01');
+
+echo fetchPrograms(2);
 echo "\n\n";
 return 0;
 
@@ -91,6 +93,29 @@ global $DB;
         $lastinsertid = $DB->insert_record('rof_component', $record);
     }
 
+}
+
+/**
+ * fetch "programs" from webservice and insert them into table rof_program
+ * @return number of inserted rows
+ * @todo manage updates ?
+ */
+function fetchPrograms($verb=0) {
+global $DB;
+    $total = 0;
+
+    $components = $DB->get_records_menu('rof_component', array(), '', 'id, number');
+    foreach ($components as $id => $number) {
+        $cnt = fetchProgramsByComponent($number);
+        if ($verb > 0) {
+            echo " : $number";
+        }
+        if ($verb > 1) {
+            echo "->$cnt";
+        }
+        $total += $cnt;
+    }
+    return $total;
 }
 
 /**
