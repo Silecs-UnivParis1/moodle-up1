@@ -10,6 +10,7 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 // echo fetchComponents();
 
 echo fetchProgramsByComponent('01');
+echo "\n\n";
 return 0;
 
 
@@ -118,7 +119,7 @@ global $DB;
         if ($elt != 'program') continue;
         $record->compnumber = $componentNumber;
         $record->rofid = (string)$element->programID;
-        $record->name = (string)$element->programName->text;
+        $record->name  = (string)$element->programName->text;
         foreach($element->programCode as $code) {
             $codeset = (string)$code->attributes();
             $val = (string)$code[0];
@@ -131,8 +132,19 @@ global $DB;
         if ( $lastinsertid) {
             $cnt++;
         }
+        // insert subprograms
+        foreach($element->subProgram as $subp) {
+            $record->rofid = (string)$subp->programID;
+            $record->name  = (string)$subp->programName->text;
+            $record->parentid = $lastinsertid;
+
+            $slastinsertid = $DB->insert_record('rof_program', $record);
+            if ( $slastinsertid) {
+                $cnt++;
+            }
+        }
     }
-    return $lastinsertid;
+    return $cnt;
 }
 
 
