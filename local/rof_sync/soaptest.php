@@ -8,11 +8,9 @@ $soapClient = new SoapClient($url, array('trace' => 1));
 
 
 $reqParams = array(
-    '_cmd' => 'getAllFormations',
+    '_cmd' => 'getFormation',
     '_lang' => 'fr-FR',
-    '__composante' => '01',
-    '__1' => '__composante',  // incompréhensible mais nécessaire
-//    '_oid' => 'UP1-PROG34252',
+    '_oid' => 'UP1-PROG28336',  // UP1-PROG28336 program ; UP1-PROG28337 subprogram
 );
 
 $callParams = setCallParams($reqParams);

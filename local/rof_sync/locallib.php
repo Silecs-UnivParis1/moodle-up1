@@ -7,9 +7,11 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // fetchConstants();
 
-echo fetchComponents();
+// echo fetchComponents();
 
+echo fetchProgramsByComponent('01');
 return 0;
+
 
 
 /**
@@ -91,6 +93,51 @@ global $DB;
 }
 
 /**
+ * fetch "programs" from webservice and insert them into table rof_program
+ * limited to a Component
+ * @param string $componentNumber (01 to 37, or more) = rof_component.number
+ * @return number of inserted rows
+ * @todo manage updates ?
+ */
+function fetchProgramsByComponent($componentNumber) {
+global $DB;
+
+    $reqParams = array(
+        '_cmd' => 'getAllFormations',
+        '_lang' => 'fr-FR',
+        '__composante' => $componentNumber,
+        '__1' => '__composante',  // incompréhensible mais nécessaire
+    );
+    $xmlResp = doSoapRequest($reqParams);
+    $xmlTree = new SimpleXMLElement($xmlResp);
+    $cnt = 0;
+
+    foreach ($xmlTree->children() as $element) { //only program elements should be better
+        $record = new stdClass();
+        $elt = (string)$element->getName();
+        if ($elt != 'program') continue;
+        $record->compnumber = $componentNumber;
+        $record->rofid = (string)$element->programID;
+        $record->name = (string)$element->programName->text;
+        foreach($element->programCode as $code) {
+            $codeset = (string)$code->attributes();
+            $val = (string)$code[0];
+            if (preg_match('/Diplome$/', $codeset) && ! strrchr($codeset, '.')) { // ni oai. ni uniform.
+                $field = str_replace('Diplome', 'dip', $codeset);
+                $record->$field = $val;
+            }
+        }
+        $lastinsertid = $DB->insert_record('rof_program', $record);
+        if ( $lastinsertid) {
+            $cnt++;
+        }
+    }
+    return $lastinsertid;
+}
+
+
+
+/**
  * turns "logical" parameters into the form needed by the webservice
  * @param type $reqParams array of parameters
  * @return string XML response
@@ -113,8 +160,6 @@ function doSoapRequest($reqParams) {
     }
 }
 
-
-
 /**
  * Turn "logical" $reqParams into "artificial" $callParams used to request
  * the CDM-fr web service
@@ -132,7 +177,6 @@ function setCallParams($reqParams) {
     );
     return $callParams;
 }
-
 
 /**
  * Display the WSDL auto-documented prototypes
