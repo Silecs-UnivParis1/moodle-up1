@@ -10,7 +10,7 @@ $soapClient = new SoapClient($url, array('trace' => 1));
 $reqParams = array(
     '_cmd' => 'getAllFormations',
     '_lang' => 'fr-FR',
-    '__composante' => '00',
+    '__composante' => '01',
     '__1' => '__composante',  // incompréhensible mais nécessaire
 //    '_oid' => 'UP1-PROG34252',
 );

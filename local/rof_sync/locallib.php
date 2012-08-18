@@ -7,6 +7,8 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // fetchConstants();
 
+echo fetchComponents();
+
 return 0;
 
 
@@ -64,6 +66,29 @@ global $DB;
     return $lastinsertid;
 }
 
+
+/**
+ * fetch "composantes" from webservice/database and insert them into table rof_component
+ *
+ * @return lastinsertid
+ * @todo how to fetch rofid (ex. UP1-OU3282) from component number ??? implement this
+ */
+function fetchComponents() {
+global $DB;
+
+    $components = $DB->get_records('rof_constant', array('element' => 'composante'));
+
+    foreach ($components as $component) {
+        $record = new stdClass();
+        $record->rofid = 0; // to be completed later
+        $record->import = $component->dataimport; // = dataid
+        $record->oai = $component->dataoai;
+        $record->name = $component->value;
+        $record->number = $component->dataid; // = dataimport
+        $lastinsertid = $DB->insert_record('rof_component', $record);
+    }
+
+}
 
 /**
  * turns "logical" parameters into the form needed by the webservice
