@@ -203,22 +203,52 @@ global $DB;
     $program = $xmlTree->program;
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
-        $subs[$subpRofId] = array();
+        $subsProg[$subpRofId] = array();
         echo "$subpRofId  \n";
         $content = $subp->programStructure->subBlock->subBlock; //ELP
         foreach ($content->children() as $element) {
             if ( (string)$element->getName() != 'refCourse') continue;
             $attrs = $element->attributes();
             $courseref = (string)$attrs['ref'];
-            $subs[$subpRofId][] = $courseref;
+            $subsProg[$subpRofId][] = $courseref;
         }
         $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
-        $dbprogram->sub = join(',', $subs[$subpRofId]);
+        $dbprogram->sub = join(',', $subsProg[$subpRofId]);
         $DB->update_record('rof_program', $dbprogram);
     }
 
+        foreach ($xmlTree->children() as $element) {
+            if ( (string)$element->getName() != 'course') continue;
+            $record = new stdClass();
+            $record->rofid = (string)$element->courseID;
+            $record->name  = (string)$element->courseName->text;
+            $record->code = (string)$element->courseCode;
+            $subsCourse[$record->rofid] = array();
 
-    // print_r ($subs);
+            // print_r($record);
+            $desc = $element->courseDescription;
+
+            //** @todo réécrire la suite en DOM ?
+            foreach ($element->courseDescription->children() as $subBlock) {
+                if ( (string)$subBlock->getName() != 'subBlock') continue;
+                $attrs = $subBlock->attributes();
+                if ( (string)$attrs['userDefined'] != 'courseStructure' ) continue ;
+
+                if ($subBlock->count() > 0) {
+                    $refBlock = $subBlock->subBlock;
+                    // print_r($refBlock); die();
+                    foreach ($refBlock->children() as $refCourse) {
+                        if ( (string)$refCourse->getName() != 'refCourse') continue;
+                        $attrRC = $refCourse->attributes();
+                        $subsCourse[$record->rofid][] = (string)$attrRC['ref'];
+                        // echo $attrRC['ref']." "; die();
+                    }
+                }
+            } // fin réécrire en DOM ?
+        }
+
+    print_r ($subsProg);
+    print_r ($subsCourse);
     return $cnt;
 }
 
