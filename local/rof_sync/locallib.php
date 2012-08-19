@@ -160,16 +160,21 @@ global $DB;
             $cnt++;
         }
         // insert subprograms
+        $subprogs = array();
         foreach($element->subProgram as $subp) {
             $record->rofid = (string)$subp->programID;
             $record->name  = (string)$subp->programName->text;
             $record->parentid = $lastinsertid;
-
+            $subprogs[] = $record->rofid;
             $slastinsertid = $DB->insert_record('rof_program', $record);
             if ( $slastinsertid) {
                 $cnt++;
             }
         }
+        // update program to store subprograms
+        $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
+        $dbprogram->sub = join(',', $subprogs);
+        $DB->update_record('rof_program', $dbprogram);
     }
     return $cnt;
 }
@@ -194,7 +199,7 @@ global $DB;
     $xmlTree = new SimpleXMLElement($xmlResp);
     $cnt = 0;
 
-    // references subProgram -> courses1 (UE)
+    // references subProgram -> courses-1 (UE)
     $program = $xmlTree->program;
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
@@ -212,7 +217,8 @@ global $DB;
         $DB->update_record('rof_program', $dbprogram);
     }
 
-    print_r ($subs);
+
+    // print_r ($subs);
     return $cnt;
 }
 
