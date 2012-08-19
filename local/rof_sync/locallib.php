@@ -11,7 +11,9 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchPrograms(2);
 
-echo fetchCoursesByProgram('UP1-PROG28336');
+echo fetchCoursesByProgram('UP1-PROG35376');
+
+// echo fetchCourses(2);
 
 echo "\n\n";
 return 0;
@@ -179,6 +181,28 @@ global $DB;
     return $cnt;
 }
 
+/**
+ * fetch "courses" from webservice and insert them into table rof_course
+ * @return number of inserted rows
+ * @todo manage updates ?
+ */
+function fetchCourses($verb=0) {
+global $DB;
+    $total = 0;
+
+    $programs = $DB->get_records_menu('rof_program', array('parentid' => null), '', 'id, rofid');
+    foreach ($programs as $id => $progRofId) {
+        $cnt = fetchCoursesByProgram($progRofId);
+        if ($verb > 0) {
+            echo "\n : prog=$progRofId";
+        }
+        if ($verb > 1) {
+            echo "->$cnt";
+        }
+        $total += $cnt;
+    }
+    return $total;
+}
 
 /**
  * fetch "courses" from webservice and insert them into table rof_course
