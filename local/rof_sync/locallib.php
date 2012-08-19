@@ -223,8 +223,13 @@ global $DB;
             $record->rofid = (string)$element->courseID;
             $record->name  = (string)$element->courseName->text;
             $record->code = (string)$element->courseCode;
+            $record->programid = 0; // non calculé
+            $record->programrofid = $subpRofId;
             $subsCourse[$record->rofid] = array();
-
+            $lastinsertid = $DB->insert_record('rof_course', $record);
+            if ( $lastinsertid) {
+                $cnt++;
+            }
             // print_r($record);
             $desc = $element->courseDescription;
 
@@ -247,8 +252,13 @@ global $DB;
             } // fin réécrire en DOM ?
         }
 
-    print_r ($subsProg);
-    print_r ($subsCourse);
+    // update courses with subcourses (sub)
+    foreach($subsCourse as $course => $subcourses) {
+        $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
+        $dbcourse->sub = join(',', $subcourses);
+        $DB->update_record('rof_course', $dbcourse);
+    }
+
     return $cnt;
 }
 
