@@ -9,9 +9,10 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchComponents();
 
-// fetchProgramsByComponent('01');
+// echo fetchPrograms(2);
 
-echo fetchPrograms(2);
+echo fetchCoursesByProgram('UP1-PROG28336');
+
 echo "\n\n";
 return 0;
 
@@ -153,6 +154,7 @@ global $DB;
                 $record->$field = $val;
             }
         }
+        //** @todo renseigner le champ sub du programme avec les sous-programmes
         $lastinsertid = $DB->insert_record('rof_program', $record);
         if ( $lastinsertid) {
             $cnt++;
@@ -171,6 +173,49 @@ global $DB;
     }
     return $cnt;
 }
+
+
+/**
+ * fetch "courses" from webservice and insert them into table rof_course
+ * limited to a Program
+ * @param string $progRofId (ex. UP1-PROG35376) = rof_program.rofid
+ * @return number of inserted rows
+ * @todo manage updates ?
+ */
+function fetchCoursesByProgram($progRofId) {
+global $DB;
+
+    $reqParams = array(
+        '_cmd' => 'getFormation',
+        '_lang' => 'fr-FR',
+        '_oid' => $progRofId,
+    );
+    $xmlResp = doSoapRequest($reqParams);
+    $xmlTree = new SimpleXMLElement($xmlResp);
+    $cnt = 0;
+
+    // references subProgram -> courses1 (UE)
+    $program = $xmlTree->program;
+    foreach($program->subProgram as $subp) {
+        $subpRofId = (string)$subp->programID;
+        $subs[$subpRofId] = array();
+        echo "$subpRofId  \n";
+        $content = $subp->programStructure->subBlock->subBlock; //ELP
+        foreach ($content->children() as $element) {
+            if ( (string)$element->getName() != 'refCourse') continue;
+            $attrs = $element->attributes();
+            $courseref = (string)$attrs['ref'];
+            $subs[$subpRofId][] = $courseref;
+        }
+        $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
+        $dbprogram->sub = join(',', $subs[$subpRofId]);
+        $DB->update_record('rof_program', $dbprogram);
+    }
+
+    print_r ($subs);
+    return $cnt;
+}
+
 
 
 
