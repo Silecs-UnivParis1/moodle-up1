@@ -23,18 +23,18 @@ foreach ($components as $c) {
 		$prog = $programs[$c->number];
 		$nbProg = count($prog);
 		echo '<li><span style="cursor: pointer;" onclick="javascript:visibilite(\'liste_'
-	    . $c->number . '\'); return false;">' . $c->name . ' (' . $nbProg . ')</span>';
+	    . $c->number . '\'); return false;">' . htmlspecialchars($c->name) . ' (' . $nbProg . ')</span>';
 		if ($nbProg) {
 			echo '<ul id="liste_'.$c->number.'" style="display:none;">';
 			foreach ($prog as $p) {
-				echo '<li>' . $p->name . '</li>';
+				echo '<li>' . htmlspecialchars($p->name) . '</li>';
 			}
 			echo '</ul>';
 		}
 		echo '</li>';
 
 	} else {
-		echo '<li><span>' . $c->name . '</span></li>';
+		echo '<li><span>' . htmlspecialchars($c->name) . '</span></li>';
 	}
 }
 echo '</ul>';
@@ -42,19 +42,20 @@ echo '</ul>';
 echo $OUTPUT->box_end();
 echo '<script type="text/javascript">';
 echo "//<![CDATA[\n";
-echo 'function visibilite(thingId)
-{
-var targetElement;
-targetElement = document.getElementById(thingId) ;
-if (targetElement.style.display == "none")
-{
-targetElement.style.display = "" ;
-} else {
-targetElement.style.display = "none" ;
-}
-}
-';
-echo "//]]>";
+
+echo 'function visibilite(thingId)'
+	. '{'
+	. 'var targetElement;'
+	. 'targetElement = document.getElementById(thingId);'
+	. 'if (targetElement.style.display == "none")'
+	. '{'
+	. 'targetElement.style.display = "" ;'
+	. '} else {'
+	. 'targetElement.style.display = "none" ;'
+	. '}'
+	. '}'
+	. ';';
+
+echo "//]]>\n";
 echo '</script>';
-echo '</body></html>';
-//echo $OUTPUT->footer();
+echo $OUTPUT->footer();
