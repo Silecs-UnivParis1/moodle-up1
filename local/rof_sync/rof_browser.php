@@ -1,9 +1,15 @@
 <?php
-    require_once('../../config.php');
-    require_once('libbrowser.php');
+require_once('../../config.php');
+require_once('libbrowser.php');
 
-    $PAGE->set_url('/local/rof_sync/rof_browser.php');
-    $PAGE->set_title('Components browser');
+// limite cette page au compte admin
+require_login();
+$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+$PAGE->set_context($systemcontext);
+has_capability('enrol/cohort:unenrol', $systemcontext);
+
+$PAGE->set_url('/local/rof_sync/rof_browser.php');
+$PAGE->set_title('Components browser');
 
 echo $OUTPUT->header();
 
@@ -13,18 +19,23 @@ echo $OUTPUT->box_start('block_navigation  block');
 
 echo '<ul>';
 foreach ($components as $c) {
-	$prog = $programs[$c->number];
-	$nbProg = count($prog);
-	echo '<li><span '.($nbProg?'style="cursor: pointer;"':'') . ' onclick="javascript:visibilite(\'liste_'
-	    . $c->number . '\'); return false;">' . $c->name . ' ('.$nbProg.')</span>';
-	if ($nbProg) {
-		echo '<ul id="liste_'.$c->number.'" style="display:none;">';
-		foreach ($prog as $p) {
-			echo '<li>' . $p->name . '</li>';
+	if (array_key_exists ($c->number, $programs)) {
+		$prog = $programs[$c->number];
+		$nbProg = count($prog);
+		echo '<li><span style="cursor: pointer;" onclick="javascript:visibilite(\'liste_'
+	    . $c->number . '\'); return false;">' . $c->name . ' (' . $nbProg . ')</span>';
+		if ($nbProg) {
+			echo '<ul id="liste_'.$c->number.'" style="display:none;">';
+			foreach ($prog as $p) {
+				echo '<li>' . $p->name . '</li>';
+			}
+			echo '</ul>';
 		}
-		echo '</ul>';
+		echo '</li>';
+
+	} else {
+		echo '<li><span>' . $c->name . '</span></li>';
 	}
-	echo '</li>';
 }
 echo '</ul>';
 
