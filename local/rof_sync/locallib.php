@@ -11,7 +11,7 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchPrograms(2);
 
-echo fetchCoursesByProgram('UP1-PROG35376');
+// echo fetchCoursesByProgram('UP1-PROG35376');
 
 // echo fetchCourses(2);
 
@@ -88,11 +88,12 @@ global $DB;
 
     foreach ($components as $component) {
         $record = new stdClass();
-        $record->rofid = 0; // to be completed later
+        $record->rofid = ''; // to be completed later
         $record->import = $component->dataimport; // = dataid
         $record->oai = $component->dataoai;
         $record->name = $component->value;
         $record->number = $component->dataid; // = dataimport
+        $record->sub= ''; // to be completed later
         $lastinsertid = $DB->insert_record('rof_component', $record);
     }
 
@@ -111,10 +112,7 @@ global $DB;
     foreach ($components as $id => $number) {
         $cnt = fetchProgramsByComponent($number);
         if ($verb > 0) {
-            echo " : $number";
-        }
-        if ($verb > 1) {
-            echo "->$cnt";
+            echo " : $number->$cnt";
         }
         $total += $cnt;
     }
