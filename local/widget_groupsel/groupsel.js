@@ -52,12 +52,13 @@ jQuery(function () {
             .data("item.autocomplete", item)
             .append("<a>" + item.label + "</a>")
             .appendTo(ul);
-
-        //$('html,body').animate({scrollTop:$("#foo").offset().top}, 500);
-        return li;
     };
     function buildSelectedBlock(item, inputName) {
         return $('<div class="group-item-block"></div>').text(item.label)
+        .append('<span style="float: right;" class="selected-remove">&times;</span>')
         .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }
+    $(".by-widget.group-select .group-selected").on("click", "span.selected-remove", function(event) {
+        $(this).closest(".group-item-block").remove();
+    });
 });
