@@ -236,7 +236,7 @@ function fetchCourses($verb=0) {
 global $DB;
     $total = 0;
 
-    $programs = $DB->get_records_menu('rof_program', array('parentid' => null), '', 'id, rofid');
+    $programs = $DB->get_records_menu('rof_program', array('level' => 1), '', 'id, rofid');
     foreach ($programs as $id => $progRofId) {
         $cnt = fetchCoursesByProgram($progRofId);
         if ($verb > 0) {
@@ -269,7 +269,7 @@ global $DB;
     $xmlTree = new SimpleXMLElement($xmlResp);
     $cnt = 0;
 
-    // references subProgram -> courses-1 (UE)
+    // references subProgram -> courses level 1 (UE)
     $program = $xmlTree->program;
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
@@ -287,40 +287,40 @@ global $DB;
         $DB->update_record('rof_program', $dbprogram);
     }
 
-        foreach ($xmlTree->children() as $element) {
-            if ( (string)$element->getName() != 'course') continue;
-            $record = new stdClass();
-            $record->rofid = (string)$element->courseID;
-            $record->name  = (string)$element->courseName->text;
-            $record->code = (string)$element->courseCode;
-            $record->programid = 0; // non calculé
-            $record->programrofid = $subpRofId;
-            $subsCourse[$record->rofid] = array();
-            $lastinsertid = $DB->insert_record('rof_course', $record);
-            if ( $lastinsertid) {
-                $cnt++;
-            }
-            // print_r($record);
-            $desc = $element->courseDescription;
-
-            //** @todo réécrire la suite en DOM ?
-            foreach ($element->courseDescription->children() as $subBlock) {
-                if ( (string)$subBlock->getName() != 'subBlock') continue;
-                $attrs = $subBlock->attributes();
-                if ( (string)$attrs['userDefined'] != 'courseStructure' ) continue ;
-
-                if ($subBlock->count() > 0) {
-                    $refBlock = $subBlock->subBlock;
-                    // print_r($refBlock); die();
-                    foreach ($refBlock->children() as $refCourse) {
-                        if ( (string)$refCourse->getName() != 'refCourse') continue;
-                        $attrRC = $refCourse->attributes();
-                        $subsCourse[$record->rofid][] = (string)$attrRC['ref'];
-                        // echo $attrRC['ref']." "; die();
-                    }
-                }
-            } // fin réécrire en DOM ?
+    foreach ($xmlTree->children() as $element) {
+        if ( (string)$element->getName() != 'course') continue;
+        $record = new stdClass();
+        $record->rofid = (string)$element->courseID;
+        $record->name  = (string)$element->courseName->text;
+        $record->code = (string)$element->courseCode;
+        $record->programid = 0; // non calculé
+        $record->programrofid = $subpRofId;
+        $subsCourse[$record->rofid] = array();
+        $lastinsertid = $DB->insert_record('rof_course', $record);
+        if ( $lastinsertid) {
+            $cnt++;
         }
+        // print_r($record);
+        $desc = $element->courseDescription;
+
+        //** @todo réécrire la suite en DOM ?
+        foreach ($element->courseDescription->children() as $subBlock) {
+            if ( (string)$subBlock->getName() != 'subBlock') continue;
+            $attrs = $subBlock->attributes();
+            if ( (string)$attrs['userDefined'] != 'courseStructure' ) continue ;
+
+            if ($subBlock->count() > 0) {
+                $refBlock = $subBlock->subBlock;
+                // print_r($refBlock); die();
+                foreach ($refBlock->children() as $refCourse) {
+                    if ( (string)$refCourse->getName() != 'refCourse') continue;
+                    $attrRC = $refCourse->attributes();
+                    $subsCourse[$record->rofid][] = (string)$attrRC['ref'];
+                    // echo $attrRC['ref']." "; die();
+                }
+            }
+        } // fin réécrire en DOM ?
+    }
 
     // update courses with subcourses (sub)
     foreach($subsCourse as $course => $subcourses) {
