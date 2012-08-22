@@ -108,76 +108,86 @@ function fetchPrograms($verb=0) {
 global $DB;
     $total = 0;
 
+    $reqParams = array(
+        '_cmd' => 'getAllFormations',
+        '_lang' => 'fr-FR',
+        '__composante' => null, // à modifier
+        '__1' => '__composante',  // incompréhensible mais nécessaire
+    );
+
     $components = $DB->get_records_menu('rof_component', array(), '', 'id, number');
-    foreach ($components as $id => $number) {
-        $cnt = fetchProgramsByComponent($number);
+    foreach ($components as $id => $compNumber) {
+        $subComp[$compNumber] = array(); // liste des programmes fils
+        $xmlResp = doSoapRequest($reqParams);
+        $xmlTree = new SimpleXMLElement($xmlResp);
+        $cnt = 0;
+
+        foreach ($xmlTree->children() as $element) { //only program elements should be better
+            $record = new stdClass();
+            $elt = (string)$element->getName();
+            if ($elt != 'program') continue;
+            $record->compnumber = ''; // potentiellement plusieurs composantes mères
+            $record->rofid = (string)$element->programID;
+            $record->name  = (string)$element->programName->text;
+            $subComp[$compNumber][] = $record->rofid;
+            foreach($element->programCode as $code) {
+                $codeset = (string)$code->attributes();
+                $val = (string)$code[0];
+                if (preg_match('/Diplome$/', $codeset) && ! strrchr($codeset, '.')) { // ni oai. ni uniform.
+                    $field = str_replace('Diplome', 'dip', $codeset);
+                    $record->$field = $val;
+                }
+            }
+            $lastinsertid = $DB->insert_record('rof_program', $record);
+            if ( $lastinsertid) {
+                $cnt++;
+            }
+            // insert subprograms
+            $subprogs = array();
+            foreach($element->subProgram as $subp) {
+                $record->rofid = (string)$subp->programID;
+                $record->name  = (string)$subp->programName->text;
+                $record->parentid = $lastinsertid;
+                $subprogs[] = $record->rofid;
+                $slastinsertid = $DB->insert_record('rof_program', $record);
+                if ( $slastinsertid) {
+                    $cnt++;
+                }
+            }
+            // update program to store subprograms
+            $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
+            $dbprogram->sub = join(',', $subprogs);
+            $DB->update_record('rof_program', $dbprogram);
+        } //foreach ($element)
+
         if ($verb > 0) {
             echo " : $number->$cnt";
         }
         $total += $cnt;
+    } //foreach($components)
+
+    // stocker les relations composantes <-> programmes
+    foreach ($components as $id => $compNumber) {
+        // composante -> programmes
+        $dbcomp= $DB->get_record('rof_component', array('number' => $compNumber));
+        $dbcomp->sub = join(',', $subComp[$compNumber]);
+        $DB->update_record('rof_component', $dbcomp);
+
+        // programme -> composantes
+        foreach ($subComp[$compNumber] as $prog) {
+            $parentProg[$prog][] = $compNumber;
+        }
     }
+    foreach ($parentProg as $prog => $parents) {
+        $dbprog= $DB->get_record('rof_program', array('rofid' => $prog));
+        $dbprog->parents = join(',', $parents);
+        $dbprog->parentsnb = count($parents);
+        $DB->update_record('rof_program', $dbprog);
+    }
+
     return $total;
 }
 
-/**
- * fetch "programs" from webservice and insert them into table rof_program
- * limited to a Component
- * @param string $componentNumber (01 to 37, or more) = rof_component.number
- * @return number of inserted rows
- * @todo manage updates ?
- */
-function fetchProgramsByComponent($componentNumber) {
-global $DB;
-
-    $reqParams = array(
-        '_cmd' => 'getAllFormations',
-        '_lang' => 'fr-FR',
-        '__composante' => $componentNumber,
-        '__1' => '__composante',  // incompréhensible mais nécessaire
-    );
-    $xmlResp = doSoapRequest($reqParams);
-    $xmlTree = new SimpleXMLElement($xmlResp);
-    $cnt = 0;
-
-    foreach ($xmlTree->children() as $element) { //only program elements should be better
-        $record = new stdClass();
-        $elt = (string)$element->getName();
-        if ($elt != 'program') continue;
-        $record->compnumber = $componentNumber;
-        $record->rofid = (string)$element->programID;
-        $record->name  = (string)$element->programName->text;
-        foreach($element->programCode as $code) {
-            $codeset = (string)$code->attributes();
-            $val = (string)$code[0];
-            if (preg_match('/Diplome$/', $codeset) && ! strrchr($codeset, '.')) { // ni oai. ni uniform.
-                $field = str_replace('Diplome', 'dip', $codeset);
-                $record->$field = $val;
-            }
-        }
-        //** @todo renseigner le champ sub du programme avec les sous-programmes
-        $lastinsertid = $DB->insert_record('rof_program', $record);
-        if ( $lastinsertid) {
-            $cnt++;
-        }
-        // insert subprograms
-        $subprogs = array();
-        foreach($element->subProgram as $subp) {
-            $record->rofid = (string)$subp->programID;
-            $record->name  = (string)$subp->programName->text;
-            $record->parentid = $lastinsertid;
-            $subprogs[] = $record->rofid;
-            $slastinsertid = $DB->insert_record('rof_program', $record);
-            if ( $slastinsertid) {
-                $cnt++;
-            }
-        }
-        // update program to store subprograms
-        $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
-        $dbprogram->sub = join(',', $subprogs);
-        $DB->update_record('rof_program', $dbprogram);
-    }
-    return $cnt;
-}
 
 /**
  * fetch "courses" from webservice and insert them into table rof_course
