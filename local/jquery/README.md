@@ -1,10 +1,10 @@
 How to use jQuery
 -----------------
 
-    $PAGE->requires->js($CFG->dirroot . '/local/jquery/jquery.js');
-    $PAGE->requires->js($CFG->dirroot . '/local/jquery/jquery-ui.js');
+    $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
+    $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 
-jQuery UI does not include any theme nor any effect.
+jQuery UI includes only the default theme.
 
 * <http://jquery.com/>
 * <http://jqueryui.com/download>
