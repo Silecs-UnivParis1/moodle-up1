@@ -9,7 +9,7 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchComponents();
 
-// echo fetchPrograms(2);
+echo fetchPrograms(2);
 
 // echo fetchCoursesByProgram('UP1-PROG35376');
 
@@ -118,18 +118,26 @@ global $DB;
     $components = $DB->get_records_menu('rof_component', array(), '', 'id, number');
     foreach ($components as $id => $compNumber) {
         $subComp[$compNumber] = array(); // liste des programmes fils
+        $reqParams['__composante'] = $compNumber;
         $xmlResp = doSoapRequest($reqParams);
         $xmlTree = new SimpleXMLElement($xmlResp);
         $cnt = 0;
 
         foreach ($xmlTree->children() as $element) { //only program elements should be better
-            $record = new stdClass();
             $elt = (string)$element->getName();
             if ($elt != 'program') continue;
+            $ProgRofid = (string)$element->programID;
+            $subComp[$compNumber][] = $ProgRofid;
+            if ( $DB->record_exists('rof_program', array('rofid' => $ProgRofid) ) ) {
+                // already seen, by another component
+                continue;
+            }
+            $subProgs[$ProgRofid] = array();
+            $record = new stdClass();
             $record->compnumber = ''; // potentiellement plusieurs composantes mères
-            $record->rofid = (string)$element->programID;
+            $record->rofid = $ProgRofid;
             $record->name  = (string)$element->programName->text;
-            $subComp[$compNumber][] = $record->rofid;
+            $record->level = 1;
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
                 $val = (string)$code[0];
@@ -143,12 +151,14 @@ global $DB;
                 $cnt++;
             }
             // insert subprograms
-            $subprogs = array();
             foreach($element->subProgram as $subp) {
                 $record->rofid = (string)$subp->programID;
+                $subProgs[$ProgRofid][] = $record->rofid;
+                if ( $DB->record_exists('rof_program', array('rofid' => $record->rofid) ) ) {
+                    continue;
+                }
                 $record->name  = (string)$subp->programName->text;
-                $record->parentid = $lastinsertid;
-                $subprogs[] = $record->rofid;
+                $record->level = 2;
                 $slastinsertid = $DB->insert_record('rof_program', $record);
                 if ( $slastinsertid) {
                     $cnt++;
@@ -156,19 +166,25 @@ global $DB;
             }
             // update program to store subprograms
             $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
-            $dbprogram->sub = join(',', $subprogs);
+            $dbprogram->sub = join(',', $subProgs[$ProgRofid]);
             $DB->update_record('rof_program', $dbprogram);
         } //foreach ($element)
 
         if ($verb > 0) {
-            echo " : $number->$cnt";
+            echo " : $compNumber->$cnt";
         }
         $total += $cnt;
     } //foreach($components)
 
-    // stocker les relations composantes <-> programmes
+
+    if ($verb > 0) {
+        echo "\n relations composantes <-> programmes\n";
+    }
     foreach ($components as $id => $compNumber) {
         // composante -> programmes
+        if ($verb > 0) {
+            echo "$compNumber ";
+        }
         $dbcomp= $DB->get_record('rof_component', array('number' => $compNumber));
         $dbcomp->sub = join(',', $subComp[$compNumber]);
         $DB->update_record('rof_component', $dbcomp);
@@ -179,9 +195,31 @@ global $DB;
         }
     }
     foreach ($parentProg as $prog => $parents) {
+        if ($verb > 0) {
+            echo ".";
+        }
         $dbprog= $DB->get_record('rof_program', array('rofid' => $prog));
         $dbprog->parents = join(',', $parents);
+        $dbprog->components = $dbprog->parents;
         $dbprog->parentsnb = count($parents);
+        $DB->update_record('rof_program', $dbprog);
+    }
+
+    if ($verb > 0) {
+        echo "\n relations programmes <-> sous-programmes\n";
+    }
+    // relations programmes <-> sous-programmes
+    foreach ($subProgs as $prog => $listSubs) {
+        if ($verb > 0) { echo '.'; }
+        foreach ($listSubs as $subprog) {
+            $parentSubProg[$subprog][] = $prog;
+        }
+    }
+    foreach ($parentSubProg as $subprog => $listParents) {
+        if ($verb > 0) { echo '*'; }
+        $dbprog= $DB->get_record('rof_program', array('rofid' => $subprog));
+        $dbprog->parents = join(',', $listParents);
+        $dbprog->parentsnb = count($listParents);
         $DB->update_record('rof_program', $dbprog);
     }
 
