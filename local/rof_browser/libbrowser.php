@@ -95,11 +95,10 @@ class rof_browser {
 			/**$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . '</span>';**/
 			$coden = trim('niv'.$niveau);
-			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'">'
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbSub . ')</span>';
-
+			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'">['
+				. $sp->rofid .'] '. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbSub . ')</span>';
 		} else {
-			$element .= '<span>' . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', '.$sp->rofid . '</span></a>';
+			$element .= '<span>['.$sp->rofid.'] ' . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></a>';
 		}
 		return $element;
 	}
@@ -119,7 +118,7 @@ class rof_browser {
 		$list = '';
 		$nbSubList = count($subList);
 		if ($nbSubList) {
-		$list = '<ul>';
+		$list = '<ul class="cont-niv'.$this->niveau.'">';
 			foreach ($subList as $id => $sl) {
 				$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
 			}

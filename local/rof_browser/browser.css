@@ -11,11 +11,13 @@
 	color: blue;
 }
 
-.component {
+.component-tree {
 	border: 1px solid #dad9c7;
-	width: 30%;
+	width: 40%;
 }
 
 .detail-tree {
 	float: right;
+	width: 60%;
+	text-align: left;
 }

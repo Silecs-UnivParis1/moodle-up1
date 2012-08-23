@@ -22,7 +22,7 @@ echo $OUTPUT->header();
 
 echo '<div id="arbreprog" class="detail-tree"></div>';
 
-echo '<div class="component">';
+echo '<div class="component-tree">';
 
 echo treeComponent();
 
