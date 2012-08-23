@@ -104,33 +104,54 @@ abstract class custominfo_field_base {
     }
 
     /**
-     * Saves the data coming from form
+     * Reads the data coming from the form but does not save it into the DB
      * @param   mixed  $new data coming from the form
-     * @return  mixed  returns data id if success of db insert/update, false on fail, 0 if not permitted
+     * @return  object  returns data if success
      */
-    public function edit_save_data($new) {
-        global $DB;
-
+    public function edit_data($new) {
         if (!isset($new->{$this->inputname})) {
             // field not present in form, probably locked and invisible - skip it
-            return;
+            return null;
         }
 
         $data = new stdClass();
 
         $new->{$this->inputname} = $this->edit_save_data_preprocess($new->{$this->inputname}, $data);
+        if (!isset($new->id)) {
+            $new->id = null;
+        }
 
         $data->objectname = $this->objectname;
         $data->objectid = $new->id;
         $data->fieldid = $this->field->id;
         $data->data    = $new->{$this->inputname};
 
-        $dataid = $DB->get_field('custom_info_data', 'id', array('objectid' => $data->objectid, 'fieldid' => $data->fieldid));
+        $this->objectid = $data->objectid;
+        $this->fieldid = $data->fieldid;
+        $this->data = $data->data;
+
+        return $data;
+    }
+
+    /**
+     * Saves the data coming from the form
+     * @param   mixed  $new data coming from the form
+     * @return  mixed  returns data id if success of db insert/update, false on fail, 0 if not permitted
+     */
+    public function edit_save_data($new) {
+        global $DB;
+
+        $record = $this->edit_data($new);
+        if (empty($record)) {
+            return;
+        }
+
+        $dataid = $DB->get_field('custom_info_data', 'id', array('objectid' => $record->objectid, 'fieldid' => $record->fieldid));
         if ($dataid) {
             $data->id = $dataid;
-            $DB->update_record('custom_info_data', $data);
+            $DB->update_record('custom_info_data', $record);
         } else {
-            $DB->insert_record('custom_info_data', $data);
+            $DB->insert_record('custom_info_data', $record);
         }
     }
 
