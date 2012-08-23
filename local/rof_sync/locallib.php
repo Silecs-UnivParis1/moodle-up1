@@ -11,9 +11,9 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchPrograms(2);
 
-echo fetchCoursesByProgram('UP1-PROG33939', 2);
+// echo fetchCoursesByProgram('UP1-PROG33939', 2);
 
-// echo fetchCourses(2);
+echo fetchCourses(2);
 
 echo "\n\n";
 return 0;
@@ -290,8 +290,8 @@ global $DB;
 //echo "$subpRofId  \n";
 
         //search and references all courses of a subprogram
-        if ( property_exists($subp, 'programStructure') ) {
-   //     try {
+        // if ( property_exists($subp, 'programStructure') ) {
+        if ( ! empty($subp->programStructure->subBlock->subBlock) ) {
             $content = $subp->programStructure->subBlock->subBlock; //ELP
             foreach ($content->children() as $element) {
                 if ( (string)$element->getName() != 'refCourse') continue;
@@ -302,12 +302,6 @@ global $DB;
             $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
             $dbprogram->sub = join(',', $subsProg[$subpRofId]);
             $DB->update_record('rof_program', $dbprogram);
-//        }
-/*        catch (Exception $e) {
-            echo 'Caught exception: ',  $e->getMessage(), "\n";
-            var_dump($content);
-        }
- */
         }
     }
 
