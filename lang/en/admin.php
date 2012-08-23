@@ -349,6 +349,7 @@ $string['convertformat'] = '<i>convert</i> output format';
 $string['cookiehttponly'] = 'Only http cookies';
 $string['cookiesecure'] = 'Secure cookies only';
 $string['country'] = 'Default country';
+$string['coursebatchactions'] = 'Courses batch actions';
 $string['coursecontact'] = 'Course contacts';
 $string['coursecontact_desc'] = 'This setting allows you to control who appears on the course description. Users need to have at least one of these roles in a course to be shown on the course description for that course.';
 $string['courselistshortnames'] = 'Display short names';
