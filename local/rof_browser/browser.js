@@ -31,7 +31,10 @@ jQuery(function () {
 			var i = codeid.lastIndexOf('_') + 1;
 			var id = codeid.substring(i);
 			var niv = codeid.substring(i-2, i-1);
-			$("#arbreprog").load('roffinal.php?id='+id+'&niveau='+niv);
+			var titre = '<div class="suprog-'+codeid+'">'+$(this).text()+'</div>';
+			$("#arbreprog").empty();
+			$(titre).appendTo("#arbreprog");
+			$('<div class="suprog-tree"></div>').load('roffinal.php?id='+id+'&niveau='+niv).appendTo("#arbreprog");
 		}
     });
 
