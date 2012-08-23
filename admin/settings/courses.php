@@ -14,6 +14,9 @@ if ($hassiteconfig
     $ADMIN->add('courses', new admin_externalpage('coursecustomfields', new lang_string('coursecustomfields', 'admin'), $CFG->wwwroot . '/course/custominfo/index.php',
             array('moodle/site:config', 'moodle/course:create')));
 
+    $ADMIN->add('courses', new admin_externalpage('coursebatchactions', new lang_string('coursebatchactions', 'admin'), $CFG->wwwroot . '/course/batch.php',
+            array('moodle/site:config', 'moodle/course:create')));
+
 /// Course Default Settings Page
 /// NOTE: these settings must be applied after all other settings because they depend on them
     ///main course settings
