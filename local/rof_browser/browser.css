@@ -1,0 +1,21 @@
+.hidden {
+	display: none;
+}
+.toggled {
+	font-weight: bold;
+	color: red;
+}
+
+.curser-point {
+	cursor: pointer;
+	color: blue;
+}
+
+.component {
+	border: 1px solid #dad9c7;
+	width: 30%;
+}
+
+.detail-tree {
+	float: right;
+}
