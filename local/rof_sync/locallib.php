@@ -9,9 +9,9 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchComponents();
 
-echo fetchPrograms(2);
+// echo fetchPrograms(2);
 
-// echo fetchCoursesByProgram('UP1-PROG35376');
+echo fetchCoursesByProgram('UP1-PROG33939', 2);
 
 // echo fetchCourses(2);
 
@@ -138,6 +138,7 @@ global $DB;
             $record->rofid = $ProgRofid;
             $record->name  = (string)$element->programName->text;
             $record->level = 1;
+            $record->oneparent = $compNumber;
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
                 $val = (string)$code[0];
@@ -159,6 +160,7 @@ global $DB;
                 }
                 $record->name  = (string)$subp->programName->text;
                 $record->level = 2;
+                $record->oneparent = $ProgRofid;
                 $slastinsertid = $DB->insert_record('rof_program', $record);
                 if ( $slastinsertid) {
                     $cnt++;
@@ -235,17 +237,27 @@ global $DB;
 function fetchCourses($verb=0) {
 global $DB;
     $total = 0;
+    $dbltotal = 0;
+    $cnt = 1;
 
     $programs = $DB->get_records_menu('rof_program', array('level' => 1), '', 'id, rofid');
     foreach ($programs as $id => $progRofId) {
-        $cnt = fetchCoursesByProgram($progRofId);
         if ($verb > 0) {
-            echo "\n : prog=$progRofId";
+            echo '.';
         }
         if ($verb > 1) {
-            echo "->$cnt";
+            echo "\n". $cnt. "  id=". $id ."  p=". $progRofId ."->";
         }
-        $total += $cnt;
+        $count = fetchCoursesByProgram($progRofId, $verb);
+        $total += $count[0];
+        $dbltotal += $count[1];
+        if ($verb > 1) {
+            echo " cnt=". $count[0] . "   dbl=".$count[1];
+        }
+        $cnt++;
+    }
+    if ($verb > 0) {
+        echo "\nCourses : total=$total  doublons=$dbltotal \n";
     }
     return $total;
 }
@@ -254,10 +266,10 @@ global $DB;
  * fetch "courses" from webservice and insert them into table rof_course
  * limited to a Program
  * @param string $progRofId (ex. UP1-PROG35376) = rof_program.rofid
- * @return number of inserted rows
+ * @return array(number of inserted rows, number of prevented doublets)
  * @todo manage updates ?
  */
-function fetchCoursesByProgram($progRofId) {
+function fetchCoursesByProgram($progRofId, $verb=0) {
 global $DB;
 
     $reqParams = array(
@@ -268,33 +280,50 @@ global $DB;
     $xmlResp = doSoapRequest($reqParams);
     $xmlTree = new SimpleXMLElement($xmlResp);
     $cnt = 0;
+    $dblcnt = 0; // compte les doublons évités
 
     // references subProgram -> courses level 1 (UE)
     $program = $xmlTree->program;
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
         $subsProg[$subpRofId] = array();
-        echo "$subpRofId  \n";
-        $content = $subp->programStructure->subBlock->subBlock; //ELP
-        foreach ($content->children() as $element) {
-            if ( (string)$element->getName() != 'refCourse') continue;
-            $attrs = $element->attributes();
-            $courseref = (string)$attrs['ref'];
-            $subsProg[$subpRofId][] = $courseref;
+//echo "$subpRofId  \n";
+
+        //search and references all courses of a subprogram
+        if ( property_exists($subp, 'programStructure') ) {
+   //     try {
+            $content = $subp->programStructure->subBlock->subBlock; //ELP
+            foreach ($content->children() as $element) {
+                if ( (string)$element->getName() != 'refCourse') continue;
+                $attrs = $element->attributes();
+                $courseref = (string)$attrs['ref'];
+                $subsProg[$subpRofId][] = $courseref;
+            }
+            $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
+            $dbprogram->sub = join(',', $subsProg[$subpRofId]);
+            $DB->update_record('rof_program', $dbprogram);
+//        }
+/*        catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
+            var_dump($content);
         }
-        $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
-        $dbprogram->sub = join(',', $subsProg[$subpRofId]);
-        $DB->update_record('rof_program', $dbprogram);
+ */
+        }
     }
 
+    // then, browse all courses
     foreach ($xmlTree->children() as $element) {
         if ( (string)$element->getName() != 'course') continue;
+        if ($DB->record_exists('rof_course', array('rofid' => (string)$element->courseID))) {
+            $dblcnt++;
+            continue;
+        }
         $record = new stdClass();
         $record->rofid = (string)$element->courseID;
         $record->name  = (string)$element->courseName->text;
         $record->code = (string)$element->courseCode;
-        $record->programid = 0; // non calculé
-        $record->programrofid = $subpRofId;
+        $record->level = 0; // on ne sait pas encore
+        $record->oneparent = $progRofId;
         $subsCourse[$record->rofid] = array();
         $lastinsertid = $DB->insert_record('rof_course', $record);
         if ( $lastinsertid) {
@@ -323,15 +352,17 @@ global $DB;
     }
 
     // update courses with subcourses (sub)
-    foreach($subsCourse as $course => $subcourses) {
-        $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
-        $dbcourse->sub = join(',', $subcourses);
-        $DB->update_record('rof_course', $dbcourse);
+    if ( isset($subsCourse) ) {
+        foreach($subsCourse as $course => $subcourses) {
+            $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
+            $dbcourse->sub = join(',', $subcourses);
+            $dbcourse->level = 1;
+            $DB->update_record('rof_course', $dbcourse);
+        }
     }
 
-    return $cnt;
+    return array($cnt, $dblcnt);
 }
-
 
 
 
