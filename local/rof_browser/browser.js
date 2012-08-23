@@ -15,7 +15,11 @@ jQuery(function () {
 			}, 'html');
 		}
 		else {
-			$("#"+codeid).siblings(cf).toggleClass('hidden');
+			var ch = $("#"+codeid).siblings(cf).hasClass('hidden');
+			$(cf).addClass('hidden');
+			if (ch) {
+				$("#"+codeid).siblings(cf).removeClass('hidden');
+			}
 		}
 	});
 
