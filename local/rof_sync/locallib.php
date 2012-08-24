@@ -1,23 +1,6 @@
 <?php
 
-define('CLI_SCRIPT', true);
-require(dirname(dirname(dirname(__FILE__))).'/config.php'); // global moodle config file.
-
 $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
-
-// fetchConstants();
-
-// echo fetchComponents();
-
-// echo fetchPrograms(2);
-
-echo fetchCoursesByProgram('UP1-PROG29332', 2);
-
-// echo fetchCourses(2);
-
-echo "\n\n";
-return 0;
-
 
 
 /**
@@ -168,7 +151,7 @@ global $DB;
             }
             // update program to store subprograms
             $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
-            $dbprogram->sub = join(',', $subProgs[$ProgRofid]);
+            $dbprogram->sub = serializeArray($subProgs[$ProgRofid]);
             $DB->update_record('rof_program', $dbprogram);
         } //foreach ($element)
 
@@ -188,7 +171,7 @@ global $DB;
             echo "$compNumber ";
         }
         $dbcomp= $DB->get_record('rof_component', array('number' => $compNumber));
-        $dbcomp->sub = join(',', $subComp[$compNumber]);
+        $dbcomp->sub = serializeArray($subComp[$compNumber]);
         $DB->update_record('rof_component', $dbcomp);
 
         // programme -> composantes
@@ -201,7 +184,7 @@ global $DB;
             echo ".";
         }
         $dbprog= $DB->get_record('rof_program', array('rofid' => $prog));
-        $dbprog->parents = join(',', $parents);
+        $dbprog->parents = serializeArray($parents);
         $dbprog->components = $dbprog->parents;
         $dbprog->parentsnb = count($parents);
         $DB->update_record('rof_program', $dbprog);
@@ -220,7 +203,7 @@ global $DB;
     foreach ($parentSubProg as $subprog => $listParents) {
         if ($verb > 0) { echo '*'; }
         $dbprog= $DB->get_record('rof_program', array('rofid' => $subprog));
-        $dbprog->parents = join(',', $listParents);
+        $dbprog->parents = serializeArray($listParents);
         $dbprog->parentsnb = count($listParents);
         $DB->update_record('rof_program', $dbprog);
     }
@@ -299,7 +282,7 @@ global $DB;
                 $subsProg[$subpRofId][] = $courseref;
             }
             $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
-            $dbprogram->sub = join(',', $subsProg[$subpRofId]);
+            $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
             $DB->update_record('rof_program', $dbprogram);
         }
     }
@@ -352,7 +335,7 @@ global $DB;
     if ( isset($subsCourse) ) {
         foreach($subsCourse as $course => $subcourses) {
             $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
-            $dbcourse->sub = join(',', $subcourses);
+            $dbcourse->sub = serializeArray($subcourses);
             $dbcourse->level = 1;
             $DB->update_record('rof_course', $dbcourse);
         }
