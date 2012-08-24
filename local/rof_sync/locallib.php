@@ -11,9 +11,9 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 
 // echo fetchPrograms(2);
 
-// echo fetchCoursesByProgram('UP1-PROG33939', 2);
+echo fetchCoursesByProgram('UP1-PROG29332', 2);
 
-echo fetchCourses(2);
+// echo fetchCourses(2);
 
 echo "\n\n";
 return 0;
@@ -287,7 +287,6 @@ global $DB;
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
         $subsProg[$subpRofId] = array();
-//echo "$subpRofId  \n";
 
         //search and references all courses of a subprogram
         // if ( property_exists($subp, 'programStructure') ) {
@@ -303,6 +302,10 @@ global $DB;
             $dbprogram->sub = join(',', $subsProg[$subpRofId]);
             $DB->update_record('rof_program', $dbprogram);
         }
+    }
+    if (isset($program->contacts)) {
+        $listRefPersons = fetchRefPersons($program->contacts) ;
+        updateRefPersons('rof_program', $progRofId, $listRefPersons);
     }
 
     // then, browse all courses
@@ -358,6 +361,43 @@ global $DB;
     return array($cnt, $dblcnt);
 }
 
+/**
+ * fetch <refPerson>s from an xml <contacts> element
+ * @param type XmlElement
+ * @return array( string refPerson )
+ */
+function fetchRefPersons($xmlContacts) {
+    $res = array();
+    foreach ($xmlContacts->children() as $refPerson) {
+        if ( (string)$refPerson->getName() != 'refPerson' ) continue;
+        $attrs = $refPerson->attributes();
+        $res[] = (string)$attrs['ref'];
+    }
+    return $res;
+}
+
+/**
+ * updateRefPersons for given table and list
+ * @global type $DB
+ * @param string $table
+ * @param string $rofid
+ * @param array(string) $listRefPersons
+ */
+function updateRefPersons($table, $rofid, $listRefPersons) {
+    global $DB;
+    $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
+    $dbrecord->refperson = serializeArray($listRefPersons);
+    $DB->update_record($table, $dbrecord);
+}
+
+/**
+ * returns a trivial serialization (csv) from an array
+ * @param type $array (simple)
+ * @return string serialized array
+ */
+function serializeArray($array) {
+    return join(',', $array);
+}
 
 
 /**
