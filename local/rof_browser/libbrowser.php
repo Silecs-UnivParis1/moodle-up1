@@ -102,11 +102,11 @@ class rof_browser {
 			/**$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . '</span>';**/
 			$coden = trim('niv'.$niveau);
-			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'"title="'
+			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).' "title="'
 				. 'rof:' . $sp->rofid . $listeTitle . '">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbSub . ')</span>';
 		} else {
-			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></a>';
+			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
 		return $element;
 	}
