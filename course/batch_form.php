@@ -12,6 +12,8 @@ class course_batch_search_form extends moodleform {
     protected $custominfo;
 
     function definition() {
+        global $DB;
+
         $mform    = $this->_form;
 
         $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
@@ -25,8 +27,22 @@ class course_batch_search_form extends moodleform {
 
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');
-        $canviewall = has_capability('moodle/course:update', $systemcontext);
-        $this->custominfo->definition($mform, $canviewall);
+        $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
+        if ($categories) {
+            foreach ($categories as $category) {
+                $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
+                if ($fields) {
+                    // display the header and the fields
+                    $mform->addElement('header', 'category_'.$category->id, format_string($category->name));
+                    foreach ($fields as $field) {
+                        $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
+                        $formfield->options[''] = '';
+                        $formfield->edit_field($mform);
+                        $mform->setDefault($formfield->inputname, '');
+                    }
+                }
+            }
+        }
 
         $this->add_action_buttons(false, get_string('go'));
     }
