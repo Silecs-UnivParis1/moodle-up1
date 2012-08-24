@@ -21,8 +21,8 @@ function treeComponent () {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
 
-			$list .= '<span class="selected-niv2 curser-point" id="niv_'.$c->id.'">'
-				. htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
+			$list .= '<span class="selected-niv2 curser-point" id="niv_'.trim($c->id).'">'
+				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?id='.$c->id.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
