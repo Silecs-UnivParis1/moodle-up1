@@ -148,7 +148,7 @@ abstract class custominfo_field_base {
 
         $dataid = $DB->get_field('custom_info_data', 'id', array('objectid' => $record->objectid, 'fieldid' => $record->fieldid));
         if ($dataid) {
-            $data->id = $dataid;
+            $record->id = $dataid;
             $DB->update_record('custom_info_data', $record);
         } else {
             $DB->insert_record('custom_info_data', $record);
