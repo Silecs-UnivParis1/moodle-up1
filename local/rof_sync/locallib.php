@@ -285,8 +285,13 @@ global $DB;
             $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
             $DB->update_record('rof_program', $dbprogram);
         }
+        if ( ! empty($subp->contacts) ) {
+            $listRefPersons = fetchRefPersons($subp->contacts) ;
+            updateRefPersons('rof_program', $subpRofId, $listRefPersons);
+        }
     }
-    if (isset($program->contacts)) {
+
+    if ( ! empty($program->contacts) ) {
         $listRefPersons = fetchRefPersons($program->contacts) ;
         updateRefPersons('rof_program', $progRofId, $listRefPersons);
     }
@@ -311,6 +316,11 @@ global $DB;
         }
         // print_r($record);
         $desc = $element->courseDescription;
+
+        if ( ! empty($element->contacts) ) {
+            $listRefPersons = fetchRefPersons($element->contacts) ;
+            updateRefPersons('rof_course', $record->rofid, $listRefPersons);
+        }
 
         //** @todo réécrire la suite en DOM ?
         foreach ($element->courseDescription->children() as $subBlock) {

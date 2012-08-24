@@ -9,11 +9,11 @@ require('./locallib.php');
 
 // echo fetchComponents();
 
-// echo fetchPrograms(2);
+echo fetchPrograms(2);
 
-echo fetchCoursesByProgram('UP1-PROG29332', 2);
+// echo fetchCoursesByProgram('UP1-PROG29332', 2);
 
-// echo fetchCourses(2);
+echo fetchCourses(2);
 
 echo "\n\n";
 return 0;
