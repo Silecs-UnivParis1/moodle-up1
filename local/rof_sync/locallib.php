@@ -375,6 +375,18 @@ global $DB;
         }
     }
 
+    // then, browse all persons
+    foreach ($xmlTree->children() as $person) {
+        if ( (string)$person->getName() != 'person') continue;
+        if ($DB->record_exists('rof_person', array('rofid' => (string)$element->personID))) {
+            continue;
+        }
+        $record = fetchPerson($person);
+        if ( ! $DB->record_exists('rof_person', array('rofid' => $record->rofid)) ) {
+            $DB->insert_record('rof_person', $record);
+        }
+    }
+
     return array($cnt, $dblcnt);
 }
 
@@ -393,6 +405,24 @@ function fetchRefPersons($xmlContacts) {
     return $res;
 }
 
+
+/**
+ * fetch info from an xml <person> element
+ * @param XmlElement $xmlPerson
+ * @return object record
+ */
+function fetchPerson($xmlPerson) {
+    $record = new stdClass();
+    $record->rofid = trim((string)$xmlPerson->personID);
+    $record->givenname = substr(trim((string)$xmlPerson->name->given), 0, 250);
+    $record->familyname = substr(trim((string)$xmlPerson->name->family), 0, 250);
+    $record->title = substr(trim((string)$xmlPerson->title->text), 0, 250);
+    $record->role = substr(trim((string)$xmlPerson->role->text), 0, 250);
+    $record->email = substr(trim((string)$xmlPerson->contactData->email), 0, 250);
+    $record->oneparent = '';
+    return $record;
+}
+
 /**
  * updateRefPersons for given table and list
  * @global type $DB
@@ -404,9 +434,11 @@ function fetchRefPersons($xmlContacts) {
 function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
     global $DB;
     $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
-    $dbrecord->refperson = serializeArray($listRefPersons);
-    if (! $dryrun ) {
-        $DB->update_record($table, $dbrecord);
+    if ( $dbrecord ) {
+        $dbrecord->refperson = serializeArray($listRefPersons);
+        if (! $dryrun ) {
+            $DB->update_record($table, $dbrecord);
+        }
     }
 }
 

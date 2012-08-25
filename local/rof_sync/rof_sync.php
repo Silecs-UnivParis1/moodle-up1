@@ -11,7 +11,7 @@ require('./locallib.php');
 
 echo fetchPrograms(2);
 
-// echo fetchCoursesByProgram('UP1-PROG29332', 2);
+// echo fetchCoursesByProgram('UP1-PROG29332', 2, 1);
 
 echo fetchCourses(2);
 
