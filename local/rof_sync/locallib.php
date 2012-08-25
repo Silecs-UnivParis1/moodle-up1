@@ -6,10 +6,10 @@ $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
 /**
  * fetch "constantes" from webservice and insert them into table rof_constant
  *
+ * @param bool $dryrun : if set, no modification to database
  * @return lastinsertid
- * @todo manage updates ?
  */
-function fetchConstants() {
+function fetchConstants($dryrun=0) {
 global $DB;
 
     $reqParams = array(
@@ -34,8 +34,9 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
-            // print_r($record);
-            $lastinsertid = $DB->insert_record('rof_constant', $record);
+            if (! $dryrun ) {
+                $lastinsertid = $DB->insert_record('rof_constant', $record);
+            }
         }
     }
     // step 2 : other elements
@@ -50,8 +51,9 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
-            // print_r($record);
+            if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_constant', $record);
+            }
         }
     }
     return $lastinsertid;
@@ -60,11 +62,11 @@ global $DB;
 
 /**
  * fetch "composantes" from webservice/database and insert them into table rof_component
- *
+ * @param bool $dryrun : if set, no modification to database
  * @return lastinsertid
  * @todo how to fetch rofid (ex. UP1-OU3282) from component number ??? implement this
  */
-function fetchComponents() {
+function fetchComponents($dryrun=0) {
 global $DB;
 
     $components = $DB->get_records('rof_constant', array('element' => 'composante'));
@@ -77,17 +79,20 @@ global $DB;
         $record->name = $component->value;
         $record->number = $component->dataid; // = dataimport
         $record->sub= ''; // to be completed later
-        $lastinsertid = $DB->insert_record('rof_component', $record);
+        if (! $dryrun ) {
+            $lastinsertid = $DB->insert_record('rof_component', $record);
+        }
     }
 
 }
 
 /**
- * fetch "programs" from webservice and insert them into table rof_program
+ * fetch "programs" and "subPrograms" from webservice and insert them into table rof_program
+ * @param integer $verb verbosity
+ * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
- * @todo manage updates ?
  */
-function fetchPrograms($verb=0) {
+function fetchPrograms($verb=0, $dryrun=0) {
 global $DB;
     $total = 0;
 
@@ -130,9 +135,11 @@ global $DB;
                     $record->$field = $val;
                 }
             }
-            $lastinsertid = $DB->insert_record('rof_program', $record);
-            if ( $lastinsertid) {
-                $cnt++;
+            if (! $dryrun ) {
+                $lastinsertid = $DB->insert_record('rof_program', $record);
+                if ( $lastinsertid) {
+                    $cnt++;
+                }
             }
             // insert subprograms
             foreach($element->subProgram as $subp) {
@@ -144,15 +151,19 @@ global $DB;
                 $record->name  = (string)$subp->programName->text;
                 $record->level = 2;
                 $record->oneparent = $ProgRofid;
-                $slastinsertid = $DB->insert_record('rof_program', $record);
-                if ( $slastinsertid) {
-                    $cnt++;
+                if (! $dryrun ) {
+                    $slastinsertid = $DB->insert_record('rof_program', $record);
+                    if ( $slastinsertid) {
+                        $cnt++;
+                    }
                 }
             }
             // update program to store subprograms
             $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
             $dbprogram->sub = serializeArray($subProgs[$ProgRofid]);
-            $DB->update_record('rof_program', $dbprogram);
+            if (! $dryrun ) {
+                $DB->update_record('rof_program', $dbprogram);
+            }
         } //foreach ($element)
 
         if ($verb > 0) {
@@ -172,7 +183,9 @@ global $DB;
         }
         $dbcomp= $DB->get_record('rof_component', array('number' => $compNumber));
         $dbcomp->sub = serializeArray($subComp[$compNumber]);
-        $DB->update_record('rof_component', $dbcomp);
+        if (! $dryrun ) {
+            $DB->update_record('rof_component', $dbcomp);
+        }
 
         // programme -> composantes
         foreach ($subComp[$compNumber] as $prog) {
@@ -187,7 +200,9 @@ global $DB;
         $dbprog->parents = serializeArray($parents);
         $dbprog->components = $dbprog->parents;
         $dbprog->parentsnb = count($parents);
-        $DB->update_record('rof_program', $dbprog);
+        if (! $dryrun ) {
+            $DB->update_record('rof_program', $dbprog);
+        }
     }
 
     if ($verb > 0) {
@@ -205,7 +220,9 @@ global $DB;
         $dbprog= $DB->get_record('rof_program', array('rofid' => $subprog));
         $dbprog->parents = serializeArray($listParents);
         $dbprog->parentsnb = count($listParents);
-        $DB->update_record('rof_program', $dbprog);
+        if (! $dryrun ) {
+            $DB->update_record('rof_program', $dbprog);
+        }
     }
 
     return $total;
@@ -214,10 +231,11 @@ global $DB;
 
 /**
  * fetch "courses" from webservice and insert them into table rof_course
+ * @param integer $verb verbosity
+ * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
- * @todo manage updates ?
  */
-function fetchCourses($verb=0) {
+function fetchCourses($verb=0, $dryrun=0) {
 global $DB;
     $total = 0;
     $dbltotal = 0;
@@ -231,7 +249,7 @@ global $DB;
         if ($verb > 1) {
             echo "\n". $cnt. "  id=". $id ."  p=". $progRofId ."->";
         }
-        $count = fetchCoursesByProgram($progRofId, $verb);
+        $count = fetchCoursesByProgram($progRofId, $verb, $dryrun);
         $total += $count[0];
         $dbltotal += $count[1];
         if ($verb > 1) {
@@ -249,10 +267,11 @@ global $DB;
  * fetch "courses" from webservice and insert them into table rof_course
  * limited to a Program
  * @param string $progRofId (ex. UP1-PROG35376) = rof_program.rofid
+ * @param integer $verb verbosity
+ * @param bool $dryrun : if set, no modification to database
  * @return array(number of inserted rows, number of prevented doublets)
- * @todo manage updates ?
  */
-function fetchCoursesByProgram($progRofId, $verb=0) {
+function fetchCoursesByProgram($progRofId, $verb=0, $dryrun=0) {
 global $DB;
 
     $reqParams = array(
@@ -283,17 +302,19 @@ global $DB;
             }
             $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
             $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
-            $DB->update_record('rof_program', $dbprogram);
+            if (! $dryrun ) {
+                $DB->update_record('rof_program', $dbprogram);
+            }
         }
         if ( ! empty($subp->contacts) ) {
             $listRefPersons = fetchRefPersons($subp->contacts) ;
-            updateRefPersons('rof_program', $subpRofId, $listRefPersons);
+            updateRefPersons('rof_program', $subpRofId, $listRefPersons, $dryrun);
         }
     }
 
     if ( ! empty($program->contacts) ) {
         $listRefPersons = fetchRefPersons($program->contacts) ;
-        updateRefPersons('rof_program', $progRofId, $listRefPersons);
+        updateRefPersons('rof_program', $progRofId, $listRefPersons, $dryrun);
     }
 
     // then, browse all courses
@@ -310,16 +331,18 @@ global $DB;
         $record->level = 0; // on ne sait pas encore
         $record->oneparent = $progRofId;
         $subsCourse[$record->rofid] = array();
-        $lastinsertid = $DB->insert_record('rof_course', $record);
-        if ( $lastinsertid) {
-            $cnt++;
+        if (! $dryrun ) {
+            $lastinsertid = $DB->insert_record('rof_course', $record);
+            if ( $lastinsertid) {
+                $cnt++;
+            }
         }
         // print_r($record);
         $desc = $element->courseDescription;
 
         if ( ! empty($element->contacts) ) {
             $listRefPersons = fetchRefPersons($element->contacts) ;
-            updateRefPersons('rof_course', $record->rofid, $listRefPersons);
+            updateRefPersons('rof_course', $record->rofid, $listRefPersons, $dryrun);
         }
 
         //** @todo réécrire la suite en DOM ?
@@ -346,8 +369,9 @@ global $DB;
         foreach($subsCourse as $course => $subcourses) {
             $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
             $dbcourse->sub = serializeArray($subcourses);
-            $dbcourse->level = 1;
-            $DB->update_record('rof_course', $dbcourse);
+            if (! $dryrun ) {
+                $DB->update_record('rof_course', $dbcourse);
+            }
         }
     }
 
@@ -375,12 +399,15 @@ function fetchRefPersons($xmlContacts) {
  * @param string $table
  * @param string $rofid
  * @param array(string) $listRefPersons
+ * @param bool $dryrun : if set, no modification to database
  */
-function updateRefPersons($table, $rofid, $listRefPersons) {
+function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
     global $DB;
     $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
     $dbrecord->refperson = serializeArray($listRefPersons);
-    $DB->update_record($table, $dbrecord);
+    if (! $dryrun ) {
+        $DB->update_record($table, $dbrecord);
+    }
 }
 
 /**
