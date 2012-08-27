@@ -26,12 +26,12 @@ jQuery(function () {
         open: function () {},
         close: function () {}
     }).data("autocomplete")._renderItem = function(ul, item) {
-        if (item.value == item.label) {
+        if (item.source == 'title') {
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + item.label + "</a>")
+            .append("<a><span>&oplus;</span>" + item.label + '</a>')
             .appendTo(ul);
     };
     function mainSource(request, response) {
@@ -45,12 +45,12 @@ jQuery(function () {
             success: function (data) {
                 response($.merge(
                     $.merge(
-                        ["Groupes d'étudiants"],
+                        [{ label: "Groupes d'étudiants", source: "title" }],
                         $.map(data.groups, function (item) {
-                            return { label: item.description, value: item.key, source: 'groups' };
+                            return { label: '<b>' + item.name + '</b><div>' + item.description + '</div>', value: item.key, source: 'groups' };
                     })),
                     $.merge(
-                        ["Étudiants"],
+                        [{ label: "Étudiants", source: "title" }],
                         $.map(data.users, function (item) {
                             return { label: item.displayName, value: item.uid, source: 'users' };
                     }))
@@ -67,10 +67,10 @@ jQuery(function () {
             },
             success: function (data) {
                 var items = $.merge(
-                    [{ label: "est membre des groupes :", value: "est membre des groupes :" }],
+                    [{ label: "est membre des groupes :", source: "title" }],
                     $.map(data, function (item) {
                        return {
-                           label: '<b>' + item.name + '</b><br />' + item.description,
+                           label: '<b>' + item.name + '</b><div>' + item.description + '</div>',
                            value: item.key,
                            source: 'groups'
                        };
@@ -81,11 +81,15 @@ jQuery(function () {
         });
     }
     function buildSelectedBlock(item, inputName) {
-        return $('<div class="group-item-block"></div>').html(item.label)
-        .append('<span style="float: right;" class="selected-remove">&times;</span>')
-        .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
+        return $('<div class="group-item-block"></div>')
+            .html('<div class="group-item-selected">' + item.label + '</div>')
+            .prepend('<div class="selected-remove">&#10799;</div>')
+            .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }
-    $(".by-widget.group-select .group-selected").on("click", "span.selected-remove", function(event) {
+    $(".by-widget.group-select .group-selected").on("click", ".selected-remove", function(event) {
         $(this).closest(".group-item-block").remove();
     });
+    // load the custom CSS
+    var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
+    $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
 });
