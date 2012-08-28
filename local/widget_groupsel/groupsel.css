@@ -1,7 +1,7 @@
-.ui-menu-item span { display: block; float: right; }
-.ui-menu-item { padding-bottom: 4px; }
-.ui-menu-item b { font-weight: normal; }
-.ui-menu-item div { color: #A0A0A0; }
+.ui-menu .ui-menu-item a span { display: block; float: right; font-size: 24px; margin-top: -6px; }
+.ui-menu .ui-menu-item a { padding-bottom: 4px; line-height: 1.0; }
+.ui-menu .ui-menu-item a b { font-weight: normal; }
+.ui-menu .ui-menu-item a div { color: #A0A0A0; }
 
 .group-item-block { margin: 2px 2px 2px 5px; }
 .group-item-block .group-item-selected { margin-right: 38px; padding: 3px 5px; background-color: #ededed; }
