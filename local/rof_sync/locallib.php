@@ -66,7 +66,7 @@ global $DB;
  * @return lastinsertid
  * @todo how to fetch rofid (ex. UP1-OU3282) from component number ??? implement this
  */
-function fetchComponents($dryrun=0) {
+function setComponents($dryrun=0) {
 global $DB;
 
     $components = $DB->get_records('rof_constant', array('element' => 'composante'));
@@ -389,6 +389,86 @@ global $DB;
 
     return array($cnt, $dblcnt);
 }
+
+/**
+ * browse the (sub)programs and courses "sub" to fill the courses "level", "parents" and "parentsnb"
+ * @param integer $verb
+ * @param boolean $dryrun
+ */
+function setCourseParents($verb, $dryrun=false) {
+    global $DB;
+    $cntlevel = array('1'=>0, '2'=>0, '3'=>0, '4'=>0, '5'=>0, '6'=>0, '7'=>0, '8'=>0, '9'=>0);
+
+    $courses = $DB->get_records('rof_course', array('level'=>0)); // niveau indéterminé
+    foreach ($courses as $course) {
+        $parents[$course->rofid] = array();
+    }
+
+    // FIRST, children of subprograms
+    $subprograms = $DB->get_records('rof_program', array('level'=>2));
+    foreach ($subprograms as $subprogram) {
+        if ($verb > 0) echo "*";
+        $childcourses = explode(',', $subprogram->sub);
+        if ( ! $childcourses ) continue ;
+        foreach ($childcourses as $childcourse) {
+            if ($verb > 1) echo ".";
+            $parents[$childcourse][] = $subprogram->rofid;
+            $alevel[$childcourse] = 1;
+        }
+    }
+
+    foreach ($courses as $course) {
+        if ( count($parents[$course->rofid]) == 0) continue;
+        $dbcourse = $DB->get_record('rof_course', array('rofid' => $course->rofid));
+        $dbcourse->level = 1;
+        $dbcourse->parents = serializeArray($parents[$course->rofid]);
+        $dbcourse->parentsnb = count($parents[$course->rofid]);
+        if ( ! $dryrun ) {
+            $DB->update_record('rof_course', $dbcourse);
+        }
+        $cntlevel[1]++;
+    }
+
+    // THEN, children of other courses
+    $level = 1; // parent level
+    $maxlevel=10;
+    do { // loop on levels
+        $finished = true;
+        if ($verb > 0) echo "\nlooping courses level $level.\n";
+        $pcourses = $DB->get_records('rof_course', array('level' => $level));
+        foreach ($pcourses as $pcourse) {
+            if ($verb > 0) echo "*";
+            $childcourses = explode(',', $pcourse->sub);
+            if ( ! $childcourses ) continue ;
+            $finished = false;
+            foreach ($childcourses as $childcourse) {
+                if ($verb > 1) echo ".";
+                $parents[$childcourse][] = $pcourse->rofid;
+                $alevel[$childcourse] = $level+1;
+            }
+        }
+        $zcourses = $DB->get_records('rof_course', array('level' => 0));
+        foreach ($zcourses as $zcourse) {
+            if ( count($parents[$zcourse->rofid]) == 0) continue;
+            $dbcourse = $DB->get_record('rof_course', array('rofid' => $zcourse->rofid));
+            $dbcourse->level = $level+1;
+            $dbcourse->parents = serializeArray($parents[$zcourse->rofid]);
+            $dbcourse->parentsnb = count($parents[$zcourse->rofid]);
+            if ( ! $dryrun ) {
+                $DB->update_record('rof_course', $dbcourse);
+            }
+            $cntlevel[$level+1]++;
+        }
+        $level++;
+    } while ( ! $finished and $level < $maxlevel); //loop on levels
+
+    // FINALLY
+    if ($verb > 0) {
+        foreach ($cntlevel as $level => $count)
+        echo "$count courses level $level.\n";
+    }
+}
+
 
 /**
  * fetch <refPerson>s from an xml <contacts> element

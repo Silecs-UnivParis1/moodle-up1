@@ -7,13 +7,15 @@ require('./locallib.php');
 
 // fetchConstants();
 
-// echo fetchComponents();
+// echo setComponents();
 
-echo fetchPrograms(2);
+// echo fetchPrograms(2);
 
 // echo fetchCoursesByProgram('UP1-PROG29332', 2, 1);
 
-echo fetchCourses(2);
+// echo fetchCourses(2);
+
+setCourseParents(2, false);
 
 echo "\n\n";
 return 0;
