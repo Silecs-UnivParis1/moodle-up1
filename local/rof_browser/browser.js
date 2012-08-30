@@ -40,15 +40,19 @@ jQuery(function () {
 
 	 $("div.detail-tree").on("click", ".selected-niv4, .selected-niv5, .selected-niv6, .selected-niv7, .selected-niv8, .selected-niv9, .selected-niv10"
 	 , function(event) {
+		var codeid = $(this).attr('id');
+		var i = codeid.lastIndexOf('_') + 1;
+		var id = codeid.substring(i);
+		var niv = codeid.substring(3, i-1);
+
 		var fr = $(this).siblings().size();
 		if (fr == 0) {
-			var codeid = $(this).attr('id');
-			var i = codeid.lastIndexOf('_') + 1;
-			var id = codeid.substring(i);
-			var niv = codeid.substring(3, i-1);
 			$.get('roffinal.php', {id: id, niveau: niv},  function(data){
 				$("#"+codeid).after(data);
 			}, 'html');
+		} else {
+			var cf = '.per'+id;
+			$("#"+codeid).siblings(cf).toggleClass('hidden');
 		}
     });
 
