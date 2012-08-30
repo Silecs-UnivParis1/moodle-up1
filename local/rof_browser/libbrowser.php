@@ -21,8 +21,8 @@ function treeComponent () {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
 
-			$list .= '<span class="selected-niv2 curser-point" id="niv_'.$c->id.'">'
-				. htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
+			$list .= '<span class="selected-niv2 curser-point" id="niv_'.trim($c->id).'">'
+				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?id='.$c->id.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
@@ -70,7 +70,11 @@ class rof_browser {
 		3 => array('code' =>'subprogam', 'tabsub' => 'rof_program', 'tabenf' => 'rof_program'),
 		4 => array('code' =>'ue', 'tabsub' => 'rof_program', 'tabenf' => 'rof_course'),
 		5 => array('code' =>'course', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
-		6 => array('code' =>'coursef', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		6 => array('code' =>'course1', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		7 => array('code' =>'course2', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		8 => array('code' =>'course3', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		9 => array('code' =>'course4', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		10 => array('code' =>'course5', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
 	);
 
 
@@ -102,11 +106,11 @@ class rof_browser {
 			/**$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . '</span>';**/
 			$coden = trim('niv'.$niveau);
-			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'"title="'
+			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'" title="'
 				. 'rof:' . $sp->rofid . $listeTitle . '">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbSub . ')</span>';
 		} else {
-			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></a>';
+			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
 		return $element;
 	}
