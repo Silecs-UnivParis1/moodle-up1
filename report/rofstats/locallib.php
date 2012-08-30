@@ -27,6 +27,8 @@ function report_rofstats_generic() {
     $res[] = array('Persons', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
 
+    $count = $DB->count_records('rof_course');
+    $res[] = array('Courses', $count);
     $levelmax = $DB->get_record_sql('SELECT MAX(level) as levelmax FROM {rof_course} rc')->levelmax;
     for ($level = 1; $level <= 1+$levelmax ; $level++) {
        $count = $DB->count_records('rof_course', array('level' => $level));
@@ -68,6 +70,8 @@ function report_rofstats_persons_not_empty() {
     $res[] = array('SubPrograms', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
 
+    $count = $DB->count_records_sql("SELECT COUNT(id) FROM {rof_course} WHERE refperson != ''");
+       $res[] = array('Courses', $count);
     $levelmax = $DB->get_record_sql('SELECT MAX(level) as levelmax FROM {rof_course} rc')->levelmax;
     for ($level = 1; $level <= $levelmax ; $level++) {
        $count = $DB->count_records_sql(
