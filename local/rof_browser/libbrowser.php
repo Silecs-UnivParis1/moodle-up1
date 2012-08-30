@@ -70,7 +70,10 @@ class rof_browser {
 		3 => array('code' =>'subprogam', 'tabsub' => 'rof_program', 'tabenf' => 'rof_program'),
 		4 => array('code' =>'ue', 'tabsub' => 'rof_program', 'tabenf' => 'rof_course'),
 		5 => array('code' =>'course', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
-		6 => array('code' =>'coursef', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		6 => array('code' =>'course1', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		7 => array('code' =>'course2', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		8 => array('code' =>'course3', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
+		9 => array('code' =>'course4', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
 	);
 
 

@@ -38,7 +38,7 @@ jQuery(function () {
 		}
     });
 
-	 $("div.detail-tree").on("click", ".selected-niv4, .selected-niv5, .selected-niv6"
+	 $("div.detail-tree").on("click", ".selected-niv4, .selected-niv5, .selected-niv6, .selected-niv7, .selected-niv8, .selected-niv9"
 	 , function(event) {
 		var fr = $(this).siblings().size();
 		if (fr == 0) {
