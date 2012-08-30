@@ -25,7 +25,7 @@ try {
     // file_put_contents("lastresponse.xml", $soapClient->__getLastResponse());
     echo "\nFin SoapFault\n\n" ;
 }
-
+return 0;
 
 
 /**

@@ -8,9 +8,10 @@ $soapClient = new SoapClient($url, array('trace' => 1));
 
 
 $reqParams = array(
-    '_cmd' => 'getFormation',
+    '_cmd' => 'getAllFormations',
     '_lang' => 'fr-FR',
-    '_oid' => $argv[1],  // UP1-PROG28336 program ; UP1-PROG28337 subprogram
+    '__composante' => $argv[1],  // 01 à 37
+    '__1' => '__composante',
 );
 
 $callParams = setCallParams($reqParams);
@@ -25,7 +26,7 @@ try {
     // file_put_contents("lastresponse.xml", $soapClient->__getLastResponse());
     echo "\nFin SoapFault\n\n" ;
 }
-
+return 0;
 
 
 /**

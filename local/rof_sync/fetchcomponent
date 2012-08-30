@@ -46,3 +46,21 @@ function setCallParams($reqParams) {
     return $callParams;
 }
 
+
+/**
+ * Display the WSDL auto-documented prototypes
+ * @return void
+ */
+function displayWsdlInformation($url) {
+    $soapClient = new SoapClient($url);
+
+    echo "Functions: ";
+    $functions = $soapClient->__getFunctions();
+    print_r($functions);
+
+    echo "\nTypes: ";
+    $types = $soapClient->__getTypes();
+    print_r($types);
+
+    echo "\n\n**************\n\n";
+}

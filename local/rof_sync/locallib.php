@@ -135,6 +135,7 @@ global $DB;
                     $record->$field = $val;
                 }
             }
+            //** @todo récupérer acronyme, mention, specialite sous /CDM/program/infoBlock/extension/cdmUP1/mention
             if (! $dryrun ) {
                 $lastinsertid = $DB->insert_record('rof_program', $record);
                 if ( $lastinsertid) {
