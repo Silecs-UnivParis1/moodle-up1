@@ -17,7 +17,5 @@ echo fetchCourses(2);
 
 setCourseParents(2, false);
 
-// echo fmtPath(getCourseFirstPath("UP1-C20867"), 'combined');
-
 echo "\n\n";
 return 0;
