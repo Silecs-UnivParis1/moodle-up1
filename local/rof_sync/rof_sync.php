@@ -5,19 +5,19 @@ require(dirname(dirname(dirname(__FILE__))).'/config.php'); // global moodle con
 require('./locallib.php');
 
 
-// fetchConstants();
+fetchConstants();
 
-// echo setComponents();
+echo setComponents();
 
-// echo fetchPrograms(2);
+echo fetchPrograms(2);
 
-// echo fetchCoursesByProgram('UP1-PROG29332', 2, 1);
+echo fetchCoursesByProgram('UP1-PROG29332', 2, 1);
 
-// echo fetchCourses(2);
+echo fetchCourses(2);
 
-// setCourseParents(2, false);
+setCourseParents(2, false);
 
-echo fmtPath(getCourseFirstPath("UP1-C20867"), 'combined');
+// echo fmtPath(getCourseFirstPath("UP1-C20867"), 'combined');
 
 echo "\n\n";
 return 0;

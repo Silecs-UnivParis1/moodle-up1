@@ -78,7 +78,8 @@ global $DB;
         $record->oai = $component->dataoai;
         $record->name = $component->value;
         $record->number = $component->dataid; // = dataimport
-        $record->sub= ''; // to be completed later
+        $record->sub = ''; // to be completed later
+        $record->subnb = 0;
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_component', $record);
         }
@@ -162,6 +163,7 @@ global $DB;
             // update program to store subprograms
             $dbprogram = $DB->get_record('rof_program', array('id' => $lastinsertid));
             $dbprogram->sub = serializeArray($subProgs[$ProgRofid]);
+            $dbprogram->subnb = count($subProgs[$ProgRofid]);
             if (! $dryrun ) {
                 $DB->update_record('rof_program', $dbprogram);
             }
@@ -184,6 +186,7 @@ global $DB;
         }
         $dbcomp= $DB->get_record('rof_component', array('number' => $compNumber));
         $dbcomp->sub = serializeArray($subComp[$compNumber]);
+        $dbcomp->subnb = count($subComp[$compNumber]);
         if (! $dryrun ) {
             $DB->update_record('rof_component', $dbcomp);
         }
@@ -303,6 +306,7 @@ global $DB;
             }
             $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
             $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
+            $dbprogram->subnb = count($subsProg[$subpRofId]);
             if (! $dryrun ) {
                 $DB->update_record('rof_program', $dbprogram);
             }
@@ -370,6 +374,7 @@ global $DB;
         foreach($subsCourse as $course => $subcourses) {
             $dbcourse = $DB->get_record('rof_course', array('rofid' => $course));
             $dbcourse->sub = serializeArray($subcourses);
+            $dbcourse->subnb = count($subcourses);
             if (! $dryrun ) {
                 $DB->update_record('rof_course', $dbcourse);
             }
