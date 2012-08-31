@@ -128,6 +128,7 @@ global $DB;
             $record->name  = (string)$element->programName->text;
             $record->level = 1;
             $record->oneparent = $compNumber;
+            // dans la boucle : typedip, domainedip, naturedip, cycledip, rythmedip, languedip
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
                 $val = (string)$code[0];
@@ -136,7 +137,12 @@ global $DB;
                     $record->$field = $val;
                 }
             }
-            //** @todo récupérer acronyme, mention, specialite sous /CDM/program/infoBlock/extension/cdmUP1/mention
+            // on récupère acronyme, mention, specialite sous /CDM/program/infoBlock/extension/cdmUP1/
+            if ( ! empty($element->infoBlock->extension->cdmUP1) ) {
+                $record->acronyme = (string)$element->infoBlock->extension->cdmUP1->acronyme;
+                $record->mention = (string)$element->infoBlock->extension->cdmUP1->mention;
+                $record->specialite = (string)$element->infoBlock->extension->cdmUP1->specialite;
+            }
             if (! $dryrun ) {
                 $lastinsertid = $DB->insert_record('rof_program', $record);
                 if ( $lastinsertid) {
