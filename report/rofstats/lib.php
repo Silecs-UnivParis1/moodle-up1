@@ -59,3 +59,14 @@ function fmtPath($pathArray, $format='rofid') {
     }
     return $ret;
 }
+
+/**
+ * returns an ordered list for typedip, to use in SQL FIND_IN_SET()
+ */
+function typeDiplomeOrderedList() {
+    global $DB;
+    $sql = "SELECT GROUP_CONCAT(dataimport) AS list FROM {rof_constant} WHERE element LIKE 'typeDiplome' ORDER BY id";
+    $res = $DB->get_record_sql($sql)->list;
+    
+    return ($res.',MA,CF'); // on complète avec les valeurs non présentes dans les constants mais utilisées
+}
