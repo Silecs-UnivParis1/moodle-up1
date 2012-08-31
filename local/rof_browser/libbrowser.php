@@ -129,8 +129,14 @@ class rof_browser {
 		$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		$list = '';
 		$nbSubList = count($subList);
+
+		$cf = 'per' . $this->idPere;
+		if ($this->niveau == 2) {
+			$cf = 'cont-niv' . $this->niveau;
+		}
+
 		if ($nbSubList) {
-		$list = '<ul class="cont-niv'.$this->niveau.'">';
+		$list = '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
 				$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
 			}
