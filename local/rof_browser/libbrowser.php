@@ -126,14 +126,20 @@ class rof_browser {
 		$nivEnf = (int)$this->niveau  + 1;
 		$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
 		$sub = subToString($sub);
-		$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
-		$list = '';
-		$nbSubList = count($subList);
 
 		$cf = 'per' . $this->idPere;
+		$sort = '';
 		if ($this->niveau == 2) {
 			$cf = 'cont-niv' . $this->niveau;
+			$sort = " order by find_in_set(typedip, 'L1,L2,L3,M1,E1,M2,E2,MA,30,CF,U4,U6') ";
+			$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
+			$subList = $DB->get_records_sql($sql);
+		} else {
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
+
+		$list = '';
+		$nbSubList = count($subList);
 
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';
