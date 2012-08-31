@@ -67,6 +67,6 @@ function typeDiplomeOrderedList() {
     global $DB;
     $sql = "SELECT GROUP_CONCAT(dataimport) AS list FROM {rof_constant} WHERE element LIKE 'typeDiplome' ORDER BY id";
     $res = $DB->get_record_sql($sql)->list;
-    
-    return ($res.',MA,CF'); // on complète avec les valeurs non présentes dans les constants mais utilisées
+
+    return ($res.',MA,CF,LI,41,77,80,02,00'); // on complète avec les valeurs non présentes dans les constants mais utilisées
 }
