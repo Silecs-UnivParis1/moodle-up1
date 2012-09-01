@@ -81,6 +81,15 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         }
     }
 
+    // other course settings
+    if (!empty($criteria->startdateafter)) {
+        $searchcond[] = "c.startdate >= " . ((int) $criteria->startdateafter);
+    }
+    if (!empty($criteria->startdatebefore)) {
+        $searchcond[] = "c.startdate <= " . ((int) $criteria->startdatebefore);
+    }
+
+    // custominfo fields
     $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
     $searchjoin = array();
     if ($fields) {
