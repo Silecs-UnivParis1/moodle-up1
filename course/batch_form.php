@@ -20,10 +20,15 @@ class course_batch_search_form extends moodleform {
 
         $mform->addElement('text', 'search', get_string('searchcourses'), 'maxlength="254" size="50"');
 
-        $mform->addElement('date_selector', 'startdateafter', get_string('startdate'));
-        $mform->setDefault('startdateafter', mktime(12, 0, 0, 1, 1, 2010));
-        $mform->addElement('date_selector', 'startdatebefore', get_string('startdate'));
+        $mform->addElement('date_selector', 'startdateafter', get_string('startdate') . ' &gt;');
+        $mform->setDefault('startdateafter', mktime(12, 0, 0, 1, 1, date('Y') - 1));
+        $mform->addElement('date_selector', 'startdatebefore', get_string('startdate') . ' &lt;');
         $mform->setDefault('startdatebefore', time() + 3600 * 24);
+
+        $mform->addElement('date_selector', 'createdafter', get_string('createdon', 'search') . ' &gt;');
+        $mform->setDefault('createdafter', mktime(12, 0, 0, 1, 1, date('Y') - 1));
+        $mform->addElement('date_selector', 'createdbefore', get_string('createdon', 'search') . ' &lt;');
+        $mform->setDefault('createdbefore', time() + 3600 * 24);
 
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');

@@ -88,6 +88,12 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     if (!empty($criteria->startdatebefore)) {
         $searchcond[] = "c.startdate <= " . ((int) $criteria->startdatebefore);
     }
+    if (!empty($criteria->createdafter)) {
+        $searchcond[] = "c.timecreated >= " . ((int) $criteria->createdafter);
+    }
+    if (!empty($criteria->createdbefore)) {
+        $searchcond[] = "c.timecreated <= " . ((int) $criteria->createdbefore);
+    }
 
     // custominfo fields
     $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
