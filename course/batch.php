@@ -92,11 +92,15 @@ if (empty($courses)) {
     }
     echo '</table>';
 
-    echo '<div><input type="text" name="batchprefix" /> '
-        , '<button name="action" value="prefix">' , get_string('prefix', 'admin') , '</button></div>';
-    echo '<div><input type="text" name="batchsuffix" /> '
-        , '<button name="action" value="suffix">' , get_string('suffix', 'admin') , '</button></div>';
-    echo '<div><button name="action" value="close">' , get_string('close', 'admin') , '</button></div>';
+    echo "<fieldset><legend>" . get_string('actions') . "</legend>";
+    echo "<ul>";
+    echo '<li><input type="text" name="batchprefix" /> '
+        , '<button name="action" value="prefix">' , get_string('prefix', 'admin') , '</button></li>';
+    echo '<li><input type="text" name="batchsuffix" /> '
+        , '<button name="action" value="suffix">' , get_string('suffix', 'admin') , '</button></li>';
+    echo '<li><button name="action" value="close">' , get_string('close', 'admin') , '</button></li>';
+    echo "</ul>";
+    echo "</fieldset>";
     echo '</div></form>';
 }
 
