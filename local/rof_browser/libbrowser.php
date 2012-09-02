@@ -1,4 +1,5 @@
 <?php
+require_once($CFG->dirroot . '/report/rofstats/roflib.php');
 
 /**
  * renvoie la liste des components
@@ -126,14 +127,20 @@ class rof_browser {
 		$nivEnf = (int)$this->niveau  + 1;
 		$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
 		$sub = subToString($sub);
-		$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
-		$list = '';
-		$nbSubList = count($subList);
 
 		$cf = 'per' . $this->idPere;
+		$sort = '';
 		if ($this->niveau == 2) {
 			$cf = 'cont-niv' . $this->niveau;
+			$sort = " ORDER BY FIND_IN_SET(typedip, '" . typeDiplomeOrderedList() . "') ";
+			$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
+			$subList = $DB->get_records_sql($sql);
+		} else {
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
+
+		$list = '';
+		$nbSubList = count($subList);
 
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';

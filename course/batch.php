@@ -25,8 +25,8 @@ if ($action) {
             $prefix = optional_param('batchprefix', '', PARAM_RAW);
             if ($prefix) {
                 foreach ($courses as $course) {
-                    // $course->fullname = $prefix . $course->fullname;
-                    $course->shortname = $prefix . $course->shortname;
+                    $course->fullname = $prefix . $course->fullname;
+                    // $course->shortname = $prefix . $course->shortname;
                     $DB->update_record('course', $course);
                 }
                 redirect($CFG->wwwroot . '/course/batch.php');
@@ -37,8 +37,8 @@ if ($action) {
             $suffix = optional_param('batchsuffix', '', PARAM_RAW);
             if ($suffix) {
                 foreach ($courses as $course) {
-                    //$course->fullname = $course->fullname . $suffix;
-                    $course->shortname = $course->shortname . $suffix;
+                    $course->fullname = $course->fullname . $suffix;
+                    // $course->shortname = $course->shortname . $suffix;
                     $DB->update_record('course', $course);
                 }
                 redirect($CFG->wwwroot . '/course/batch.php');
