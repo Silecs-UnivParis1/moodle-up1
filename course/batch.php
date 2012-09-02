@@ -10,7 +10,7 @@ global $DB, $PAGE;
 $action = optional_param('action', '', PARAM_ALPHA);
 $coursesid = optional_param_array('c', array(), PARAM_INT);  // which courses to act on
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
-$perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
+$perpage   = optional_param('perpage', 100, PARAM_INT); // how many per page
 
 require_login(get_site());
 $PAGE->set_pagelayout('admin');
