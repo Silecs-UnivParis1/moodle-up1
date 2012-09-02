@@ -82,6 +82,9 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     }
 
     // other course settings
+    if (property_exists($criteria, 'visible')) {
+        $searchcond[] = "c.visible >= " . ((int) $criteria->visible);
+    }
     if (!empty($criteria->startdateafter)) {
         $searchcond[] = "c.startdate >= " . ((int) $criteria->startdateafter);
     }
