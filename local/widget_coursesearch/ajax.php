@@ -35,7 +35,8 @@ if (empty($courses)) {
     foreach ($courses as $course) {
         echo '<tr>';
         $coursename = get_course_display_name_for_list($course);
-        echo '<td><a href="view.php?id='.$course->id.'">'. format_string($coursename) .'</a></td>';
+        $url = new moodle_url('/course/view.php?id=' . $course->id);
+        echo '<td><a href="' . $url . '">'. format_string($coursename) .'</a></td>';
         echo "</tr>";
     }
     echo '</table>';
