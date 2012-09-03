@@ -295,8 +295,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * Creates new users and updates coursecreator status of users.
      *
      * @param bool $do_updates will do pull in data updates from LDAP if relevant
+     * @param (string|false) $since if set, only updates since this params (syntax LDAP ex. 20120731012345Z)
      */
-    function sync_users($do_updates=true) {
+    function sync_users($do_updates=true, $since=false) {
         global $CFG, $DB;
 
         print_string('connectingldap', 'auth_ldapup1');
@@ -321,7 +322,16 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         //// get user's list from ldap to sql in a scalable fashion
         ////
         // prepare some data we'll need
-        $filter = '(&('.$this->config->user_attribute.'=*)'.$this->config->objectclass.')';
+        $filterAff = '(|(eduPersonAffiliation=teacher)(eduPersonAffiliation=student)(eduPersonAffiliation=staff))';
+        $filterAcc = '(accountStatus=active)';
+        // $filterAcc = '';
+        $filterTime = '(modifyTimestamp>='. $since .')';
+
+        if ( $since ) {
+            $filter = '(&'. $filterAff . $filterAcc . $filterTime .')';
+        } else {
+            $filter = '(&'. $filterAff . $filterAcc .')';
+        }
 
         $contexts = explode(';', $this->config->contexts);
 
@@ -438,25 +448,23 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             $updatekeys = array();
             foreach ($all_keys as $key) {
                 if (preg_match('/^field_updatelocal_(.+)$/', $key, $match)) {
-                    // If we have a field to update it from
-                    // and it must be updated 'onlogin' we
-                    // update it on cron
-                    if (!empty($this->config->{'field_map_'.$match[1]})
-                         and $this->config->{$match[0]} === 'onlogin') {
-                        array_push($updatekeys, $match[1]); // the actual key name
+                    // SILECS UP1 on force tous les champs à accepter l'update (type onlogin, pas oncreate)
+                    if ( ! empty($this->config->{'field_map_'.$match[1]}) ) {
+                    array_push($updatekeys, $match[1]); // the actual key name
                     }
                 }
             }
             unset($all_keys); unset($key);
-
         } else {
             print_string('noupdatestobedone', 'auth_ldapup1');
+            echo "    (no do_updates)\n";
         }
         if ($do_updates and !empty($updatekeys)) { // run updates only if relevant
             $users = $DB->get_records_sql('SELECT u.username, u.id
                                              FROM {user} u
-                                            WHERE u.deleted = 0 AND u.auth = ? AND u.mnethostid = ?',
-                                          array($this->authtype, $CFG->mnet_localhost_id));
+                                             JOIN {tmp_extuser} te ON (u.username = te.username)
+                                            WHERE u.deleted = 0 AND u.auth = ? ',
+                                          array('auth_shibboleth'));
             if (!empty($users)) {
                 print_string('userentriestoupdate', 'auth_ldapup1', count($users));
 
@@ -466,7 +474,14 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 foreach ($users as $user) {
                     echo "\t"; print_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id));
-                    if (!$this->update_user_record($user->username, $updatekeys)) {
+                    if ($this->update_user_record($user->username, $updatekeys)) {
+                        //** @todo incorporer ceci à la table user
+                        $usersync = $DB->get_record('user_sync', array('id'=>$user->id));
+                        if ($usersync) {
+                            $usersync->timemodified = time();
+                            $DB->update_record('user_sync', $usersync);
+                        }
+                    } else {
                         echo ' - '.get_string('skipped');
                     }
                     echo "\n";
@@ -477,6 +492,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             }
         } else { // end do updates
             print_string('noupdatestobedone', 'auth_ldapup1');
+            echo "    (empty)\n";
         }
 
 /// User Additions
@@ -499,7 +515,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 // Prep a few params
                 $user->modified   = time();
                 $user->confirmed  = 1;
-                $user->auth       = $this->authtype;
+                $user->auth       = 'auth_shibboleth'; // up1 specific
                 $user->mnethostid = $CFG->mnet_localhost_id;
                 // get_userinfo_asobj() might have replaced $user->username with the value
                 // from the LDAP server (which can be mixed-case). Make sure it's lowercase
@@ -510,10 +526,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 $id = $DB->insert_record('user', $user);
                 echo "\t"; print_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)); echo "\n";
-                if (!empty($this->config->forcechangepassword)) {
-                    set_user_preference('auth_forcepasswordchange', 1, $id);
-                }
-
+                //** @todo incorporer ceci à la table user
+                $usersync = new stdClass;
+                $usersync->id = $id; // same id as new user
+                $usersync->ref_plugin = 'auth_ldapup1';
+                $usersync->ref_param = '';
+                $usersync->timemodified = time();
+                $DB->insert_record('user_sync', $usersync);
             }
             $transaction->allow_commit();
             unset($add_users); // free mem
