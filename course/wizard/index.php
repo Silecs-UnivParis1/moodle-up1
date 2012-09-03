@@ -89,6 +89,9 @@ if (isset($stepgo)) {
             $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
 		    $mydata = (object) $datamerge;
 		    $mydata->startdate = $startdate;
+		    // cours doit être validé
+		    $mydata->profile_field_tovalidate = 1;
+
             $course = create_course($mydata);
             // save custom fields data
             $mydata->id = $course->id;
