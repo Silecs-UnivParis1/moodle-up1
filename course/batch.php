@@ -10,7 +10,7 @@ global $DB, $PAGE;
 $action = optional_param('action', '', PARAM_ALPHA);
 $coursesid = optional_param_array('c', array(), PARAM_INT);  // which courses to act on
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
-$perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
+$perpage   = optional_param('perpage', 100, PARAM_INT); // how many per page
 
 require_login(get_site());
 $PAGE->set_pagelayout('admin');
@@ -92,11 +92,15 @@ if (empty($courses)) {
     }
     echo '</table>';
 
-    echo '<div><input type="text" name="batchprefix" /> '
-        , '<button name="action" value="prefix">' , get_string('prefix', 'admin') , '</button></div>';
-    echo '<div><input type="text" name="batchsuffix" /> '
-        , '<button name="action" value="suffix">' , get_string('suffix', 'admin') , '</button></div>';
-    echo '<div><button name="action" value="close">' , get_string('close', 'admin') , '</button></div>';
+    echo "<fieldset><legend>" . get_string('actions') . "</legend>";
+    echo "<ul>";
+    echo '<li><input type="text" name="batchprefix" /> '
+        , '<button name="action" value="prefix">' , get_string('prefix', 'admin') , '</button></li>';
+    echo '<li><input type="text" name="batchsuffix" /> '
+        , '<button name="action" value="suffix">' , get_string('suffix', 'admin') , '</button></li>';
+    echo '<li><button name="action" value="close">' , get_string('close', 'admin') , '</button></li>';
+    echo "</ul>";
+    echo "</fieldset>";
     echo '</div></form>';
 }
 

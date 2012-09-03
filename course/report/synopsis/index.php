@@ -56,17 +56,16 @@ echo "<li>Code : ". $course->idnumber ."</li>\n";
 echo "</ul>\n";
 echo '<div id="summary">' . $course->summary . '</div>';
 
-
-//** @todo utiliser les fonctions prévues
-// $customdata = custominfo_data::type('course')->get_record($course->id);
-// $customdata = custominfo_data::type('course')->display_fields($course->id);
-// var_dump($customdata);
-
-$custominfo_data = custominfo_data::type('course');
-$cinfos = $custominfo_data->get_record($course->id);
+// custom info data
+$fieldList = custominfo_data::type('course')->get_structured_fields($course->id, true);
 echo "<ul>\n";
-foreach ($cinfos as $label=>$info) {
-    echo "<li>" . $label ." : ". $info. "</li>\n";
+foreach ($fieldList as $category => $fields) {
+    if ($category == 'Other fields') continue;
+    echo "<li>" . $category . "</li>\n<ul>";
+    foreach ($fields as $fname => $fvalue ) {
+        echo "<li>$fname : $fvalue</li>";
+    }
+    echo "</ul>\n";
 }
 echo "</ul>\n";
 

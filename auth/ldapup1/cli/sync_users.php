@@ -31,6 +31,8 @@
  * # 5 minutes past 4am
  * 5 4 * * * $sudo -u www-data /usr/bin/php /var/www/moodle/auth/ldap/cli/sync_users.php
  *
+ * if $argv[1] == 'init' : reinit all accounts
+ *
  * Notes:
  *   - it is required to use the web server account when executing PHP CLI scripts
  *   - If you have a large number of users, you may want to raise the memory limits
@@ -53,5 +55,12 @@ if (!is_enabled_auth('ldapup1')) {
 }
 
 $ldapauth = get_auth_plugin('ldapup1');
-$ldapauth->sync_users(true);
+
+if ( isset($argv[1]) && $argv[1]==='init' ) {
+    $since = FALSE;
+} else {
+    $since = date("YmdHis", time() - (24*60*60 + 10*60)) . 'Z' ; // il y a 24 h + 10 min
+}
+
+$ldapauth->sync_users(true, $since);
 
