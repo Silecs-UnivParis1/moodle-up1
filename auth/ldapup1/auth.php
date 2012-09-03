@@ -464,7 +464,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                                              FROM {user} u
                                              JOIN {tmp_extuser} te ON (u.username = te.username)
                                             WHERE u.deleted = 0 AND u.auth = ? ',
-                                          array('auth_shibboleth'));
+                                          array('shibboleth'));
             if (!empty($users)) {
                 print_string('userentriestoupdate', 'auth_ldapup1', count($users));
 
@@ -515,7 +515,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 // Prep a few params
                 $user->modified   = time();
                 $user->confirmed  = 1;
-                $user->auth       = 'auth_shibboleth'; // up1 specific
+                $user->auth       = 'shibboleth'; // up1 specific
                 $user->mnethostid = $CFG->mnet_localhost_id;
                 // get_userinfo_asobj() might have replaced $user->username with the value
                 // from the LDAP server (which can be mixed-case). Make sure it's lowercase
