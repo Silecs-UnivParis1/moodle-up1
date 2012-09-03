@@ -113,13 +113,6 @@ class custominfo_data {
                         $formfield = custominfo_field_factory($this->objectname, $field->datatype, $field->id, $objectid);
                         if ($formfield->is_visible() && ($allfields || ! $formfield->is_empty()) )  {
                             $res[$category->name][$formfield->field->name] = $formfield->display_data();
-/*
-                            printf(
-                                    "\n<tr><td class=\"label c0\">%s</td><td class=\"info c1\">%s</td></tr>\n",
-                                    format_string($formfield->field->name.':'),
-                                    $formfield->display_data()
-                            );
- */
                         }
                     }
                 }
