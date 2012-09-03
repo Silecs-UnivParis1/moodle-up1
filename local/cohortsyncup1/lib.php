@@ -14,7 +14,8 @@ function sync_cohorts($timelast=0, $limit=0)
 {
     global $CFG, $DB;
 
-    $wsgroups = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
+    // $wsgroups = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
+    $wsgroups = 'http://wsgroups.univ-paris1.fr/userGroupsAndRoles';
     $wstimeout = 5;
     $ref_plugin = 'auth_ldapup1';
     $param = 'uid';
@@ -41,7 +42,8 @@ function sync_cohorts($timelast=0, $limit=0)
 //var_dump($idcohort); die();
 
     foreach ($users as $userid => $username) {
-        $requrl = $wsgroups . '?uid=' . $username;
+        $localusername = strstr($username, '@', true);
+        $requrl = $wsgroups . '?uid=' . $localusername;
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
         echo ':'; // progress bar
