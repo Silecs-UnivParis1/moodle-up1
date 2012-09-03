@@ -94,6 +94,41 @@ class custominfo_data {
     }
 
     /**
+     * Returns a structured list (array(array)) of categories, fields names and values
+     * @global object $DB
+     * @param integer $objectid
+     * @param integer $allfields : if set, all fields are returned; otherwise only not empty ones
+     */
+    public function get_structured_fields($objectid, $allfields=false) {
+        global $DB;
+
+        $res = array();
+        $categories = $DB->get_records('custom_info_category', array('objectname' => $this->objectname), 'sortorder ASC');
+        if ($categories) {
+            foreach ($categories as $category) {
+                $res[$category->name] = array();
+                $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
+                if ($fields) {
+                    foreach ($fields as $field) {
+                        $formfield = custominfo_field_factory($this->objectname, $field->datatype, $field->id, $objectid);
+                        if ($formfield->is_visible() && ($allfields || ! $formfield->is_empty()) )  {
+                            $res[$category->name][$formfield->field->name] = $formfield->display_data();
+/*
+                            printf(
+                                    "\n<tr><td class=\"label c0\">%s</td><td class=\"info c1\">%s</td></tr>\n",
+                                    format_string($formfield->field->name.':'),
+                                    $formfield->display_data()
+                            );
+ */
+                        }
+                    }
+                }
+            }
+        }
+        return $res;
+    }
+
+    /**
      * Returns an object with the custom fields set for the given object
      * @param  integer  $objectid
      * @return  object
