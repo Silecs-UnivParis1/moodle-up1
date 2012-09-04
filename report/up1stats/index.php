@@ -1,10 +1,10 @@
 <?php
 
 /**
- * ROF Statistics
+ * UP1 Users Statistics
  *
  * @package    report
- * @subpackage rofstats
+ * @subpackage up1stats
  * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -12,7 +12,7 @@
 define('NO_OUTPUT_BUFFERING', true);
 
 require('../../config.php');
-require_once($CFG->dirroot.'/report/rofstats/locallib.php');
+require_once($CFG->dirroot.'/report/up1stats/locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
@@ -20,34 +20,33 @@ require_login();
 // $issue = optional_param('issue', '', PARAM_ALPHANUMEXT); // show detailed info about one issue only
 
 // Print the header.
-admin_externalpage_setup('reportrofstats', '', null, '', array('pagelayout'=>'report'));
+admin_externalpage_setup('reportup1stats', '', null, '', array('pagelayout'=>'report'));
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading(get_string('pluginname', 'report_rofstats'));
+echo $OUTPUT->heading(get_string('pluginname', 'report_up1stats'));
 
-$url = "$CFG->wwwroot/report/rofstats/index.php";
-
-$browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
-echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
+$url = "$CFG->wwwroot/report/up1stats/index.php";
 
 
-echo "<h3>Counts</h3>\n";
+echo "<h3>Connecteurs Annuaire / Groupes</h3>\n";
 $table = new html_table();
 $table->head = array('Items', 'Nb');
-$table->data = report_rofstats_generic();
+$table->data = report_up1stats_generic();
 echo html_writer::table($table);
 
-echo "<h3>Components</h3>\n";
+echo "<h3>Cohortes</h3>\n";
 $table = new html_table();
-$table->head = array('', '# Programs', 'ROFid', 'Name');
-$table->data = report_rofstats_components();
+$table->head = array('Motif', 'Nb');
+$table->data = report_up1stats_cohorts();
 echo html_writer::table($table);
 
-echo "<h3>Persons</h3>\n";
+echo "<h3>Cohortes - top 10</h3>\n";
 $table = new html_table();
-$table->head = array('Levels', 'Persons not empty');
-$table->data = report_rofstats_persons_not_empty();
+$table->head = array('Effectif', 'Nom', 'Id');
+$table->data = report_up1stats_cohorts_top(10);
 echo html_writer::table($table);
+
+
 
 /*  $table->head  = array($strissue, $strstatus, $strdesc, $strconfig);
     $table->size  = array('30%', '10%', '50%', '10%' );
@@ -56,7 +55,5 @@ echo html_writer::table($table);
     $table->data  = array();
     $table->data[] = $row;
 */
-
-echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
 
 echo $OUTPUT->footer();

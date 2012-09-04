@@ -91,6 +91,7 @@ if (isset($stepgo)) {
 		    $mydata->startdate = $startdate;
 		    // cours doit être validé
 		    $mydata->profile_field_tovalidate = 1;
+		    $mydata->profile_field_validatedate = 0;
 
             $course = create_course($mydata);
             // save custom fields data
