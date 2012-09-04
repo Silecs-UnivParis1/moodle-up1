@@ -3,7 +3,7 @@ require_once('../../config.php');
 require_once('libcoursevalidated.php');
 
 require_once($CFG->libdir.'/adminlib.php');
-admin_externalpage_setup('coursetovalidate');
+admin_externalpage_setup('coursestovalidate');
 
 // limite cette page au compte admin
 require_login();
