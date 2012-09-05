@@ -514,7 +514,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         if (!empty($add_users)) {
             print_string('userentriestoadd', 'auth_ldapup1', count($add_users));
-            $logmsg .= count(add_users) . ' added.  ';
+            $logmsg .= count($add_users) . ' added.  ';
 
             $transaction = $DB->start_delegated_transaction();
             foreach ($add_users as $user) {
