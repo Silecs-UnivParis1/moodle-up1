@@ -1,3 +1,4 @@
+<?php
 /**
  * Plugin upgrade code.
  *
