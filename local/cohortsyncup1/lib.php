@@ -22,7 +22,7 @@ function sync_cohorts($timelast=0, $limit=0)
     $param = 'uid';
     // ex. parameter'?uid=e0g411g01n6'
 
-    $sql = 'SELECT u.id, username FROM {user} u JOIN {user_sync} us ON (u.id = us.id) '
+    $sql = 'SELECT u.id, username FROM {user} u JOIN {user_sync} us ON (u.id = us.userid) '
          . 'WHERE us.ref_plugin = ? AND us.timemodified > ?';
     $users = $DB->get_records_sql_menu($sql, array($ref_plugin, $timelast), 0, $limit);
 

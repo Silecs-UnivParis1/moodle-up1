@@ -6,8 +6,9 @@
   <TABLES>
     <TABLE NAME="user_sync" COMMENT="records reference and synchronization date for each user">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="ref_plugin"/>
-        <FIELD NAME="ref_plugin" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="ref_param"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" PREVIOUS="id" NEXT="ref_plugin"/>
+        <FIELD NAME="ref_plugin" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="ref_param"/>
         <FIELD NAME="ref_param" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="ref_plugin" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ref_param"/>
       </FIELDS>
