@@ -46,6 +46,11 @@ $table->head = array('Effectif', 'Nom', 'Id');
 $table->data = report_up1stats_cohorts_top(10);
 echo html_writer::table($table);
 
+echo "<h3>Last synchronizations</h3>\n";
+$table = new html_table();
+$table->head = array('Reference', 'Begin', 'End');
+$table->data = report_up1stats_sync();
+echo html_writer::table($table);
 
 
 /*  $table->head  = array($strissue, $strstatus, $strdesc, $strconfig);
