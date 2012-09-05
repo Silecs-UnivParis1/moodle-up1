@@ -25,10 +25,15 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 // Ensure errors are well explained
 $CFG->debug = DEBUG_NORMAL;
 
+echo "Last sync\n";
+print_r(get_last_sync());
+// die();
+
 if ( isset($argv[1]) && $argv[1]==='init' ) {
     $since = 0;
 } else {
-    $since = time() - (24*60*60 + 10*60) ; // il y a 24 h + 10 min
+    $last = get_last_sync();
+    $since = $last['begin'];
 }
 
 sync_cohorts($since, 0);

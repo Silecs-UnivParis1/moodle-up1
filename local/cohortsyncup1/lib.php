@@ -93,3 +93,23 @@ function define_cohort($wscohort) {
                     );
     return ((object) $newcohort);
 }
+
+
+/**
+ * returns the last sync from the logs
+ * @return array('begin' => integer, 'end' => integer) as moodle timestamps
+ */
+function get_last_sync() {
+    global $DB;
+
+    $sql = "SELECT MAX(time) FROM {log} WHERE module=? AND action=?";
+    $begin = $DB->get_field_sql($sql, array('local_cohortsyncup1', 'sync:begin'));
+    if ($begin === null) $begin=0;
+    $end = $DB->get_field_sql($sql, array('local_cohortsyncup1', 'sync:end'));
+    if ($end === null) $end=0;
+        $res = array(
+            'begin' => $begin,
+            'end' => $end,
+        );
+        return $res;
+    }
