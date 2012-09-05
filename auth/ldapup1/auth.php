@@ -301,6 +301,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         global $CFG, $DB;
 
         print_string('connectingldap', 'auth_ldapup1');
+        add_to_log(0, 'auth_ldapup1', 'sync:begin', '', "since $since");
+        $logmsg = '';
         $ldapconnection = $this->ldap_connect();
 
         $dbman = $DB->get_manager();
@@ -373,6 +375,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $count = $DB->count_records_sql('SELECT COUNT(username) AS count, 1 FROM {tmp_extuser}');
         if ($count < 1) {
             print_string('didntgetusersfromldap', 'auth_ldapup1');
+            add_to_log(0, 'auth_ldapup1', 'sync:end', '', 'temp table empty. Exit.');
             exit;
         } else {
             print_string('gotcountrecordsfromldap', 'auth_ldapup1', $count);
@@ -393,6 +396,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
             if (!empty($remove_users)) {
                 print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
+                $logmsg .= count($remove_users) . ' removed.  ';
 
                 foreach ($remove_users as $user) {
                     if ($this->config->removeuser == AUTH_REMOVEUSER_FULLDELETE) {
@@ -425,6 +429,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
             if (!empty($revive_users)) {
                 print_string('userentriestorevive', 'auth_ldapup1', count($revive_users));
+                $logmsg .= count($revive_users) . ' revived.  ';
 
                 foreach ($revive_users as $user) {
                     $updateuser = new stdClass();
@@ -467,6 +472,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                                           array('shibboleth'));
             if (!empty($users)) {
                 print_string('userentriestoupdate', 'auth_ldapup1', count($users));
+                $logmsg .= count($users) . ' updated.  ';
 
                 $transaction = $DB->start_delegated_transaction();
                 $xcount = 0;
@@ -492,6 +498,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             }
         } else { // end do updates
             print_string('noupdatestobedone', 'auth_ldapup1');
+            $logmsg .= '0 updated.  ';
             echo "    (empty)\n";
         }
 
@@ -507,6 +514,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         if (!empty($add_users)) {
             print_string('userentriestoadd', 'auth_ldapup1', count($add_users));
+            $logmsg .= count($add_users) . ' added.  ';
 
             $transaction = $DB->start_delegated_transaction();
             foreach ($add_users as $user) {
@@ -538,10 +546,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             unset($add_users); // free mem
         } else {
             print_string('nouserstobeadded', 'auth_ldapup1');
+            $logmsg .= '0 added.  ';
         }
 
         $dbman->drop_table($table);
         $this->ldap_close();
+        add_to_log(0, 'auth_ldapup1', 'sync:end', '', $logmsg);
 
         return true;
     }
@@ -992,4 +1002,21 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                                 $this->config->user_attribute, $this->config->search_sub);
     }
 
+    /**
+     * returns the last sync from the logs
+     */
+    function get_last_sync() {
+        global $DB;
+
+        $sql = "SELECT MAX(time) FROM {log} WHERE module=? AND action=?";
+        $begin = $DB->get_field_sql($sql, array('auth_ldapup1', 'sync:begin'));
+        $end = $DB->get_field_sql($sql, array('auth_ldapup1', 'sync:end'));
+        // if not found, null -> 19700101010000Z : ok
+        date_default_timezone_set('UTC');
+        $res = array(
+            'begin' => date("YmdHis", $begin) . 'Z',
+            'end' => date("YmdHis", $end) . 'Z',
+        );
+        return $res;
+    }
 } // End of the class

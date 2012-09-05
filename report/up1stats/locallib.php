@@ -9,6 +9,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once($CFG->dirroot . '/auth/ldapup1/auth.php');
+require_once($CFG->dirroot . '/local/cohortsyncup1/lib.php');
+
+
 defined('MOODLE_INTERNAL') || die;
 
 function report_up1stats_generic() {
@@ -60,5 +64,19 @@ function report_up1stats_cohorts_top($limit) {
     foreach ($cohorts as $cohort) {
         $res[] = array($cohort->cnt, $cohort->idnumber, $cohort->name);
     }
+    return $res;
+}
+
+function report_up1stats_sync() {
+    // $ldap = auth_plugin_ldapup1::get_last_sync(); // because non-static method
+    $ldap = get_auth_plugin('ldapup1')->get_last_sync();
+    $cohorts = get_cohort_last_sync();
+
+    $res = array(
+        array('LDAP', $ldap['begin'], $ldap['end']),
+        array('Cohorts',
+            date('Y-m-d H:i:s ', $cohorts['begin']),
+            date('Y-m-d H:i:s ', $cohorts['end'])),
+    );
     return $res;
 }
