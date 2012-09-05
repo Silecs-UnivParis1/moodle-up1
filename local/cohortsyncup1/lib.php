@@ -14,6 +14,7 @@ function sync_cohorts($timelast=0, $limit=0)
 {
     global $CFG, $DB;
 
+    add_to_log(0, 'local_cohortsyncup1', 'sync:begin', '', "since $timelast");
     // $wsgroups = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
     $wsgroups = 'http://wsgroups.univ-paris1.fr/userGroupsAndRoles';
     $wstimeout = 5;
@@ -76,7 +77,7 @@ function sync_cohorts($timelast=0, $limit=0)
     $logmsg = "Cohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created. "
         . "Membership: $cntAddmembers.";
     echo "\n\n$logmsg\n\n";
-    add_to_log(0, 'local_cohortsyncup1', 'sync', '', $logmsg); //** @todo clean this hack if possible
+    add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', $logmsg);
     // print_r($cntUsers);
 }
 
