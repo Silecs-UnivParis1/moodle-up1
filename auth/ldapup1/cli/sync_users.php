@@ -54,12 +54,17 @@ if (!is_enabled_auth('ldapup1')) {
     die;
 }
 
+
 $ldapauth = get_auth_plugin('ldapup1');
+
+echo "Last sync\n";
+print_r($ldapauth->get_last_sync());
 
 if ( isset($argv[1]) && $argv[1]==='init' ) {
     $since = FALSE;
 } else {
-    $since = date("YmdHis", time() - (24*60*60 + 10*60)) . 'Z' ; // il y a 24 h + 10 min
+    $last = $ldapauth->get_last_sync();
+    $since = $last['begin'];
 }
 
 $ldapauth->sync_users(true, $since);

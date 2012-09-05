@@ -515,7 +515,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         if (!empty($add_users)) {
             print_string('userentriestoadd', 'auth_ldapup1', count($add_users));
             $logmsg .= count($add_users) . ' added.  ';
-            
+
             $transaction = $DB->start_delegated_transaction();
             foreach ($add_users as $user) {
                 $user = $this->get_userinfo_asobj($user->username);
@@ -1002,4 +1002,21 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                                 $this->config->user_attribute, $this->config->search_sub);
     }
 
+    /**
+     * returns the last sync from the logs
+     */
+    function get_last_sync() {
+        global $DB;
+
+        $sql = "SELECT MAX(time) FROM {log} WHERE module=? AND action=?";
+        $begin = $DB->get_field_sql($sql, array('auth_ldapup1', 'sync:begin'));
+        $end = $DB->get_field_sql($sql, array('auth_ldapup1', 'sync:end'));
+        // if not found, null -> 19700101010000Z : ok
+        date_default_timezone_set('UTC');
+        $res = array(
+            'begin' => date("YmdHis", $begin) . 'Z',
+            'end' => date("YmdHis", $end) . 'Z',
+        );
+        return $res;
+    }
 } // End of the class
