@@ -482,7 +482,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     echo "\t"; print_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id));
                     if ($this->update_user_record($user->username, $updatekeys)) {
                         //** @todo incorporer ceci à la table user
-                        $usersync = $DB->get_record('user_sync', array('id'=>$user->id));
+                        $usersync = $DB->get_record('user_sync', array('userid' => $user->id));
                         if ($usersync) {
                             $usersync->timemodified = time();
                             $DB->update_record('user_sync', $usersync);
@@ -536,7 +536,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 echo "\t"; print_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)); echo "\n";
                 //** @todo incorporer ceci à la table user
                 $usersync = new stdClass;
-                $usersync->id = $id; // same id as new user
+                $usersync->userid = $id; // same userid as new user
                 $usersync->ref_plugin = 'auth_ldapup1';
                 $usersync->ref_param = '';
                 $usersync->timemodified = time();

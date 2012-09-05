@@ -18,5 +18,17 @@ function xmldb_auth_ldapup1_upgrade($oldversion) {
     // Moodle v2.3.0 release upgrade line
     // Put any upgrade step following this
 
+    if ($oldversion < 2012090501) {
+        // Add userid field
+        $table = new xmldb_table('user_sync');
+
+        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+
+        if ( ! $dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    }
+
+
     return true;
 }
