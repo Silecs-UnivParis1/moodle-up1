@@ -33,14 +33,14 @@ function sync_cohorts($timelast=0, $limit=0)
     $cntCrcohorts = 0;
     $cntAddmembers = 0;
 
-    $res = cohort_get_cohorts(1); //context global
+    $res = cohort_get_cohorts(1, 0, 100000); //1 = context global, page, perpage
     $allcohorts = $res['cohorts'];
     $idcohort = array();
 
     foreach ($allcohorts as $cohort) {
         $idcohort[$cohort->idnumber] = $cohort->id;
     }
-//var_dump($idcohort); die();
+// var_dump($idcohort); die();
 
     foreach ($users as $userid => $username) {
         $localusername = strstr($username, '@', true);
@@ -99,7 +99,7 @@ function define_cohort($wscohort) {
  * returns the last sync from the logs
  * @return array('begin' => integer, 'end' => integer) as moodle timestamps
  */
-function get_last_sync() {
+function get_cohort_last_sync() {
     global $DB;
 
     $sql = "SELECT MAX(time) FROM {log} WHERE module=? AND action=?";

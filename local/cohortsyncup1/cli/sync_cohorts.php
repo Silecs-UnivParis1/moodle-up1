@@ -26,13 +26,12 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 $CFG->debug = DEBUG_NORMAL;
 
 echo "Last sync\n";
-print_r(get_last_sync());
-// die();
+print_r(get_cohort_last_sync());
 
 if ( isset($argv[1]) && $argv[1]==='init' ) {
     $since = 0;
 } else {
-    $last = get_last_sync();
+    $last = get_cohort_last_sync();
     $since = $last['begin'];
 }
 
