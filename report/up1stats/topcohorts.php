@@ -18,6 +18,7 @@ require_once($CFG->libdir.'/adminlib.php');
 require_login();
 
 $howmany = optional_param('number', 50, PARAM_INT);
+$prefix = optional_param('prefix', '', PARAM_ALPHANUMEXT);
 
 // Print the header.
 admin_externalpage_setup('reportup1stats', '', null, '', array('pagelayout'=>'report'));
@@ -30,7 +31,11 @@ $url = "$CFG->wwwroot/report/up1stats/index.php";
 echo "<h3>Cohortes - top $howmany</h3>\n";
 $table = new html_table();
 $table->head = array('Effectif', 'Nom', 'Id');
-$table->data = report_up1stats_cohorts_top($howmany);
+if (empty($prefix)) {
+    $table->data = report_up1stats_cohorts_top($howmany, false);
+} else {
+    $table->data = report_up1stats_cohorts_top($howmany, $prefix);
+}
 echo html_writer::table($table);
 
 echo $OUTPUT->footer();
