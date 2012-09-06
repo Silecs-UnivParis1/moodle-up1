@@ -40,11 +40,15 @@ $table->head = array('Motif', 'Nb');
 $table->data = report_up1stats_cohorts();
 echo html_writer::table($table);
 
-echo "<h3>Cohortes - top 10</h3>\n";
+$linkdetails = html_writer::link(
+        new moodle_url('/report/up1stats/topcohorts', array('number'=>50)),
+        'Détails');
+echo "<h3>Cohortes - top 10 ". $linkdetails ." </h3>\n";
 $table = new html_table();
 $table->head = array('Effectif', 'Nom', 'Id');
 $table->data = report_up1stats_cohorts_top(10);
 echo html_writer::table($table);
+
 
 echo "<h3>Last synchronizations</h3>\n";
 $table = new html_table();
