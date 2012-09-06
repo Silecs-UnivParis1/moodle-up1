@@ -74,7 +74,7 @@ function report_up1stats_cohorts_top_by_prefix($limit) {
 
     foreach ($cohortPrefixes as $prefix) {
         $linkdetails = html_writer::link(
-            new moodle_url('/report/up1stats/topcohorts', array('number'=>50, 'prefix'=>$prefix)),
+            new moodle_url('/report/up1stats/topcohorts.php', array('number'=>50, 'prefix'=>$prefix)),
             'Détails');
         $res[] = array('', $prefix, $linkdetails);
         $tres = report_up1stats_cohorts_top($limit, $prefix);
