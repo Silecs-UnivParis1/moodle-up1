@@ -361,7 +361,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
             if ($entry = @ldap_first_entry($ldapconnection, $ldap_result)) {
                 do {
-                    $value = ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute);
+                    $value = ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
                     $value = textlib::convert($value[0], $this->config->ldapencoding, 'utf-8');
                     $this->ldap_bulk_insert($value);
                 } while ($entry = ldap_next_entry($ldapconnection, $entry));

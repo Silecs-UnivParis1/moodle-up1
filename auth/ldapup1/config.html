@@ -257,12 +257,12 @@ $yesno = array(get_string('no'), get_string('yes'));
 
 <?php
 $help  = get_string('auth_ldapup1_extrafields', 'auth_ldapup1');
-$help .= get_string('auth_updatelocal_expl', 'auth');
+// $help .= get_string('auth_updatelocal_expl', 'auth');
 $help .= get_string('auth_fieldlock_expl', 'auth');
-$help .= get_string('auth_updateremote_expl', 'auth');
+// $help .= get_string('auth_updateremote_expl', 'auth');
 $help .= '<hr />';
 $help .= get_string('auth_updateremote_ldap', 'auth');
 
-print_auth_lock_options($this->authtype, $user_fields, $help, true, true);
+print_auth_lock_options($this->authtype, $user_fields, $help, true, FALSE, FALSE);
 ?>
 </table>
