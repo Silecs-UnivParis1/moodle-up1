@@ -43,7 +43,7 @@ echo html_writer::table($table);
 
 //***** TOP NN cohorts
 $linkdetails = html_writer::link(
-        new moodle_url('/report/up1stats/topcohorts', array('number'=>50)),
+        new moodle_url('/report/up1stats/topcohorts.php', array('number'=>50)),
         'Détails');
 echo "<h3>Cohortes - top 5 ". $linkdetails ." </h3>\n";
 $table = new html_table();
@@ -60,7 +60,7 @@ echo html_writer::table($table);
 
 //***** LAST syncs
 $linkdetails = html_writer::link(
-        new moodle_url('/report/up1stats/lastsync', array('number'=>50)),
+        new moodle_url('/report/up1stats/lastsync.php', array('number'=>50)),
         'Détails');
 echo "<h3>Last synchronizations ". $linkdetails ." </h3>\n";
 $table = new html_table();
