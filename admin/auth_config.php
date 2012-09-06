@@ -87,7 +87,7 @@ exit;
 // but some may want a custom one if they are offering
 // other options
 // Note: lockconfig_ fields have special handling.
-function print_auth_lock_options ($auth, $user_fields, $helptext, $retrieveopts, $updateopts) {
+function print_auth_lock_options ($auth, $user_fields, $helptext, $retrieveopts, $updateremote, $updatelocal=true) {
     global $OUTPUT;
     echo '<tr><td colspan="3">';
     if ($retrieveopts) {
@@ -148,15 +148,15 @@ function print_auth_lock_options ($auth, $user_fields, $helptext, $retrieveopts,
 
             echo "<input id=\"lockconfig_{$varname}\" name=\"lockconfig_{$varname}\" type=\"text\" size=\"30\" value=\"{$pluginconfig->$varname}\" />";
             echo '<div style="text-align: right">';
-            echo '<label for="menulockconfig_field_updatelocal_'.$field.'">'.get_string('auth_updatelocal', 'auth') . '</label>&nbsp;';
-            echo html_writer::select($updatelocaloptions, "lockconfig_field_updatelocal_{$field}", $pluginconfig->{"field_updatelocal_$field"}, false);
-            echo '<br />';
-            if ($updateopts) {
+            if ($updatelocal) {
+                echo '<label for="menulockconfig_field_updatelocal_'.$field.'">'.get_string('auth_updatelocal', 'auth') . '</label>&nbsp;';
+                echo html_writer::select($updatelocaloptions, "lockconfig_field_updatelocal_{$field}", $pluginconfig->{"field_updatelocal_$field"}, false);
+                echo '<br />';
+            }
+            if ($updateremote) {
                 echo '<label for="menulockconfig_field_updateremote_'.$field.'">'.get_string('auth_updateremote', 'auth') . '</label>&nbsp;';
                 echo html_writer::select($updateextoptions, "lockconfig_field_updateremote_{$field}", $pluginconfig->{"field_updateremote_$field"}, false);
                 echo '<br />';
-
-
             }
             echo '<label for="menulockconfig_field_lock_'.$field.'">'.get_string('auth_fieldlock', 'auth') . '</label>&nbsp;';
             echo html_writer::select($lockoptions, "lockconfig_field_lock_{$field}", $pluginconfig->{"field_lock_$field"}, false);

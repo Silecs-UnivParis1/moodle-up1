@@ -37,18 +37,12 @@ if (!isset($config->ldap_version)) {
 if (!isset($config->objectclass)) {
     $config->objectclass = '';
 }
-if (!isset($config->memberattribute)) {
-    $config->memberattribute = '';
-}
-if (!isset($config->memberattribute_isdn)) {
-    $config->memberattribute_isdn = '';
-}
 
 if (!isset($config->sync_condition)) {
     $config->sync_condition = '';
 }
 if (!isset($config->removeuser)) {
-    $config->removeuser = AUTH_REMOVEUSER_KEEP;
+    $config->removeuser = AUTH_REMOVEUSER_SUSPEND;
 }
 
 $yesno = array(get_string('no'), get_string('yes'));
@@ -212,30 +206,7 @@ $yesno = array(get_string('no'), get_string('yes'));
         <?php print_string('auth_ldapup1_user_attribute', 'auth_ldapup1') ?>
     </td>
 </tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="memberattribute"><?php print_string('auth_ldapup1_memberattribute_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="memberattribute" id="memberattribute" type="text" size="30" value="<?php echo $config->memberattribute?>" />
-        <?php if (isset($err['memberattribute'])) { echo $OUTPUT->error_text($err['memberattribute']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_memberattribute', 'auth_ldapup1') ?>
-    </td>
-</tr>
-<tr valign="top" class="required">
-    <td align="right">
-        <label for="memberattribute_isdn"><?php print_string('auth_ldapup1_memberattribute_isdn_key', 'auth_ldapup1') ?></label>
-    </td>
-    <td>
-        <input name="memberattribute_isdn" id="memberattribute_isdn" type="text" size="30" value="<?php echo $config->memberattribute_isdn?>" />
-        <?php if (isset($err['memberattribute_isdn'])) { echo $OUTPUT->error_text($err['memberattribute_isdn']); } ?>
-    </td>
-    <td>
-        <?php print_string('auth_ldapup1_memberattribute_isdn', 'auth_ldapup1') ?>
-    </td>
-</tr>
+
 <tr valign="top" class="required">
     <td align="right">
         <label for="objectclass"><?php print_string('auth_ldapup1_objectclass_key', 'auth_ldapup1') ?></label>
@@ -273,9 +244,9 @@ $yesno = array(get_string('no'), get_string('yes'));
     <td>
         <?php
             $deleteopt = array();
-            $deleteopt[AUTH_REMOVEUSER_KEEP] = get_string('auth_remove_keep', 'auth');
+            // $deleteopt[AUTH_REMOVEUSER_KEEP] = get_string('auth_remove_keep', 'auth');
             $deleteopt[AUTH_REMOVEUSER_SUSPEND] = get_string('auth_remove_suspend', 'auth');
-            $deleteopt[AUTH_REMOVEUSER_FULLDELETE] = get_string('auth_remove_delete', 'auth');
+            // $deleteopt[AUTH_REMOVEUSER_FULLDELETE] = get_string('auth_remove_delete', 'auth');
             echo html_writer::select($deleteopt, 'removeuser', $config->removeuser, false);
         ?>
     </td>
@@ -286,12 +257,12 @@ $yesno = array(get_string('no'), get_string('yes'));
 
 <?php
 $help  = get_string('auth_ldapup1_extrafields', 'auth_ldapup1');
-$help .= get_string('auth_updatelocal_expl', 'auth');
+// $help .= get_string('auth_updatelocal_expl', 'auth');
 $help .= get_string('auth_fieldlock_expl', 'auth');
-$help .= get_string('auth_updateremote_expl', 'auth');
+// $help .= get_string('auth_updateremote_expl', 'auth');
 $help .= '<hr />';
 $help .= get_string('auth_updateremote_ldap', 'auth');
 
-print_auth_lock_options($this->authtype, $user_fields, $help, true, true);
+print_auth_lock_options($this->authtype, $user_fields, $help, true, FALSE, FALSE);
 ?>
 </table>
