@@ -40,16 +40,32 @@ $table->head = array('Motif', 'Nb');
 $table->data = report_up1stats_cohorts();
 echo html_writer::table($table);
 
-echo "<h3>Cohortes - top 10</h3>\n";
+
+//***** TOP NN cohorts
+$linkdetails = html_writer::link(
+        new moodle_url('/report/up1stats/topcohorts', array('number'=>50)),
+        'Détails');
+echo "<h3>Cohortes - top 5 ". $linkdetails ." </h3>\n";
 $table = new html_table();
-$table->head = array('Effectif', 'Nom', 'Id');
-$table->data = report_up1stats_cohorts_top(10);
+$table->head = array('Effectif', 'Id', 'Nom');
+$table->data = report_up1stats_cohorts_top(5, false);
 echo html_writer::table($table);
 
-echo "<h3>Last synchronizations</h3>\n";
+echo "<h3>Cohortes - top 3 par préfixe</h3>\n";
+$table = new html_table();
+$table->head = array('Effectif', 'Id', 'Nom');
+$table->data = report_up1stats_cohorts_top_by_prefix(3);
+echo html_writer::table($table);
+
+
+//***** LAST syncs
+$linkdetails = html_writer::link(
+        new moodle_url('/report/up1stats/lastsync', array('number'=>50)),
+        'Détails');
+echo "<h3>Last synchronizations ". $linkdetails ." </h3>\n";
 $table = new html_table();
 $table->head = array('Reference', 'Begin', 'End');
-$table->data = report_up1stats_sync();
+$table->data = report_up1stats_last_sync();
 echo html_writer::table($table);
 
 

@@ -12,6 +12,7 @@
 require_once($CFG->dirroot . '/auth/ldapup1/auth.php');
 require_once($CFG->dirroot . '/local/cohortsyncup1/lib.php');
 
+$cohortPrefixes = array('structures-', 'diploma-', 'groups-', 'affiliation-');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -35,12 +36,11 @@ function report_up1stats_generic() {
 
 
 function report_up1stats_cohorts() {
-    global $DB;
+    global $DB, $cohortPrefixes;
     $res = array();
 
-    $cohortsprefix = array('structures-', 'diploma-', 'groups-', 'affiliation-');
     $wherediff = '';
-    foreach ($cohortsprefix as $prefix) {
+    foreach ($cohortPrefixes as $prefix) {
         $sql = "SELECT COUNT(*) FROM {cohort} c WHERE idnumber LIKE '".$prefix."%' ";
         $count = $DB->count_records_sql($sql);
         $res[] = array($prefix, $count);
@@ -52,13 +52,14 @@ function report_up1stats_cohorts() {
     return $res;
 }
 
-function report_up1stats_cohorts_top($limit) {
+function report_up1stats_cohorts_top($limit, $prefix=false) {
     global $DB;
     $res = array();
 
     $sql = "SELECT cm.cohortid, c.idnumber, c.name, COUNT(cm.id) AS cnt "
-        . "FROM cohort_members cm "
-        . "JOIN cohort c ON (c.id = cm.cohortid) "
+        . "FROM {cohort_members} cm "
+        . "JOIN {cohort} c ON (c.id = cm.cohortid) "
+        . ($prefix ? "WHERE idnumber LIKE '".$prefix."%' " : '')
         . "GROUP BY cohortid  ORDER BY cnt DESC  LIMIT " . $limit;
     $cohorts = $DB->get_records_sql($sql);
     foreach ($cohorts as $cohort) {
@@ -67,7 +68,23 @@ function report_up1stats_cohorts_top($limit) {
     return $res;
 }
 
-function report_up1stats_sync() {
+function report_up1stats_cohorts_top_by_prefix($limit) {
+    global $cohortPrefixes;
+    $res = array();
+
+    foreach ($cohortPrefixes as $prefix) {
+        $linkdetails = html_writer::link(
+            new moodle_url('/report/up1stats/topcohorts', array('number'=>50, 'prefix'=>$prefix)),
+            'Détails');
+        $res[] = array('', $prefix, $linkdetails);
+        $tres = report_up1stats_cohorts_top($limit, $prefix);
+        $res = array_merge($res, $tres);
+    }
+    return $res;
+}
+
+
+function report_up1stats_last_sync() {
     // $ldap = auth_plugin_ldapup1::get_last_sync(); // because non-static method
     $ldap = get_auth_plugin('ldapup1')->get_last_sync();
     $cohorts = get_cohort_last_sync();
@@ -78,5 +95,25 @@ function report_up1stats_sync() {
             date('Y-m-d H:i:s ', $cohorts['begin']),
             date('Y-m-d H:i:s ', $cohorts['end'])),
     );
+    return $res;
+}
+
+function report_up1stats_syncs($plugin, $howmany) {
+    global $DB;
+
+    $res = array();
+    $sql = "SELECT * FROM log WHERE action LIKE ? AND module LIKE ? ORDER BY id DESC LIMIT ". (2*$howmany);
+    $logs = $DB->get_records_sql($sql, array('sync:%', $plugin));
+
+    $logs = array_reverse($logs);
+    foreach($logs as $log) {
+        if ($log->action == 'sync:begin') {
+            $datebegin = date('Y-m-d H:i:s ', $log->time);
+        }
+        if ($log->action == 'sync:end') {
+            $res[] = array($datebegin, date('Y-m-d H:i:s ', $log->time), $log->module, $log->info);
+            $datebegin = '?';
+        }
+    }
     return $res;
 }
