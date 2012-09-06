@@ -1,7 +1,7 @@
 <?php
 
 /**
- * UP1 Users Statistics
+ * UP1 Users Statistics - Top NN cohorts page
  *
  * @package    report
  * @subpackage up1stats
@@ -23,7 +23,7 @@ $howmany = optional_param('number', 50, PARAM_INT);
 admin_externalpage_setup('reportup1stats', '', null, '', array('pagelayout'=>'report'));
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading('Cohorts - top '.$howmany);
+echo $OUTPUT->heading('Cohortes - top '.$howmany);
 
 $url = "$CFG->wwwroot/report/up1stats/index.php";
 
