@@ -57,8 +57,8 @@ function report_up1stats_cohorts_top($limit) {
     $res = array();
 
     $sql = "SELECT cm.cohortid, c.idnumber, c.name, COUNT(cm.id) AS cnt "
-        . "FROM cohort_members cm "
-        . "JOIN cohort c ON (c.id = cm.cohortid) "
+        . "FROM {cohort_members} cm "
+        . "JOIN {cohort} c ON (c.id = cm.cohortid) "
         . "GROUP BY cohortid  ORDER BY cnt DESC  LIMIT " . $limit;
     $cohorts = $DB->get_records_sql($sql);
     foreach ($cohorts as $cohort) {
@@ -67,7 +67,7 @@ function report_up1stats_cohorts_top($limit) {
     return $res;
 }
 
-function report_up1stats_sync() {
+function report_up1stats_last_sync() {
     // $ldap = auth_plugin_ldapup1::get_last_sync(); // because non-static method
     $ldap = get_auth_plugin('ldapup1')->get_last_sync();
     $cohorts = get_cohort_last_sync();
@@ -78,5 +78,25 @@ function report_up1stats_sync() {
             date('Y-m-d H:i:s ', $cohorts['begin']),
             date('Y-m-d H:i:s ', $cohorts['end'])),
     );
+    return $res;
+}
+
+function report_up1stats_syncs($plugin, $howmany) {
+    global $DB;
+
+    $res = array();
+    $sql = "SELECT * FROM log WHERE action LIKE ? AND module LIKE ? ORDER BY id DESC LIMIT ". (2*$howmany);
+    $logs = $DB->get_records_sql($sql, array('sync:%', $plugin));
+
+    $logs = array_reverse($logs);
+    foreach($logs as $log) {
+        if ($log->action == 'sync:begin') {
+            $datebegin = date('Y-m-d H:i:s ', $log->time);
+        }
+        if ($log->action == 'sync:end') {
+            $res[] = array($datebegin, date('Y-m-d H:i:s ', $log->time), $log->module, $log->info);
+            $datebegin = '?';
+        }
+    }
     return $res;
 }

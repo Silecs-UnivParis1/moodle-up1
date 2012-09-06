@@ -1,7 +1,7 @@
 <?php
 
 /**
- * UP1 Users Statistics - Top NN cohorts page
+ * UP1 Users Statistics - Last synchronizations page
  *
  * @package    report
  * @subpackage up1stats
@@ -23,14 +23,20 @@ $howmany = optional_param('number', 50, PARAM_INT);
 admin_externalpage_setup('reportup1stats', '', null, '', array('pagelayout'=>'report'));
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading('Cohortes - top '.$howmany);
+echo $OUTPUT->heading('Last '.$howmany. ' synchronizations');
 
 $url = "$CFG->wwwroot/report/up1stats/index.php";
 
-echo "<h3>Cohortes - top $howmany</h3>\n";
+echo "<h3>Last LDAP synchronizations</h3>\n";
 $table = new html_table();
-$table->head = array('Effectif', 'Nom', 'Id');
-$table->data = report_up1stats_cohorts_top($howmany);
+$table->head = array('Begin', 'End', 'Module', 'Info');
+$table->data = report_up1stats_syncs("auth_ldapup1", $howmany);
+echo html_writer::table($table);
+
+echo "<h3>Last cohort synchronizations</h3>\n";
+$table = new html_table();
+$table->head = array('Begin', 'End', 'Module', 'Info');
+$table->data = report_up1stats_syncs("local_cohortsyncup1", $howmany);
 echo html_writer::table($table);
 
 echo $OUTPUT->footer();
