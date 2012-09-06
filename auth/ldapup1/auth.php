@@ -390,57 +390,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         echo "accountStatus : $countEna enabled.  $countDis disabled.  $countNot indefined.\n";
 
-/// User suspension
-            $sql = 'SELECT u.*
-                      FROM {user} u
-                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username)
-                     WHERE u.auth = ?
-                           AND u.deleted = 0
-                           AND e.accountstatus != ?';
-            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'enabled'));
-
-            if (!empty($remove_users)) {
-                print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
-                $logmsg .= count($remove_users) . ' suspended/removed.  ';
-
-                foreach ($remove_users as $user) {
-                    // AUTH_REMOVEUSER_SUSPEND
-                        $updateuser = new stdClass();
-                        $updateuser->id = $user->id;
-                        $updateuser->auth = 'nologin';
-                        $updateuser->suspended = 1;
-                        $DB->update_record('user', $updateuser);
-                        echo "\t"; print_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
-                }
-            } else {
-                print_string('nouserentriestoremove', 'auth_ldapup1');
-            }
-            unset($remove_users); // free mem!
-
-/// Revive suspended users
-            $sql = "SELECT u.id, u.username
-                      FROM {user} u
-                      JOIN {tmp_extuser} e ON (u.username = e.username)
-                     WHERE u.auth = 'nologin' AND u.deleted = 0 AND e.accountstatus = 'enabled'";
-            $revive_users = $DB->get_records_sql($sql);
-
-            if (!empty($revive_users)) {
-                print_string('userentriestorevive', 'auth_ldapup1', count($revive_users));
-                $logmsg .= count($revive_users) . ' revived.  ';
-
-                foreach ($revive_users as $user) {
-                    $updateuser = new stdClass();
-                    $updateuser->id = $user->id;
-                    $updateuser->auth = 'shibboleth';
-                    $updateuser->suspended = 0;
-                    $DB->update_record('user', $updateuser);
-                    echo "\t"; print_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
-                }
-            } else {
-                print_string('nouserentriestorevive', 'auth_ldapup1');
-            }
-            unset($revive_users);
-
 
 /// User Updates - time-consuming (optional)
         if ($do_updates) {
@@ -544,6 +493,57 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             print_string('nouserstobeadded', 'auth_ldapup1');
             $logmsg .= '0 added.  ';
         }
+
+/// User suspension
+            $sql = 'SELECT u.*
+                      FROM {user} u
+                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username)
+                     WHERE u.auth = ?
+                           AND u.deleted = 0
+                           AND e.accountstatus != ?';
+            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'enabled'));
+
+            if (!empty($remove_users)) {
+                print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
+                $logmsg .= count($remove_users) . ' suspended/removed.  ';
+
+                foreach ($remove_users as $user) {
+                    // AUTH_REMOVEUSER_SUSPEND
+                        $updateuser = new stdClass();
+                        $updateuser->id = $user->id;
+                        $updateuser->auth = 'nologin';
+                        $updateuser->suspended = 1;
+                        $DB->update_record('user', $updateuser);
+                        echo "\t"; print_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                }
+            } else {
+                print_string('nouserentriestoremove', 'auth_ldapup1');
+            }
+            unset($remove_users); // free mem!
+
+/// Revive suspended users
+            $sql = "SELECT u.id, u.username
+                      FROM {user} u
+                      JOIN {tmp_extuser} e ON (u.username = e.username)
+                     WHERE u.auth = 'nologin' AND u.deleted = 0 AND e.accountstatus = 'enabled'";
+            $revive_users = $DB->get_records_sql($sql);
+
+            if (!empty($revive_users)) {
+                print_string('userentriestorevive', 'auth_ldapup1', count($revive_users));
+                $logmsg .= count($revive_users) . ' revived.  ';
+
+                foreach ($revive_users as $user) {
+                    $updateuser = new stdClass();
+                    $updateuser->id = $user->id;
+                    $updateuser->auth = 'shibboleth';
+                    $updateuser->suspended = 0;
+                    $DB->update_record('user', $updateuser);
+                    echo "\t"; print_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                }
+            } else {
+                print_string('nouserentriestorevive', 'auth_ldapup1');
+            }
+            unset($revive_users);
 
         $dbman->drop_table($table);
         $this->ldap_close();
