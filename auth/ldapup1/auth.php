@@ -311,13 +311,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $table = new xmldb_table('tmp_extuser');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('accountstatus', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('mnethostid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null);
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $table->add_index('username', XMLDB_INDEX_UNIQUE, array('mnethostid', 'username'));
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
-
 // var_dump($this->config);
 
         ////
@@ -325,8 +325,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         ////
         // prepare some data we'll need
         $filterAff = '(|(eduPersonAffiliation=teacher)(eduPersonAffiliation=student)(eduPersonAffiliation=staff))';
-        $filterAcc = '(accountStatus=active)';
-        // $filterAcc = '';
+        // $filterAff = '';
+        // $filterAcc = '(accountStatus=active)';
+        $filterAcc = '';
         $filterTime = '(modifyTimestamp>='. $since .')';
 
         if ( $since ) {
@@ -347,12 +348,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 //use ldap_search to find first user from subtree
                 $ldap_result = ldap_search($ldapconnection, $context,
                                            $filter,
-                                           array($this->config->user_attribute));
+                                           array($this->config->user_attribute, 'accountStatus'));
             } else {
                 //search only in this context
                 $ldap_result = ldap_list($ldapconnection, $context,
                                          $filter,
-                                         array($this->config->user_attribute));
+                                         array($this->config->user_attribute, 'accountStatus'));
             }
 
             if(!$ldap_result) {
@@ -361,9 +362,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
             if ($entry = @ldap_first_entry($ldapconnection, $ldap_result)) {
                 do {
-                    $value = ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
+                    $value = @ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
                     $value = textlib::convert($value[0], $this->config->ldapencoding, 'utf-8');
-                    $this->ldap_bulk_insert($value);
+                    $status = @ldap_get_values_len($ldapconnection, $entry, 'accountStatus'); // enabled ou disabled ou nondéfini
+                    $status = strtolower($status[0]);
+                //echo "$value [$status]\n";
+                    $this->ldap_bulk_insert($value, $status);
                 } while ($entry = ldap_next_entry($ldapconnection, $entry));
             }
             unset($ldap_result); // free mem
@@ -380,6 +384,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         } else {
             print_string('gotcountrecordsfromldap', 'auth_ldapup1', $count);
         }
+        $countEna = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='enabled'");
+        $countDis = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='disabled'");
+        $countNot = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus=''");
+
+        echo "accountStatus : $countEna enabled.  $countDis disabled.  $countNot indefined.\n";
+        die();
 
 
 /// User removal
@@ -614,12 +624,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
     /**
      * Bulk insert in SQL's temp table
      */
-    function ldap_bulk_insert($username) {
+    function ldap_bulk_insert($username, $status) {
         global $DB, $CFG;
 
         $username = textlib::strtolower($username); // usernames are __always__ lowercase.
-        $DB->insert_record_raw('tmp_extuser', array('username'=>$username,
-                                                    'mnethostid'=>$CFG->mnet_localhost_id), false, true);
+        $DB->insert_record_raw('tmp_extuser', array('username' => $username,
+                                                    'accountstatus' => $status,
+                                                    'mnethostid' => $CFG->mnet_localhost_id), false, true);
         echo '.';
     }
 
