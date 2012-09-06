@@ -345,6 +345,11 @@ if (isloggedin() and !isguestuser()) {
     echo $OUTPUT->box_end();
 } else {
     include("index_form.html");
+    $msg =  "Cette authentification locale n'utilise pas les comptes globaux valables sur tout le réseau. "
+        . "Pour se connecter via cette page, il faut détenir un compte de <strong>visiteur extérieur</strong>,"
+		. " créé individuellement pour cette application."
+        . " Le lien <em>Connexion</em> utilise par contre les comptes globaux.";
+    echo $OUTPUT->box($msg, 'generalbox boxaligncenter boxwidthnormal');
     if (!empty($CFG->loginpageautofocus)) {
         //focus username or password
         $PAGE->requires->js_init_call('M.util.focus_login_form', null, true);
