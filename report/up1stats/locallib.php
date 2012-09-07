@@ -76,7 +76,10 @@ function report_up1stats_cohorts_top($limit, $prefix=false) {
         . "GROUP BY cohortid  ORDER BY cnt DESC  LIMIT " . $limit;
     $cohorts = $DB->get_records_sql($sql);
     foreach ($cohorts as $cohort) {
-        $res[] = array($cohort->cnt, $cohort->idnumber, $cohort->name);
+        $url = new moodle_url('/cohort/view.php', array('id' => $cohort->cohortid));
+        $res[] = array($cohort->cnt,
+            html_writer::link($url, $cohort->idnumber),
+            $cohort->name);
     }
     return $res;
 }
