@@ -494,13 +494,11 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         }
 
 /// User suspension
-            $sql = 'SELECT u.*
+            $sql = "SELECT u.*
                       FROM {user} u
                       LEFT JOIN {tmp_extuser} e ON (u.username = e.username)
-                     WHERE u.auth = ?
-                           AND u.deleted = 0
-                           AND e.accountstatus != ?';
-            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'active'));
+                     WHERE u.auth = ? AND u.deleted = 0 AND e.accountstatus = ?";
+            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'disabled'));
 
             if (!empty($remove_users)) {
                 print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
@@ -524,7 +522,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             $sql = "SELECT u.id, u.username
                       FROM {user} u
                       JOIN {tmp_extuser} e ON (u.username = e.username)
-                     WHERE u.auth = 'nologin' AND u.deleted = 0 AND e.accountstatus = 'active'";
+                     WHERE (u.auth = 'nologin' OR u.suspended = 1) AND u.deleted = 0 AND e.accountstatus != 'disabled'";
             $revive_users = $DB->get_records_sql($sql);
 
             if (!empty($revive_users)) {
