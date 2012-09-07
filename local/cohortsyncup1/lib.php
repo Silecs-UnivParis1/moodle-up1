@@ -82,7 +82,8 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
     } // foreach ($users)
     curl_close($ch);
 
-    $logmsg = "Cohorts : " . count($cntCohortUsers) . " encountered. $cntCrcohorts created. "
+    $logmsg = "$totalUsers parsed users.  "
+        . "Cohorts : " . count($cntCohortUsers) . " encountered. $cntCrcohorts created.  "
         . "Membership: $cntAddmembers.";
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', $logmsg);
