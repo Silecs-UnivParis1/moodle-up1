@@ -31,13 +31,18 @@ $url = "$CFG->wwwroot/report/up1stats/index.php";
 echo "<h3>Connecteurs Annuaire / Groupes</h3>\n";
 $table = new html_table();
 $table->head = array('Items', 'Nb');
-$table->data = report_up1stats_generic();
+$table->data = report_up1stats_users();
 echo html_writer::table($table);
 
 echo "<h3>Cohortes</h3>\n";
 $table = new html_table();
+$table->head = array('Items', 'Nb');
+$table->data = report_up1stats_cohorts_generic();
+echo html_writer::table($table);
+
+$table = new html_table();
 $table->head = array('Motif', 'Nb');
-$table->data = report_up1stats_cohorts();
+$table->data = report_up1stats_cohorts_prefix();
 echo html_writer::table($table);
 
 

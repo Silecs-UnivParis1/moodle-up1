@@ -16,14 +16,28 @@ $cohortPrefixes = array('structures-', 'diploma-', 'groups-', 'affiliation-');
 
 defined('MOODLE_INTERNAL') || die;
 
-function report_up1stats_generic() {
+function report_up1stats_users() {
     global $DB;
     $res = array();
 
     $count = $DB->count_records('user_sync', array('ref_plugin' => 'auth_ldapup1'));
-    $res[] = array('Utilisateurs annuaire', $count);
-    $count = $DB->count_records('user', array('auth' => 'shibboleth'));
-    $res[] = array('Utilisateurs Shibboleth', $count);
+    $res[] = array('Utilisateurs annuaire (user_sync)', $count);
+
+    $rows = $DB->get_records_sql("SELECT auth, COUNT(id) AS cnt FROM {user} GROUP BY auth WITH ROLLUP");
+    foreach ($rows as $row) {
+        if ($row->auth == '') {
+            $auth = "TOTAL auth.";
+        } else {
+            $auth = 'Auth. ' . $row->auth;
+        }
+        $res[] = array($auth, $row->cnt);
+    }
+    return $res;
+}
+
+function report_up1stats_cohorts_generic() {
+    global $DB;
+    $res = array();
 
     $count = $DB->count_records('cohort', array('component' => 'local_cohortsyncup1'));
     $res[] = array('Cohortes UP1', $count);
@@ -34,8 +48,7 @@ function report_up1stats_generic() {
     return $res;
 }
 
-
-function report_up1stats_cohorts() {
+function report_up1stats_cohorts_prefix() {
     global $DB, $cohortPrefixes;
     $res = array();
 
@@ -63,7 +76,10 @@ function report_up1stats_cohorts_top($limit, $prefix=false) {
         . "GROUP BY cohortid  ORDER BY cnt DESC  LIMIT " . $limit;
     $cohorts = $DB->get_records_sql($sql);
     foreach ($cohorts as $cohort) {
-        $res[] = array($cohort->cnt, $cohort->idnumber, $cohort->name);
+        $url = new moodle_url('/cohort/view.php', array('id' => $cohort->cohortid));
+        $res[] = array($cohort->cnt,
+            html_writer::link($url, $cohort->idnumber),
+            $cohort->name);
     }
     return $res;
 }
