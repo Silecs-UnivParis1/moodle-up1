@@ -10,7 +10,7 @@
 
 require_once($CFG->dirroot . '/cohort/lib.php');
 
-function sync_cohorts($timelast=0, $limit=0)
+function sync_cohorts($timelast=0, $limit=0, $verbose=0)
 {
     global $CFG, $DB;
 
@@ -29,9 +29,11 @@ function sync_cohorts($timelast=0, $limit=0)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
-    $cntUsers = array(); // users added in each cohort
+    $cntCohortUsers = array(); // users added in each cohort
     $cntCrcohorts = 0;
     $cntAddmembers = 0;
+    $cntUsers = 0;
+    $totalUsers = count($users);
 
     $res = cohort_get_cohorts(1, 0, 100000); //1 = context global, page, perpage
     $allcohorts = $res['cohorts'];
@@ -42,20 +44,26 @@ function sync_cohorts($timelast=0, $limit=0)
     }
 // var_dump($idcohort); die();
 
+    $prevpercent = '';
     foreach ($users as $userid => $username) {
+        $cntUsers++;
         $localusername = strstr($username, '@', true);
         $requrl = $wsgroups . '?uid=' . $localusername;
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
-        echo ':'; // progress bar
-
+        if ($verbose > 0) echo ':'; // progress bar user
+        $percent = sprintf("%3.1f", ($cntUsers / $totalUsers * 100)) ;
+        if ( $percent != $prevpercent ) {
+            echo "\n $percent % ";
+            $prevpercent = $percent;
+        }
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
-            echo '.'; // progress bar
-            if ( isset($cntUsers[$ckey]) ) {
-                $cntUsers[$ckey]++;
+            if ($verbose > 1) echo '.'; // progress bar user-cohort
+            if ( isset($cntCohortUsers[$ckey]) ) {
+                $cntCohortUsers[$ckey]++;
             } else {
-                $cntUsers[$ckey] = 1;
+                $cntCohortUsers[$ckey] = 1;
                 if (! isset($idcohort[$ckey])) { // cohort doesn't exist yet
                     $newcohort = define_cohort($cohort);
                     $newid = cohort_add_cohort($newcohort);
@@ -74,11 +82,11 @@ function sync_cohorts($timelast=0, $limit=0)
     } // foreach ($users)
     curl_close($ch);
 
-    $logmsg = "Cohorts : " . count($cntUsers) . " encountered. $cntCrcohorts created. "
+    $logmsg = "Cohorts : " . count($cntCohortUsers) . " encountered. $cntCrcohorts created. "
         . "Membership: $cntAddmembers.";
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', $logmsg);
-    // print_r($cntUsers);
+    // print_r($cntCohortUsers);
 }
 
 

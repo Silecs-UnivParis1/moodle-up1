@@ -311,22 +311,23 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $table = new xmldb_table('tmp_extuser');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('accountstatus', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('mnethostid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null);
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $table->add_index('username', XMLDB_INDEX_UNIQUE, array('mnethostid', 'username'));
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
-
-// var_dump($this->config);
+        // var_dump($this->config);
 
         ////
         //// get user's list from ldap to sql in a scalable fashion
         ////
         // prepare some data we'll need
         $filterAff = '(|(eduPersonAffiliation=teacher)(eduPersonAffiliation=student)(eduPersonAffiliation=staff))';
-        $filterAcc = '(accountStatus=active)';
-        // $filterAcc = '';
+        // $filterAff = '';
+        // $filterAcc = '(accountStatus=active)';
+        $filterAcc = '';
         $filterTime = '(modifyTimestamp>='. $since .')';
 
         if ( $since ) {
@@ -347,12 +348,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 //use ldap_search to find first user from subtree
                 $ldap_result = ldap_search($ldapconnection, $context,
                                            $filter,
-                                           array($this->config->user_attribute));
+                                           array($this->config->user_attribute, 'accountStatus'));
             } else {
                 //search only in this context
                 $ldap_result = ldap_list($ldapconnection, $context,
                                          $filter,
-                                         array($this->config->user_attribute));
+                                         array($this->config->user_attribute, 'accountStatus'));
             }
 
             if(!$ldap_result) {
@@ -361,9 +362,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
             if ($entry = @ldap_first_entry($ldapconnection, $ldap_result)) {
                 do {
-                    $value = ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
+                    $value = @ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
                     $value = textlib::convert($value[0], $this->config->ldapencoding, 'utf-8');
-                    $this->ldap_bulk_insert($value);
+                    $status = @ldap_get_values_len($ldapconnection, $entry, 'accountStatus'); // active ou disabled ou (non-défini)
+                    $status = strtolower($status[0]);
+                //echo "$value [$status]\n";
+                    $this->ldap_bulk_insert($value, $status);
                 } while ($entry = ldap_next_entry($ldapconnection, $entry));
             }
             unset($ldap_result); // free mem
@@ -380,71 +384,10 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         } else {
             print_string('gotcountrecordsfromldap', 'auth_ldapup1', $count);
         }
-
-
-/// User removal
-        // Find users in DB that aren't in ldap -- to be removed!
-        // this is still not as scalable (but how often do we mass delete?)
-        if ($this->config->removeuser !== AUTH_REMOVEUSER_KEEP) {
-            $sql = 'SELECT u.*
-                      FROM {user} u
-                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username AND u.mnethostid = e.mnethostid)
-                     WHERE u.auth = ?
-                           AND u.deleted = 0
-                           AND e.username IS NULL';
-            $remove_users = $DB->get_records_sql($sql, array($this->authtype));
-
-            if (!empty($remove_users)) {
-                print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
-                $logmsg .= count($remove_users) . ' removed.  ';
-
-                foreach ($remove_users as $user) {
-                    if ($this->config->removeuser == AUTH_REMOVEUSER_FULLDELETE) {
-                        if (delete_user($user)) {
-                            echo "\t"; print_string('auth_dbdeleteuser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
-                        } else {
-                            echo "\t"; print_string('auth_dbdeleteusererror', 'auth_db', $user->username); echo "\n";
-                        }
-                    } else if ($this->config->removeuser == AUTH_REMOVEUSER_SUSPEND) {
-                        $updateuser = new stdClass();
-                        $updateuser->id = $user->id;
-                        $updateuser->auth = 'nologin';
-                        $DB->update_record('user', $updateuser);
-                        echo "\t"; print_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
-                    }
-                }
-            } else {
-                print_string('nouserentriestoremove', 'auth_ldapup1');
-            }
-            unset($remove_users); // free mem!
-        }
-
-/// Revive suspended users
-        if (!empty($this->config->removeuser) and $this->config->removeuser == AUTH_REMOVEUSER_SUSPEND) {
-            $sql = "SELECT u.id, u.username
-                      FROM {user} u
-                      JOIN {tmp_extuser} e ON (u.username = e.username AND u.mnethostid = e.mnethostid)
-                     WHERE u.auth = 'nologin' AND u.deleted = 0";
-            $revive_users = $DB->get_records_sql($sql);
-
-            if (!empty($revive_users)) {
-                print_string('userentriestorevive', 'auth_ldapup1', count($revive_users));
-                $logmsg .= count($revive_users) . ' revived.  ';
-
-                foreach ($revive_users as $user) {
-                    $updateuser = new stdClass();
-                    $updateuser->id = $user->id;
-                    $updateuser->auth = $this->authtype;
-                    $DB->update_record('user', $updateuser);
-                    echo "\t"; print_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
-                }
-            } else {
-                print_string('nouserentriestorevive', 'auth_ldapup1');
-            }
-
-            unset($revive_users);
-        }
-
+        $countAct = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='active'");
+        $countDis = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='disabled'");
+        $countUnd = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus=''");
+        echo "accountStatus : $countAct active.  $countDis disabled.  $countUnd undefined.\n";
 
 /// User Updates - time-consuming (optional)
         if ($do_updates) {
@@ -461,8 +404,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             }
             unset($all_keys); unset($key);
         } else {
+            $logmsg .= 'updates disabled.  ';
             print_string('noupdatestobedone', 'auth_ldapup1');
-            echo "    (no do_updates)\n";
+            echo "    (updates disabled)\n";
         }
         if ($do_updates and !empty($updatekeys)) { // run updates only if relevant
             $users = $DB->get_records_sql('SELECT u.username, u.id
@@ -497,8 +441,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 unset($users); // free mem
             }
         } else { // end do updates
-            print_string('noupdatestobedone', 'auth_ldapup1');
             $logmsg .= '0 updated.  ';
+            print_string('noupdatestobedone', 'auth_ldapup1');
             echo "    (empty)\n";
         }
 
@@ -548,6 +492,55 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             print_string('nouserstobeadded', 'auth_ldapup1');
             $logmsg .= '0 added.  ';
         }
+
+/// User suspension
+            $sql = "SELECT u.*
+                      FROM {user} u
+                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username)
+                     WHERE u.auth = ? AND u.deleted = 0 AND e.accountstatus = ?";
+            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'disabled'));
+
+            if (!empty($remove_users)) {
+                print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
+                $logmsg .= count($remove_users) . ' suspended/removed.  ';
+
+                foreach ($remove_users as $user) {
+                    // AUTH_REMOVEUSER_SUSPEND
+                        $updateuser = new stdClass();
+                        $updateuser->id = $user->id;
+                        $updateuser->auth = 'nologin';
+                        $updateuser->suspended = 1;
+                        $DB->update_record('user', $updateuser);
+                        echo "\t"; print_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                }
+            } else {
+                print_string('nouserentriestoremove', 'auth_ldapup1');
+            }
+            unset($remove_users); // free mem!
+
+/// Revive suspended users
+            $sql = "SELECT u.id, u.username
+                      FROM {user} u
+                      JOIN {tmp_extuser} e ON (u.username = e.username)
+                     WHERE (u.auth = 'nologin' OR u.suspended = 1) AND u.deleted = 0 AND e.accountstatus != 'disabled'";
+            $revive_users = $DB->get_records_sql($sql);
+
+            if (!empty($revive_users)) {
+                print_string('userentriestorevive', 'auth_ldapup1', count($revive_users));
+                $logmsg .= count($revive_users) . ' revived.  ';
+
+                foreach ($revive_users as $user) {
+                    $updateuser = new stdClass();
+                    $updateuser->id = $user->id;
+                    $updateuser->auth = 'shibboleth';
+                    $updateuser->suspended = 0;
+                    $DB->update_record('user', $updateuser);
+                    echo "\t"; print_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                }
+            } else {
+                print_string('nouserentriestorevive', 'auth_ldapup1');
+            }
+            unset($revive_users);
 
         $dbman->drop_table($table);
         $this->ldap_close();
@@ -614,12 +607,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
     /**
      * Bulk insert in SQL's temp table
      */
-    function ldap_bulk_insert($username) {
+    function ldap_bulk_insert($username, $status) {
         global $DB, $CFG;
 
         $username = textlib::strtolower($username); // usernames are __always__ lowercase.
-        $DB->insert_record_raw('tmp_extuser', array('username'=>$username,
-                                                    'mnethostid'=>$CFG->mnet_localhost_id), false, true);
+        $DB->insert_record_raw('tmp_extuser', array('username' => $username,
+                                                    'accountstatus' => $status,
+                                                    'mnethostid' => $CFG->mnet_localhost_id), false, true);
         echo '.';
     }
 
