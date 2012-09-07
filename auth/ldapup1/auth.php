@@ -364,7 +364,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 do {
                     $value = @ldap_get_values_len($ldapconnection, $entry, $this->config->user_attribute); // uid ou ...
                     $value = textlib::convert($value[0], $this->config->ldapencoding, 'utf-8');
-                    $status = @ldap_get_values_len($ldapconnection, $entry, 'accountStatus'); // enabled ou disabled ou nondéfini
+                    $status = @ldap_get_values_len($ldapconnection, $entry, 'accountStatus'); // active ou disabled ou (non-défini)
                     $status = strtolower($status[0]);
                 //echo "$value [$status]\n";
                     $this->ldap_bulk_insert($value, $status);
@@ -384,12 +384,10 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         } else {
             print_string('gotcountrecordsfromldap', 'auth_ldapup1', $count);
         }
-        $countEna = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='enabled'");
+        $countAct = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='active'");
         $countDis = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus='disabled'");
-        $countNot = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus=''");
-
-        echo "accountStatus : $countEna enabled.  $countDis disabled.  $countNot indefined.\n";
-
+        $countUnd = $DB->count_records_sql("SELECT COUNT(username) AS count FROM {tmp_extuser} WHERE accountstatus=''");
+        echo "accountStatus : $countAct active.  $countDis disabled.  $countUnd undefined.\n";
 
 /// User Updates - time-consuming (optional)
         if ($do_updates) {
@@ -406,8 +404,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             }
             unset($all_keys); unset($key);
         } else {
+            $logmsg .= 'updates disabled.  ';
             print_string('noupdatestobedone', 'auth_ldapup1');
-            echo "    (no do_updates)\n";
+            echo "    (updates disabled)\n";
         }
         if ($do_updates and !empty($updatekeys)) { // run updates only if relevant
             $users = $DB->get_records_sql('SELECT u.username, u.id
@@ -442,8 +441,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 unset($users); // free mem
             }
         } else { // end do updates
-            print_string('noupdatestobedone', 'auth_ldapup1');
             $logmsg .= '0 updated.  ';
+            print_string('noupdatestobedone', 'auth_ldapup1');
             echo "    (empty)\n";
         }
 
@@ -501,7 +500,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                      WHERE u.auth = ?
                            AND u.deleted = 0
                            AND e.accountstatus != ?';
-            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'enabled'));
+            $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'active'));
 
             if (!empty($remove_users)) {
                 print_string('userentriestoremove', 'auth_ldapup1', count($remove_users));
@@ -525,7 +524,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             $sql = "SELECT u.id, u.username
                       FROM {user} u
                       JOIN {tmp_extuser} e ON (u.username = e.username)
-                     WHERE u.auth = 'nologin' AND u.deleted = 0 AND e.accountstatus = 'enabled'";
+                     WHERE u.auth = 'nologin' AND u.deleted = 0 AND e.accountstatus = 'active'";
             $revive_users = $DB->get_records_sql($sql);
 
             if (!empty($revive_users)) {
