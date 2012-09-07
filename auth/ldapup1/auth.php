@@ -312,9 +312,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
         $table->add_field('accountstatus', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('mnethostid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null);
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_index('username', XMLDB_INDEX_UNIQUE, array('mnethostid', 'username'));
+        $table->add_index('username', XMLDB_INDEX_UNIQUE, array('username'));
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
@@ -423,7 +422,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 $maxxcount = 100;
 
                 foreach ($users as $user) {
-                    echo "\t"; print_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id));
+                    error_log(get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n", 3, "sync_users.log");
                     if ($this->update_user_record($user->username, $updatekeys)) {
                         //** @todo incorporer ceci à la table user
                         $usersync = $DB->get_record('user_sync', array('userid' => $user->id));
@@ -445,14 +444,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             print_string('noupdatestobedone', 'auth_ldapup1');
             echo "    (empty)\n";
         }
-
 /// User Additions
         // Find users missing in DB that are in LDAP
         // and gives me a nifty object I don't want.
         // note: we do not care about deleted accounts anymore, this feature was replaced by suspending to nologin auth plugin
         $sql = 'SELECT e.id, e.username
                   FROM {tmp_extuser} e
-                  LEFT JOIN {user} u ON (e.username = u.username AND e.mnethostid = u.mnethostid)
+                  LEFT JOIN {user} u ON (e.username = u.username)
                  WHERE u.id IS NULL';
         $add_users = $DB->get_records_sql($sql);
 
@@ -477,7 +475,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 }
 
                 $id = $DB->insert_record('user', $user);
-                echo "\t"; print_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)); echo "\n";
+                error_log(get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n", 3, "sync_users.log");
                 //** @todo incorporer ceci à la table user
                 $usersync = new stdClass;
                 $usersync->userid = $id; // same userid as new user
@@ -511,7 +509,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                         $updateuser->auth = 'nologin';
                         $updateuser->suspended = 1;
                         $DB->update_record('user', $updateuser);
-                        echo "\t"; print_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                        error_log(get_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n", 3, "sync_users.log");
                 }
             } else {
                 print_string('nouserentriestoremove', 'auth_ldapup1');
@@ -535,7 +533,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     $updateuser->auth = 'shibboleth';
                     $updateuser->suspended = 0;
                     $DB->update_record('user', $updateuser);
-                    echo "\t"; print_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)); echo "\n";
+                    error_log(get_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n", 3, "sync_users.log");
                 }
             } else {
                 print_string('nouserentriestorevive', 'auth_ldapup1');
@@ -612,8 +610,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         $username = textlib::strtolower($username); // usernames are __always__ lowercase.
         $DB->insert_record_raw('tmp_extuser', array('username' => $username,
-                                                    'accountstatus' => $status,
-                                                    'mnethostid' => $CFG->mnet_localhost_id), false, true);
+                                                    'accountstatus' => $status), false, true);
         echo '.';
     }
 
