@@ -119,6 +119,7 @@ foreach($cohorts['cohorts'] as $cohort) {
             $buttons[] = html_writer::link(new moodle_url('/cohort/assign.php', array('id'=>$cohort->id)), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/users'), 'alt'=>get_string('assign', 'core_cohort'), 'class'=>'iconsmall')));
         }
     }
+    $buttons[] = html_writer::link(new moodle_url('/cohort/view.php', array('id'=>$cohort->id)), html_writer::empty_tag('img', array('src'=>$OUTPUT->pix_url('i/info'), 'alt'=>get_string('assign', 'core_cohort'), 'class'=>'iconsmall')));
     $line[] = implode(' ', $buttons);
 
     $data[] = $line;
