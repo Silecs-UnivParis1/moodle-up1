@@ -318,7 +318,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
-// var_dump($this->config);
+        // var_dump($this->config);
 
         ////
         //// get user's list from ldap to sql in a scalable fashion
