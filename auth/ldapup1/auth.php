@@ -296,8 +296,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      *
      * @param bool $do_updates will do pull in data updates from LDAP if relevant
      * @param (string|false) $since if set, only updates since this params (syntax LDAP ex. 20120731012345Z)
+     * @param string $logoutput ('file' | 'stdout' | 'stderr')
      */
-    function sync_users($do_updates=true, $since=false) {
+    function sync_users($do_updates=true, $since=false, $output='file') {
         global $CFG, $DB;
 
         print_string('connectingldap', 'auth_ldapup1');
@@ -422,7 +423,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 $maxxcount = 100;
 
                 foreach ($users as $user) {
-                    error_log(get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n", 3, "sync_users.log");
+                    do_log($output, get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n");
                     if ($this->update_user_record($user->username, $updatekeys)) {
                         //** @todo incorporer ceci à la table user
                         $usersync = $DB->get_record('user_sync', array('userid' => $user->id));
@@ -431,9 +432,9 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                             $DB->update_record('user_sync', $usersync);
                         }
                     } else {
-                        echo ' - '.get_string('skipped');
+                        do_log($output, '     - ' . get_string('skipped') . "\n");
                     }
-                    echo "\n";
+                    echo '.';
                     $xcount++;
                 }
                 $transaction->allow_commit();
@@ -475,7 +476,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 }
 
                 $id = $DB->insert_record('user', $user);
-                error_log(get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n", 3, "sync_users.log");
+                do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
                 //** @todo incorporer ceci à la table user
                 $usersync = new stdClass;
                 $usersync->userid = $id; // same userid as new user
@@ -509,7 +510,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                         $updateuser->auth = 'nologin';
                         $updateuser->suspended = 1;
                         $DB->update_record('user', $updateuser);
-                        error_log(get_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n", 3, "sync_users.log");
+                        do_log($output, get_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
                 }
             } else {
                 print_string('nouserentriestoremove', 'auth_ldapup1');
@@ -533,7 +534,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     $updateuser->auth = 'shibboleth';
                     $updateuser->suspended = 0;
                     $DB->update_record('user', $updateuser);
-                    error_log(get_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n", 3, "sync_users.log");
+                    do_log($output, get_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
                 }
             } else {
                 print_string('nouserentriestorevive', 'auth_ldapup1');
@@ -545,6 +546,24 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         add_to_log(0, 'auth_ldapup1', 'sync:end', '', $logmsg);
 
         return true;
+    }
+
+    /**
+     * displays or logs modified users ; called by sync_users()
+     * @param string $output  'stdout' or 'file' or 'stderr'
+     * @param string $msg  message to log
+     */
+    function do_log($output, $msg) {
+        if ($output == 'stdout') {
+            echo $msg;
+        }
+        elseif ($output == 'file') {
+            $logdate = date('Y-m-d H:i:s  ');
+            error_log($logdate . $msg, 3, "sync_users.log");
+        }
+        elseif ($output == 'stderr') {
+            error_log($msg, 4);
+        }
     }
 
     /**
