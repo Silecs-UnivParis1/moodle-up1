@@ -35,5 +35,5 @@ if ( isset($argv[1]) && $argv[1]==='init' ) {
     $since = $last['begin'];
 }
 
-sync_cohorts($since, 0, 2);
+sync_cohorts($since, 0, 1);
 
