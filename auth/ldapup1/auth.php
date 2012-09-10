@@ -423,7 +423,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 $maxxcount = 100;
 
                 foreach ($users as $user) {
-                    do_log($output, get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n");
+                    $this->do_log($output, get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n");
                     if ($this->update_user_record($user->username, $updatekeys)) {
                         //** @todo incorporer ceci à la table user
                         $usersync = $DB->get_record('user_sync', array('userid' => $user->id));
@@ -432,7 +432,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                             $DB->update_record('user_sync', $usersync);
                         }
                     } else {
-                        do_log($output, '     - ' . get_string('skipped') . "\n");
+                        $this->do_log($output, '     - ' . get_string('skipped') . "\n");
                     }
                     echo '.';
                     $xcount++;
@@ -476,7 +476,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 }
 
                 $id = $DB->insert_record('user', $user);
-                do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
+                $this->do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
                 //** @todo incorporer ceci à la table user
                 $usersync = new stdClass;
                 $usersync->userid = $id; // same userid as new user
@@ -510,7 +510,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                         $updateuser->auth = 'nologin';
                         $updateuser->suspended = 1;
                         $DB->update_record('user', $updateuser);
-                        do_log($output, get_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
+                        $this->do_log($output, get_string('auth_dbsuspenduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
                 }
             } else {
                 print_string('nouserentriestoremove', 'auth_ldapup1');
@@ -534,7 +534,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     $updateuser->auth = 'shibboleth';
                     $updateuser->suspended = 0;
                     $DB->update_record('user', $updateuser);
-                    do_log($output, get_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
+                    $this->do_log($output, get_string('auth_dbreviveduser', 'auth_db', array('name'=>$user->username, 'id'=>$user->id)) . "\n");
                 }
             } else {
                 print_string('nouserentriestorevive', 'auth_ldapup1');
