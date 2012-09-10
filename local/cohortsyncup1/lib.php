@@ -52,7 +52,7 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
         if ($verbose > 0) echo ':'; // progress bar user
-        $percent = sprintf("%3.1f", ($cntUsers / $totalUsers * 100)) ;
+        $percent = sprintf("%3.0f", ($cntUsers / $totalUsers * 100)) ;
         if ( $percent != $prevpercent ) {
             echo "\n $percent % ";
             $prevpercent = $percent;
