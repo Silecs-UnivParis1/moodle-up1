@@ -67,7 +67,7 @@ $main_table->data = array(array_values($table));
 $members_table = new html_table();
 $members_table->width = "95%";
 $members_table->head = array();
-$user_fields = array('username', 'lastname', 'firstname', 'email');
+$user_fields = array('idnumber', 'username', 'lastname', 'firstname', 'email');
 foreach ($user_fields as $field) {
     $members_table->head[] = get_string($field);
 }
