@@ -2336,11 +2336,11 @@ function print_category_info($category, $depth=0, $showcourses = false) {
 
                 $coursecontent = html_writer::tag('div', $courseicon.$courselink, array('class'=>'name'));
 
-                if ($course->summary) {
-                    $link = new moodle_url('/course/info.php?id='.$course->id);
-                    $actionlink = $OUTPUT->action_link($link, '<img alt="'.$strsummary.'" src="'.$OUTPUT->pix_url('i/info') . '" />',
-                        new popup_action('click', $link, 'courseinfo', array('height' => 400, 'width' => 500)),
-                        array('title'=>$strsummary));
+                if ( TRUE ) { //** @todo test if report_synopsis exists  //** this code replaces "summary" link towards course/info.php
+                    $link = new moodle_url('/course/report/synopsis/index.php', array('id'=>$course->id, 'layout'=>'popup'));
+                    $actionlink = $OUTPUT->action_link($link, '<img alt="Synopsis" src="'.$OUTPUT->pix_url('i/info') . '" />',
+                        new popup_action('click', $link, 'popup', array('height' => 800, 'width' => 600)),
+                        array('title'=>'Synopsis'));
 
                     $coursecontent .= html_writer::tag('div', $actionlink, array('class'=>'info'));
                 }
