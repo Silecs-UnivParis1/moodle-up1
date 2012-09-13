@@ -298,7 +298,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @param (string|false) $since if set, only updates since this params (syntax LDAP ex. 20120731012345Z)
      * @param string $logoutput ('file' | 'stdout' | 'stderr')
      */
-    function sync_users($do_updates=true, $since=false, $output='file') {
+    function sync_users($do_updates=true, $since=false, $output='file', $verb=1) {
         global $CFG, $DB;
 
         print_string('connectingldap', 'auth_ldapup1');
@@ -366,8 +366,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     $value = textlib::convert($value[0], $this->config->ldapencoding, 'utf-8');
                     $status = @ldap_get_values_len($ldapconnection, $entry, 'accountStatus'); // active ou disabled ou (non-défini)
                     $status = strtolower($status[0]);
-                //echo "$value [$status]\n";
-                    $this->ldap_bulk_insert($value, $status);
+                    $this->ldap_bulk_insert($value, $status, $verb);
                 } while ($entry = ldap_next_entry($ldapconnection, $entry));
             }
             unset($ldap_result); // free mem
@@ -434,7 +433,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     } else {
                         $this->do_log($output, '     - ' . get_string('skipped') . "\n");
                     }
-                    echo '.';
+                    if ($verb >= 1) echo '.';
                     $xcount++;
                 }
                 $transaction->allow_commit();
@@ -624,13 +623,13 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
     /**
      * Bulk insert in SQL's temp table
      */
-    function ldap_bulk_insert($username, $status) {
+    function ldap_bulk_insert($username, $status, $verb) {
         global $DB, $CFG;
 
         $username = textlib::strtolower($username); // usernames are __always__ lowercase.
         $DB->insert_record_raw('tmp_extuser', array('username' => $username,
                                                     'accountstatus' => $status), false, true);
-        echo '.';
+        if ($verb >= 1) echo '.';
     }
 
     /**
