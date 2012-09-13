@@ -41,7 +41,7 @@ DELETE FROM cohort, cohort_members  USING cohort INNER JOIN cohort_members
     WHERE cohort.component = 'local_cohortsyncup1' AND cohort.id = cohort_members.cohortid;
 
 Options:
---verb=N              Verbosity (0 to 2), 1 by default
+--verb=N              Verbosity (0 to 3), 1 by default
 --since=(timestamp)   Apply only to users synchronized since given timestamp. If not set, use last cohort sync.
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
