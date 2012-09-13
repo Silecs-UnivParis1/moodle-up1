@@ -47,7 +47,7 @@ Options:
 -h, --help            Print out this help
 
 Example:
-/usr/bin/php local/cohortsyncup1/cli/msync_cohorts.php --init --verb=2
+/usr/bin/php local/cohortsyncup1/cli/sync_cohorts.php --init --verb=2
 
 ";
 

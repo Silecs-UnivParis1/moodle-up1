@@ -32,6 +32,7 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
     $cntCohortUsers = array(); // users added in each cohort
     $cntCrcohorts = 0;
     $cntAddmembers = 0;
+    $cntRemovemembers = 0;
     $cntUsers = 0;
     $totalUsers = count($users);
 
@@ -49,6 +50,8 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
         $cntUsers++;
         $localusername = strstr($username, '@', true);
         $requrl = $wsgroups . '?uid=' . $localusername;
+        $memberof = array(); //to compute memberships to be removed
+
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
         if ($verbose >= 2) echo ':'; // progress bar user
@@ -57,8 +60,11 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
             echo "\n $percent % ";
             $prevpercent = $percent;
         }
+        if ( empty($data) ) continue;
+        
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
+            $memberof[] = $ckey;
             if ($verbose >= 3) echo '.'; // progress bar membership
             if ( isset($cntCohortUsers[$ckey]) ) {
                 $cntCohortUsers[$ckey]++;
@@ -79,18 +85,44 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
                 $cntAddmembers++;
             }
         } // foreach($data)
+
+        $cntRemovemembers += remove_memberships($userid, $memberof);
     } // foreach ($users)
     curl_close($ch);
 
     $logmsg = "$totalUsers parsed users.  "
         . "Cohorts : " . count($cntCohortUsers) . " encountered. $cntCrcohorts created.  "
-        . "Membership: $cntAddmembers.";
+        . "Membership: +$cntAddmembers  -$cntRemovemembers.";
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', $logmsg);
     // print_r($cntCohortUsers);
 }
 
+/**
+ * compute memberships to be removed from database, and then actually do removing
+ * @param type $userid
+ * @param type $memberof
+ */
+function remove_memberships($userid, $memberof) {
+    global $DB;
+    $cnt = 0;
 
+    $sql = "SELECT cm.cohortid, c.idnumber FROM {cohort_members} cm LEFT JOIN {cohort} c ON (c.id=cm.cohortid) WHERE cm.userid=?";
+    $res = $DB->get_records_sql_menu($sql, array($userid));
+    foreach ($res as $cohortid => $idnumber) {
+        if ( ! in_array($idnumber, $memberof) ) {
+            cohort_remove_member($cohortid, $userid);
+            $cnt++;
+        }
+    }
+    return $cnt;
+}
+
+/**
+ * returns a "newcohort" object from the json-formatted webservice cohort
+ * @param type $wscohort
+ * @return (object) $newcohort
+ */
 function define_cohort($wscohort) {
     $newcohort = array(
                         'contextid' => 1,
