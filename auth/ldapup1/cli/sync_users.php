@@ -30,21 +30,53 @@
  * Sample cron entry:
  * # 5 minutes past 4am
  * 5 4 * * * $sudo -u www-data /usr/bin/php /var/www/moodle/auth/ldap/cli/sync_users.php
- *
- * if $argv[1] == 'init' : reinit all accounts
- *
- * Notes:
- *   - it is required to use the web server account when executing PHP CLI scripts
- *   - If you have a large number of users, you may want to raise the memory limits
- *     by passing -d momory_limit=256M
- *   - For debugging & better logging, you are encouraged to use in the command line:
- *     -d log_errors=1 -d error_reporting=E_ALL -d display_errors=0 -d html_errors=0
  */
 
 define('CLI_SCRIPT', true);
 
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global moodle config file.
 require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->libdir.'/clilib.php');      // cli only functions
+
+// now get cli options
+list($options, $unrecognized) = cli_get_params(array('help'=>false, 'noupdate'=>false, 'init'=>false, 'since'=>0, 'verb'=>1, 'output'=>'file'),
+                                               array('h'=>'help', 'n'=>'noupdate', 'i'=>'init'));
+
+if ($unrecognized) {
+    $unrecognized = implode("\n  ", $unrecognized);
+    cli_error(get_string('cliunknowoption', 'admin', $unrecognized));
+}
+
+$help =
+"Synchronize users from LDAP. Normally, to be executed by a cron job.
+
+If you want to force initialization, it can be useful to empty tables
+user and user_sync first with the following SQL command:
+DELETE FROM user, user_sync  USING user INNER JOIN user_sync
+    WHERE user_sync.ref_plugin = 'auth_ldapup1' AND user.id = user_sync.userid;
+
+Options:
+--verb=N              Verbosity (0 to 1), 1 by default
+--since=(datetime)    Fetch only to users with modifyTimestamp >= given datetime. If not set, use last ldap sync.
+                      datetime in LDAP native format, eg '20120930123456Z' = 2012, sept. 30, 12:34:56 UTC
+-i, --init            Apply to all users available in LDAP (no modifyTimestamp filter)
+--output=(foobar)     Where to write execution messages? (file|stdout|stderr). Default is 'file' (sync_users.log)
+-h, --help            Print out this help
+-n, --noupdate        Do only inserts, removes and revives (not by default).
+
+ Notes:
+   - If you have a large number of users, you may want to raise the memory limits by passing -d memory_limit=256M
+   - For debugging & better logging, you are encouraged to use in the command line, as php options
+     -d log_errors=1 -d error_reporting=E_ALL -d display_errors=0 -d html_errors=0
+
+";
+
+if ( ! empty($options['help']) ) {
+    echo $help;
+    return 0;
+}
+
+
 
 // Ensure errors are well explained
 $CFG->debug = DEBUG_NORMAL;
@@ -54,18 +86,17 @@ if (!is_enabled_auth('ldapup1')) {
     die;
 }
 
-
 $ldapauth = get_auth_plugin('ldapup1');
 
-echo "Last sync\n";
-print_r($ldapauth->get_last_sync());
-
-if ( isset($argv[1]) && $argv[1]==='init' ) {
+if ( $options['init'] ) {
     $since = FALSE;
+} elseif (isset($options['since']) && $options['since']>0 ) {
+    $since = $options['since'];
 } else {
     $last = $ldapauth->get_last_sync();
     $since = $last['begin'];
 }
 
-$ldapauth->sync_users(true, $since);
+$ldapauth->sync_users((! $options['noupdate']), $since, $options['output'], $options['verb']);
+
 
