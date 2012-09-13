@@ -51,15 +51,15 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
         $requrl = $wsgroups . '?uid=' . $localusername;
         curl_setopt($ch, CURLOPT_URL, $requrl);
         $data = json_decode(curl_exec($ch));
-        if ($verbose > 0) echo ':'; // progress bar user
+        if ($verbose >= 2) echo ':'; // progress bar user
         $percent = sprintf("%3.0f", ($cntUsers / $totalUsers * 100)) ;
-        if ( $percent != $prevpercent ) {
+        if ( $verbose>=1 && $percent != $prevpercent ) {
             echo "\n $percent % ";
             $prevpercent = $percent;
         }
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
-            if ($verbose > 1) echo '.'; // progress bar user-cohort
+            if ($verbose >= 3) echo '.'; // progress bar membership
             if ( isset($cntCohortUsers[$ckey]) ) {
                 $cntCohortUsers[$ckey]++;
             } else {
