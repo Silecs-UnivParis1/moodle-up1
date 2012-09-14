@@ -28,12 +28,18 @@ require('../../../config.php');
 require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
-$id = required_param('id',PARAM_INT);       // course id
+$id = required_param('id', PARAM_INT);       // course id
+$layout = optional_param('layout', 'report', PARAM_ALPHA); // default layout=report
+
+if ($layout != 'popup') {
+    $layout = 'report';
+}
+
 $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
 $context = get_context_instance(CONTEXT_COURSE, $course->id);
 
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
-$PAGE->set_pagelayout('report');
+$PAGE->set_pagelayout($layout);
 
 require_login($course);
 $context = get_context_instance(CONTEXT_COURSE, $course->id);
@@ -46,7 +52,7 @@ $strreport = get_string('pluginname', 'coursereport_synopsis');
 $PAGE->set_title($course->shortname .': '. $strreport);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($course->fullname));
+// echo $OUTPUT->heading(format_string($course->fullname));
 
 echo "<h2>" . get_string('Description', 'coursereport_synopsis') . "</h2>\n";
 
