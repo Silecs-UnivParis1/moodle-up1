@@ -199,9 +199,9 @@ global $DB;
             }
         } //foreach ($element)
 
-        if ($verb > 0) {
-            echo " : $compNumber->$cnt";
-        }
+        if ($verb >=2) echo " : $compNumber->$cnt";
+        if ($verb >=1) echo '.';
+
         $total += $cnt;
     } //foreach($components)
 
@@ -320,28 +320,14 @@ global $DB;
 
     // references subProgram -> courses level 1 (UE)
     $program = $xmlTree->program;
+    $progCourses = fetchRefCourses($program); //fetch courses under Program
+    updateRefCourses($progRofId, $progCourses, $dryrun);
+
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
-        $subsProg[$subpRofId] = array();
 
-        //search and references all courses of a subprogram
-        // if ( property_exists($subp, 'programStructure') ) {
-        if ( ! empty($subp->programStructure->subBlock->subBlock) ) {
-            $content = $subp->programStructure->subBlock->subBlock; //ELP
-            foreach ($content->children() as $element) {
-                if ( (string)$element->getName() != 'refCourse') continue;
-                $attrs = $element->attributes();
-                $courseref = (string)$attrs['ref'];
-                $subsProg[$subpRofId][] = $courseref;
-            }
-            $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
-            $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
-            $dbprogram->subnb = count($subsProg[$subpRofId]);
-            if (! $dryrun ) {
-                $DB->update_record('rof_program', $dbprogram);
-            }
-        }
-
+        $subProgCourses = fetchRefCourses($subp); //fetch courses under subprograms
+        updateRefCourses($subpRofId, $subProgCourses, $dryrun);
         if ( ! empty($subp->contacts) ) {
             $listRefPersons = fetchRefPersons($subp->contacts) ;
             updateRefPersons('rof_program', $subpRofId, $listRefPersons, $dryrun);
@@ -442,15 +428,15 @@ function setCourseParents($verb, $dryrun=false) {
         $parents[$course->rofid] = array();
     }
 
-    // FIRST, children of subprograms
-    $subprograms = $DB->get_records('rof_program', array('level'=>2));
-    foreach ($subprograms as $subprogram) {
+    // FIRST, children of programs AND subprograms
+    $programs = $DB->get_records('rof_program'); // both programs and subprograms
+    foreach ($programs as $program) {
         if ($verb > 0) echo "*";
-        $childcourses = explode(',', $subprogram->sub);
+        $childcourses = explode(',', $program->courses);
         if ( ! $childcourses ) continue ;
         foreach ($childcourses as $childcourse) {
             if ($verb > 1) echo ".";
-            $parents[$childcourse][] = $subprogram->rofid;
+            $parents[$childcourse][] = $program->rofid;
             $alevel[$childcourse] = 1;
         }
     }
@@ -472,15 +458,15 @@ function setCourseParents($verb, $dryrun=false) {
     $maxlevel=10;
     do { // loop on levels
         $finished = true;
-        if ($verb > 0) echo "\nlooping courses level $level.\n";
+        if ($verb >= 1) echo "\nlooping courses level $level.\n";
         $pcourses = $DB->get_records('rof_course', array('level' => $level));
         foreach ($pcourses as $pcourse) {
-            if ($verb > 0) echo "*";
+            if ($verb >= 2) echo "*";
             $childcourses = explode(',', $pcourse->sub);
             if ( ! $childcourses ) continue ;
             $finished = false;
             foreach ($childcourses as $childcourse) {
-                if ($verb > 1) echo ".";
+                if ($verb >= 3) echo ".";
                 $parents[$childcourse][] = $pcourse->rofid;
                 $alevel[$childcourse] = $level+1;
             }
@@ -501,12 +487,50 @@ function setCourseParents($verb, $dryrun=false) {
     } while ( ! $finished and $level < $maxlevel); //loop on levels
 
     // FINALLY
-    if ($verb > 0) {
+    if ($verb >= 3) {
         foreach ($cntlevel as $level => $count)
         echo "$count courses level $level.\n";
     }
 }
 
+
+/**
+ * fetch <refCourse>s from an xml program OR subProgram element
+ * @param type $xmlNode
+ * @return array( string refCourse )
+ */
+function fetchRefCourses($xmlNode) {
+    $res = array();
+    if ( ! empty($xmlNode->programStructure->subBlock->subBlock) ) {
+        $content = $xmlNode->programStructure->subBlock->subBlock; //ELP
+        foreach ($content->children() as $refCourse) {
+            if ( (string)$refCourse->getName() != 'refCourse') continue;
+            $attrs = $refCourse->attributes();
+            $courseref = (string)$attrs['ref'];
+            $res[] = $courseref;
+        }
+    }
+    return $res;
+}
+
+/**
+ * updateRefCourses for given program and list
+ * @global type $DB
+ * @param string $rofid
+ * @param array(string) $listRefCourses
+ * @param bool $dryrun : if set, no modification to database
+ */
+function updateRefCourses($rofid, $listRefCourses, $dryrun) {
+    global $DB;
+    $dbprogram = $DB->get_record('rof_program', array('rofid' => $rofid));
+    if ($dbprogram) {
+        $dbprogram->courses = serializeArray($listRefCourses);
+        $dbprogram->coursesnb = count($listRefCourses);
+        if (! $dryrun ) {
+            $DB->update_record('rof_program', $dbprogram);
+        }
+    }
+}
 
 /**
  * fetch <refPerson>s from an xml <contacts> element
@@ -521,6 +545,25 @@ function fetchRefPersons($xmlContacts) {
         $res[] = (string)$attrs['ref'];
     }
     return $res;
+}
+
+/**
+ * updateRefPersons for given table and list
+ * @global type $DB
+ * @param string $table (rof_program or rof_course)
+ * @param string $rofid
+ * @param array(string) $listRefPersons
+ * @param bool $dryrun : if set, no modification to database
+ */
+function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
+    global $DB;
+    $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
+    if ( $dbrecord ) {
+        $dbrecord->refperson = serializeArray($listRefPersons);
+        if (! $dryrun ) {
+            $DB->update_record($table, $dbrecord);
+        }
+    }
 }
 
 
@@ -540,25 +583,6 @@ function fetchPerson($xmlPerson) {
     $record->oneparent = '';
     $record->timesync = time();
     return $record;
-}
-
-/**
- * updateRefPersons for given table and list
- * @global type $DB
- * @param string $table
- * @param string $rofid
- * @param array(string) $listRefPersons
- * @param bool $dryrun : if set, no modification to database
- */
-function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
-    global $DB;
-    $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
-    if ( $dbrecord ) {
-        $dbrecord->refperson = serializeArray($listRefPersons);
-        if (! $dryrun ) {
-            $DB->update_record($table, $dbrecord);
-        }
-    }
 }
 
 /**
