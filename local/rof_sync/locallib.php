@@ -53,6 +53,7 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
+            $record->timesync = time();
             if (! $dryrun ) {
                 $lastinsertid = $DB->insert_record('rof_constant', $record);
             }
@@ -70,6 +71,7 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
+            $record->timesync = time();
             if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_constant', $record);
             }
@@ -99,6 +101,7 @@ global $DB;
         $record->number = $component->dataid; // = dataimport
         $record->sub = ''; // to be completed later
         $record->subnb = 0;
+        $record->timesync = time();
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_component', $record);
         }
@@ -147,6 +150,7 @@ global $DB;
             $record->name  = (string)$element->programName->text;
             $record->level = 1;
             $record->oneparent = $compNumber;
+            $record->timesync = time();
             // dans la boucle : typedip, domainedip, naturedip, cycledip, rythmedip, languedip
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
@@ -178,6 +182,7 @@ global $DB;
                 $record->name  = (string)$subp->programName->text;
                 $record->level = 2;
                 $record->oneparent = $ProgRofid;
+                $record->timesync = time();
                 if (! $dryrun ) {
                     $slastinsertid = $DB->insert_record('rof_program', $record);
                     if ( $slastinsertid) {
@@ -361,6 +366,7 @@ global $DB;
         $record->code = (string)$element->courseCode;
         $record->level = 0; // on ne sait pas encore
         $record->oneparent = $progRofId;
+        $record->timesync = time();
         $subsCourse[$record->rofid] = array();
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_course', $record);
@@ -532,6 +538,7 @@ function fetchPerson($xmlPerson) {
     $record->role = substr(trim((string)$xmlPerson->role->text), 0, 250);
     $record->email = substr(trim((string)$xmlPerson->contactData->email), 0, 250);
     $record->oneparent = '';
+    $record->timesync = time();
     return $record;
 }
 
