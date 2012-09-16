@@ -1,6 +1,25 @@
 <?php
+/**
+ * @package    local
+ * @subpackage rof_sync
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
+
+/**
+ * clean all five rof_ tables : component, constant, program, course, person
+ */
+function rofCleanAll() {
+    global $DB;
+
+    $DB->delete_records('rof_constant');
+    $DB->delete_records('rof_component');
+    $DB->delete_records('rof_program');
+    $DB->delete_records('rof_course');
+    $DB->delete_records('rof_person');
+}
 
 
 /**
@@ -93,7 +112,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
  */
-function fetchPrograms($verb=0, $dryrun=0) {
+function fetchPrograms($verb=0, $dryrun=false) {
 global $DB;
     $total = 0;
 
@@ -245,7 +264,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
  */
-function fetchCourses($verb=0, $dryrun=0) {
+function fetchCourses($verb=0, $dryrun=false) {
 global $DB;
     $total = 0;
     $dbltotal = 0;
@@ -281,7 +300,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return array(number of inserted rows, number of prevented doublets)
  */
-function fetchCoursesByProgram($progRofId, $verb=0, $dryrun=0) {
+function fetchCoursesByProgram($progRofId, $verb=0, $dryrun=false) {
 global $DB;
 
     $reqParams = array(
@@ -317,6 +336,7 @@ global $DB;
                 $DB->update_record('rof_program', $dbprogram);
             }
         }
+
         if ( ! empty($subp->contacts) ) {
             $listRefPersons = fetchRefPersons($subp->contacts) ;
             updateRefPersons('rof_program', $subpRofId, $listRefPersons, $dryrun);
