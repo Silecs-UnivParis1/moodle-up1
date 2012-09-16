@@ -44,15 +44,20 @@ if ($options['cleanall']) {
     return 0;
 }
 else {
+    if ($options['verb'] >= 1) echo "Constants... \n";
     fetchConstants();
 
+    if ($options['verb'] >= 1) echo "\nComponents... \n";
     echo setComponents();
 
+    if ($options['verb'] >= 1) echo "\nPrograms... \n";
     echo fetchPrograms($options['verb'], $options['dryrun']);
 
     // echo fetchCoursesByProgram('UP1-PROG29332', 2, 1); // TEST
+    if ($options['verb'] >= 1) echo "\nCourses... \n";
     echo fetchCourses($options['verb'], $options['dryrun']);
 
+    if ($options['verb'] >= 1) echo "\nCourse parents... \n";
     setCourseParents($options['verb'], $options['dryrun']);
 
 echo "\n\n";
