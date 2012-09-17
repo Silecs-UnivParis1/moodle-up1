@@ -1,6 +1,25 @@
 <?php
+/**
+ * @package    local
+ * @subpackage rof_sync
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 $rofUrl = 'http://formation.univ-paris1.fr/cdm/services/cataManager?wsdl' ;
+
+/**
+ * clean all five rof_ tables : component, constant, program, course, person
+ */
+function rofCleanAll() {
+    global $DB;
+
+    $DB->delete_records('rof_constant');
+    $DB->delete_records('rof_component');
+    $DB->delete_records('rof_program');
+    $DB->delete_records('rof_course');
+    $DB->delete_records('rof_person');
+}
 
 
 /**
@@ -34,6 +53,7 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
+            $record->timesync = time();
             if (! $dryrun ) {
                 $lastinsertid = $DB->insert_record('rof_constant', $record);
             }
@@ -51,6 +71,7 @@ global $DB;
             $record->dataimport = (string)$singledata->attributes()->import;
             $record->dataoai = (string)$singledata->attributes()->oai;
             $record->value = (string)$singledata->value;
+            $record->timesync = time();
             if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_constant', $record);
             }
@@ -80,6 +101,7 @@ global $DB;
         $record->number = $component->dataid; // = dataimport
         $record->sub = ''; // to be completed later
         $record->subnb = 0;
+        $record->timesync = time();
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_component', $record);
         }
@@ -93,7 +115,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
  */
-function fetchPrograms($verb=0, $dryrun=0) {
+function fetchPrograms($verb=0, $dryrun=false) {
 global $DB;
     $total = 0;
 
@@ -128,6 +150,11 @@ global $DB;
             $record->name  = (string)$element->programName->text;
             $record->level = 1;
             $record->oneparent = $compNumber;
+            $record->timesync = time();
+            $record->sub = '';
+            $record->courses = '';
+            $record->parents = '';
+            $record->refperson = '';
             // dans la boucle : typedip, domainedip, naturedip, cycledip, rythmedip, languedip
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
@@ -159,6 +186,7 @@ global $DB;
                 $record->name  = (string)$subp->programName->text;
                 $record->level = 2;
                 $record->oneparent = $ProgRofid;
+                $record->timesync = time();
                 if (! $dryrun ) {
                     $slastinsertid = $DB->insert_record('rof_program', $record);
                     if ( $slastinsertid) {
@@ -175,9 +203,9 @@ global $DB;
             }
         } //foreach ($element)
 
-        if ($verb > 0) {
-            echo " : $compNumber->$cnt";
-        }
+        if ($verb >=2) echo " : $compNumber->$cnt";
+        if ($verb >=1) echo '.';
+
         $total += $cnt;
     } //foreach($components)
 
@@ -245,7 +273,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return number of inserted rows
  */
-function fetchCourses($verb=0, $dryrun=0) {
+function fetchCourses($verb=0, $dryrun=false) {
 global $DB;
     $total = 0;
     $dbltotal = 0;
@@ -281,7 +309,7 @@ global $DB;
  * @param bool $dryrun : if set, no modification to database
  * @return array(number of inserted rows, number of prevented doublets)
  */
-function fetchCoursesByProgram($progRofId, $verb=0, $dryrun=0) {
+function fetchCoursesByProgram($progRofId, $verb=0, $dryrun=false) {
 global $DB;
 
     $reqParams = array(
@@ -296,27 +324,14 @@ global $DB;
 
     // references subProgram -> courses level 1 (UE)
     $program = $xmlTree->program;
+    $progCourses = fetchRefCourses($program); //fetch courses under Program
+    updateRefCourses($progRofId, $progCourses, $dryrun);
+
     foreach($program->subProgram as $subp) {
         $subpRofId = (string)$subp->programID;
-        $subsProg[$subpRofId] = array();
 
-        //search and references all courses of a subprogram
-        // if ( property_exists($subp, 'programStructure') ) {
-        if ( ! empty($subp->programStructure->subBlock->subBlock) ) {
-            $content = $subp->programStructure->subBlock->subBlock; //ELP
-            foreach ($content->children() as $element) {
-                if ( (string)$element->getName() != 'refCourse') continue;
-                $attrs = $element->attributes();
-                $courseref = (string)$attrs['ref'];
-                $subsProg[$subpRofId][] = $courseref;
-            }
-            $dbprogram = $DB->get_record('rof_program', array('rofid' => $subpRofId));
-            $dbprogram->sub = serializeArray($subsProg[$subpRofId]);
-            $dbprogram->subnb = count($subsProg[$subpRofId]);
-            if (! $dryrun ) {
-                $DB->update_record('rof_program', $dbprogram);
-            }
-        }
+        $subProgCourses = fetchRefCourses($subp); //fetch courses under subprograms
+        updateRefCourses($subpRofId, $subProgCourses, $dryrun);
         if ( ! empty($subp->contacts) ) {
             $listRefPersons = fetchRefPersons($subp->contacts) ;
             updateRefPersons('rof_program', $subpRofId, $listRefPersons, $dryrun);
@@ -341,6 +356,10 @@ global $DB;
         $record->code = (string)$element->courseCode;
         $record->level = 0; // on ne sait pas encore
         $record->oneparent = $progRofId;
+        $record->timesync = time();
+        $record->parents = '';
+        $record->sub = '';
+        $record->refperson = '';
         $subsCourse[$record->rofid] = array();
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_course', $record);
@@ -416,15 +435,15 @@ function setCourseParents($verb, $dryrun=false) {
         $parents[$course->rofid] = array();
     }
 
-    // FIRST, children of subprograms
-    $subprograms = $DB->get_records('rof_program', array('level'=>2));
-    foreach ($subprograms as $subprogram) {
+    // FIRST, children of programs AND subprograms
+    $programs = $DB->get_records('rof_program'); // both programs and subprograms
+    foreach ($programs as $program) {
         if ($verb > 0) echo "*";
-        $childcourses = explode(',', $subprogram->sub);
+        $childcourses = explode(',', $program->courses);
         if ( ! $childcourses ) continue ;
         foreach ($childcourses as $childcourse) {
             if ($verb > 1) echo ".";
-            $parents[$childcourse][] = $subprogram->rofid;
+            $parents[$childcourse][] = $program->rofid;
             $alevel[$childcourse] = 1;
         }
     }
@@ -446,15 +465,15 @@ function setCourseParents($verb, $dryrun=false) {
     $maxlevel=10;
     do { // loop on levels
         $finished = true;
-        if ($verb > 0) echo "\nlooping courses level $level.\n";
+        if ($verb >= 1) echo "\nlooping courses level $level.\n";
         $pcourses = $DB->get_records('rof_course', array('level' => $level));
         foreach ($pcourses as $pcourse) {
-            if ($verb > 0) echo "*";
+            if ($verb >= 2) echo "*";
             $childcourses = explode(',', $pcourse->sub);
             if ( ! $childcourses ) continue ;
             $finished = false;
             foreach ($childcourses as $childcourse) {
-                if ($verb > 1) echo ".";
+                if ($verb >= 3) echo ".";
                 $parents[$childcourse][] = $pcourse->rofid;
                 $alevel[$childcourse] = $level+1;
             }
@@ -475,12 +494,50 @@ function setCourseParents($verb, $dryrun=false) {
     } while ( ! $finished and $level < $maxlevel); //loop on levels
 
     // FINALLY
-    if ($verb > 0) {
+    if ($verb >= 3) {
         foreach ($cntlevel as $level => $count)
         echo "$count courses level $level.\n";
     }
 }
 
+
+/**
+ * fetch <refCourse>s from an xml program OR subProgram element
+ * @param type $xmlNode
+ * @return array( string refCourse )
+ */
+function fetchRefCourses($xmlNode) {
+    $res = array();
+    if ( ! empty($xmlNode->programStructure->subBlock->subBlock) ) {
+        $content = $xmlNode->programStructure->subBlock->subBlock; //ELP
+        foreach ($content->children() as $refCourse) {
+            if ( (string)$refCourse->getName() != 'refCourse') continue;
+            $attrs = $refCourse->attributes();
+            $courseref = (string)$attrs['ref'];
+            $res[] = $courseref;
+        }
+    }
+    return $res;
+}
+
+/**
+ * updateRefCourses for given program and list
+ * @global type $DB
+ * @param string $rofid
+ * @param array(string) $listRefCourses
+ * @param bool $dryrun : if set, no modification to database
+ */
+function updateRefCourses($rofid, $listRefCourses, $dryrun) {
+    global $DB;
+    $dbprogram = $DB->get_record('rof_program', array('rofid' => $rofid));
+    if ($dbprogram) {
+        $dbprogram->courses = serializeArray($listRefCourses);
+        $dbprogram->coursesnb = count($listRefCourses);
+        if (! $dryrun ) {
+            $DB->update_record('rof_program', $dbprogram);
+        }
+    }
+}
 
 /**
  * fetch <refPerson>s from an xml <contacts> element
@@ -495,6 +552,25 @@ function fetchRefPersons($xmlContacts) {
         $res[] = (string)$attrs['ref'];
     }
     return $res;
+}
+
+/**
+ * updateRefPersons for given table and list
+ * @global type $DB
+ * @param string $table (rof_program or rof_course)
+ * @param string $rofid
+ * @param array(string) $listRefPersons
+ * @param bool $dryrun : if set, no modification to database
+ */
+function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
+    global $DB;
+    $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
+    if ( $dbrecord ) {
+        $dbrecord->refperson = serializeArray($listRefPersons);
+        if (! $dryrun ) {
+            $DB->update_record($table, $dbrecord);
+        }
+    }
 }
 
 
@@ -512,26 +588,8 @@ function fetchPerson($xmlPerson) {
     $record->role = substr(trim((string)$xmlPerson->role->text), 0, 250);
     $record->email = substr(trim((string)$xmlPerson->contactData->email), 0, 250);
     $record->oneparent = '';
+    $record->timesync = time();
     return $record;
-}
-
-/**
- * updateRefPersons for given table and list
- * @global type $DB
- * @param string $table
- * @param string $rofid
- * @param array(string) $listRefPersons
- * @param bool $dryrun : if set, no modification to database
- */
-function updateRefPersons($table, $rofid, $listRefPersons, $dryrun) {
-    global $DB;
-    $dbrecord = $DB->get_record($table, array('rofid' => $rofid));
-    if ( $dbrecord ) {
-        $dbrecord->refperson = serializeArray($listRefPersons);
-        if (! $dryrun ) {
-            $DB->update_record($table, $dbrecord);
-        }
-    }
 }
 
 /**
@@ -601,52 +659,4 @@ function displayWsdlInformation($url) {
     print_r($types);
 
     echo "\n\n**************\n\n";
-}
-
-/**
- * Get the first path for a course (only from rof_course table)
- * @param string $rofid Course ROFid, ex. UP1-C20867
- */
-function getCourseFirstPath($rofid) {
-    global $DB;
-    $currofid = $rofid;
-    $rofpath = array();
-    $namepath = array();
-
-    do {
-        $course = $DB->get_record('rof_course', array('rofid' => $currofid), '*', IGNORE_MISSING);
-        $rofpath[] = $currofid;
-        $namepath[] = $course->name;
-        $parents = explode(',', $course->parents);
-        $currofid = $parents[0];
-    } while($course->level > 1);
-
-    $rofpath = array_reverse($rofpath);
-    $namepath = array_reverse($namepath);
-    return array_combine($rofpath, $namepath);
-}
-
-/**
- * returns a formatted string with the result of getCourseFirstPath (or other)
- * @param associative array $pathArray
- * @param enum $format
- * @return string
- */
-function fmtPath($pathArray, $format='rofid') {
-    $formats = array('rofid', 'name', 'combined');
-    $ret = '';
-    foreach ($pathArray as $rofid => $name) {
-        switch($format) {
-            case 'rofid':
-                $ret .= '/' . $rofid;
-                break;
-            case 'name':
-                $ret .= '/' . $name;
-                break;
-            case 'combined':
-                $ret .= ' / ' . '[' . $rofid . '] ' . $name;
-                break;
-        }
-    }
-    return $ret;
 }

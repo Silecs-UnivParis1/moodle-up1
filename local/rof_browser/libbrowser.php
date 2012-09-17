@@ -52,6 +52,9 @@ function subToString ($sub) {
  * @return int
  */
 function nbSub($sub) {
+	if ($sub == '') {
+		return 0;
+	}
 	$tabsub = explode(',', $sub);
 	return count($tabsub);
 }
@@ -97,21 +100,32 @@ class rof_browser {
 		$element = '';
 
 		$listeTitle = '';
-		if ($this->tabNiveau[$niveau-1]['tabenf'] == 'rof_program') {
+		// table rof_program
+		if (isset($sp->typedip)) {
 			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
 			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
 		}
 
 		$nbSub = nbSub($sp->sub);
-		if ($sp->sub != '') {
-			/**$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . '</span>';**/
+		$nbCourses = 0;
+		if (isset($sp->courses)) {
+			$nbCourses = nbSub($sp->courses);
+		}
+		$nbEnf = $nbSub + $nbCourses;
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
+
+		if ($nbEnf) {
+			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
+				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
 			$coden = trim('niv'.$niveau);
 			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'" title="'
 				. 'rof:' . $sp->rofid . $listeTitle . '">'
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbSub . ')</span>';
+                . html_writer::link($detUrl, '( i )') . "  "
+				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
-			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'
+                . html_writer::link($detUrl, '( i )') . "  "
+                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
 		return $element;
 	}
@@ -121,26 +135,68 @@ class rof_browser {
 	 * @return string code html
 	 */
 	function createBlock() {
+		// niveau 2 on peut avoir $tabEnf= rof_program ou/et $tabEnf= rof_course
 		global $DB;
 		$tabSub = $this->tabNiveau[$this->niveau]['tabsub'];
 		$tabEnf = $this->tabNiveau[$this->niveau]['tabenf'];
 		$nivEnf = (int)$this->niveau  + 1;
-		$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
-		$sub = subToString($sub);
 
-		$cf = 'per' . $this->idPere;
 		$sort = '';
+
 		if ($this->niveau == 2) {
-			$cf = 'cont-niv' . $this->niveau;
+			$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
+			$sub = subToString($sub);
 			$sort = " ORDER BY FIND_IN_SET(typedip, '" . typeDiplomeOrderedList() . "') ";
 			$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
 			$subList = $DB->get_records_sql($sql);
+		} elseif ($this->niveau==4) {
+			// dans rof_progam, la liste des enfants courses est dans le champ courses
+			$sub = $DB->get_field_select($tabSub, 'courses', 'id = '.$this->idPere);
+			$sub = subToString($sub);
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+		} elseif ($this->niveau==3) {
+			$sub =  $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
+			if ($sub != '') {
+				$sub = subToString($sub);
+				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+			}
+			// si il y a aussi des cours à ce niveau
+			$sub =  $DB->get_field_select($tabSub, 'courses', 'id = '.$this->idPere);
+			if ($sub != '') {
+				$sub = subToString($sub);
+				$tabEnf = 'rof_course';
+				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+			}
 		} else {
+			$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
+			$sub = subToString($sub);
 			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
 
+		$blocListe = '';
+		if (isset($subList) && count($subList)) {
+			$blocListe .= $this->afficheListe($subList, $nivEnf);
+		}
+		if (isset($subList2) && count($subList2)) {
+			$blocListe .= $this->afficheListe($subList2, $nivEnf);
+		}
+		return $blocListe;
+	}
+
+	/**
+	 * construit le code HTML listant les elements $subList
+	 * @param array() $subList
+	 * @param int $nivEnf
+	 * return string
+	 */
+	function afficheListe($subList, $nivEnf) {
 		$list = '';
 		$nbSubList = count($subList);
+
+		$cf = 'per' . $this->idPere;
+		if ($this->niveau == 2) {
+			$cf = 'cont-niv' . $this->niveau;
+		}
 
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';
