@@ -151,6 +151,10 @@ global $DB;
             $record->level = 1;
             $record->oneparent = $compNumber;
             $record->timesync = time();
+            $record->sub = '';
+            $record->courses = '';
+            $record->parents = '';
+            $record->refperson = '';
             // dans la boucle : typedip, domainedip, naturedip, cycledip, rythmedip, languedip
             foreach($element->programCode as $code) {
                 $codeset = (string)$code->attributes();
@@ -353,6 +357,9 @@ global $DB;
         $record->level = 0; // on ne sait pas encore
         $record->oneparent = $progRofId;
         $record->timesync = time();
+        $record->parents = '';
+        $record->sub = '';
+        $record->refperson = '';
         $subsCourse[$record->rofid] = array();
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_course', $record);

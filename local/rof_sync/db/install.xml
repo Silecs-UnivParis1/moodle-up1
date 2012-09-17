@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/rof_sync/db" VERSION="20120917" COMMENT="XMLDB file for Moodle local/rof_sync"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="rof_constant" COMMENT="rof_constant stores cache for WS constants" NEXT="rof_component">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="element"/>
+        <FIELD NAME="element" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="elementtype"/>
+        <FIELD NAME="elementtype" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" PREVIOUS="element" NEXT="dataid"/>
+        <FIELD NAME="dataid" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" PREVIOUS="elementtype" NEXT="dataimport"/>
+        <FIELD NAME="dataimport" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataid" NEXT="dataoai"/>
+        <FIELD NAME="dataoai" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataimport" NEXT="value"/>
+        <FIELD NAME="value" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="dataoai" NEXT="timesync"/>
+        <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="value"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="rof_component" COMMENT="rof_component stores components" PREVIOUS="rof_constant" NEXT="rof_program">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="rofid"/>
+        <FIELD NAME="rofid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="import"/>
+        <FIELD NAME="import" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="rofid" NEXT="oai"/>
+        <FIELD NAME="oai" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="import" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="oai" NEXT="number"/>
+        <FIELD NAME="number" TYPE="char" LENGTH="2" NOTNULL="false" COMMENT="01 à 37+" SEQUENCE="false" PREVIOUS="name" NEXT="subnb"/>
+        <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="number" NEXT="sub"/>
+        <FIELD NAME="sub" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="subnb" NEXT="timesync"/>
+        <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sub"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="number"/>
+        <KEY NAME="number" TYPE="unique" FIELDS="number" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="rof_program" COMMENT="rof_program stores programs and subprograms" PREVIOUS="rof_component" NEXT="rof_course">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="rofid"/>
+        <FIELD NAME="rofid" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="rofid" NEXT="components"/>
+        <FIELD NAME="components" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="typedip"/>
+        <FIELD NAME="typedip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="components" NEXT="domainedip"/>
+        <FIELD NAME="domainedip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="typedip" NEXT="naturedip"/>
+        <FIELD NAME="naturedip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="domainedip" NEXT="cycledip"/>
+        <FIELD NAME="cycledip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="naturedip" NEXT="rythmedip"/>
+        <FIELD NAME="rythmedip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="cycledip" NEXT="languedip"/>
+        <FIELD NAME="languedip" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="rythmedip" NEXT="acronyme"/>
+        <FIELD NAME="acronyme" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="languedip" NEXT="mention"/>
+        <FIELD NAME="mention" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="acronyme" NEXT="specialite"/>
+        <FIELD NAME="specialite" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="mention" NEXT="subnb"/>
+        <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="specialite" NEXT="sub"/>
+        <FIELD NAME="sub" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="subnb" NEXT="coursesnb"/>
+        <FIELD NAME="coursesnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sub" NEXT="courses"/>
+        <FIELD NAME="courses" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="coursesnb" NEXT="level"/>
+        <FIELD NAME="level" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courses" NEXT="parents"/>
+        <FIELD NAME="parents" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="level" NEXT="parentsnb"/>
+        <FIELD NAME="parentsnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="parents" NEXT="oneparent"/>
+        <FIELD NAME="oneparent" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="parentsnb" NEXT="refperson"/>
+        <FIELD NAME="refperson" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="oneparent" NEXT="timesync"/>
+        <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="refperson"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="rofid"/>
+        <KEY NAME="rofid" TYPE="unique" FIELDS="rofid" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="rof_course" COMMENT="rof_course stores courses from various levels" PREVIOUS="rof_program" NEXT="rof_person">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="rofid"/>
+        <FIELD NAME="rofid" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="rofid" NEXT="code"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="subnb"/>
+        <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="code" NEXT="sub"/>
+        <FIELD NAME="sub" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="subnb" NEXT="level"/>
+        <FIELD NAME="level" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sub" NEXT="parents"/>
+        <FIELD NAME="parents" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="level" NEXT="parentsnb"/>
+        <FIELD NAME="parentsnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="parents" NEXT="oneparent"/>
+        <FIELD NAME="oneparent" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="parentsnb" NEXT="refperson"/>
+        <FIELD NAME="refperson" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="oneparent" NEXT="timesync"/>
+        <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="refperson"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="rofid"/>
+        <KEY NAME="rofid" TYPE="unique" FIELDS="rofid" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="rof_person" COMMENT="rof_person stores contact persons" PREVIOUS="rof_course">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="rofid"/>
+        <FIELD NAME="rofid" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="givenname"/>
+        <FIELD NAME="givenname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="rofid" NEXT="familyname"/>
+        <FIELD NAME="familyname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="givenname" NEXT="title"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="familyname" NEXT="role"/>
+        <FIELD NAME="role" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="title" NEXT="email"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="role" NEXT="oneparent"/>
+        <FIELD NAME="oneparent" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="email" NEXT="timesync"/>
+        <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="oneparent"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="rofid"/>
+        <KEY NAME="rofid" TYPE="unique" FIELDS="rofid" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
