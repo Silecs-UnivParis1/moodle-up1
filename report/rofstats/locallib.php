@@ -83,7 +83,41 @@ function report_rofstats_persons_not_empty() {
 
 function report_rofstats_hybrid_programs() {
     global $DB;
+    $res = array();
+    $programs = $DB->get_records_sql("SELECT rofid, name, subnb, coursesnb FROM {rof_program} WHERE level=1 AND subnb>0 AND coursesnb>0");
 
-    $res = $DB->get_records_sql("SELECT rofid, name, subnb, coursesnb FROM {rof_program} WHERE level=1 AND subnb>0 AND coursesnb>0");
+    foreach ($programs as $program) {
+        $url = new moodle_url('/report/rofstats/view.php', array('rofid'=>$program->rofid));
+        $res[] = array (
+            html_writer::link($url, $program->rofid),
+            $program->name,
+            $program->subnb,
+            $program->coursesnb
+        );
+    }
     return $res;
+}
+
+
+function report_rofstats_view_record($rofid) {
+    global $DB;
+
+    $res = array();
+    if (preg_match('/UP1-PROG/', $rofid)) {
+        $table = 'rof_program';
+    } elseif (preg_match('/UP1-C/', $rofid)) {
+        $table = 'rof_course';
+    } elseif (preg_match('/UP1-PERS/', $rofid)) {
+        $table = 'rof_person';
+    }
+
+    $dbprog = $DB->get_record($table, array('rofid'=>$rofid));
+    foreach (get_object_vars($dbprog) as $key => $value) {
+        $res[] = array($key, $value);
+    }
+    $table = new html_table();
+    $table->head = array('Champ', 'Valeur');
+    $table->data = $res;
+    echo html_writer::table($table);
+    return;
 }
