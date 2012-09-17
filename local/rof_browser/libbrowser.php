@@ -112,6 +112,7 @@ class rof_browser {
 			$nbCourses = nbSub($sp->courses);
 		}
 		$nbEnf = $nbSub + $nbCourses;
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
 
 		if ($nbEnf) {
 			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
@@ -119,9 +120,12 @@ class rof_browser {
 			$coden = trim('niv'.$niveau);
 			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'" title="'
 				. 'rof:' . $sp->rofid . $listeTitle . '">'
+                . html_writer::link($detUrl, '( i )') . "  "
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
-			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'
+                . html_writer::link($detUrl, '( i )') . "  "
+                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
 		return $element;
 	}
