@@ -21,6 +21,9 @@ echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
 
 report_rofstats_view_record($rofid);
 
+echo "Premier chemin : <br />\n";
+echo fmtPath(getCourseFirstPath($rofid), 'ul', true);
+
 echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
 
 echo $OUTPUT->footer();

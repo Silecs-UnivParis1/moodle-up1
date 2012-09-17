@@ -9,6 +9,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once('./roflib.php');
 defined('MOODLE_INTERNAL') || die;
 
 function report_rofstats_generic() {
@@ -103,15 +104,7 @@ function report_rofstats_view_record($rofid) {
     global $DB;
 
     $res = array();
-    if (preg_match('/UP1-PROG/', $rofid)) {
-        $table = 'rof_program';
-    } elseif (preg_match('/UP1-C/', $rofid)) {
-        $table = 'rof_course';
-    } elseif (preg_match('/UP1-PERS/', $rofid)) {
-        $table = 'rof_person';
-    }
-
-    $dbprog = $DB->get_record($table, array('rofid'=>$rofid));
+    $dbprog = $DB->get_record(rofGetTable($rofid), array('rofid' => $rofid));
     foreach (get_object_vars($dbprog) as $key => $value) {
         $res[] = array($key, $value);
     }

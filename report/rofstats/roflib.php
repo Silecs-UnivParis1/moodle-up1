@@ -13,8 +13,8 @@ defined('MOODLE_INTERNAL') || die;
 
 
 /**
- * Get the first path for a course (only from rof_course table)
- * @param string $rofid Course ROFid, ex. UP1-C20867
+ * Get the first path for a course or a program
+ * @param string $rofid Course ROFid, ex. UP1-C20867 or Program ROFid, ex. UP1-PROG18336
  */
 function getCourseFirstPath($rofid) {
     global $DB;
@@ -23,12 +23,13 @@ function getCourseFirstPath($rofid) {
     $namepath = array();
 
     do {
-        $course = $DB->get_record('rof_course', array('rofid' => $currofid), '*', IGNORE_MISSING);
+        $table = rofGetTable($currofid);
+        $record = $DB->get_record($table, array('rofid' => $currofid), '*', IGNORE_MISSING);
         $rofpath[] = $currofid;
-        $namepath[] = $course->name;
-        $parents = explode(',', $course->parents);
+        $namepath[] = $record->name;
+        $parents = explode(',', $record->parents);
         $currofid = $parents[0];
-    } while($course->level > 1);
+    } while($table=='rof_course' || $record->level > 1);
 
     $rofpath = array_reverse($rofpath);
     $namepath = array_reverse($namepath);
@@ -36,26 +37,51 @@ function getCourseFirstPath($rofid) {
 }
 
 /**
+ * returns table from rofid
+ * @param string $rofid
+ * @return string table name
+ */
+function rofGetTable($rofid) {
+    if (preg_match('/UP1-PROG/', $rofid)) {
+        $table = 'rof_program';
+    } elseif (preg_match('/UP1-C/', $rofid)) {
+        $table = 'rof_course';
+    } elseif (preg_match('/UP1-PERS/', $rofid)) {
+        $table = 'rof_person';
+    }
+    return $table;
+}
+
+
+/**
  * returns a formatted string with the result of getCourseFirstPath (or other)
  * @param associative array $pathArray
  * @param enum $format
+ * @param bool $roflink : if set, rofid links to view.php
  * @return string
  */
-function fmtPath($pathArray, $format='rofid') {
-    $formats = array('rofid', 'name', 'combined');
+function fmtPath($pathArray, $format='rofid', $roflink=false) {
+    $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
+        $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
+        $linkrofid = ($roflink ? html_writer::link($url, $rofid) : $rofid);
         switch($format) {
             case 'rofid':
-                $ret .= '/' . $rofid;
+                $ret .= ' / ' . $linkrofid;
                 break;
             case 'name':
-                $ret .= '/' . $name;
+                $ret .= ' / ' . $name;
                 break;
             case 'combined':
-                $ret .= ' / ' . '[' . $rofid . '] ' . $name;
+                $ret .= ' / ' . '[' . $linkrofid . '] ' . $name;
                 break;
+            case 'ul':
+                $ret .= '<ul><li>' . '[' . $linkrofid . '] ' . $name .'</li>';
         }
+    }
+    if ($format == 'ul') {
+        $ret .= str_repeat('</ul>', count($pathArray));
     }
     return $ret;
 }
