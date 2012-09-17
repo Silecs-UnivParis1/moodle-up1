@@ -31,22 +31,31 @@ $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
 echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
 
 
-echo "<h3>Counts</h3>\n";
+echo "<h3>Compteurs</h3>\n";
 $table = new html_table();
 $table->head = array('Items', 'Nb');
 $table->data = report_rofstats_generic();
 echo html_writer::table($table);
 
-echo "<h3>Components</h3>\n";
+echo "<h3>Composantes</h3>\n";
 $table = new html_table();
-$table->head = array('', '# Programs', 'ROFid', 'Name');
+$table->head = array('', '# Programmes', 'Id. ROF', 'Nom');
 $table->data = report_rofstats_components();
 echo html_writer::table($table);
 
-echo "<h3>Persons</h3>\n";
+echo "<h3>Personnes</h3>\n";
 $table = new html_table();
-$table->head = array('Levels', 'Persons not empty');
+$table->head = array('Niveaux', 'Personnes non vides');
 $table->data = report_rofstats_persons_not_empty();
+echo html_writer::table($table);
+
+
+echo "<h2>Anomalies ?</h2>";
+
+echo "<h3>Programmes hybrides</h3>\n";
+$table = new html_table();
+$table->head = array('Programme', 'Titre', 'ss-prog.', 'cours');
+$table->data = report_rofstats_hybrid_programs();
 echo html_writer::table($table);
 
 /*  $table->head  = array($strissue, $strstatus, $strdesc, $strconfig);

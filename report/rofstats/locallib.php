@@ -80,3 +80,10 @@ function report_rofstats_persons_not_empty() {
     }
     return $res;
 }
+
+function report_rofstats_hybrid_programs() {
+    global $DB;
+
+    $res = $DB->get_records_sql("SELECT rofid, name, subnb, coursesnb FROM {rof_program} WHERE level=1 AND subnb>0 AND coursesnb>0");
+    return $res;
+}
