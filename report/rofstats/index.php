@@ -43,6 +43,12 @@ $table->head = array('', '# Programmes', 'Id. ROF', 'Nom');
 $table->data = report_rofstats_components();
 echo html_writer::table($table);
 
+echo "<h3>Cours ROF</h3>\n";
+$table = new html_table();
+$table->head = array('Items', 'Nb');
+$table->data = report_rofstats_courses();
+echo html_writer::table($table);
+
 echo "<h3>Personnes</h3>\n";
 $table = new html_table();
 $table->head = array('Niveaux', 'Personnes non vides');

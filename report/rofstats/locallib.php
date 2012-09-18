@@ -17,23 +17,32 @@ function report_rofstats_generic() {
     $res = array();
 
     $count = $DB->count_records('rof_component');
-    $res[] = array('Components', $count);
+    $res[] = array('Composantes', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
     $count = $DB->count_records('rof_program', array('level' => 1));
-    $res[] = array('Programs', $count);
+    $res[] = array('Programmes', $count);
     $count = $DB->count_records('rof_program', array('level' => 2));
-    $res[] = array('SubPrograms', $count);
+    $res[] = array('Sous-programmes', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
     $count = $DB->count_records('rof_person');
-    $res[] = array('Persons', $count);
-    $res[] = array('', ''); //** @todo meilleur séparateur ?
+    $res[] = array('Personnes', $count);
+
+    return $res;
+}
+
+function report_rofstats_courses() {
+    global $DB;
+    $res = array();
 
     $count = $DB->count_records('rof_course');
-    $res[] = array('Courses', $count);
+    $res[] = array('Cours ROF', $count);
+    $count = $DB->count_records('rof_course', array('subnb' => 0));
+    $res[] = array('Cours feuilles', $count);
+    $res[] = array('', ''); //** @todo meilleur séparateur ?
     $levelmax = $DB->get_record_sql('SELECT MAX(level) as levelmax FROM {rof_course} rc')->levelmax;
     for ($level = 1; $level <= 1+$levelmax ; $level++) {
        $count = $DB->count_records('rof_course', array('level' => $level));
-       $res[] = array('Courses level=' . $level, $count);
+       $res[] = array('Cours de niveau=' . $level, $count);
     }
     return $res;
 }
@@ -77,7 +86,7 @@ function report_rofstats_persons_not_empty() {
     for ($level = 1; $level <= $levelmax ; $level++) {
        $count = $DB->count_records_sql(
                "SELECT COUNT(id) FROM {rof_course} WHERE level=? AND refperson != ''", array($level));
-       $res[] = array('Courses level=' . $level, $count);
+       $res[] = array('Cours de niveau=' . $level, $count);
     }
     return $res;
 }

@@ -206,7 +206,7 @@ function typeDiplomeOrderedList() {
 /**
  * displays a table from a ROF record (component, program, course, or person)
  * @param type $rofid
- * @return type
+ * @return bool TRUE if everything is OK, FALSE otherwise
  */
 function rof_view_record($rofid) {
 
@@ -214,7 +214,7 @@ function rof_view_record($rofid) {
     list($dbprog, $stop) = rofGetRecord($rofid);
     if ( ! $dbprog ) {
         echo "Mauvais identifiant (rofid) : $rofid.";
-        return;
+        return false;
     }
     foreach (get_object_vars($dbprog) as $key => $value) {
         $res[] = array($key, $value);
@@ -223,5 +223,5 @@ function rof_view_record($rofid) {
     $table->head = array('Champ', 'Valeur');
     $table->data = $res;
     echo html_writer::table($table);
-    return;
+    return true;
 }
