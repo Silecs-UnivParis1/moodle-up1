@@ -129,24 +129,24 @@ function rofGetTable($rofid) {
  */
 function rofGetRecord($rofid) {
     global $DB;
-    if (preg_match('/UP1-PROG/', $rofid)) {
+    if (preg_match('/^UP1-PROG/', $rofid)) {
         $table = 'rof_program';
         $field = 'rofid';
         $stop = false;
-    } elseif (preg_match('/UP1-C/', $rofid)) {
+    } elseif (preg_match('/^UP1-C/', $rofid)) {
         $table = 'rof_course';
         $field = 'rofid';
         $stop = false;
-    } elseif (preg_match('/[0-9][0-9]/', $rofid)) {
+    } elseif (preg_match('/^[0-9][0-9]$/', $rofid)) {
         $table = 'rof_component';
         $field = 'number';
         $stop = true;
-    } elseif (preg_match('/UP1-OU/', $rofid)) {
+    } elseif (preg_match('/^UP1-OU/', $rofid)) {
         $table = 'rof_component';
         $field = 'rofid';
         $stop = true;
         // WARNING non renseigné pour l'instant
-    } elseif (preg_match('/UP1-PERS/', $rofid)) {
+    } elseif (preg_match('/^UP1-PERS/', $rofid)) {
         $table = 'rof_person';
         $field = 'rofid';
         $stop = false;

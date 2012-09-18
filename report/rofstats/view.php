@@ -17,8 +17,6 @@ echo $OUTPUT->heading('Détails de ' . $rofid ." ($table)");
 $url = "$CFG->wwwroot/report/rofstats/index.php";
 
 $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
-echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
-
 
 rof_view_record($rofid);
 if ($table == 'rof_program' || $table == 'rof_course') {
@@ -28,11 +26,12 @@ if ($table == 'rof_program' || $table == 'rof_course') {
     echo "Tous les chemins : <br />\n";
     $allPaths = getCourseAllPaths($rofid);
     $allPathnames = getCourseAllPathnames($allPaths);
+    echo '<ul>';
     foreach ($allPathnames as $pathname) {
-        echo fmtPath($pathname, 'combined', true);
-        echo "<br \>\n";
+        echo '<li>' . fmtPath($pathname, 'combined', true) . '</li>';
     }
+    echo '</ul>';
 }
 
-echo '<div><a href="' . $browserurl. '">ROF browser</a></div>';
+echo '<p><a href="' . $browserurl. '">Navigateur ROF</a></p>';
 echo $OUTPUT->footer();
