@@ -21,6 +21,24 @@ function rofCleanAll() {
     $DB->delete_records('rof_person');
 }
 
+function rofGlobalSync($verb=0, $dryrun=false) {
+
+    rofCleanAll();
+
+    if ($verb >= 1) echo "Constants... \n";
+    fetchConstants();
+    if ($verb >= 1) echo "\nComponents... \n";
+    echo setComponents();
+
+    if ($verb >= 1) echo "\nPrograms... \n";
+    echo fetchPrograms($verb, $dryrun);
+    if ($verb >= 1) echo "\nCourses... \n";
+    echo fetchCourses($verb, $dryrun);
+
+    if ($verb >= 1) echo "\nCourse parents... \n";
+    setCourseParents($verb, $dryrun);
+}
+
 
 /**
  * fetch "constantes" from webservice and insert them into table rof_constant

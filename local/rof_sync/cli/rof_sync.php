@@ -26,7 +26,7 @@ $help =
 
 Options:
 --verb=N              Verbosity (0 to 3), 1 by default
---cleanall            Do not sync, but clean all 5 cache rof_ tables
+--cleanall            Do not sync, but clean all 5 rof_ tables
 --dryrun              Simulation mode: do not change anything in the database
 -h, --help            Print out this help
 
@@ -44,22 +44,7 @@ if ($options['cleanall']) {
     return 0;
 }
 else {
-    if ($options['verb'] >= 1) echo "Constants... \n";
-    fetchConstants();
-
-    if ($options['verb'] >= 1) echo "\nComponents... \n";
-    echo setComponents();
-
-    if ($options['verb'] >= 1) echo "\nPrograms... \n";
-    echo fetchPrograms($options['verb'], $options['dryrun']);
-
-    // echo fetchCoursesByProgram('UP1-PROG29332', 2, 1); // TEST
-    if ($options['verb'] >= 1) echo "\nCourses... \n";
-    echo fetchCourses($options['verb'], $options['dryrun']);
-
-    if ($options['verb'] >= 1) echo "\nCourse parents... \n";
-    setCourseParents($options['verb'], $options['dryrun']);
-
-echo "\n\n";
-return 0;
+    rofGlobalSync($options['verb'], $options['verb']);
+    echo "\n\n";
+    return 0;
 }
