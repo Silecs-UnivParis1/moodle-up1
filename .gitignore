@@ -26,3 +26,5 @@ CVS
 /.buildpath
 /.cache
 phpunit.xml
+*.log
+xmlsamples
