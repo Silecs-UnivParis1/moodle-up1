@@ -21,8 +21,9 @@ function treeComponent () {
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
-
-			$list .= '<span class="selected-niv2 curser-point" id="niv_'.trim($c->id).'">'
+			$id = trim($c->id);
+			$list .= '<span class="selected-deep2 curser-point" data_id="' . $id
+				. '" data_deep="2" id="deep2_' . $id . '" data_path="/' . $id . '">'
 				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?id='.$c->id.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
@@ -117,9 +118,9 @@ class rof_browser {
 		if ($nbEnf) {
 			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
-			$coden = trim('niv'.$niveau);
-			$element .= '<span class="selected-'.$coden.' curser-point" id="'.trim($coden .'_'.$sp->id).'" title="'
-				. 'rof:' . $sp->rofid . $listeTitle . '">'
+			$coden = trim('deep'.$niveau);
+			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $coden . '_' . $sp->id . '" title="'
+				. 'rof:' . $sp->rofid . $listeTitle . '" data_id="'.$sp->id.'" data_deep="'.$niveau.'">'
                 . html_writer::link($detUrl, '( i )') . "  "
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
@@ -195,7 +196,7 @@ class rof_browser {
 
 		$cf = 'per' . $this->idPere;
 		if ($this->niveau == 2) {
-			$cf = 'cont-niv' . $this->niveau;
+			$cf = 'cont-deep' . $this->niveau;
 		}
 
 		if ($nbSubList) {
