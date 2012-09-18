@@ -21,11 +21,10 @@ function treeComponent () {
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
-			$id = trim($c->id);
-			$list .= '<span class="selected-deep2 curser-point" data_id="' . $id
-				. '" data_deep="2" id="deep2_' . $id . '" data_path="/' . $id . '">'
+			$list .= '<span class="selected-deep2 curser-point" data_deep="2" '
+			. 'id="deep2_' . $c->number . '" data_path="/' . $c->number . '" data_rofid="'.$c->number.'">'
 				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
-		//	$list .= '<a href="roffinal.php?id='.$c->id.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
+		//	$list .= '<a href="roffinal.php?rofid='.$c->number.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
 			$list .= '<li><span>' . htmlspecialchars($c->name) . '</span></li>';
@@ -67,7 +66,7 @@ class rof_browser {
 	public $format = 'list'; // list, table
 
 	protected $niveau;
-	protected $idPere;
+	protected $rofid;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -87,8 +86,8 @@ class rof_browser {
 		$this->niveau = $niveau;
 	}
 
-	public function setIdPere($idPere) {
-		$this->idPere = $idPere;
+	public function setRofid($rofid) {
+		$this->rofid = $rofid;
 	}
 
 	/**
@@ -116,11 +115,11 @@ class rof_browser {
         $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
 
 		if ($nbEnf) {
-			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&id='.$sp->id.'"><span class="curser-point">'
+			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&rofid='.$sp->rofid.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
 			$coden = trim('deep'.$niveau);
-			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $coden . '_' . $sp->id . '" title="'
-				. 'rof:' . $sp->rofid . $listeTitle . '" data_id="'.$sp->id.'" data_deep="'.$niveau.'">'
+			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $coden . '_' . $sp->rofid . '" title="'
+				. 'rof:' . $sp->rofid . $listeTitle . '" data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
                 . html_writer::link($detUrl, '( i )') . "  "
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
@@ -141,36 +140,36 @@ class rof_browser {
 		$tabSub = $this->tabNiveau[$this->niveau]['tabsub'];
 		$tabEnf = $this->tabNiveau[$this->niveau]['tabenf'];
 		$nivEnf = (int)$this->niveau  + 1;
-
 		$sort = '';
 
+		list($pere, $stop) = rofGetRecord($this->rofid);
+
 		if ($this->niveau == 2) {
-			$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
-			$sub = subToString($sub);
+			$sub = subToString($pere->sub);
 			$sort = " ORDER BY FIND_IN_SET(typedip, '" . typeDiplomeOrderedList() . "') ";
 			$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
 			$subList = $DB->get_records_sql($sql);
 		} elseif ($this->niveau==4) {
 			// dans rof_progam, la liste des enfants courses est dans le champ courses
-			$sub = $DB->get_field_select($tabSub, 'courses', 'id = '.$this->idPere);
-			$sub = subToString($sub);
+			if (isset($pere->courses)) {
+				$sub = subToString($pere->courses);
+			} else {
+				$sub = subToString($pere->sub);
+			}
 			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		} elseif ($this->niveau==3) {
-			$sub =  $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
-			if ($sub != '') {
-				$sub = subToString($sub);
+			if ($pere->sub != '') {
+				$sub = subToString($pere->sub);
 				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 			}
 			// si il y a aussi des cours à ce niveau
-			$sub =  $DB->get_field_select($tabSub, 'courses', 'id = '.$this->idPere);
-			if ($sub != '') {
-				$sub = subToString($sub);
+			if ($pere->courses != '') {
+				$sub = subToString($pere->courses);
 				$tabEnf = 'rof_course';
 				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 			}
 		} else {
-			$sub = $DB->get_field_select($tabSub, 'sub', 'id = '.$this->idPere);
-			$sub = subToString($sub);
+			$sub = subToString($pere->sub);
 			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
 
@@ -194,7 +193,7 @@ class rof_browser {
 		$list = '';
 		$nbSubList = count($subList);
 
-		$cf = 'per' . $this->idPere;
+		$cf = 'per' . $this->rofid;
 		if ($this->niveau == 2) {
 			$cf = 'cont-deep' . $this->niveau;
 		}
