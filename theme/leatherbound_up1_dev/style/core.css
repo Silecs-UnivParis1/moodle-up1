@@ -1,0 +1,407 @@
+/********************************************************
+**
+** Theme name: Leatherbound UP1 - DEV (red-ified)
+** Description: A GPL theme derived from Leatherbound by Patrick Malley
+** Author: Université Paris 1 (UP1), France
+**
+*********************************************************/
+
+/* Global 
+------------------------*/
+
+body {
+    background: #fff;
+    margin: 0;
+    padding: 0;
+    color: #281f18;
+}
+
+body,h1,h2,h3,h4,h5,h6,p,ul,ol,dl,input,textarea {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+ 
+h3 { color:#2E5693; margin-top:16px; margin-bottom:20px; }  /* yassi  */
+
+.sectionname h3 { font-family: Verdana,Helvetica,Arial,sans-serif !important; color:#333; }   
+
+.wrapper {
+    margin: 0 25px;
+}
+
+a:link,a:visited {
+    color: #DA5013; 
+
+}
+
+a:hover,a:active {
+    color: #251c17;
+}
+
+a img {
+    border: none;
+}
+
+a:active {
+    outline: none;
+}
+
+/* Header 
+-----------------------*/
+
+#page-header {
+    float: none;
+    padding: 10px 0 0 0px;
+    background: url([[pix:theme|header-logo3]]) no-repeat 0px 10px; /* yassi */
+	background-color: #f4cecd;
+    border-bottom: 5px solid #0A4280;
+    color: #fff; color:#0A4280; /* yassi */
+}
+
+#page-header h1 {
+    font-size: 2.25em;
+    margin: 30px 0 20px 240px;  /* yassi */
+}
+
+#page-header h1.inside {
+    font-size: 1.65em;
+    margin: 20px 0 10px 240px;  /* yassi */
+}
+
+.headermenu {
+    margin: 0;
+    font-size: 0.9em;
+ 
+
+}
+
+/* Navbar
+-----------------------*/
+
+.navbar {
+    border-width: 0 0 1px 0;
+    border-color: #ddddd7;
+    background: #f7f6f1;
+    margin: 0;
+    padding: 5px 0;
+}
+
+.breadcrumb {
+    padding-left: 10px;
+}
+
+.navbar .navbutton {
+    margin-top: 0;
+}
+
+.breadcrumb .sep {
+    font-size: 0.75em; 
+    color: #999;
+}
+
+/* Content
+-----------------------*/
+
+#page-content-wrapper {
+    float: none;
+    margin-top: 5px;
+}
+
+/* Blocks
+-----------------------*/
+
+.block {
+    margin-bottom: 20px;
+    border: none;
+}
+
+.block .header {
+    	border-top: 2px solid #da5013;
+	border-top: 2px solid #0A4280;  /* yassi */
+
+    	background: #f7f6f1; background: #f4cecd; /* yassi */
+	background: ##F0E6D5;
+    	padding: 4px 5px 5px;
+}
+
+.block .title h2 {
+    color: #35251B;
+	color: #4075C4; /*yassi */
+    font-weight: normal;
+    font-size: 1.2em; 
+    margin: 0;
+}
+
+/* ajouté yassi ::::::::::::: */
+
+.block .content{
+     
+	border:0px solid #666;
+	font-size: 0.85em; 
+
+}
+
+
+
+
+
+
+/* Forum
+------------------------*/
+
+.forumpost .topic {
+    background: #dbd6c7;
+    border-bottom:1px solid #da5013;
+    padding:5px 4px 4px;
+}
+
+.forumpost .topic .subject {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.forumpost .topic .author {
+    font-size: 0.9em;
+}
+
+.forumpost .content {
+    background: #f7f5f1;
+    border-width: 0 1px 1px;
+    border-style: solid;
+    border-color: #d9d8d4;
+}
+
+/* Course
+---------------------------*/
+
+h2.headingblock {
+    border-width: 0 0 1px 0;
+    padding: 5px 5px 2px;
+    font-weight: bold;
+    font-size: 1.35em;
+    BACKGROUND :  #ededed; background: #f7f5f1; background:#F2EFEA;  	 /* yassi */
+   font-variant: small-caps;
+
+    color: #251c17; color : #868686;
+}
+
+.course-content .main {
+    background: #f7f5f1;
+    border: 1px solid #ddd;
+	border : 1px solid #2E5693; /* yassi */
+	border-top:  3px solid #2E5693;/* yassi */
+
+}
+/* differencier ces liens des autres blocks   yassi 28 ******************************/
+/*
+.course-content .main a {color: #003399;}
+.course-content .main a:hover {color: #0000ff; text-decoration:underline;} 
+.course-content .main a:visited {color: #5580AE;  }
+
+*/
+
+
+.course-content .current {
+    background: #da5013;
+}
+
+.course-content .current .left.side {
+  color: #fff;
+}
+
+.course-content .main .content {
+    background: #fff;
+}
+
+/* Dock
+---------------------------*/
+
+#dock {
+    background-color: #f7f5f1;
+    border-right-color: #433b30;
+}
+
+#dock .dockeditem_container {
+    margin-top: 10px;
+}
+
+#dock .dockeditem {
+    background-color: #fff;
+}
+
+#dock .firstdockitem {
+    margin-top: 1em;
+}
+
+#dock .dockeditem .dockedtitle {
+    border-color: #dddddd;
+    border-top-color: #fff;
+}
+
+#dock .dockeditem .dockedtitle.activeitem {
+    background: #f7f5f1;
+    border-top-color:#f7f5f1 ;
+}
+
+#dock .firstdockitem .dockedtitle {
+    border-top-color: #ddd;
+}
+
+#dock .dockeditem .dockedtitle h2 {
+    margin: 12px 0 12px 7px;
+}
+
+#dockeditempanel .dockeditempanel_content {
+    border-color: #433b30;
+}
+
+#dockeditempanel .dockeditempanel_hd {
+    border-bottom: none;
+    padding: 3px 5px;
+    background: #f7f6f1;
+    text-align: left;
+}
+
+#dockeditempanel .dockeditempanel_hd h2 {
+    color: #333;
+    text-align: left;
+    font-weight: normal;
+    font-size: 1.25em;
+    padding: 0 2px;
+}
+
+#dockeditempanel .dockeditempanel_hd .commands {
+    float: right;
+}
+/* block expansion code */
+
+.block_js_expansion .block_tree {
+    overflow-x: scroll;
+}
+
+.block_js_expansion.mouseover .content {
+    width: 200%;
+    z-index: 1000;
+    position: relative;
+}
+
+.block_js_expansion.mouseover .content .block_tree {
+    width: 100%;
+    background-color: #FAFAFA;
+    padding-bottom: 0px;
+}
+
+/** IE stylings */
+
+.ie6 .block .block_tree {
+    width: 160px;
+    overflow-x: scroll;
+}
+
+.ie6 .block_tree .tree_item {
+    width: 100%;
+}
+
+.ie6 #dock {
+    position: absolute;
+}
+
+.ie6 #dock hr {
+    display: none;
+    margin: 0px;
+    height: 0px;
+    padding: 0px;
+}
+
+.ie6 #dock li p {
+    background-color: inherit;
+}
+
+.ie6 #dock .bd.oversized_content .content, .ie7 #dock .bd.oversized_content .content {
+    padding-bottom: 0px;
+}
+
+.ie6 .block_js_expansion.mouseover .content, .ie7 .block_js_expansion.mouseover .content {
+    padding-bottom: 2px;
+}
+
+.ie6 #dock .bd.oversized_content {
+    width: 100%;
+}
+
+/*custom menu styles */
+#custommenuwrap {
+    background-color: #F7F6F1;
+    border-bottom: 1px solid #DDDDDD;
+    padding: 3px 0px;
+}    
+
+#custommenu {
+    border-width: 0;
+    margin: 0 25px;
+}
+
+/*YUI Reset */
+#custommenu .yui3-menu-label,
+#custommenu .yui3-menuitem-content {
+    color: #35251B;
+    font-weight: 400;
+    border-width: 0;
+}
+
+#custommenu .custom_menu_submenu .yui3-menu-label,
+#custommenu .custom_menu_submenu .yui3-menuitem-content {
+    color: #35251B;
+}
+
+#custommenu .yui3-menu-label.yui3-menu-label-active,
+#custommenu .yui3-menuitem-active .yui3-menuitem-content {
+    color: #DA5013;
+}
+
+#custommenu .yui3-menu-content,
+#custommenu .yui3-menu .yui3-menu .yui3-menu-content,
+#custommenu .yui3-menu-horizontal .yui3-menu-label,
+#custommenu .yui3-menu-horizontal .yui3-menuitem-content  {
+    border-width: 0;
+}
+
+#custommenu .yui3-menu-label-active,
+#custommenu .yui3-menu-label-menuvisible,
+#custommenu .yui3-menu .yui3-menu .yui3-menuitem-active .yui3-menuitem-content {
+    background-color:#F6F6F6;
+}
+
+#custommenu .custom_menu_submenu {
+    border: 2px solid #DA5013 !important;
+    background: #fff;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0px 1px 3px #ccc;
+    -moz-box-shadow: 0px 1px 3px #ccc;
+    box-shadow: 0px 1px 3px #ccc;
+}
+
+#custommenu .yui3-menu.javascript-disabled .yui3-menu-content,
+#custommenu .yui3-menu.javascript-disabled .yui3-menu-content .ul {
+    border-width:0;
+}
+
+/* ..............Yassi ...............*/
+
+
+#page-content #region-main  a {color: #003399;}
+
+#page-content #region-main a:hover {color: #0000ff; text-decoration:underline;} 
+
+#page-content #region-main a:visited {color: #5580AE;  } 
+
+
+.coursebox .info { border: solid 0px #666; background-color: #ececec; }
+
+
+
+
+
+

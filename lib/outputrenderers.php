@@ -564,8 +564,9 @@ class core_renderer extends renderer_base {
         } else {
             $loggedinas = get_string('loggedinnot', 'moodle');
             if (!$loginpage) {
-                $loggedinas .= " (<a href=\"$loginurl\">".get_string('login').'</a>)';
+                $loggedinas .= " (<a href=\"$loginurl\">Invité</a>)";
             }
+            $loggedinas .= " (<a href=\"{$CFG->httpswwwroot}/auth/shibboleth/index.php\">".get_string('login').'</a>)';
         }
 
         $loggedinas = '<div class="logininfo">'.$loggedinas.'</div>';
