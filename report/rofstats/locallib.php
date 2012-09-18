@@ -98,19 +98,3 @@ function report_rofstats_hybrid_programs() {
     }
     return $res;
 }
-
-
-function report_rofstats_view_record($rofid) {
-    global $DB;
-
-    $res = array();
-    $dbprog = $DB->get_record(rofGetTable($rofid), array('rofid' => $rofid));
-    foreach (get_object_vars($dbprog) as $key => $value) {
-        $res[] = array($key, $value);
-    }
-    $table = new html_table();
-    $table->head = array('Champ', 'Valeur');
-    $table->data = $res;
-    echo html_writer::table($table);
-    return;
-}
