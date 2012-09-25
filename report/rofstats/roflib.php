@@ -170,8 +170,7 @@ function fmtPath($pathArray, $format='rofid', $roflink=false) {
     $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
-        $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
-        $linkrofid = ($roflink ? html_writer::link($url, $rofid) : $rofid);
+        $linkrofid = ($roflink ? rofid_link($rofid) : $rofid);
         switch($format) {
             case 'rofid':
                 $ret .= ' / ' . $linkrofid;
@@ -190,6 +189,16 @@ function fmtPath($pathArray, $format='rofid', $roflink=false) {
         $ret .= str_repeat('</ul>', count($pathArray));
     }
     return $ret;
+}
+
+/**
+ * returns link to view rofid
+ * @param string $rofid
+ * @return string url
+ */
+function rofid_link($rofid) {
+    $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
+    return html_writer::link($url, $rofid);
 }
 
 /**
@@ -217,7 +226,12 @@ function rof_view_record($rofid) {
         return false;
     }
     foreach (get_object_vars($dbprog) as $key => $value) {
-        $res[] = array($key, $value);
+        if ($key == 'courses' || $key == 'sub') {
+            $links = join(',', array_map('rofid_link', explode(',', $value)));    
+            $res[] = array($key, $links);
+        } else {
+            $res[] = array($key, $value);
+        }
     }
     $table = new html_table();
     $table->head = array('Champ', 'Valeur');
@@ -261,7 +275,7 @@ function rof_get_metadata($rofobject) {
     $res['diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
 
     $elp = array_pop($rofpath);
-    
+
     $elpdb = $DB->get_record('rof_course', array('rofid' => $elp));
     $res['identification']['nom'] = $elpdb->name;
     $res['identification']['rofid'] = $elpdb->rofid;
