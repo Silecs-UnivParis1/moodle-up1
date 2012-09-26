@@ -227,7 +227,7 @@ function rof_view_record($rofid) {
     }
     foreach (get_object_vars($dbprog) as $key => $value) {
         if ($key == 'courses' || $key == 'sub') {
-            $links = join(',', array_map('rofid_link', explode(',', $value)));    
+            $links = join(',', array_map('rofid_link', explode(',', $value)));
             $res[] = array($key, $links);
         } else {
             $res[] = array($key, $value);
@@ -280,6 +280,8 @@ function rof_get_metadata($rofobject) {
     $res['identification']['nom'] = $elpdb->name;
     $res['identification']['rofid'] = $elpdb->rofid;
     $res['identification']['code'] = $elpdb->code;
+    $res['identification']['nom-norme'] = $elpdb->code .' - '. $elpdb->name .' - ';
+    $res['identification']['abrege-norme'] = $elpdb->code .' - ';
 
     return $res;
 }

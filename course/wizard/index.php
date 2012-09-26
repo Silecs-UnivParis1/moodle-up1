@@ -97,6 +97,9 @@ if (isset($stepgo)) {
             // save custom fields data
             $mydata->id = $course->id;
             $custominfo_data = custominfo_data::type('course');
+
+            $mydata = customfields_wash($mydata);
+
             $custominfo_data->save_data($mydata);
             $SESSION->wizard['idcourse'] = $course->id;
             $SESSION->wizard['idenrolment'] = 'manual';
