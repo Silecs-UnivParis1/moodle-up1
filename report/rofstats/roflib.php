@@ -170,8 +170,7 @@ function fmtPath($pathArray, $format='rofid', $roflink=false) {
     $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
-        $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
-        $linkrofid = ($roflink ? html_writer::link($url, $rofid) : $rofid);
+        $linkrofid = ($roflink ? rofid_link($rofid) : $rofid);
         switch($format) {
             case 'rofid':
                 $ret .= ' / ' . $linkrofid;
@@ -190,6 +189,16 @@ function fmtPath($pathArray, $format='rofid', $roflink=false) {
         $ret .= str_repeat('</ul>', count($pathArray));
     }
     return $ret;
+}
+
+/**
+ * returns link to view rofid
+ * @param string $rofid
+ * @return string url
+ */
+function rofid_link($rofid) {
+    $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
+    return html_writer::link($url, $rofid);
 }
 
 /**
@@ -217,11 +226,86 @@ function rof_view_record($rofid) {
         return false;
     }
     foreach (get_object_vars($dbprog) as $key => $value) {
-        $res[] = array($key, $value);
+        if ($key == 'courses' || $key == 'sub') {
+            $links = join(',', array_map('rofid_link', explode(',', $value)));    
+            $res[] = array($key, $links);
+        } else {
+            $res[] = array($key, $value);
+        }
     }
     $table = new html_table();
     $table->head = array('Champ', 'Valeur');
     $table->data = $res;
     echo html_writer::table($table);
     return true;
+}
+
+
+
+function rof_get_metadata($rofobject) {
+    global $DB;
+    $res = array('identification' => array(),
+                 'indexation' => array(),
+                 'diplome' => array(),
+        );
+    if (is_array($rofobject) ) {
+        $path = $rofobject;
+    } else {
+        $path = getCourseFirstPath($rofobject);
+    }
+
+    $namepath = array_values($path);
+    $rofpath = array_keys($path);
+
+    $res['indexation']['semestre'] = $namepath[2]; //valeur de subprogram
+
+    $program = $DB->get_record('rof_program', array('rofid' => $rofpath[1])); //diplome (en général)
+    $res['diplome']['diplome'] = $program->name;
+    $res['diplome']['acronyme'] = $program->acronyme;
+    $res['diplome']['mention'] = $program->mention;
+    $res['diplome']['specialite'] = $program->specialite;
+    if ( preg_match('/^.* parcours (.*)$/', $program->name, $matches) ) {
+        $res['diplome']['parcours'] = $matches[1];
+    }
+    $res['diplome']['type']    = constant_metadata('typeDiplome', $program->typedip);
+    $res['diplome']['domaine'] = constant_metadata('domaineDiplome', $program->domainedip);
+    $res['diplome']['nature']  = constant_metadata('natureDiplome', $program->naturedip);
+    $res['diplome']['cycle']   = constant_metadata('cycleDiplome', $program->cycledip);
+    $res['diplome']['rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
+    $res['diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
+
+    $elp = array_pop($rofpath);
+
+    $elpdb = $DB->get_record('rof_course', array('rofid' => $elp));
+    $res['identification']['nom'] = $elpdb->name;
+    $res['identification']['rofid'] = $elpdb->rofid;
+    $res['identification']['code'] = $elpdb->code;
+
+    return $res;
+}
+
+/**
+ * return "human-readable" value as : (code) readable-name
+ * @global type $DB
+ * @param type $element from the rof_constant table
+ * @param type $rawdata reference to the rof_constant table, column dataimport
+ * @return string
+ */
+function constant_metadata($element, $rawdata) {
+    global $DB;
+    return '(' . $rawdata. ') '.
+            $DB->get_field('rof_constant', 'value', array('element' => $element, 'dataimport' => $rawdata));
+}
+
+function fmt_rof_metadata($metadata) {
+    $output = "<ul>\n";
+    foreach ($metadata as $cat => $data) {
+        $output .= "  <li>" . $cat . "</li>\n  <ul>\n";
+        foreach ($data as $key=>$value) {
+            $output .= "    <li>" . $key ." : ". $value ."</li>\n";
+        }
+        $output .= "  </ul>\n";
+    }
+    $output .= "</ul>\n";
+    return $output;
 }

@@ -31,6 +31,11 @@ if (rof_view_record($rofid)) {
             echo '<li>' . fmtPath($pathname, 'combined', true) . '</li>';
         }
         echo '</ol>';
+
+        if ($table == 'rof_course') {
+            echo "Métadonnées : <br />\n";
+            echo fmt_rof_metadata(rof_get_metadata($rofid));
+        }
     }
 }
 
