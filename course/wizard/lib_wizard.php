@@ -73,3 +73,31 @@ function send_course_request($message, $messagehtml) {
     }
     return $count;
 }
+
+/**
+ * Convertit les champs custom_info_field de type datetime en timestamp
+ * @param object $data
+ * @return object $data
+ */
+function customfields_wash($data) {
+	global $DB;
+    $fields = $DB->get_records('custom_info_field', array('objectname' => 'course', 'datatype' => 'datetime'));
+    if ($fields) {
+		foreach ($fields as $field) {
+			$nomc = 'profile_field_'.$field->shortname;
+			if (isset($data->$nomc) && is_array($data->$nomc)) {
+				$tab = $data->$nomc;
+				$hour = 0;
+				$minute = 0;
+				if (isset($tab['hour'])) {
+					$hour = $tab['hour'];
+				}
+				if (isset($tab['minute'])) {
+					$minute = $tab['minute'];
+				}
+				$data->$nomc = mktime($hour, $minute, 0, $tab['month'], $tab['day'], $tab['year']);
+			}
+		}
+	}
+    return $data;
+}
