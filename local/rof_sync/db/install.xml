@@ -75,8 +75,9 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="rofid"/>
         <FIELD NAME="rofid" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="rofid" NEXT="code"/>
-        <FIELD NAME="code" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="subnb"/>
-        <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="code" NEXT="sub"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="composition"/>
+        <FIELD NAME="composition" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="code" NEXT="subnb"/>
+        <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="composition" NEXT="sub"/>
         <FIELD NAME="sub" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="subnb" NEXT="level"/>
         <FIELD NAME="level" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sub" NEXT="parents"/>
         <FIELD NAME="parents" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="level" NEXT="parentsnb"/>
