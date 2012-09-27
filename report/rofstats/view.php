@@ -20,8 +20,10 @@ $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
 
 if (rof_view_record($rofid)) {
     if ($table == 'rof_program' || $table == 'rof_course') {
-        echo "Premier chemin : <br />\n";
-        echo fmtPath(getCourseFirstPath($rofid), 'ul', true);
+
+        echo "<h3>Chemins</h3>\n";
+        // echo "Premier chemin : <br />\n";
+        // echo fmtPath(getCourseFirstPath($rofid), 'ul', true);
 
         echo "Tous les chemins : <br />\n";
         $allPaths = getCourseAllPaths($rofid);
@@ -33,7 +35,7 @@ if (rof_view_record($rofid)) {
         echo '</ol>';
 
         if ($table == 'rof_course') {
-            echo "Métadonnées : <br />\n";
+            echo "<h3>Métadonnées</h3>\n";
             echo fmt_rof_metadata(rof_get_metadata($rofid));
         }
     }
