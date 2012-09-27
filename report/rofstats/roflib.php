@@ -257,8 +257,6 @@ function rof_get_metadata($rofobject) {
     $namepath = array_values($path);
     $rofpath = array_keys($path);
 
-    $res['indexation']['semestre'] = $namepath[2]; //valeur de subprogram
-
     $program = $DB->get_record('rof_program', array('rofid' => $rofpath[1])); //diplome (en général)
     $res['diplome']['diplome'] = $program->name;
     $res['diplome']['acronyme'] = $program->acronyme;
@@ -274,15 +272,18 @@ function rof_get_metadata($rofobject) {
     $res['diplome']['rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
     $res['diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
 
-    $elp = array_pop($rofpath);
+    $res['indexation']['semestre'] = $namepath[2]; //valeur de subprogram
+    $res['indexation']['semestreint'] = rof_guess_semester($namepath[2]);
+    $res['indexation']['annee'] = rof_guess_year($res['indexation']['semestreint'], $program->typedip);
 
+    $elp = array_pop($rofpath);
     $elpdb = $DB->get_record('rof_course', array('rofid' => $elp));
     $res['identification']['nom'] = $elpdb->name;
     $res['identification']['rofid'] = $elpdb->rofid;
     $res['identification']['code'] = $elpdb->code;
     $res['identification']['nom-norme'] = $elpdb->code .' - '. $elpdb->name .' - ';
-    $res['identification']['abrege-norme'] = $elpdb->code .' - ';
-
+    $res['identification']['abrege-norme'] = $elpdb->code .' - '
+;
     return $res;
 }
 
@@ -297,6 +298,52 @@ function constant_metadata($element, $rawdata) {
     global $DB;
     return '(' . $rawdata. ') '.
             $DB->get_field('rof_constant', 'value', array('element' => $element, 'dataimport' => $rawdata));
+}
+
+/**
+ * try to guess (integer) semester number
+ * @param type $semester
+ * @return string
+ */
+function rof_guess_semester($semester) {
+
+    if (preg_match('/\bsemestre( )?([1-9])/i', $semester, $match)) {
+        $res = $match[2];
+    } elseif (preg_match('/\bsem( )?([1-9])/i', $semester, $match)) {
+        $res = $match[2];
+    } elseif (preg_match('/\bs( )?([1-9])/i', $semester, $match)) {
+        $res = $match[2];
+    } else {
+        $res = '';
+    }
+    return $res;
+}
+
+/**
+ * try to guess the year of studies (année d'étude)
+ * @param int $semestreint
+ * @param string $typedip : one of the constants typeDiplome
+ * @return int or empty string
+ */
+function rof_guess_year($semestreint, $typedip) {
+    $cycledip = array(
+        'C1' => array('L1','L2','L3','DP','U2','U3'),
+        'C2' => array('M1','E1','M2','E2','30','U4','U5'),
+        'C3' => array('40', '41', 'U6'),
+        );
+        // 'Autres' => 'PG,PC,PA,P1'
+    if (! is_numeric($semestreint) ) {
+        return '';
+    }
+    if ( in_array($typedip, $cycledip['C1']) ) {
+        return 1 + round(($semestreint - 1) / 2, 0, PHP_ROUND_HALF_DOWN);
+    } elseif ( in_array($typedip, $cycledip['C2']) ) {
+        return 4 + round(($semestreint - 1) / 2, 0, PHP_ROUND_HALF_DOWN);
+    } elseif ( in_array($typedip, $cycledip['C3']) ) {
+        return 6;
+    } else {
+        return '';
+    }
 }
 
 function fmt_rof_metadata($metadata) {
