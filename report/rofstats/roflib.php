@@ -272,18 +272,18 @@ function rof_get_metadata($rofobject) {
     $res['diplome']['rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
     $res['diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
 
-    $res['indexation']['semestre'] = $namepath[2]; //valeur de subprogram
-    $res['indexation']['semestreint'] = rof_guess_semester($namepath[2]);
-    $res['indexation']['annee'] = rof_guess_year($res['indexation']['semestreint'], $program->typedip);
+    $res['indexation']['subprogram'] = $namepath[2]; //valeur de subprogram
+    $res['indexation']['semestre'] = rof_guess_semester($namepath[2]);
+    $res['indexation']['annee'] = rof_guess_year($res['indexation']['semestre'], $program->typedip);
 
     $elp = array_pop($rofpath);
-    $elpdb = $DB->get_record('rof_course', array('rofid' => $elp));
-    $res['identification']['nom'] = $elpdb->name;
-    $res['identification']['rofid'] = $elpdb->rofid;
-    $res['identification']['code'] = $elpdb->code;
-    $res['identification']['nom-norme'] = $elpdb->code .' - '. $elpdb->name .' - ';
-    $res['identification']['abrege-norme'] = $elpdb->code .' - '
-;
+    $course = $DB->get_record('rof_course', array('rofid' => $elp));
+    $res['identification']['nom'] = $course->name;
+    $res['identification']['rofid'] = $course->rofid;
+    $res['identification']['code'] = $course->code;
+    $res['identification']['nom-norme'] = $course->code .' - '. $course->name .' - '. $course->composition;
+    $res['identification']['abrege-norme'] = $course->code .' - '. $course->composition;
+
     return $res;
 }
 
@@ -351,7 +351,7 @@ function fmt_rof_metadata($metadata) {
     foreach ($metadata as $cat => $data) {
         $output .= "  <li>" . $cat . "</li>\n  <ul>\n";
         foreach ($data as $key=>$value) {
-            $output .= "    <li>" . $key ." : ". $value ."</li>\n";
+            $output .= "    <li>" . $key ." : <b>". $value ."</b></li>\n";
         }
         $output .= "  </ul>\n";
     }
