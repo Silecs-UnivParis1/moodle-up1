@@ -149,6 +149,10 @@ global $DB;
         $subComp[$compNumber] = array(); // liste des programmes fils
         $reqParams['__composante'] = $compNumber;
         $xmlResp = doSoapRequest($reqParams);
+        if ($verb >=3 ) {
+            echo "\n$compNumber size=". strlen($xmlResp) ."\n";
+        }
+
         $xmlTree = new SimpleXMLElement($xmlResp);
         $cnt = 0;
 
@@ -379,6 +383,11 @@ global $DB;
         $record->sub = '';
         $record->refperson = '';
         $subsCourse[$record->rofid] = array();
+        // on récupère les infos sous course/infoBlock/extension/cdmUP1/ (seulement composition ?)
+        if ( ! empty($element->infoBlock->extension->cdmUP1) ) {
+            $record->composition = (string)$element->infoBlock->extension->cdmUP1->composition;
+        }
+
         if (! $dryrun ) {
             $lastinsertid = $DB->insert_record('rof_course', $record);
             if ( $lastinsertid) {
