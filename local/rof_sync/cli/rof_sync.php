@@ -44,7 +44,7 @@ if ($options['cleanall']) {
     return 0;
 }
 else {
-    rofGlobalSync($options['verb'], $options['verb']);
+    rofGlobalSync($options['verb'], $options['dryrun']);
     echo "\n\n";
     return 0;
 }
