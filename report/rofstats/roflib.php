@@ -278,6 +278,7 @@ function rof_get_metadata($rofobject) {
 
     $elp = array_pop($rofpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
+    $res['indexation']['composition'] = $course->composition;
     $res['identification']['nom'] = $course->name;
     $res['identification']['rofid'] = $course->rofid;
     $res['identification']['code'] = $course->code;
