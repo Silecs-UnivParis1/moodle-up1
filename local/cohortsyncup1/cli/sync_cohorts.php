@@ -24,7 +24,7 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 
 
 // now get cli options
-list($options, $unrecognized) = cli_get_params(array('help'=>false, 'init'=>false, 'since'=>0, 'verb'=>1),
+list($options, $unrecognized) = cli_get_params(array('help'=>false, 'init'=>false, 'cleanall'=>false, 'since'=>0, 'verb'=>1),
                                                array('h'=>'help', 'i'=>'init'));
 
 if ($unrecognized) {
@@ -35,16 +35,17 @@ if ($unrecognized) {
 $help =
 "Synchronize cohorts from PAGS webservice. Normally, to be executed by a cron job.
 
-If you want to force initialization, it can be useful to empty tables
-cohort and cohort_members first with the following SQL command:
-DELETE FROM cohort, cohort_members  USING cohort INNER JOIN cohort_members
-    WHERE cohort.component = 'local_cohortsyncup1' AND cohort.id = cohort_members.cohortid;
-
 Options:
 --verb=N              Verbosity (0 to 3), 1 by default
 --since=(timestamp)   Apply only to users synchronized since given timestamp. If not set, use last cohort sync.
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
+--cleanall            Empty cohort_members, then cohort (slow due to Moodle restrictions)
+
+If you want to force initialization, you should execute --cleanall first but it is MUCH faster
+to manually empty tables cohort and cohort_members INSTEAD with the following SQL command:
+DELETE FROM cohort, cohort_members  USING cohort INNER JOIN cohort_members
+    WHERE cohort.component = 'local_cohortsyncup1' AND cohort.id = cohort_members.cohortid;
 
 Example:
 /usr/bin/php local/cohortsyncup1/cli/sync_cohorts.php --init --verb=2
@@ -59,6 +60,11 @@ if ( ! empty($options['help']) ) {
 
 // Ensure errors are well explained
 $CFG->debug = DEBUG_NORMAL;
+
+if ( $options['cleanall'] ) {
+    cohorts_cleanall();
+    return 0;
+}
 
 if ( $options['init'] ) {
     $since = 0;

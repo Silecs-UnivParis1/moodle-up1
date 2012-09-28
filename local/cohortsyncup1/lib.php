@@ -10,6 +10,22 @@
 
 require_once($CFG->dirroot . '/cohort/lib.php');
 
+function cohorts_cleanall() {
+    global $DB;
+
+    $delcohorts=$DB->get_records_menu('cohort', array('component' => 'local_cohortsyncup1'));
+    echo "Deleting cohort_members...\n";
+    foreach ($delcohorts as $id => $contextid) {
+        $DB->delete_records('cohort_members', array('cohortid' => $id));
+    }
+    echo "Deleting cohorts...\n";
+    $DB->delete_records('cohort', array('component' => 'local_cohortsyncup1'));
+    /*
+    $sql = "DELETE FROM {cohort}, {cohort_members} USING {cohort} INNER JOIN {cohort_members} "
+    . "WHERE {cohort}.component = 'local_cohortsyncup1' AND {cohort}.id = {cohort_members}.cohortid ";
+    */
+}
+
 function sync_cohorts($timelast=0, $limit=0, $verbose=0)
 {
     global $CFG, $DB;
@@ -61,7 +77,7 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
             $prevpercent = $percent;
         }
         if ( empty($data) ) continue;
-        
+
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
             $memberof[] = $ckey;
@@ -126,9 +142,9 @@ function remove_memberships($userid, $memberof) {
 function define_cohort($wscohort) {
     $newcohort = array(
                         'contextid' => 1,
-                        'name' => (property_exists($wscohort, 'name') ? $wscohort->name : $wscohort->key),
+                        'name' => (property_exists($wscohort, 'description') ? substr($wscohort->description, 0, 254) : ''),
                         'idnumber' => $wscohort->key,
-                        'description' => (property_exists($wscohort, 'description') ? $wscohort->description : ''),
+                        'description' => (property_exists($wscohort, 'name') ? $wscohort->name : $wscohort->key),
                         'descriptionformat' => 0, //** @todo check
                         'component' => 'local_cohortsyncup1'
                     );
