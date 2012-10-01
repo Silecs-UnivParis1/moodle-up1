@@ -33,6 +33,35 @@ function treeComponent () {
 	$list .= '</ul>';
 	return $list;
 }
+
+/**
+ * construit l'arbre du rof (arbre selected)
+ * @return string code html
+ */
+function afficheArbre() {
+	$components = getRofComponents();
+	$list = '<ul>';
+	foreach ($components as $c) {
+		$id = 'deep2_' . $c->number;
+		$idElem = $id . '-elem';
+		if ($c->sub != '') {
+			$nbProg = nbSub($c->sub);
+			$list .= '<li>';
+			$list .= '<span class="collapse curser-point" data_deep="2" '
+				.'title="Déplier" '
+				. 'id="' . $id . '" data_path="/' . $c->number . '" data_rofid="' . $c->number . '">'
+				. '[+] </span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
+				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
+			$list .= '</li>';
+		} else {
+			$list .= '<li><span class="element pointer" id="' . $idElem
+				. '" title="Sélectionner">' . htmlspecialchars($c->name) . '</span></li>';
+		}
+	}
+	$list .= '</ul>';
+	return $list;
+}
+
 /*
  * réécrit la liste les éléments fils en suivant le format "'fils_1', 'fils2'"
  * @param string $sub : "fils_1, fils2"
@@ -67,6 +96,7 @@ class rof_browser {
 
 	protected $niveau;
 	protected $rofid;
+	protected $selected;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -88,6 +118,10 @@ class rof_browser {
 
 	public function setRofid($rofid) {
 		$this->rofid = $rofid;
+	}
+
+	public function setSelected($selected) {
+		$this->selected = $selected;
 	}
 
 	/**
@@ -201,10 +235,58 @@ class rof_browser {
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
-				$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
+				if ($this->selected == 1) {
+					$list .= '<li>' . $this->createItem($sl, $nivEnf). '</li>';
+				} else {
+					$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
+				}
 			}
 		$list .= '</ul>';
 		}
 		return $list;
+	}
+
+/**
+	 * Construit un item d'une liste (arbre selected)
+	 * @param $object $sp correspond à l'objet à afficher
+	 * @param $niveau
+	 * @return string
+	 */
+	function createItem($sp, $niveau) {
+		$element = '';
+
+		$listeTitle = '';
+		// table rof_program
+		if (isset($sp->typedip)) {
+			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
+			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
+		}
+		$nbSub = nbSub($sp->sub);
+		$nbCourses = 0;
+		if (isset($sp->courses)) {
+			$nbCourses = nbSub($sp->courses);
+		}
+		$nbEnf = $nbSub + $nbCourses;
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
+
+		$coden = trim('deep'.$niveau);
+		$id = $coden.'_'.$sp->rofid;
+		$idElem = $id . '-elem';
+		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+
+		if ($nbEnf) {
+			$element .= '<span class="collapse curser-point" id="'. $id . '" title="Déplier" '
+				. 'data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
+				. '[+] </span>'
+                . html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
+                . '<span class="element pointer" id="' . $idElem
+				. '" title="' . $titleElem . '">'
+				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
+		} else {
+			$element .= html_writer::link($detUrl, '( i )') . "  "
+                . '<span title="' . $titleElem . '">'
+                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+		}
+		return $element;
 	}
 }
