@@ -9,5 +9,5 @@
  */
 
 $string['pluginname'] = 'course_validated';
-$string['coursestovalidate'] = 'Course Assistant to validate';
+$string['coursestovalidate'] = 'Course Wizard to validate';
 
