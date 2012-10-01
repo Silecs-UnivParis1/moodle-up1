@@ -40,10 +40,10 @@ Options:
 --since=(timestamp)   Apply only to users synchronized since given timestamp. If not set, use last cohort sync.
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
---cleanall            Empty cohort_members, then cohort (slow due to Moodle restrictions)
+--cleanall            Empty cohort_members, then cohort
 
-If you want to force initialization, you should execute --cleanall first but it is MUCH faster
-to manually empty tables cohort and cohort_members INSTEAD with the following SQL command:
+If you want to force initialization, you should execute --cleanall first but it may be faster
+to manually empty tables cohort and cohort_members with the following MySQL command:
 DELETE FROM cohort, cohort_members  USING cohort INNER JOIN cohort_members
     WHERE cohort.component = 'local_cohortsyncup1' AND cohort.id = cohort_members.cohortid;
 

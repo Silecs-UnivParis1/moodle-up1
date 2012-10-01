@@ -13,17 +13,12 @@ require_once($CFG->dirroot . '/cohort/lib.php');
 function cohorts_cleanall() {
     global $DB;
 
-    $delcohorts=$DB->get_records_menu('cohort', array('component' => 'local_cohortsyncup1'));
     echo "Deleting cohort_members...\n";
-    foreach ($delcohorts as $id => $contextid) {
-        $DB->delete_records('cohort_members', array('cohortid' => $id));
-    }
+    $select = "cohortid IN (SELECT id FROM {cohort} WHERE component='local_cohortsyncup1')";
+    $DB->delete_records_select('cohort_members', $select);
+
     echo "Deleting cohorts...\n";
     $DB->delete_records('cohort', array('component' => 'local_cohortsyncup1'));
-    /*
-    $sql = "DELETE FROM {cohort}, {cohort_members} USING {cohort} INNER JOIN {cohort_members} "
-    . "WHERE {cohort}.component = 'local_cohortsyncup1' AND {cohort}.id = {cohort_members}.cohortid ";
-    */
 }
 
 function sync_cohorts($timelast=0, $limit=0, $verbose=0)
