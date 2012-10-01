@@ -102,7 +102,9 @@ function sync_cohorts($timelast=0, $limit=0, $verbose=0)
             }
         } // foreach($data)
 
-        $cntRemovemembers += remove_memberships($userid, $memberof);
+        if ($timelast > 0) {
+            $cntRemovemembers += remove_memberships($userid, $memberof);
+        }
     } // foreach ($users)
     curl_close($ch);
 
@@ -123,7 +125,8 @@ function remove_memberships($userid, $memberof) {
     global $DB;
     $cnt = 0;
 
-    $sql = "SELECT cm.cohortid, c.idnumber FROM {cohort_members} cm LEFT JOIN {cohort} c ON (c.id=cm.cohortid) WHERE cm.userid=?";
+    $sql = "SELECT cm.cohortid, c.idnumber FROM {cohort_members} cm "
+        . "LEFT JOIN {cohort} c ON (c.id=cm.cohortid AND c.component='local_cohortsyncup1') WHERE cm.userid=?";
     $res = $DB->get_records_sql_menu($sql, array($userid));
     foreach ($res as $cohortid => $idnumber) {
         if ( ! in_array($idnumber, $memberof) ) {
