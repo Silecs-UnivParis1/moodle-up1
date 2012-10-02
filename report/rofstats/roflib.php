@@ -125,36 +125,36 @@ function rofGetTable($rofid) {
 /**
  * returns record from rofid ; requests from component, program, course and person tables
  * @param string $rofid
- * @return DB record
+ * @return array(DB $record, bool $top) ; top set on component => stop climbing up the ROF tree
  */
 function rofGetRecord($rofid) {
     global $DB;
     if (preg_match('/^UP1-PROG/', $rofid)) {
         $table = 'rof_program';
         $field = 'rofid';
-        $stop = false;
+        $top = false;
     } elseif (preg_match('/^UP1-C/', $rofid)) {
         $table = 'rof_course';
         $field = 'rofid';
-        $stop = false;
+        $top = false;
     } elseif (preg_match('/^[0-9][0-9]$/', $rofid)) {
         $table = 'rof_component';
         $field = 'number';
-        $stop = true;
+        $top = true;
     } elseif (preg_match('/^UP1-OU/', $rofid)) {
         $table = 'rof_component';
         $field = 'rofid';
-        $stop = true;
+        $top = true;
         // WARNING non renseigné pour l'instant
     } elseif (preg_match('/^UP1-PERS/', $rofid)) {
         $table = 'rof_person';
         $field = 'rofid';
-        $stop = false;
+        $top = false;
     } else {
         return array(false, true);
     }
     $record = $DB->get_record($table, array($field => $rofid), '*', IGNORE_MISSING);
-    return array($record, $stop);
+    return array($record, $top);
 }
 
 
