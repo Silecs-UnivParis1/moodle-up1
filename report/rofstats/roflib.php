@@ -376,3 +376,17 @@ function fmt_rof_metadata($metadata) {
     $output .= "</ul>\n";
     return $output;
 }
+
+function rof_insert_paths_statistics($verb=0) {
+    global $DB;
+
+    $courses = $DB->get_records('rof_course', array(), '', 'id,rofid');
+    foreach ($courses as $course) {
+        $paths = count(getCourseAllPaths($course->rofid));
+        if ($verb >=1 ) { echo '.'; }
+        $dbcourse = new stdClass();
+        $dbcourse->id = $course->id;
+        $dbcourse->pathsnb = $paths;
+        $DB->update_record('rof_course', $dbcourse, true); //bulk=true
+    }
+}
