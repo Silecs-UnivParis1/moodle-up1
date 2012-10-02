@@ -4,6 +4,7 @@ jQuery(function () {
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data_rofid');
+		var path = $(this).attr('data_path');
 
 		var plus = $(this).text();
 		$(this).empty();
@@ -17,7 +18,7 @@ jQuery(function () {
 		var fr = $(this).siblings('ul').size();
 		if (fr == 0) {
 		// creation liste ul
-			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1},  function(data){
+			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
 				$("#"+codeid+'-elem').after(data);
 			}, 'html');
 		}

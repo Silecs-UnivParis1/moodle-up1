@@ -31,3 +31,7 @@ div#liste-selected {
 .elemSel {
 	cursor: pointer;
 }
+
+.pointer {
+	cursor: pointer;
+}

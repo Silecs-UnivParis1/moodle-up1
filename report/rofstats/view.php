@@ -7,6 +7,7 @@ require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
 $rofid = required_param('rofid', PARAM_ALPHANUMEXT); //
+$path = required_param('path', PARAM_ALPHANUMEXT); //
 
 // Print the header.
 $table = rofGetTable($rofid);
