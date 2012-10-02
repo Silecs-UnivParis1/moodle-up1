@@ -50,19 +50,23 @@ function afficheArbre() {
 		$idElem = $id . '-elem';
 		$data_path = $c->number;
 		$data_rofid = $c->number;
+
+		$style = 'collapse';
+		$collapse = '';
+		$infoNbEnf = '';
 		if ($c->sub != '') {
-			$nbProg = nbSub($c->sub);
-			$list .= '<li>';
-			$list .= '<span class="collapse curser-point" data_deep="2" '
-				.'title="Déplier" '
-				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
-				. '[+] </span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
-				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
-			$list .= '</li>';
-		} else {
-			$list .= '<li><span class="element pointer" id="' . $idElem
-				. '" title="Sélectionner">' . htmlspecialchars($c->name) . '</span></li>';
+			$nbEnf = nbSub($c->sub);
+			$style = 'collapse curser-point';
+			$collapse = '[+] ';
+			$infoNbEnf = '('. $nbEnf .')';
 		}
+		$list .= '<li>';
+		$list .= '<span class="' . $style . '" data_deep="2" '
+			.'title="Déplier" '
+			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
+			. $collapse . '</span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
+			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
+		$list .= '</li>';
 	}
 	$list .= '</ul>';
 	return $list;
@@ -292,19 +296,21 @@ class rof_browser {
 		$nbEnf = $nbSub + $nbCourses;
         $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
 
+		$style = 'collapse';
+		$collapse = '';
+		$infoNbEnf = '';
 		if ($nbEnf) {
-			$element .= '<span class="collapse curser-point" id="'. $id . '" title="Déplier" '
-				. 'data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'" data_path="' . $data_path . '">'
-				. '[+] </span>'
-                . html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
-                . '<span class="element pointer" id="' . $idElem
-				. '" title="' . $titleElem . '">'
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
-		} else {
-			$element .= html_writer::link($detUrl, '( i )') . "  "
-                . '<span title="' . $titleElem . '" data_path="' . $data_path . '">'
-                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+			$style = 'collapse curser-point';
+			$collapse = '[+] ';
+			$infoNbEnf = '('. $nbEnf .')';
 		}
+		$element .= '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
+			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
+			. html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
+			. '<span class="element pointer" id="' . $idElem
+			. '" title="' . $titleElem . '">'
+			. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
 		return $element;
 	}
 }
