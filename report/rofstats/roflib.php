@@ -100,6 +100,23 @@ function getCourseAllPathnames($pathlist) {
     return $res;
 }
 
+
+/**
+ * returns detailed path (with names) from rofid path
+ * @global type $DB
+ * @param array $path
+ * @return associative array (rofid => name)
+ */
+function getCompletePath($path) {
+    global $DB;
+    $res = array();
+    foreach ($path as $rofid) {
+        list($record, $ignore) = rofGetRecord($rofid);
+        $res[$rofid] = $record->name;
+    }
+    return $res;
+}
+
 /**
  * returns table from rofid
  * @param string $rofid
