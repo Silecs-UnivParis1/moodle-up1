@@ -19,8 +19,9 @@ function treeComponent () {
 	$list = '<ul>';
 	foreach ($components as $c) {
 		$id = 'deep2_' . $c->number;
-		$data_path = '/' . $c->number;
+		$data_path = $c->number;
 		$data_rofid = $c->number;
+
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
@@ -47,12 +48,14 @@ function afficheArbre() {
 	foreach ($components as $c) {
 		$id = 'deep2_' . $c->number;
 		$idElem = $id . '-elem';
+		$data_path = $c->number;
+		$data_rofid = $c->number;
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li>';
 			$list .= '<span class="collapse curser-point" data_deep="2" '
 				.'title="Déplier" '
-				. 'id="' . $id . '" data_path="/' . $c->number . '" data_rofid="' . $c->number . '">'
+				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
 				. '[+] </span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
 				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 			$list .= '</li>';
@@ -100,6 +103,7 @@ class rof_browser {
 	protected $niveau;
 	protected $rofid;
 	protected $selected;
+	protected $path;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -127,6 +131,10 @@ class rof_browser {
 		$this->selected = $selected;
 	}
 
+	public function setPath($path) {
+		$this->path = $path;
+	}
+
 	/**
 	 * Construit un élément d'une liste
 	 * @param $object $sp correspond à l'objet à afficher
@@ -146,6 +154,7 @@ class rof_browser {
 
 		$coden = trim('deep'.$niveau);
 		$id =  $coden . '_' . $sp->rofid;
+		$data_path = $this->path . '_' . $sp->rofid;
 
 		$nbSub = nbSub($sp->sub);
 		$nbCourses = 0;
@@ -153,17 +162,18 @@ class rof_browser {
 			$nbCourses = nbSub($sp->courses);
 		}
 		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
 
 		if ($nbEnf) {
 			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&rofid='.$sp->rofid.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
 			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $id . '" title="'
-				. $titleElem . '" data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
+				. $titleElem . '" data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+				. '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
-			$element .= '<span title="' . $titleElem . '">'
+			$element .= '<span title="' . $titleElem . '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
                 . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
@@ -272,17 +282,19 @@ class rof_browser {
 		if (isset($sp->courses)) {
 			$nbCourses = nbSub($sp->courses);
 		}
-		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
 
 		$coden = trim('deep'.$niveau);
 		$id = $coden.'_'.$sp->rofid;
 		$idElem = $id . '-elem';
 		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+		$data_path = $this->path . '_' . $sp->rofid;
+
+		$nbEnf = $nbSub + $nbCourses;
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
 
 		if ($nbEnf) {
 			$element .= '<span class="collapse curser-point" id="'. $id . '" title="Déplier" '
-				. 'data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
+				. 'data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'" data_path="' . $data_path . '">'
 				. '[+] </span>'
                 . html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
                 . '<span class="element pointer" id="' . $idElem
@@ -290,7 +302,7 @@ class rof_browser {
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
 		} else {
 			$element .= html_writer::link($detUrl, '( i )') . "  "
-                . '<span title="' . $titleElem . '">'
+                . '<span title="' . $titleElem . '" data_path="' . $data_path . '">'
                 . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
 		}
 		return $element;
