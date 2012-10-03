@@ -39,3 +39,8 @@ div#liste-selected {
 .list-none {
 	list-style-type: none;
 }
+
+ul.item {
+	margin-top: 0;
+	margin-bottom: 0;
+}

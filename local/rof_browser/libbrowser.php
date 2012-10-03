@@ -257,6 +257,7 @@ class rof_browser {
 		if ($this->niveau == 2) {
 			$cf = 'cont-deep' . $this->niveau;
 		}
+		$cf .= ' item ';
 
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';
