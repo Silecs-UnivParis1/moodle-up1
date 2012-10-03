@@ -21,17 +21,19 @@ function treeComponent () {
 		$id = 'deep2_' . $c->number;
 		$data_path = $c->number;
 		$data_rofid = $c->number;
+		$listStyle = 'list-none';
 
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
-			$list .= '<li>';
+			$list .= '<li class="' . $listStyle . '">';
 			$list .= '<span class="selected-deep2 curser-point" data_deep="2" '
 				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
 				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?rofid='.$c->number.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
-			$list .= '<li><span>' . htmlspecialchars($c->name) . '</span></li>';
+			$list .= '<li class="' . $listStyle . '"><span>' . htmlspecialchars($c->name)
+				. '</span></li>';
 		}
 	}
 	$list .= '</ul>';
@@ -54,13 +56,14 @@ function afficheArbre() {
 		$style = 'collapse';
 		$collapse = '';
 		$infoNbEnf = '';
+		$listStyle = 'list-none';
 		if ($c->sub != '') {
 			$nbEnf = nbSub($c->sub);
 			$style = 'collapse curser-point';
 			$collapse = '[+] ';
 			$infoNbEnf = '('. $nbEnf .')';
 		}
-		$list .= '<li>';
+		$list .= '<li class="' . $listStyle . '">';
 		$list .= '<span class="' . $style . '" data_deep="2" '
 			.'title="Déplier" '
 			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
@@ -167,19 +170,22 @@ class rof_browser {
 		}
 		$nbEnf = $nbSub + $nbCourses;
         $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
+        $listStyle = 'list-none';
 
 		if ($nbEnf) {
 			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&rofid='.$sp->rofid.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
-			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $id . '" title="'
+			$element .= '<li class="' . $listStyle . '"><span class="selected-'
+				. $coden . ' curser-point" id="'. $id . '" title="'
 				. $titleElem . '" data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 				. '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
+				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span></li>';
 		} else {
-			$element .= '<span title="' . $titleElem . '" data_path="' . $data_path . '">'
+			$element .= '<li class="' . $listStyle . '"><span title="'
+				. $titleElem . '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></li>';
 		}
 		return $element;
 	}
@@ -256,9 +262,9 @@ class rof_browser {
 		$list = '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
 				if ($this->selected == 1) {
-					$list .= '<li>' . $this->createItem($sl, $nivEnf). '</li>';
+					$list .= $this->createItem($sl, $nivEnf);
 				} else {
-					$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
+					$list .= $this->createElement($sl, $nivEnf);
 				}
 			}
 		$list .= '</ul>';
@@ -299,18 +305,21 @@ class rof_browser {
 		$style = 'collapse';
 		$collapse = '';
 		$infoNbEnf = '';
+		$listStyle = 'list-none';
 		if ($nbEnf) {
 			$style = 'collapse curser-point';
 			$collapse = '[+] ';
 			$infoNbEnf = '('. $nbEnf .')';
 		}
-		$element .= '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
+		$element .= '<li class="' . $listStyle . '">'
+			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
 			. '<span class="element pointer" id="' . $idElem
 			. '" title="' . $titleElem . '">'
-			. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
+			. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>'
+			. '</li>';
 		return $element;
 	}
 }
