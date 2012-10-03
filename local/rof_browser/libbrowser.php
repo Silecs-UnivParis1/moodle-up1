@@ -18,16 +18,22 @@ function treeComponent () {
 	$components = getRofComponents();
 	$list = '<ul>';
 	foreach ($components as $c) {
+		$id = 'deep2_' . $c->number;
+		$data_path = $c->number;
+		$data_rofid = $c->number;
+		$listStyle = 'list-none';
+
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
-			$list .= '<li>';
+			$list .= '<li class="' . $listStyle . '">';
 			$list .= '<span class="selected-deep2 curser-point" data_deep="2" '
-			. 'id="deep2_' . $c->number . '" data_path="/' . $c->number . '" data_rofid="'.$c->number.'">'
+				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
 				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?rofid='.$c->number.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
-			$list .= '<li><span>' . htmlspecialchars($c->name) . '</span></li>';
+			$list .= '<li class="' . $listStyle . '"><span>' . htmlspecialchars($c->name)
+				. '</span></li>';
 		}
 	}
 	$list .= '</ul>';
@@ -44,19 +50,26 @@ function afficheArbre() {
 	foreach ($components as $c) {
 		$id = 'deep2_' . $c->number;
 		$idElem = $id . '-elem';
+		$data_path = $c->number;
+		$data_rofid = $c->number;
+
+		$style = 'collapse';
+		$collapse = '';
+		$infoNbEnf = '';
+		$listStyle = 'list-none';
 		if ($c->sub != '') {
-			$nbProg = nbSub($c->sub);
-			$list .= '<li>';
-			$list .= '<span class="collapse curser-point" data_deep="2" '
-				.'title="Déplier" '
-				. 'id="' . $id . '" data_path="/' . $c->number . '" data_rofid="' . $c->number . '">'
-				. '[+] </span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
-				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
-			$list .= '</li>';
-		} else {
-			$list .= '<li><span class="element pointer" id="' . $idElem
-				. '" title="Sélectionner">' . htmlspecialchars($c->name) . '</span></li>';
+			$nbEnf = nbSub($c->sub);
+			$style = 'collapse curser-point';
+			$collapse = '[+] ';
+			$infoNbEnf = '('. $nbEnf .')';
 		}
+		$list .= '<li class="' . $listStyle . '">';
+		$list .= '<span class="' . $style . '" data_deep="2" '
+			.'title="Déplier" '
+			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
+			. $collapse . '</span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
+			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
+		$list .= '</li>';
 	}
 	$list .= '</ul>';
 	return $list;
@@ -97,6 +110,7 @@ class rof_browser {
 	protected $niveau;
 	protected $rofid;
 	protected $selected;
+	protected $path;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -124,6 +138,10 @@ class rof_browser {
 		$this->selected = $selected;
 	}
 
+	public function setPath($path) {
+		$this->path = $path;
+	}
+
 	/**
 	 * Construit un élément d'une liste
 	 * @param $object $sp correspond à l'objet à afficher
@@ -139,6 +157,11 @@ class rof_browser {
 			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
 			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
 		}
+		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+
+		$coden = trim('deep'.$niveau);
+		$id =  $coden . '_' . $sp->rofid;
+		$data_path = $this->path . '_' . $sp->rofid;
 
 		$nbSub = nbSub($sp->sub);
 		$nbCourses = 0;
@@ -146,20 +169,23 @@ class rof_browser {
 			$nbCourses = nbSub($sp->courses);
 		}
 		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
+        $listStyle = 'list-none';
 
 		if ($nbEnf) {
 			/**	$element .= '<a href="roffinal.php?niveau='.$niveau.'&rofid='.$sp->rofid.'"><span class="curser-point">'
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
-			$coden = trim('deep'.$niveau);
-			$element .= '<span class="selected-' . $coden . ' curser-point" id="'. $coden . '_' . $sp->rofid . '" title="'
-				. 'rof:' . $sp->rofid . $listeTitle . '" data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
+			$element .= '<li class="' . $listStyle . '"><span class="selected-'
+				. $coden . ' curser-point" id="'. $id . '" title="'
+				. $titleElem . '" data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+				. '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
+				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span></li>';
 		} else {
-			$element .= '<span title="rof:' . $sp->rofid . $listeTitle . '">'
+			$element .= '<li class="' . $listStyle . '"><span title="'
+				. $titleElem . '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></li>';
 		}
 		return $element;
 	}
@@ -231,14 +257,15 @@ class rof_browser {
 		if ($this->niveau == 2) {
 			$cf = 'cont-deep' . $this->niveau;
 		}
+		$cf .= ' item ';
 
 		if ($nbSubList) {
 		$list = '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
 				if ($this->selected == 1) {
-					$list .= '<li>' . $this->createItem($sl, $nivEnf). '</li>';
+					$list .= $this->createItem($sl, $nivEnf);
 				} else {
-					$list .= '<li>' . $this->createElement($sl, $nivEnf). '</li>';
+					$list .= $this->createElement($sl, $nivEnf);
 				}
 			}
 		$list .= '</ul>';
@@ -266,27 +293,34 @@ class rof_browser {
 		if (isset($sp->courses)) {
 			$nbCourses = nbSub($sp->courses);
 		}
-		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid));
 
 		$coden = trim('deep'.$niveau);
 		$id = $coden.'_'.$sp->rofid;
 		$idElem = $id . '-elem';
 		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+		$data_path = $this->path . '_' . $sp->rofid;
 
+		$nbEnf = $nbSub + $nbCourses;
+        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
+
+		$style = 'collapse';
+		$collapse = '';
+		$infoNbEnf = '';
+		$listStyle = 'list-none';
 		if ($nbEnf) {
-			$element .= '<span class="collapse curser-point" id="'. $id . '" title="Déplier" '
-				. 'data_deep="'.$niveau.'" data_rofid="'.$sp->rofid.'">'
-				. '[+] </span>'
-                . html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
-                . '<span class="element pointer" id="' . $idElem
-				. '" title="' . $titleElem . '">'
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span>';
-		} else {
-			$element .= html_writer::link($detUrl, '( i )') . "  "
-                . '<span title="' . $titleElem . '">'
-                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span>';
+			$style = 'collapse curser-point';
+			$collapse = '[+] ';
+			$infoNbEnf = '('. $nbEnf .')';
 		}
+		$element .= '<li class="' . $listStyle . '">'
+			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
+			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
+			. html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
+			. '<span class="element pointer" id="' . $idElem
+			. '" title="' . $titleElem . '">'
+			. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>'
+			. '</li>';
 		return $element;
 	}
 }

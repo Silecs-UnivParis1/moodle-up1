@@ -4,6 +4,7 @@ jQuery(function () {
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data_rofid');
+		var path = $(this).attr('data_path');
 
 		var plus = $(this).text();
 		$(this).empty();
@@ -17,7 +18,7 @@ jQuery(function () {
 		var fr = $(this).siblings('ul').size();
 		if (fr == 0) {
 		// creation liste ul
-			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1},  function(data){
+			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
 				$("#"+codeid+'-elem').after(data);
 			}, 'html');
 		}
@@ -36,11 +37,18 @@ jQuery(function () {
 
 	$('div.component-tree').on("click", ".element", function(event) {
 		var rofid = $(this).prevAll('span.collapse').attr('data_rofid');
+		var path =  $(this).prevAll('span.collapse').attr('data_path');
+		var intitule = $(this).text();
+
+		var reg=new RegExp("_", "gi");
+		path = path.replace(reg, "/");
+
 		var present = $('#liste-selected > div#select_'+rofid).size();
 		if (present) {
 			alert(rofid+' fait déjà parti de la la sélection.');
 		} else {
-			var elem = ' <div class="elemSel" id="select_'+rofid+'" title="Supprimer">'+rofid+'</div>';
+			var elem = ' <div class="elemSel" id="select_'+rofid
+				+'" title="Supprimer">'+path+' : '+intitule+'</div>';
 			$("#liste-selected").append(elem);
 		}
 

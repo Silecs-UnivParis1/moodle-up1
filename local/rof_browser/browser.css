@@ -31,3 +31,16 @@ div#liste-selected {
 .elemSel {
 	cursor: pointer;
 }
+
+.pointer {
+	cursor: pointer;
+}
+
+.list-none {
+	list-style-type: none;
+}
+
+ul.item {
+	margin-top: 0;
+	margin-bottom: 0;
+}

@@ -36,7 +36,7 @@ jQuery(function () {
     };
     function mainSource(request, response) {
         $.ajax({
-            url: "http://ticetest.univ-paris1.fr/web-service-groups/search",
+            url: "http://wsgroups.univ-paris1.fr/search",
             dataType: "jsonp",
             data: {
                 maxRows: 10,
@@ -60,7 +60,7 @@ jQuery(function () {
     }
     function setGroupsbyUser(uid, ac) {
         $.ajax({
-            url: 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsId',
+            url: 'http://wsgroups.univ-paris1.fr/userGroupsId',
             dataType: "jsonp",
             data: {
                 uid: uid

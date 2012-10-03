@@ -7,6 +7,7 @@ require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
 $rofid = required_param('rofid', PARAM_ALPHANUMEXT); //
+$path = optional_param('path', null, PARAM_ALPHANUMEXT); //
 
 // Print the header.
 $table = rofGetTable($rofid);
@@ -22,8 +23,12 @@ if (rof_view_record($rofid)) {
     if ($table == 'rof_program' || $table == 'rof_course') {
 
         echo "<h3>Chemins</h3>\n";
-        // echo "Premier chemin : <br />\n";
-        // echo fmtPath(getCourseFirstPath($rofid), 'ul', true);
+        if (isset($path)) {
+            echo "Chemin d'accès : <br />\n";
+            $accPath = explode('_', $path);
+            echo fmtPath(getCompletePath($accPath), 'combined', true);
+            echo "<br />\n<br />\n";
+        }
 
         echo "Tous les chemins : <br />\n";
         $allPaths = getCourseAllPaths($rofid);

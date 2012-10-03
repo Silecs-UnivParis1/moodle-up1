@@ -10,7 +10,7 @@ jQuery(function () {
 		var fr = $(this).siblings().size();
 		if (fr == 0) {
 			$(cf).addClass('hidden');
-			$.get('roffinal.php', {niveau: niv, rofid: rofid},  function(data){
+			$.get('roffinal.php', {niveau: niv, rofid: rofid, path: path},  function(data){
 				$("#"+codeid).after(data);
 			}, 'html');
 		}
@@ -30,11 +30,16 @@ jQuery(function () {
 			var codeid = $(this).attr('id');
 		    var niv = $(this).attr('data_deep');
 		    var rofid = $(this).attr('data_rofid');
+		    var path = $(this).attr('data_path');
 
 			var titre = '<div class="suprog-'+codeid+'">'+$(this).text()+'</div>';
 			$("#arbreprog").empty();
 			$(titre).appendTo("#arbreprog");
-			$('<div class="suprog-tree"></div>').load('roffinal.php', {niveau: niv, rofid: rofid}).appendTo("#arbreprog");
+			$('<div class="suprog-tree"></div>').load('roffinal.php', {
+				niveau: niv,
+				rofid: rofid,
+				path: path}
+			).appendTo("#arbreprog");
 		}
     });
 
@@ -43,10 +48,11 @@ jQuery(function () {
 		var codeid = $(this).attr('id');
 		var niv = $(this).attr('data_deep');
 		var rofid = $(this).attr('data_rofid');
+		var path = $(this).attr('data_path');
 
 		var fr = $(this).siblings().size();
 		if (fr == 0) {
-			$.get('roffinal.php', {niveau: niv, rofid: rofid},  function(data){
+			$.get('roffinal.php', {niveau: niv, rofid: rofid, path: path},  function(data){
 				$("#"+codeid).after(data);
 			}, 'html');
 		} else {

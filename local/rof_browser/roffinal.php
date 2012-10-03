@@ -7,6 +7,7 @@ require_once('libbrowser.php');
 
 $niveau = optional_param('niveau', NULL,PARAM_INT);
 $rofid = optional_param('rofid',NULL,PARAM_ALPHANUMEXT);
+$path = optional_param('path',NULL,PARAM_ALPHANUMEXT);
 
 $format = optional_param('format',NULL,PARAM_ALPHANUMEXT);
 $action = optional_param('action',NULL,PARAM_ALPHANUMEXT);
@@ -25,6 +26,9 @@ if (array_key_exists ($niveau, $rb->tabNiveau)) {
 		$rb->setSelected($selected);
 	} else {
 		$rb->setSelected(0);
+	}
+	if (isset($path)) {
+		$rb->setPath($path);
 	}
 
     $htmlblock = $rb->createBlock();
