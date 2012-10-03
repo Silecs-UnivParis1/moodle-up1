@@ -37,11 +37,18 @@ jQuery(function () {
 
 	$('div.component-tree').on("click", ".element", function(event) {
 		var rofid = $(this).prevAll('span.collapse').attr('data_rofid');
+		var path =  $(this).prevAll('span.collapse').attr('data_path');
+		var intitule = $(this).text();
+
+		var reg=new RegExp("_", "gi");
+		path = path.replace(reg, "/");
+
 		var present = $('#liste-selected > div#select_'+rofid).size();
 		if (present) {
 			alert(rofid+' fait déjà parti de la la sélection.');
 		} else {
-			var elem = ' <div class="elemSel" id="select_'+rofid+'" title="Supprimer">'+rofid+'</div>';
+			var elem = ' <div class="elemSel" id="select_'+rofid
+				+'" title="Supprimer">'+path+' : '+intitule+'</div>';
 			$("#liste-selected").append(elem);
 		}
 
