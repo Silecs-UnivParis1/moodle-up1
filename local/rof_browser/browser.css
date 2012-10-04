@@ -28,10 +28,6 @@ div#liste-selected {
 	text-align: left;
 }
 
-.elemSel {
-	cursor: pointer;
-}
-
 .pointer {
 	cursor: pointer;
 }
@@ -43,4 +39,25 @@ div#liste-selected {
 ul.item {
 	margin-top: 0;
 	margin-bottom: 0;
+}
+
+div.by-widget {
+	float: left; width: 45%; padding: 3px; margin: 2px;
+}
+div.block-item-selected {
+	float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;
+}
+
+.block-item-selected .item-selected {
+	 margin: 2px 2px 2px 5px;
+	 border: 1px solid #dad9c7;
+}
+
+.item-selected .intitule-selected {
+	margin-right: 38px; padding: 3px 5px; background-color: #ededed;
+}
+
+.item-selected .selected-remove {
+	cursor: pointer;
+	float: right; font-size: 20px; color: #A0A0A0; padding: 0 5px;
 }
