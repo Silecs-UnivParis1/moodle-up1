@@ -46,7 +46,7 @@ jQuery(function () {
 		var reg=new RegExp("_", "gi");
 		path = path.replace(reg, "/");
 
-		var present = $('#item-selected > div#select_'+rofid).size();
+		var present = $('#items-selected > div#select_'+rofid).size();
 		if (present) {
 			alert(rofid+' fait déjà parti de la sélection.');
 		} else {
