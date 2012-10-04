@@ -1,9 +1,9 @@
 jQuery(function () {
 
 	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
-    $('div.component-tree').load(rootUrl + 'ajax.php');
+    $('div.item-select').load(rootUrl + 'ajax.php');
 
-    $('div.component-tree').on("click", ".collapse", function(event) {
+    $('div.item-select').on("click", ".collapse", function(event) {
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data_rofid');
@@ -38,7 +38,7 @@ jQuery(function () {
 	});
 
 
-	$('div.component-tree').on("click", ".element", function(event) {
+	$('div.item-select').on("click", ".element", function(event) {
 		var rofid = $(this).prevAll('span.collapse').attr('data_rofid');
 		var path =  $(this).prevAll('span.collapse').attr('data_path');
 		var intitule = $(this).text();
@@ -46,20 +46,23 @@ jQuery(function () {
 		var reg=new RegExp("_", "gi");
 		path = path.replace(reg, "/");
 
-		var present = $('#liste-selected > div#select_'+rofid).size();
+		var present = $('#item-selected > div#select_'+rofid).size();
 		if (present) {
-			alert(rofid+' fait déjà parti de la la sélection.');
+			alert(rofid+' fait déjà parti de la sélection.');
 		} else {
-			var elem = ' <div class="elemSel" id="select_'+rofid
-				+'" title="Supprimer">'+path+' : '+intitule+'</div>';
-			$("#liste-selected").append(elem);
+			var elem = '<div class="item-selected" id="select_'+rofid+'">'
+				+'<div class="selected-remove" title="Supprimer">&#10799;</div>'
+				+'<div class="intitule-selected">'+path+' : '+intitule+'</div>'
+				+'<input type="hidden" name="item[]" value="'+rofid+'"/>'
+				+'</div>';
+			$("#items-selected").append(elem);
 		}
 
 	});
 
-	$("#liste-selected").on("click", ".elemSel", function(event) {
+	$("#items-selected").on("click", ".selected-remove", function(event) {
 		if (confirm('Supprimez cet élément de la sélection ?')) {
-			$(this).remove();
+			$(this).parent('div.item-selected').remove();
 		}
 	});
 

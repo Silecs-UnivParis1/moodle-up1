@@ -14,9 +14,18 @@ $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
+?>
+<div>
+<div class="by-widget">
+	<h3>Rechercher un élément pédagogique</h3>
+	<div class="item-select">
+	</div>
+</div>
+<div class="block-item-selected">
+	<h3>Éléments pédagogiques sélectionnés</h3>
+	<div id="items-selected"></div>
+</div>
 
-echo '<div id="liste-selected"></div>';
-echo '<div class="component-tree">';
-echo '</div>';
-
+</div>
+<?php
 echo $OUTPUT->footer();
