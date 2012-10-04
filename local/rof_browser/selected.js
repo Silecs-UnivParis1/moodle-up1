@@ -48,7 +48,7 @@ jQuery(function () {
 
 		var present = $('#items-selected > div#select_'+rofid).size();
 		if (present) {
-			alert(rofid+' fait déjà parti de la sélection.');
+			alert(rofid+' fait déjà partie de la sélection.');
 		} else {
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
 				+'<div class="selected-remove" title="Supprimer">&#10799;</div>'
