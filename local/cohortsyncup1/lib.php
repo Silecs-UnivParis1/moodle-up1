@@ -121,7 +121,7 @@ function remove_memberships($userid, $memberof) {
     $cnt = 0;
 
     $sql = "SELECT cm.cohortid, c.idnumber FROM {cohort_members} cm "
-        . "LEFT JOIN {cohort} c ON (c.id=cm.cohortid AND c.component='local_cohortsyncup1') WHERE cm.userid=?";
+        . "INNER JOIN {cohort} c ON (c.id = cm.cohortid) WHERE (cm.userid=? AND c.component='local_cohortsyncup1')";
     $res = $DB->get_records_sql_menu($sql, array($userid));
     foreach ($res as $cohortid => $idnumber) {
         if ( ! in_array($idnumber, $memberof) ) {
