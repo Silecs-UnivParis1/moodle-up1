@@ -1,0 +1,3 @@
+[submodule "plagiarism/compilatio"]
+	path = plagiarism/compilatio
+	url = https://github.com/danmarsden/moodle-plagiarism_compilatio.git
