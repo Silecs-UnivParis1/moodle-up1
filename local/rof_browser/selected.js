@@ -1,5 +1,8 @@
 jQuery(function () {
 
+	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
+    $('div.component-tree').load(rootUrl + 'ajax.php');
+
     $('div.component-tree').on("click", ".collapse", function(event) {
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
