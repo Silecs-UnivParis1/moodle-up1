@@ -27,10 +27,11 @@ $PAGE->set_title($PAGE->course->fullname.': '.'Cohortes');
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'));
+$PAGE->requires->js(new moodle_url('/course/wizard/js/wizard.js'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Inscrire des groupes');
-
+echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post">';
 ?>
 
 <div class="by-widget group-select">
@@ -46,29 +47,22 @@ echo $OUTPUT->heading('Inscrire des groupes');
 <?php
 
 $stepin = 5;
-$stepgo = 5;
-$buttonpre = '';
-if (isset($SESSION->wizard['idenrolment'])) {
-    if ($SESSION->wizard['idenrolment'] == 'cohort') {
-        $stepgo = 7;
-		$buttonpre = $OUTPUT->single_button(
-        new moodle_url('/course/wizard/index.php',
-            array('stepin' => $stepin, 'stepgo' => 5, 'courseid' => $id, 'idenrolment' => 'manual')),
-            'Etape précédente',
-            'post'
-        );
-	}
-}
 
 echo '<div align="center" style="margin:50px; clear:both"><div class="buttons">';
-echo $buttonpre;
-echo $OUTPUT->single_button(
-    new moodle_url('/course/wizard/index.php',
-        array('stepin' => $stepin, 'stepgo' => $stepgo, 'courseid' => $id, 'idenrolment' => 'cohort')),
-    'Termine l\'inscription des groupes',
-    'post'
-);
+echo '<input type="hidden" name="courseid" value="'.$id.'"/>';
+echo '<input type="hidden" name="stepin" value="'.$stepin.'"/>';
+
+echo '<input type="hidden" name="stepogo-manual" value="5"/>';
+echo '<input type="hidden" name="stepgo-cohort" value="7"/>';
+echo '<input type="hidden" name="stepgo" value=""/>';
+
+echo '<input type="hidden" name="idenrolment" value=""/>';
+echo '<input type="hidden" name="sesskey" value="'.sesskey().'"/>';
+echo '<button type="submit" id="etapep" value="open">Etape précédente</button>';
+echo '<button type="submit" id="etapes" value="open">Termine l\'inscription des groupes</button>';
+
 echo '</div>';
-//echo '</div>';
+echo '</div>';
+echo '</form>';
 
 echo $OUTPUT->footer();

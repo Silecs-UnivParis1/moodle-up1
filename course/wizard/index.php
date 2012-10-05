@@ -109,7 +109,7 @@ if (isset($stepgo)) {
             redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
 		    break;
 		case 5 :
-		     $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
+		    $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
 		    $url = '/course/wizard/enrol/users.php';
 		    if ($SESSION->wizard['idenrolment'] =='cohort') {
 				$url = '/course/wizard/enrol/cohort.php';
@@ -123,6 +123,17 @@ if (isset($stepgo)) {
 		case 7 :
 		    // on vient de inscription et on va à la fin
 		    $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
+		    $idcourse = $SESSION->wizard['idcourse'];
+		    if (isset($_POST['group']) && count($_POST['group'])) {
+				$tabGroup = $_POST['group'];
+				$SESSION->wizard['form_step5']['group'] = $tabGroup;
+
+				$erreurs = myenrol_cohort($idcourse, $tabGroup);
+				if (count($erreurs)) {
+					$SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
+					$messageInterface = affiche_error_enrolcohort($erreurs);
+				}
+			}
 		    $editform = new course_wizard_step_confirm();
 		    break;
 	    case 8 :
@@ -155,6 +166,13 @@ $PAGE->set_heading($fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading("Assistant ouverture/paramétrage coursMoodle");
 echo $OUTPUT->heading($steptitle);
+
+if (isset($messageInterface)) {
+	echo $OUTPUT->box_start();
+	echo $messageInterface;
+	echo $OUTPUT->box_end();
+}
+
 if (isset($editform)) {
     $editform->display();
 }elseif(isset($step1form)) {

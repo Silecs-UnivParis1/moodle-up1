@@ -101,3 +101,49 @@ function customfields_wash($data) {
 	}
     return $data;
 }
+
+function myenrol_cohort($idcourse, $tabGroup) {
+	global $DB, $CFG;
+	if ($idcourse == SITEID) {
+		throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+	}
+	$error = array();
+    $enrol = 'cohort';
+    $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
+    $status = 0;   //ENROL_INSTANCE_ENABLED
+	foreach ($tabGroup as $idgroup) {
+		$cohort = $DB->get_record('cohort', array('idnumber'=>$idgroup));
+		if ($cohort) {
+			if (! $DB->record_exists('enrol', array('enrol' => $enrol, 'courseid' =>$idcourse, 'customint1' =>$cohort->id))) {
+				$instance = new stdClass();
+				$instance->enrol          = $enrol;
+				$instance->status         = $status;
+				$instance->courseid       = $idcourse;
+				$instance->customint1	  = $cohort->id;
+				$instance->roleid	      = $roleid;
+				$instance->enrolstartdate = 0;
+				$instance->enrolenddate   = 0;
+				$instance->timemodified   = time();
+				$instance->timecreated    = $instance->timemodified;
+				$instance->sortorder      = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid'=>$idcourse));
+				$DB->insert_record('enrol', $instance);
+			}
+		} else {
+			$error[] = 'groupe "' . $idgroup . '" n\'existe pas dans la base';
+		}
+	}
+	require_once("$CFG->dirroot/enrol/cohort/locallib.php");
+	enrol_cohort_sync($idcourse);
+	return $error;
+}
+
+function affiche_error_enrolcohort($erreurs)  {
+	$message = '';
+	$message .= '<div><h3>Messages </h3>';
+	$message .= '<p>Des erreurs sont survenues lors de l\'inscription des groupes :</p><ul>';
+	foreach ($erreurs as $e) {
+		$message .= '<li>'.$e.'</li>';
+	}
+	$message .= '</ul></div>';
+	return $message;
+}
