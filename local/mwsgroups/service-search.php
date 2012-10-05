@@ -5,10 +5,12 @@ require('../../config.php');
 require_once('./lib.php');
 
 $token = required_param('token', PARAM_ALPHANUMEXT);
-$maxrows = optional_param('maxRows', 10, PARAM_ALPHANUMEXT);
+$maxrows = optional_param('maxRows', 10, PARAM_INT);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
 $res = mws_search($token, $maxrows);
+// echo "$token";
+// die();
 
 header('Content-Type: application/json; charset="UTF-8"');
 

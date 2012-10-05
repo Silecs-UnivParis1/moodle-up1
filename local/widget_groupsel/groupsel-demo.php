@@ -14,7 +14,7 @@ $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'));
 $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading('Démo du sélecteur de groupes');
+echo $OUTPUT->heading('Démo du sélecteur de groupes - webservice UP1');
 
 ?>
 <div class="by-widget group-select">
