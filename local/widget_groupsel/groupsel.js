@@ -39,7 +39,7 @@ jQuery(function () {
     function mainSource(internal) {
         var sourceUrl = "http://wsgroups.univ-paris1.fr/search";
         if (internal) {
-            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/service-search.php');
+            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/widget_groupsel/groupsel.js', '/mwsgroups/service-search.php');
         }
         return function(request, response) {
         $.ajax({
@@ -69,7 +69,7 @@ jQuery(function () {
     function setGroupsbyUser(uid, ac, internal) {
         var sourceUrl = 'http://wsgroups.univ-paris1.fr/userGroupsId';
         if (internal) {
-            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/service-userGroups.php');
+            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/widget_groupsel/groupsel.js', '/mwsgroups/service-userGroups.php');
         }
         $.ajax({
             url: sourceUrl,
