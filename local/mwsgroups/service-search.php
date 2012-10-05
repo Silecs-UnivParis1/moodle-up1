@@ -6,10 +6,15 @@ require_once('./lib.php');
 
 $token = required_param('token', PARAM_ALPHANUMEXT);
 $maxrows = optional_param('maxRows', 10, PARAM_ALPHANUMEXT);
+$callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
 $res = mws_search($token, $maxrows);
 
 header('Content-Type: application/json; charset="UTF-8"');
 
-echo json_encode($res);
+if (empty($callback)) {
+    echo json_encode($res);
+} else {
+    echo $callback . '(' . json_encode($res) . ');';
+}
 
