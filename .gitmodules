@@ -1,3 +1,6 @@
 [submodule "plagiarism/compilatio"]
 	path = plagiarism/compilatio
 	url = https://github.com/danmarsden/moodle-plagiarism_compilatio.git
+[submodule "blocks/notifications"]
+	path = blocks/notifications
+	url = git@github.com:silecs/moodle_notifications_20.git
