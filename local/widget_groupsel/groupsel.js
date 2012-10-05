@@ -8,9 +8,11 @@ jQuery(function () {
         type: "text/css",
         href: "http://code.jquery.com/ui/1.8.22/themes/base/jquery-ui.css"
     }).appendTo("head");
-    $(".by-widget.group-select input.group-selector").autocomplete({
+    $(".by-widget.group-select input.group-selector").each(function(){
+        var internal = $(this).closest('.group-select').hasClass('group-select-internal');
+        $(this).autocomplete({
         minLength: 4,
-        source: mainSource,
+        source: mainSource(internal),
         select: function (event, ui) {
             var inputName = $(this).attr('data-inputname');
             var widget = $(this).closest('.by-widget.group-select');
@@ -19,13 +21,13 @@ jQuery(function () {
                 $(this).val('');
             } else if (ui.item.source == 'users') {
                 $(this).val(ui.item.label);
-                setGroupsbyUser(ui.item.value, $('input.ui-autocomplete-input', widget));
+                setGroupsbyUser(ui.item.value, $('input.ui-autocomplete-input', widget), internal);
             }
             return false;
         },
         open: function () {},
         close: function () {}
-    }).data("autocomplete")._renderItem = function(ul, item) {
+    })}).data("autocomplete")._renderItem = function(ul, item) {
         if (item.source == 'title') {
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
@@ -34,9 +36,14 @@ jQuery(function () {
             .append("<a><span>&oplus;</span>" + item.label + '</a>')
             .appendTo(ul);
     };
-    function mainSource(request, response) {
+    function mainSource(internal) {
+        var sourceUrl = "http://wsgroups.univ-paris1.fr/search";
+        if (internal) {
+            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/service-search.php');
+        }
+        return function(request, response) {
         $.ajax({
-            url: "http://wsgroups.univ-paris1.fr/search",
+            url: sourceUrl,
             dataType: "jsonp",
             data: {
                 maxRows: 10,
@@ -57,10 +64,15 @@ jQuery(function () {
                 ));
             }
         });
+        }
     }
-    function setGroupsbyUser(uid, ac) {
+    function setGroupsbyUser(uid, ac, internal) {
+        var sourceUrl = 'http://wsgroups.univ-paris1.fr/userGroupsId';
+        if (internal) {
+            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/service-userGroups.php');
+        }
         $.ajax({
-            url: 'http://wsgroups.univ-paris1.fr/userGroupsId',
+            url: sourceUrl,
             dataType: "jsonp",
             data: {
                 uid: uid
