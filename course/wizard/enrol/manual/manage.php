@@ -44,7 +44,7 @@ require_capability('enrol/manual:manage', $context);
 require_capability('enrol/manual:unenrol', $context);
 **/
 require_login();
-if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$id) {
+if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$course->id) {
 	require_login($course);
 	// ou redirect(new moodle_url('/'));
 }

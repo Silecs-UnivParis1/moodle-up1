@@ -134,10 +134,7 @@ class course_enrolment_manager_wizard extends course_enrolment_manager {
 
         // Add some additional sensible conditions
        // $tests = array("id <> :guestid", 'u.deleted = 0', 'u.confirmed = 1');
-       $tests = array( 'u.deleted = 0', 'u.confirmed = 1',  'ra.contextid = 1', 'ra.roleid < 5');
-
-       error_log('siteguest : '.$CFG->siteguest."\n", 3, '/home/cecile/projets/moodle-paris/moodle/messages_loc.txt');
-
+        $tests = array( 'u.deleted = 0', 'u.confirmed = 1',  'ra.contextid = 1', 'ra.roleid < 5');
         $params = array('guestid' => $CFG->siteguest);
         if (!empty($search)) {
             $conditions = get_extra_user_fields($this->get_context());
@@ -289,9 +286,3 @@ class enrol_manual_plugin_wizard extends enrol_manual_plugin {
     }
 
 }
-
-class enrol_cohort_plugin_wizard extends enrol_cohort_plugin {
-	//
-}
-
-

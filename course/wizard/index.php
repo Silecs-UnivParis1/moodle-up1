@@ -109,9 +109,12 @@ if (isset($stepgo)) {
             redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
 		    break;
 		case 5 :
-		    echo ' inscription cohortes';
-		    $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
-		    redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$SESSION->wizard['idcourse'])));
+		     $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
+		    $url = '/course/wizard/enrol/users.php';
+		    if ($SESSION->wizard['idenrolment'] =='cohort') {
+				$url = '/course/wizard/enrol/cohort.php';
+			}
+		    redirect(new moodle_url($url, array('id'=>$SESSION->wizard['idcourse'])));
 		    break;
 		case 6 :
 		    echo ' si inscription avec clef';
