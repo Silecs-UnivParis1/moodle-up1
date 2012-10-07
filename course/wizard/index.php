@@ -22,76 +22,76 @@
  * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 require_once('../../config.php');
 require_once('../lib.php');
-require_once('lib_wizard.php');
-require_once('step1_form.php');
-require_once('step2_form.php');
-require_once('step3_form.php');
-require_once('step_confirm.php');
+require_once(__DIR__ . '/lib_wizard.php');
+require_once(__DIR__ . '/step1_form.php');
+require_once(__DIR__ . '/step2_form.php');
+require_once(__DIR__ . '/step3_form.php');
+require_once(__DIR__ . '/step_confirm.php');
+
+global $CFG, $PAGE, $OUTPUT, $SESSION;
 
 require_login();
 
-$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+$systemcontext = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_url('/course/wizard/index.php');
 $PAGE->set_context($systemcontext);
-has_capability('moodle/course:request', $systemcontext);
+require_capability('moodle/course:request', $systemcontext);
 
 if (!isset($_POST['stepin'])) {
-	$stepin = optional_param('stepin', 1, PARAM_INT);
-	$stepgo = $stepin;
-	if (isset($SESSION->wizard)) {
-	    unset($SESSION->wizard);
+    $stepin = optional_param('stepin', 1, PARAM_INT);
+    $stepgo = $stepin;
+    if (isset($SESSION->wizard)) {
+        unset($SESSION->wizard);
     }
 } else {
-	$stepin = $_POST['stepin'];
-	$stepgo = get_stepgo($stepin, $_POST);
-
+    $stepin = $_POST['stepin'];
+    $stepgo = get_stepgo($stepin, $_POST);
 }
 
 if (isset($stepgo)) {
-    $SESSION->wizard['form_step'.$stepin] = $_POST;
+    $SESSION->wizard['form_step' . $stepin] = $_POST;
     switch ($stepgo) {
-		case 1 :
-		    $steptitle = 'Etape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
-		    $step1form = step1_form();
-
-		    break;
-		case 2 :
-		    $steptitle = 'Etape 2 - Identification de l\'espace de cours';
-		    $course = null;
-		    $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes'=>$CFG->maxbytes, 'trusttext'=>false, 'noclean'=>true);
-		    $course = file_prepare_standard_editor($course, 'summary', $editoroptions, null, 'course', 'summary', null);
-		    $editform = new course_wizard_step2_form(NULL, array('editoroptions'=>$editoroptions));
-		    break;
-		case 3 :
-		    $data = $SESSION->wizard['form_step2'];
-		    $errors = validation_shortname($data['shortname']);
-		    if (count($errors)) {
-				$data['erreurs'] = $errors;
-				$SESSION->wizard['form_step2'] = $data;
-				$editform = new course_wizard_step2_form(NULL);
-				$steptitle = 'Etape 2 - Identification de l\'espace de cours';
-			} else {
-		        $steptitle = 'Etape 3 - Description de l\'espace de cours';
-		        $editform = new course_wizard_step3_form();
-		        if (isset($SESSION->wizard['form_step3'])) {
-		            $editform->set_data((object)$SESSION->wizard['form_step3']);
-		        }
-		    }
-		    break;
-		case 4 :
-		    $steptitle = 'Etape 4 : création du cours + inscription profs';
-		    $date = $SESSION->wizard['form_step2']['startdate'];
-		    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+        case 1:
+            $steptitle = 'Etape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
+            $step1form = step1_form();
+            break;
+        case 2:
+            $steptitle = 'Etape 2 - Identification de l\'espace de cours';
+            $editoroptions = array(
+                'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
+            );
+            $course = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
+            $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
+            break;
+        case 3:
+            $data = $SESSION->wizard['form_step2'];
+            $errors = validation_shortname($data['shortname']);
+            if (count($errors)) {
+                $data['erreurs'] = $errors;
+                $SESSION->wizard['form_step2'] = $data;
+                $editform = new course_wizard_step2_form(NULL);
+                $steptitle = 'Etape 2 - Identification de l\'espace de cours';
+            } else {
+                $steptitle = 'Etape 3 - Description de l\'espace de cours';
+                $editform = new course_wizard_step3_form();
+                if (isset($SESSION->wizard['form_step3'])) {
+                    $editform->set_data((object) $SESSION->wizard['form_step3']);
+                }
+            }
+            break;
+        case 4:
+            $steptitle = 'Etape 4 : création du cours + inscription enseignants';
+            $date = $SESSION->wizard['form_step2']['startdate'];
+            $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
             $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
-		    $mydata = (object) $datamerge;
-		    $mydata->startdate = $startdate;
-		    // cours doit être validé
-		    $mydata->profile_field_tovalidate = 1;
-		    $mydata->profile_field_validatedate = 0;
+            $mydata = (object) $datamerge;
+            $mydata->startdate = $startdate;
+            // cours doit être validé
+            $mydata->profile_field_tovalidate = 1;
+            $mydata->profile_field_validatedate = 0;
 
             $course = create_course($mydata);
             // save custom fields data
@@ -106,51 +106,51 @@ if (isset($stepgo)) {
             // tester si le cours existe bien ?
             //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
 
-            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id'=>$course->id)));
-		    break;
-		case 5 :
-		    $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
-		    $url = '/course/wizard/enrol/users.php';
-		    if ($SESSION->wizard['idenrolment'] =='cohort') {
-				$url = '/course/wizard/enrol/cohort.php';
-			}
-		    redirect(new moodle_url($url, array('id'=>$SESSION->wizard['idcourse'])));
-		    break;
-		case 6 :
-		    echo ' si inscription avec clef';
-		    break;
+            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id' => $course->id)));
+            break;
+        case 5:
+            $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
+            $url = '/course/wizard/enrol/users.php';
+            if ($SESSION->wizard['idenrolment'] == 'cohort') {
+                $url = '/course/wizard/enrol/cohort.php';
+            }
+            redirect(new moodle_url($url, array('id' => $SESSION->wizard['idcourse'])));
+            break;
+        case 6:
+            echo ' si inscription avec clef';
+            break;
 
-		case 7 :
-		    // on vient de inscription et on va à la fin
-		    $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
-		    $idcourse = $SESSION->wizard['idcourse'];
-		    if (isset($_POST['group']) && count($_POST['group'])) {
-				$tabGroup = $_POST['group'];
-				$SESSION->wizard['form_step5']['group'] = $tabGroup;
+        case 7:
+            // on vient de inscription et on va à la fin
+            $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
+            $idcourse = $SESSION->wizard['idcourse'];
+            if (isset($_POST['group']) && count($_POST['group'])) {
+                $tabGroup = $_POST['group'];
+                $SESSION->wizard['form_step5']['group'] = $tabGroup;
 
-				$erreurs = myenrol_cohort($idcourse, $tabGroup);
-				if (count($erreurs)) {
-					$SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
-					$messageInterface = affiche_error_enrolcohort($erreurs);
-				}
-			}
-		    $editform = new course_wizard_step_confirm();
-		    break;
-	    case 8 :
-		    // envoi message
-		    $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
-		    $message = $SESSION->wizard['form_step7']['message'];
-		    if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-				$messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
-				    . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
-				$message .= "\n".'La demande est accompagnée de la remarque suivante : '."\n"
-				    . $SESSION->wizard['form_step7']['remarques'];
-			}
-			$res = send_course_request($message, $messagehtml);
-		    unset($SESSION->wizard);
-		    redirect(new moodle_url('/'));
-		    break;
-	}
+                $erreurs = myenrol_cohort($idcourse, $tabGroup);
+                if (count($erreurs)) {
+                    $SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
+                    $messageInterface = affiche_error_enrolcohort($erreurs);
+                }
+            }
+            $editform = new course_wizard_step_confirm();
+            break;
+        case 8:
+            // envoi message
+            $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
+            $message = $SESSION->wizard['form_step7']['message'];
+            if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
+                $messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
+                        . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
+                $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
+                        . $SESSION->wizard['form_step7']['remarques'];
+            }
+            send_course_request($message, $messagehtml);
+            unset($SESSION->wizard);
+            redirect(new moodle_url('/'));
+            break;
+    }
 }
 $site = get_site();
 
@@ -168,17 +168,17 @@ echo $OUTPUT->heading("Assistant ouverture/paramétrage coursMoodle");
 echo $OUTPUT->heading($steptitle);
 
 if (isset($messageInterface)) {
-	echo $OUTPUT->box_start();
-	echo $messageInterface;
-	echo $OUTPUT->box_end();
+    echo $OUTPUT->box_start();
+    echo $messageInterface;
+    echo $OUTPUT->box_end();
 }
 
 if (isset($editform)) {
     $editform->display();
-}elseif(isset($step1form)) {
-	echo $step1form;
+} elseif (isset($step1form)) {
+    echo $step1form;
 } else {
-	echo '<p>Pas de formulaires</p>';
+    echo '<p>Pas de formulaires</p>';
 }
 
 echo $OUTPUT->footer();
