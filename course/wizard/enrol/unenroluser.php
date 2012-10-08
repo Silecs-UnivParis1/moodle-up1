@@ -46,7 +46,7 @@ $context = context_course::instance($course->id);
 $PAGE->set_url('/course/wizard/enrol/unenroluser.php', array('ue'=>$ueid, 'ifilter'=>$filter));
 
 require_login();
-if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$id) {
+if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$course->id) {
 	require_login($course);
 	// ou redirect(new moodle_url('/'));
 }

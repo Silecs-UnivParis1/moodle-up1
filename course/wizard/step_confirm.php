@@ -2,6 +2,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+global $CFG;
+
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
@@ -53,24 +55,24 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
         $date = $SESSION->wizard['form_step2']['startdate'];
-		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-		$mform->addElement('date_selector', 'startdate', get_string('startdate'));
-		$mform->setConstant('startdate', $startdate);
+        $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+        $mform->addElement('date_selector', 'startdate', get_string('startdate'));
+        $mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
 
         //--------------------------------------------------------------------------------
         if (isset($SESSION->wizard['idcourse'])) {
-		    $idcourse = (int) $SESSION->wizard['idcourse'];
+            $idcourse = (int) $SESSION->wizard['idcourse'];
             $custominfo_data = custominfo_data::type('course');
             $cinfos = $custominfo_data->get_record($idcourse);
 
             foreach ($cinfos as $label=>$info) {
-			    $htmlinfo = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
+                $htmlinfo = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
                     . $label . '</label></div></div>'
                     . '<div class="felement fstatic">' . $info . '</div>';
                 $mform->addElement('html', html_writer::tag('div', $htmlinfo, array('class' => 'fitem')));
-		    }
-		}
+            }
+        }
 //--------------------------------------------------------------------------------
 
         $mform->addElement('hidden', 'stepin', null);

@@ -30,7 +30,6 @@ require_once("$CFG->dirroot/enrol/users_forms.php");
 require_once("$CFG->dirroot/enrol/renderer.php");
 
 require_once("$CFG->dirroot/enrol/manual/lib.php");
-require_once("$CFG->dirroot/enrol/cohort/lib.php");
 
 require_once("$CFG->dirroot/course/wizard/enrol/locallib.php");
 
@@ -64,121 +63,6 @@ $manager = new course_enrolment_manager_wizard($PAGE, $course, $filter);
 $table = new course_enrolment_users_table($manager, $PAGE);
 $PAGE->set_url('/course/wizard/enrol/users.php', $manager->get_url_params()+$table->get_url_params());
 navigation_node::override_active_url(new moodle_url('/course/wizard/enrol/users.php', array('id' => $id)));
-
-// Check if there is an action to take
-if ($action) {
-
-    // Check if the page is confirmed (and sesskey is correct)
-    $confirm = optional_param('confirm', false, PARAM_BOOL) && confirm_sesskey();
-
-    $actiontaken = false;
-    $pagetitle = '';
-    $pageheading = '';
-    $mform = null;
-    $pagecontent = null;
-
-    switch ($action) {
-        /**
-         * Removes a role from the user with this course
-         */
-        case 'unassign':
-            if (has_capability('moodle/role:assign', $manager->get_context())) {
-                $role = required_param('role', PARAM_INT);
-                $user = required_param('user', PARAM_INT);
-                if ($confirm && $manager->unassign_role_from_user($user, $role)) {
-                    redirect($PAGE->url);
-                } else {
-                    $user = $DB->get_record('user', array('id'=>$user), '*', MUST_EXIST);
-                    $allroles = $manager->get_all_roles();
-                    $role = $allroles[$role];
-                    $yesurl = new moodle_url($PAGE->url, array('action'=>'unassign', 'role'=>$role->id, 'user'=>$user->id, 'confirm'=>1, 'sesskey'=>sesskey()));
-                    $message = get_string('unassignconfirm', 'role', array('user'=>fullname($user, true), 'role'=>$role->localname));
-                    $pagetitle = get_string('unassignarole', 'role', $role->localname);
-                    $pagecontent = $OUTPUT->confirm($message, $yesurl, $PAGE->url);
-                }
-                $actiontaken = true;
-            }
-            break;
-        /**
-         * Assigns a new role to a user enrolled within this course.
-         * A user must be enrolled in the course in order for this script to action
-         */
-        case 'assign':
-            $user = $DB->get_record('user', array('id'=>required_param('user', PARAM_INT)), '*', MUST_EXIST);
-            if (is_enrolled($context, $user) && has_capability('moodle/role:assign', $manager->get_context())) {
-                $mform = new enrol_users_assign_form(NULL, array('user'=>$user, 'course'=>$course, 'assignable'=>$manager->get_assignable_roles()));
-                $mform->set_data($PAGE->url->params());
-                $data = $mform->get_data();
-                if ($mform->is_cancelled() || ($data && array_key_exists($data->roleid, $manager->get_assignable_roles()) && $manager->assign_role_to_user($data->roleid, $user->id))) {
-                    redirect($PAGE->url);
-                } else {
-                    $pagetitle = get_string('assignroles', 'role');
-                }
-                $actiontaken = true;
-            }
-            break;
-        /**
-         * Removes the user from the given group
-         */
-        case 'removemember':
-            if (has_capability('moodle/course:managegroups', $manager->get_context())) {
-                $groupid = required_param('group', PARAM_INT);
-                $userid  = required_param('user', PARAM_INT);
-                $user = $DB->get_record('user', array('id'=>$userid), '*', MUST_EXIST);
-                if ($confirm && $manager->remove_user_from_group($user, $groupid)) {
-                    redirect($PAGE->url);
-                } else {
-                    $group = $manager->get_group($groupid);
-                    if (!$group) {
-                        break;
-                    }
-                    $yesurl = new moodle_url($PAGE->url, array('action'=>'removemember', 'group'=>$groupid, 'user'=>$userid, 'confirm'=>1, 'sesskey'=>sesskey()));
-                    $message = get_string('removefromgroupconfirm', 'group', array('user'=>fullname($user, true), 'group'=>$group->name));
-                    $pagetitle = get_string('removefromgroup', 'group', $group->name);
-                    $pagecontent = $OUTPUT->confirm($message, $yesurl, $PAGE->url);
-                }
-                $actiontaken = true;
-            }
-            break;
-        /**
-         * Makes the user a member of a given group
-         */
-        case 'addmember':
-            if (has_capability('moodle/course:managegroups', $manager->get_context())) {
-                $userid = required_param('user', PARAM_INT);
-                $user = $DB->get_record('user', array('id'=>$userid), '*', MUST_EXIST);
-
-                $mform = new enrol_users_addmember_form(NULL, array('user'=>$user, 'course'=>$course, 'allgroups'=>$manager->get_all_groups()));
-                $mform->set_data($PAGE->url->params());
-                $data = $mform->get_data();
-                if ($mform->is_cancelled() || ($data && $manager->add_user_to_group($user, $data->groupid))) {
-                    redirect($PAGE->url);
-                } else {
-                    $pagetitle = get_string('addgroup', 'group');
-                }
-                $actiontaken = true;
-            }
-            break;
-    }
-
-    // If we took an action display we need to display something special.
-    if ($actiontaken) {
-        if (empty($pageheading)) {
-            $pageheading = $pagetitle;
-        }
-        $PAGE->set_title($pagetitle);
-        $PAGE->set_heading($pageheading);
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(fullname($user));
-        if (!is_null($mform)) {
-            $mform->display();
-        } else {
-            echo $pagecontent;
-        }
-        echo $OUTPUT->footer();
-        exit;
-    }
-}
 
 $renderer = $PAGE->get_renderer('core_enrol', 'wizard');
 
@@ -232,17 +116,6 @@ echo $renderer->render($table);
 $stepin = 5;
 $stepgo = 5;
 $buttonpre = '';
-if (isset($SESSION->wizard['idenrolment'])) {
-    if ($SESSION->wizard['idenrolment'] == 'cohort') {
-        $stepgo = 7;
-		$buttonpre = $OUTPUT->single_button(
-        new moodle_url('/course/wizard/index.php',
-            array('stepin' => $stepin, 'stepgo' => 5, 'courseid' => $id, 'idenrolment' => 'manual')),
-            'Etape précédente',
-            'post'
-        );
-	}
-}
 
 echo '<div align="center" style="margin:50px;"><div class="buttons">';
 echo $buttonpre;
