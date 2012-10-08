@@ -34,7 +34,7 @@ echo $OUTPUT->heading('Inscrire des groupes');
 echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post">';
 ?>
 
-<div class="by-widget group-select">
+<div class="by-widget group-select group-select-internal">
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
         <h3>Rechercher un groupe d'étudiants</h3>
         <input type="text" class="group-selector" name="something" data-inputname="group" size="50" placeholder="Libellé de groupe ou nom d'étudiant" />
