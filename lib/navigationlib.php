@@ -3642,6 +3642,12 @@ class settings_navigation extends navigation_node {
             $coursenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
         }
 
+        // Tableau de bord
+        if (has_capability('moodle/course:update', $coursecontext)) {
+            $url = new moodle_url('/local/courseboard/view.php', array('idnumber'=>$course->idnumber));
+            $coursenode->add(get_string('pluginname', 'local_courseboard'), $url, self::TYPE_SETTING, null, 'dashboard', null, '');
+        }
+
         // Backup this course
         if (has_capability('moodle/backup:backupcourse', $coursecontext)) {
             $url = new moodle_url('/backup/backup.php', array('id'=>$course->id));

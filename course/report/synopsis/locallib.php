@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once(dirname(__FILE__).'/lib.php');
 require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->libdir.'/custominfo/lib.php');
 
 /**
  * Returns list of cohorts enrolled into course/context.
@@ -56,6 +57,20 @@ function get_enrolled_cohorts($courseid, $roleids=null) {
     return $DB->get_records_sql($sql, array($courseid));
 }
 
+
+function html_custom_data($course) {
+    $fieldList = custominfo_data::type('course')->get_structured_fields($course->id, true);
+    echo "<ul>\n";
+    foreach ($fieldList as $category => $fields) {
+        if ($category == 'Other fields') continue;
+            echo "<li>" . $category . "</li>\n<ul>";
+            foreach ($fields as $fname => $fvalue ) {
+                echo "<li>$fname : $fvalue</li>";
+            }
+        echo "</ul>\n";
+    }
+    echo "</ul>\n";
+}
 
 function report_outline_print_row($mod, $instance, $result) {
     global $OUTPUT, $CFG;

@@ -9,7 +9,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('./roflib.php');
+require_once(dirname(__FILE__).'/roflib.php');
+//require_once('./roflib.php');
 defined('MOODLE_INTERNAL') || die;
 
 function report_rofstats_generic() {

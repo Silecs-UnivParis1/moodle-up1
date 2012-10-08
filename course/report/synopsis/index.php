@@ -42,7 +42,6 @@ $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
 
 require_login($course);
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
 require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
 
 // add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
@@ -63,17 +62,7 @@ echo "</ul>\n";
 echo '<div id="summary">' . $course->summary . '</div>';
 
 // custom info data
-$fieldList = custominfo_data::type('course')->get_structured_fields($course->id, true);
-echo "<ul>\n";
-foreach ($fieldList as $category => $fields) {
-    if ($category == 'Other fields') continue;
-    echo "<li>" . $category . "</li>\n<ul>";
-    foreach ($fields as $fname => $fvalue ) {
-        echo "<li>$fname : $fvalue</li>";
-    }
-    echo "</ul>\n";
-}
-echo "</ul>\n";
+html_custom_data($course);
 
 
 echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
