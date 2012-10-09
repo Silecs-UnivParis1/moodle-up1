@@ -1,15 +1,20 @@
 jQuery(function () {
-    $('#etapep').click(function(event) {
-		$('input[name=idenrolment]').val('manual');
-		var stepout = $('input[name=stepgo-manual]').val();
-		$('input[name=stepgo]').val(stepout);
-		$('input[name=stepgo]').val('5');
+	$('#etaper').click(function(event) {
+		var stepout = $('input[name=stepgo-retour]').val();
+		$('#stepgo').val(stepout);
+		var newname = 'stepgo_'+stepout;
+		$('#stepgo').attr('name',newname);
 	});
 
 	$('#etapes').click(function(event) {
-		$('input[name=idenrolment]').val('cohort');
-		var stepout = $('input[name=stepgo-cohort]').val();
-		$('input[name=stepgo]').val(stepout);
+		var stepout = $('input[name=stepgo-suite]').val();
+		if ($('#cohort').size()) {
+			if($('div.group-item-block').size()) {
+				stepout = parseInt(stepout) + 1;
+			}
+		}
+		$('#stepgo').val(stepout);
+		var newname = 'stepgo_'+stepout;
+		$('#stepgo').attr('name',newname);
 	});
-
 });

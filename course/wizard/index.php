@@ -82,62 +82,30 @@ if (isset($stepgo)) {
             }
             break;
         case 4:
-            $steptitle = 'Etape 4 : création du cours + inscription enseignants';
-            $date = $SESSION->wizard['form_step2']['startdate'];
-            $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-
-            $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
-            $mydata = (object) $datamerge;
-            $mydata->startdate = $startdate;
-            // cours doit être validé
-            $mydata->profile_field_tovalidate = 1;
-            $mydata->profile_field_validatedate = 0;
-
-            $course = create_course($mydata);
-            // save custom fields data
-            $mydata->id = $course->id;
-            $custominfo_data = custominfo_data::type('course');
-
-            $mydata = customfields_wash($mydata);
-
-            $custominfo_data->save_data($mydata);
-            $SESSION->wizard['idcourse'] = $course->id;
-            $SESSION->wizard['idenrolment'] = 'manual';
-            // tester si le cours existe bien ?
-            //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
-
-            redirect(new moodle_url('/course/wizard/enrol/users.php', array('id' => $course->id)));
+			$steptitle = 'Etape 4 : inscription enseignants';
+			$url = '/course/wizard/enrol/teacher.php';
+			wizard_navigation(4);
+			redirect(new moodle_url($url));
             break;
         case 5:
-            $SESSION->wizard['idenrolment'] = $SESSION->wizard['form_step5']['idenrolment'];
-            $url = '/course/wizard/enrol/users.php';
-            if ($SESSION->wizard['idenrolment'] == 'cohort') {
-                $url = '/course/wizard/enrol/cohort.php';
-            }
-            redirect(new moodle_url($url, array('id' => $SESSION->wizard['idcourse'])));
+			$steptitle = 'Etape 5 : inscription des groupes';
+			wizard_navigation(5);
+            $url = '/course/wizard/enrol/cohort.php';
+            redirect(new moodle_url($url));
             break;
         case 6:
-            echo ' si inscription avec clef';
+			$steptitle = 'Etape 6 : Définition d\'une clef d\'inscription';
+			wizard_navigation(6);
             break;
-
         case 7:
-            // on vient de inscription et on va à la fin
-            $steptitle = 'Etape 6 - Confirmation de la demande d\'espace de cours';
-            $idcourse = $SESSION->wizard['idcourse'];
-            if (isset($_POST['group']) && count($_POST['group'])) {
-                $tabGroup = $_POST['group'];
-                $SESSION->wizard['form_step5']['group'] = $tabGroup;
-
-                $erreurs = myenrol_cohort($idcourse, $tabGroup);
-                if (count($erreurs)) {
-                    $SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
-                    $messageInterface = affiche_error_enrolcohort($erreurs);
-                }
-            }
+			$steptitle = 'Confirmation de la demande d\'espace de cours';
+            wizard_navigation(7);
             $editform = new course_wizard_step_confirm();
             break;
         case 8:
             // envoi message
+            $corewizard = new core_wizard();
+			$corewizard->create_course_to_validate();
             $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
             $message = $SESSION->wizard['form_step7']['message'];
             if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
