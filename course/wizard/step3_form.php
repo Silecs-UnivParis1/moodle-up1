@@ -61,9 +61,9 @@ class course_wizard_step3_form extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray=array();
-        $buttonarray[] = $mform->createElement('submit', 'stepgo_2', 'étape précédente');
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_2', 'Etape précédente');
         $buttonarray[] = $mform->createElement(
-                'submit', 'stepgo_4', 'étape suivante');
+                'submit', 'stepgo_4', 'Etape suivante');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }
