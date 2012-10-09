@@ -3,6 +3,9 @@
 function get_stepgo($stepin, $post) {
 	switch ($stepin) {
 		case 5:
+			if (array_key_exists('stepgo_4', $post)) {
+				$stepgo = 4;
+			}
 			if (array_key_exists('stepgo_6', $post)) {
 				$stepgo = 6;
 			}
