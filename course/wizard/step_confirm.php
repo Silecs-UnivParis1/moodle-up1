@@ -6,6 +6,7 @@ global $CFG;
 
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
+require_once('lib_wizard.php');
 
 class course_wizard_step_confirm extends moodleform {
 
@@ -59,6 +60,25 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('date_selector', 'startdate', get_string('startdate'));
         $mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
+
+        $enseigants = wizard_list_enrolement_enseignants();
+		if (count($enseigants)) {
+			$mform->addElement('header','resume', 'Enseignants');
+			foreach ($enseigants as $type => $tab) {
+				$mform->addElement('html', html_writer::tag('h4', $type));
+				foreach ($tab as $e) {
+					$mform->addElement('html', html_writer::tag('div', $e, array('class' => 'fitem')));
+				}
+			}
+		}
+
+		$groupes = wizard_list_enrolement_group();
+		if (count($groupes)) {
+			$mform->addElement('header','groupes', 'Groupes');
+			foreach ($groupes as $g) {
+				$mform->addElement('html', html_writer::tag('div', $g, array('class' => 'fitem')));
+			}
+		}
 
         //--------------------------------------------------------------------------------
         if (isset($SESSION->wizard['idcourse'])) {

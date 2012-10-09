@@ -142,11 +142,89 @@ function wizard_navigation ($stepin) {
 	$SESSION->wizard['navigation']['retour'] = $stepin - 1;
 }
 
+function wizard_role_teacher($token) {
+	global $DB;
+	$ptoken = '%' . $token . '%';
+	$sql = "SELECT * FROM {role} WHERE "
+        . "shortname LIKE ?" ;
+    $records = $DB->get_records_sql($sql, array($ptoken));
+    $rolet = array();
+    foreach ($records as $record) {
+        $rolet[] = array(
+            'shortname' => $record->shortname,
+            'name' => $record->name,
+            'id' => $record->id
+        );
+    }
+    return $rolet;
+}
+
+function myenrol_teacher($courseid, $tabTeachers, $roleid) {
+	global $DB, $CFG;
+	require_once("$CFG->dirroot/lib/enrollib.php");
+    if ($courseid == SITEID) {
+        throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+    }
+
+	foreach ($tabTeachers as $user) {
+		$userid = $DB->get_field('user', 'id', array('username' => $user));
+		if ($userid) {
+			enrol_try_internal_enrol($courseid, $userid, $roleid);
+		}
+	}
+}
+
+/**
+ * renvoie un tableau des groupes à afficher dans étape confirmation
+ * utilise $SESSION->wizard['form_step5']
+ * @retun array $list
+ */
+function wizard_list_enrolement_group()
+{
+	global $DB, $SESSION;
+	$list = array();
+	$form5 = $SESSION->wizard['form_step5'];
+	if (array_key_exists('group', $form5)) {
+		foreach ($form5['group'] as $group) {
+			$cohort = $DB->get_field('cohort', 'name', array('idnumber' => $group));
+			if ($cohort) {
+				$list[] = $cohort;
+			}
+		}
+	}
+	return $list;
+}
+
+/**
+ * renvoie un tableau d'enseignants à afficher dans étape confirmation
+ * utilise $SESSION->wizard['form_step4']
+ * @retun array $list
+ */
+function wizard_list_enrolement_enseignants()
+{
+	global $DB, $SESSION;
+	$list = array();
+	$roles = wizard_role_teacher('teacher');
+	$form4 = $SESSION->wizard['form_step4'];
+	foreach ($roles as $r) {
+		$code = $r['shortname'];
+		if (array_key_exists($code, $form4)) {
+			foreach ($form4[$code] as $u) {
+				$user = $DB->get_record('user', array('username' => $u));
+				if ($user) {
+					$list[$code][] = $user->firstname .' '. $user->lastname;
+				}
+			}
+		}
+	}
+	return $list;
+}
+
 class core_wizard {
 
 	function create_course_to_validate () {
 		global $SESSION, $DB, $CFG;
-		// créer me cours
+		// créer cours
 		$mydata = $this->prepare_course_to_validate();
 		$course = create_course($mydata);
 		// save custom fields data
@@ -162,6 +240,14 @@ class core_wizard {
         //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
 
 		// inscrire des enseignants
+		$form4 = $SESSION->wizard['form_step4'];
+		$roles = wizard_role_teacher('teacher');
+		foreach ($roles as $r) {
+			$code = $r['shortname'];
+			if (array_key_exists($code, $form4)) {
+				myenrol_teacher($course->id, $form4[$code], $r['id']);
+			}
+		}
 		// inscrire des cohortes
 		if (isset($SESSION->wizard['form_step5']['group']) && count($SESSION->wizard['form_step5']['group'])) {
 			$tabGroup = $SESSION->wizard['form_step5']['group'];

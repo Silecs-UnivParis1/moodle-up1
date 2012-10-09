@@ -1,6 +1,7 @@
 <?php
 
 require_once('../../../config.php');
+require_once('../lib_wizard.php');
 
 require_login();
 
@@ -24,8 +25,12 @@ echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post"
 <div class="role">
 <h3>Rôle</h3>
 	<select name="role" size="1" id="roleteacher">
-		<option value="editingteacher">Enseignant</option>
-		<option value="teacher">Enseignant non éditeur</option>
+	<?php
+		$roles = wizard_role_teacher('teacher');
+		foreach ($roles as $r) {
+			echo '<option value="' . $r['shortname'] . '">' . $r['name'] . '</option>';
+		}
+	?>
 	</select>
 </div>
 <br/>
