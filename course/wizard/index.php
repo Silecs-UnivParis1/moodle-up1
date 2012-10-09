@@ -29,6 +29,7 @@ require_once(__DIR__ . '/step1_form.php');
 require_once(__DIR__ . '/step2_form.php');
 require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
+require_once(__DIR__ . '/step_cle.php');
 
 global $CFG, $PAGE, $OUTPUT, $SESSION;
 
@@ -96,6 +97,7 @@ if (isset($stepgo)) {
         case 6:
 			$steptitle = 'Etape 6 : Définition d\'une clef d\'inscription';
 			wizard_navigation(6);
+			$editform = new course_wizard_step_cle();
             break;
         case 7:
 			$steptitle = 'Confirmation de la demande d\'espace de cours';

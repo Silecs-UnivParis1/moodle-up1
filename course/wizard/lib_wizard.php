@@ -223,6 +223,69 @@ function wizard_list_enrolement_enseignants()
 	return $list;
 }
 
+function wizard_list_clef() {
+	global $SESSION;
+	if (isset($SESSION->wizard['form_step6'])) {
+		$form6 = $SESSION->wizard['form_step6'];
+		if (isset($form6['passwordu'])) {
+			$pass = trim($form6['passwordu']);
+			if ($pass !='') {
+				$list['Etudiante']['password'] = $pass;
+				if (isset($form6['enrolstartdateu'])) {
+					$list['Etudiante']['enrolstartdate'] = $form6['enrolstartdateu'];
+				}
+				if (isset($form6['enrolenddateu'])) {
+					$list['Etudiante']['enrolenddate'] = $form6['enrolenddateu'];
+				}
+			}
+		}
+	}
+	return $list;
+}
+
+function myenrol_clef_etudiant($idcourse, $tabClef) {
+	 global $DB;
+    if ($idcourse == SITEID) {
+        throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+    }
+    // traitement des données
+    $enrol = 'self';
+    $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
+    $status = 0;   //0 pour auto-inscription
+    $name = 'Clef pour le rôle étudiant';
+    if (isset($tabClef['enrolstartdate'])) {
+		$date = $tabClef['enrolstartdate'];
+		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+	} else {
+		$startdate = 0;
+	}
+	if (isset($tabClef['enrolenddate'])) {
+		$date = $tabClef['enrolenddate'];
+		$enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+	} else {
+		$enddate = 0;
+	}
+
+	$instance = new stdClass();
+	$instance->enrol = $enrol;
+	$instance->status = $status;
+	$instance->courseid = $idcourse;
+	$instance->roleid = $roleid;
+	$instance->name = $name;
+	$instance->password = $tabClef['password'];
+	$instance->customint1 = 0; // clef d'inscription groupe ?
+	$instance->customint2 = 0;
+	$instance->customint3 = 0;
+	$instance->customint4 = 0; // envoie d'un message
+
+	$instance->enrolstartdate = $startdate;
+	$instance->enrolenddate = $enddate;
+	$instance->timemodified = time();
+	$instance->timecreated = $instance->timemodified;
+	$instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
+	$DB->insert_record('enrol', $instance);
+}
+
 class core_wizard {
 
 	function create_course_to_validate () {
@@ -259,8 +322,15 @@ class core_wizard {
 				$SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
 				$messageInterface = affiche_error_enrolcohort($erreurs);
 			}
+		} else {
+			// inscrire des clefs
+			$clefs = wizard_list_clef();
+			if (count($clefs)) {
+				if (isset($clefs['Etudiante'])) {
+					myenrol_clef_etudiant($course->id, $clefs['Etudiante']);
+				}
+			}
 		}
-
 	}
 
 	function prepare_course_to_validate () {

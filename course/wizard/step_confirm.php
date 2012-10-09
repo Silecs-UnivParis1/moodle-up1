@@ -80,6 +80,28 @@ class course_wizard_step_confirm extends moodleform {
 			}
 		}
 
+		$clefs = wizard_list_clef();
+		if (count($clefs)) {
+			$mform->addElement('header','clefs', 'Clefs d\'inscription');
+			foreach ($clefs as $type => $clef) {
+				$mform->addElement('html', html_writer::tag('h4', $type . ' : '));
+				if (isset($clef['enrolstartdate'])) {
+					$date = $clef['enrolstartdate'];
+					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+					$mform->addElement('date_selector', 'enrolstartdateu', get_string('enrolstartdate', 'enrol_self'));
+					$mform->setConstant('enrolstartdateu', $startdate);
+					$tabfreeze[] = 'enrolstartdateu';
+				}
+				if (isset($clef['enrolenddate'])) {
+					$date = $clef['enrolenddate'];
+					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+					$mform->addElement('date_selector', 'enrolenddateu', get_string('enrolenddate', 'enrol_self'));
+					$mform->setConstant('enrolenddateu', $startdate);
+					$tabfreeze[] = 'enrolenddateu';
+				}
+			}
+		}
+
         //--------------------------------------------------------------------------------
         if (isset($SESSION->wizard['idcourse'])) {
             $idcourse = (int) $SESSION->wizard['idcourse'];
