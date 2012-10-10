@@ -19,18 +19,18 @@ class course_wizard_step3_form extends moodleform {
         $mform    = $this->_form;
 
         $mform->addElement('header','general', 'Rattachement de l\'espace de cours');
-        $mform->addElement('text', 'niveau', 'Niveau', 'maxlength="40" size="20", disabled="disabled"');
-        $mform->addElement('text', 'composante', 'Composante', 'maxlength="40" size="20", disabled="disabled"');
-        if (isset($SESSION->wizard['form_step2']['category'])) {
-            $idcat = (int) $SESSION->wizard['form_step2']['category'];
-            $nameniveau = $DB->get_field_select('course_categories', 'name', "id = ?", array($idcat));
-            $namecomposante = $DB->get_field_select('course_categories', 'name', "parent = ?", array($idcat));
 
-            $mform->setConstant('niveau', $nameniveau);
-            $mform->setConstant('composante', $namecomposante);
+		$myconfig = new my_elements_config();
+		if (isset($SESSION->wizard['form_step2']['category'])) {
+			$idcat = (int) $SESSION->wizard['form_step2']['category'];
+            $tabcategories = get_list_category($idcat);
+            foreach ($tabcategories as  $key => $nom) {
+				$type = $myconfig->categorie_cours[$key];
+				$mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
+				$mform->setConstant($type, $nom);
+				$tabfreeze[] = $type;
+			}
 		}
-        $tabfreeze[] = 'niveau';
-        $tabfreeze[] = 'composante';
 
         $mform->addElement('header','gestion', 'Gestion de l\'espace de cours');
         $mform->addElement('text', 'user_name', 'Nom du demandeur', 'maxlength="40" size="20", disabled="disabled"');

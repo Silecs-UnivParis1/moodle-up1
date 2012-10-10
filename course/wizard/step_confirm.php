@@ -13,6 +13,8 @@ class course_wizard_step_confirm extends moodleform {
     function definition() {
         global $USER, $DB, $SESSION;
 
+		$myconfig = new my_elements_config();
+
         $tabfreeze = array();
         $mform    = $this->_form;
 
@@ -64,8 +66,13 @@ class course_wizard_step_confirm extends moodleform {
         $enseigants = wizard_list_enrolement_enseignants();
 		if (count($enseigants)) {
 			$mform->addElement('header','resume', 'Enseignants');
+			$labels = $myconfig->role_teachers;
 			foreach ($enseigants as $type => $tab) {
-				$mform->addElement('html', html_writer::tag('h4', $type));
+				$label = $type;
+				if (array_key_exists($type, $labels)) {
+					$label = $labels[$type];
+				}
+				$mform->addElement('html', html_writer::tag('h4', $label));
 				foreach ($tab as $e) {
 					$mform->addElement('html', html_writer::tag('div', $e, array('class' => 'fitem')));
 				}

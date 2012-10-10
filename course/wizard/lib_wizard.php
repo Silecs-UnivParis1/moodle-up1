@@ -5,14 +5,17 @@ function get_stepgo($stepin, $post) {
 		case 5:
 			if (array_key_exists('stepgo_4', $post)) {
 				$stepgo = 4;
+				break;
 			}
 			if (array_key_exists('stepgo_6', $post)) {
 				$stepgo = 6;
+				break;
 			}
 			if (array_key_exists('stepgo_7', $post)) {
 				$stepgo = 7;
+				break;
 			}
-			break;
+
 		default :
 			$stepgo = $stepin + 1;
 			$stepretour = $stepin - 1;
@@ -37,6 +40,23 @@ function validation_shortname($shortname) {
         $errors['shortname'] = get_string('shortnametaken', '', $foundcoursenamestring);
     }
     return $errors;
+}
+
+function get_list_category($idcategory) {
+	global $DB;
+	$categories = array();
+	$selected = $DB->get_record('course_categories', array('id' => $idcategory));
+	$tabidpath = explode('/', $selected->path);
+	$tabcategory = array();
+	foreach ($tabidpath as $id) {
+		if ($id) {
+			$name = $DB->get_field('course_categories', 'name', array('id' => $id));
+			if ($name) {
+				$tabcategory[] = $name;
+			}
+		}
+	}
+	return $tabcategory;
 }
 
 function send_course_request($message, $messagehtml) {
@@ -225,6 +245,7 @@ function wizard_list_enrolement_enseignants()
 
 function wizard_list_clef() {
 	global $SESSION;
+	$list = array();
 	if (isset($SESSION->wizard['form_step6'])) {
 		$form6 = $SESSION->wizard['form_step6'];
 		if (isset($form6['passwordu'])) {
@@ -347,4 +368,14 @@ class core_wizard {
 
 		return $mydata;
 	}
+}
+
+class my_elements_config {
+	public $categorie_cours = array('Période', 'Etablissement',
+		'Compposante','Niveau'
+	);
+
+	public $role_teachers = array('editingteacher' => 'Enseignant',
+		'teacher' => 'Enseignant non éditeur'
+	);
 }

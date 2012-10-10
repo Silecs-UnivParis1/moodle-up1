@@ -19,7 +19,7 @@ class course_wizard_step_cle extends moodleform {
 			. 'à vos étudiants un code (appelé "clef d\'inscription") leur permettant de '
 			. 's\'inscrire aux-mêmes à l\'espace de cours lors de leur premier accès';
 		$messagecle = '<b>Attention : </b>Il faut renseigner le champ ' . get_string('password', 'enrol_self')
-			. ' pour crée la clef soit crée.';
+			. ' pour que la clef soit crée.';
 		$mform->addElement('html', html_writer::tag('div', $message, array('class' => 'fitem')));
 
         $mform->addElement('header','general', 'Clé d\'inscription pour le rôle "étudiants"');
