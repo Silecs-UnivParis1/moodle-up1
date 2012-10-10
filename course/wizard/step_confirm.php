@@ -92,19 +92,20 @@ class course_wizard_step_confirm extends moodleform {
 			$mform->addElement('header','clefs', 'Clefs d\'inscription');
 			foreach ($clefs as $type => $clef) {
 				$mform->addElement('html', html_writer::tag('h4', $type . ' : '));
+				$c = $clef['code'];
 				if (isset($clef['enrolstartdate'])) {
 					$date = $clef['enrolstartdate'];
 					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-					$mform->addElement('date_selector', 'enrolstartdateu', get_string('enrolstartdate', 'enrol_self'));
-					$mform->setConstant('enrolstartdateu', $startdate);
-					$tabfreeze[] = 'enrolstartdateu';
+					$mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
+					$mform->setConstant('enrolstartdate' . $c, $startdate);
+					$tabfreeze[] = 'enrolstartdate' . $c;
 				}
 				if (isset($clef['enrolenddate'])) {
 					$date = $clef['enrolenddate'];
 					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-					$mform->addElement('date_selector', 'enrolenddateu', get_string('enrolenddate', 'enrol_self'));
-					$mform->setConstant('enrolenddateu', $startdate);
-					$tabfreeze[] = 'enrolenddateu';
+					$mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
+					$mform->setConstant('enrolenddate' . $c, $startdate);
+					$tabfreeze[] = 'enrolenddate' . $c;
 				}
 			}
 		}
