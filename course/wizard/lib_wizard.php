@@ -314,6 +314,8 @@ class core_wizard {
 		// créer cours
 		$mydata = $this->prepare_course_to_validate();
 		$course = create_course($mydata);
+		// fonction addhoc - on supprime les enrols par défaut
+		$this->delete_default_enrol_course($course->id);
 		// save custom fields data
 		$mydata->id = $course->id;
 		$custominfo_data = custominfo_data::type('course');
@@ -367,6 +369,12 @@ class core_wizard {
 		$mydata->profile_field_validatedate = 0;
 
 		return $mydata;
+	}
+
+	// methode adhoc
+	function delete_default_enrol_course ($courseid) {
+		global $DB;
+		$DB->delete_records('enrol', array('courseid' => $courseid));
 	}
 }
 
