@@ -387,10 +387,11 @@ class core_wizard {
 		return $mydata;
 	}
 
-	// methode adhoc
+	// methode ad hoc : supprime les méthodes d'inscriptions guest et self
 	function delete_default_enrol_course ($courseid) {
 		global $DB;
-		$DB->delete_records('enrol', array('courseid' => $courseid));
+		$DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'self'));
+		$DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
 	}
 }
 
