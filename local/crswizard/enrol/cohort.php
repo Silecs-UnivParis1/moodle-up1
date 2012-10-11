@@ -1,37 +1,33 @@
 <?php
-//echo "chien";
-
-//require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 require_once('../../../config.php');
-$id = required_param('id', PARAM_INT); // course id
-$course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
-$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
-
-if ($course->id == SITEID) {
-    redirect(new moodle_url('/'));
-}
+require_once('../lib_wizard.php');
 
 require_login();
-if(!isset($SESSION->wizard['idcourse']) || $SESSION->wizard['idcourse']!=$id) {
-	require_login($course);
-	// ou redirect(new moodle_url('/'));
-}
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);
-has_capability('moodle/course:request', $systemcontext);
 
-$PAGE->set_url('/course/wizard/enrol/cohort.php');
+//has_capability('moodle/course:request', $systemcontext);
+$capcreate = use_crswizard($systemcontext);
 
-$PAGE->set_title($PAGE->course->fullname.': '.'Cohortes');
+$PAGE->set_url('/local/crswizard/enrol/cohort.php');
+
+$PAGE->set_title('Nom du cours : Cohortes');
+
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'));
-$PAGE->requires->js(new moodle_url('/course/wizard/js/wizard.js'));
+$PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Inscrire des groupes');
-echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post">';
+echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
 
 <div class="by-widget group-select group-select-internal">
@@ -44,22 +40,24 @@ echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post"
         <div class="group-selected"></div>
     </div>
 </div>
-<?php
 
-$stepin = 5;
+<?php
+$stepin = $SESSION->wizard['navigation']['stepin'];
+$suite = $SESSION->wizard['navigation']['suite'];
+$retour = $SESSION->wizard['navigation']['retour'];
 
 echo '<div align="center" style="margin:50px; clear:both"><div class="buttons">';
-echo '<input type="hidden" name="courseid" value="'.$id.'"/>';
 echo '<input type="hidden" name="stepin" value="'.$stepin.'"/>';
 
-echo '<input type="hidden" name="stepogo-manual" value="5"/>';
-echo '<input type="hidden" name="stepgo-cohort" value="7"/>';
-echo '<input type="hidden" name="stepgo" value=""/>';
+echo '<input type="hidden" name="stepgo-retour" value="'.$retour.'"/>';
+echo '<input type="hidden" name="stepgo-suite" value="'.$suite.'"/>';
+echo '<input type="hidden" id="stepgo" name="stepgo_" value=""/>';
 
-echo '<input type="hidden" name="idenrolment" value=""/>';
+echo '<input type="hidden" id="cohort" value="1"/>';
+
 echo '<input type="hidden" name="sesskey" value="'.sesskey().'"/>';
-echo '<button type="submit" id="etapep" value="open">Etape précédente</button>';
-echo '<button type="submit" id="etapes" value="open">Termine l\'inscription des groupes</button>';
+echo '<button type="submit" id="etaper" value="open">Etape précédente</button>';
+echo '<button type="submit" id="etapes" value="open">Etape suivante</button>';
 
 echo '</div>';
 echo '</div>';

@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 function step1_form() {
@@ -20,8 +25,8 @@ function step1_form() {
     );
     $formstep1 .= '</div><div style="margin:5px;">';
     $formstep1 .= $OUTPUT->single_button(
-            new moodle_url('/course/wizard/index.php', array('stepin' => 1, 'stepgo_2' => 2, 'wizardcase' => 3)),
-            'Un autre besoin',
+            new moodle_url('/local/crswizard/index.php', array('stepin' => 1, 'stepgo_2' => 2, 'wizardcase' => 3)),
+            get_string('anotherneed', 'local_crswizard'),
             'post'
     );
     $formstep1 .= '</div></div>';

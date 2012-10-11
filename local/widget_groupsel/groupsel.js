@@ -95,7 +95,7 @@ jQuery(function () {
     function buildSelectedBlock(item, inputName) {
         return $('<div class="group-item-block"></div>')
             .html('<div class="group-item-selected">' + item.label + '</div>')
-            .prepend('<div class="selected-remove">&#10799;</div>')
+            .prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
             .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }
     $(".by-widget.group-select .group-selected").on("click", ".selected-remove", function(event) {

@@ -11,3 +11,4 @@
 $string['pluginname'] = 'course_opennow';
 $string['startdate'] = 'Date de début du cours';
 $string['opencourse'] = 'Ouvrir le cours';
+$string['open'] = 'Ce cours est ouvert aux étudiants';

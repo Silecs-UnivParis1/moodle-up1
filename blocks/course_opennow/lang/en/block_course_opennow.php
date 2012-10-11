@@ -11,3 +11,4 @@
 $string['pluginname'] = 'course_opennow';
 $string['startdate'] = 'Course start';
 $string['opencourse'] = 'Couse open';
+$string['open'] = 'This course is open';

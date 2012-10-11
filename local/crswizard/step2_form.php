@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
@@ -137,8 +142,8 @@ class course_wizard_step2_form extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray=array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_1', 'étape précédente', array('onclick'=>'skipClientValidation = true; return true;'));
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_3', 'étape suivante');
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_1', 'Etape précédente', array('onclick'=>'skipClientValidation = true; return true;'));
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_3', 'Etape suivante');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }

@@ -1,16 +1,24 @@
 <?php
-
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
+require_once('lib_wizard.php');
 
 class course_wizard_step_confirm extends moodleform {
 
     function definition() {
         global $USER, $DB, $SESSION;
+
+		$myconfig = new my_elements_config();
 
         $tabfreeze = array();
         $mform    = $this->_form;
@@ -59,6 +67,53 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('date_selector', 'startdate', get_string('startdate'));
         $mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
+
+        $enseigants = wizard_list_enrolement_enseignants();
+		if (count($enseigants)) {
+			$mform->addElement('header','resume', 'Enseignants');
+			$labels = $myconfig->role_teachers;
+			foreach ($enseigants as $type => $tab) {
+				$label = $type;
+				if (array_key_exists($type, $labels)) {
+					$label = $labels[$type];
+				}
+				$mform->addElement('html', html_writer::tag('h4', $label));
+				foreach ($tab as $e) {
+					$mform->addElement('html', html_writer::tag('div', $e, array('class' => 'fitem')));
+				}
+			}
+		}
+
+		$groupes = wizard_list_enrolement_group();
+		if (count($groupes)) {
+			$mform->addElement('header','groupes', 'Groupes');
+			foreach ($groupes as $g) {
+				$mform->addElement('html', html_writer::tag('div', $g, array('class' => 'fitem')));
+			}
+		}
+
+		$clefs = wizard_list_clef();
+		if (count($clefs)) {
+			$mform->addElement('header','clefs', 'Clefs d\'inscription');
+			foreach ($clefs as $type => $clef) {
+				$mform->addElement('html', html_writer::tag('h4', $type . ' : '));
+				$c = $clef['code'];
+				if (isset($clef['enrolstartdate'])) {
+					$date = $clef['enrolstartdate'];
+					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+					$mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
+					$mform->setConstant('enrolstartdate' . $c, $startdate);
+					$tabfreeze[] = 'enrolstartdate' . $c;
+				}
+				if (isset($clef['enrolenddate'])) {
+					$date = $clef['enrolenddate'];
+					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+					$mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
+					$mform->setConstant('enrolenddate' . $c, $startdate);
+					$tabfreeze[] = 'enrolenddate' . $c;
+				}
+			}
+		}
 
         //--------------------------------------------------------------------------------
         if (isset($SESSION->wizard['idcourse'])) {

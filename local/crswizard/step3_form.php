@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
@@ -19,18 +24,18 @@ class course_wizard_step3_form extends moodleform {
         $mform    = $this->_form;
 
         $mform->addElement('header','general', 'Rattachement de l\'espace de cours');
-        $mform->addElement('text', 'niveau', 'Niveau', 'maxlength="40" size="20", disabled="disabled"');
-        $mform->addElement('text', 'composante', 'Composante', 'maxlength="40" size="20", disabled="disabled"');
-        if (isset($SESSION->wizard['form_step2']['category'])) {
-            $idcat = (int) $SESSION->wizard['form_step2']['category'];
-            $nameniveau = $DB->get_field_select('course_categories', 'name', "id = ?", array($idcat));
-            $namecomposante = $DB->get_field_select('course_categories', 'name', "parent = ?", array($idcat));
 
-            $mform->setConstant('niveau', $nameniveau);
-            $mform->setConstant('composante', $namecomposante);
+		$myconfig = new my_elements_config();
+		if (isset($SESSION->wizard['form_step2']['category'])) {
+			$idcat = (int) $SESSION->wizard['form_step2']['category'];
+            $tabcategories = get_list_category($idcat);
+            foreach ($tabcategories as  $key => $nom) {
+				$type = $myconfig->categorie_cours[$key];
+				$mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
+				$mform->setConstant($type, $nom);
+				$tabfreeze[] = $type;
+			}
 		}
-        $tabfreeze[] = 'niveau';
-        $tabfreeze[] = 'composante';
 
         $mform->addElement('header','gestion', 'Gestion de l\'espace de cours');
         $mform->addElement('text', 'user_name', 'Nom du demandeur', 'maxlength="40" size="20", disabled="disabled"');
@@ -60,12 +65,10 @@ class course_wizard_step3_form extends moodleform {
 
 //--------------------------------------------------------------------------------
 
-        $message = "Attention, vous ne pourrez plus modifier vos données.\\nConfirmez-vous le passage à l\'étape suivante ?";
         $buttonarray=array();
-        $buttonarray[] = $mform->createElement('submit', 'stepgo_2', 'étape précédente');
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_2', 'Etape précédente');
         $buttonarray[] = $mform->createElement(
-                'submit', 'stepgo_4', 'étape suivante', array('onclick'=>"return confirm('".$message."');")
-        );
+                'submit', 'stepgo_4', 'Etape suivante');
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }
