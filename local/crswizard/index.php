@@ -18,12 +18,13 @@
 /**
  * Edit course settings
  *
- * @package    moodlecore
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or laters
  */
 require_once('../../config.php');
-require_once('../lib.php');
+require_once('../../course/lib.php');
 require_once(__DIR__ . '/lib_wizard.php');
 require_once(__DIR__ . '/step1_form.php');
 require_once(__DIR__ . '/step2_form.php');
@@ -36,7 +37,7 @@ global $CFG, $PAGE, $OUTPUT, $SESSION;
 require_login();
 
 $systemcontext = get_context_instance(CONTEXT_SYSTEM);
-$PAGE->set_url('/course/wizard/index.php');
+$PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
 require_capability('moodle/course:request', $systemcontext);
 
@@ -84,14 +85,14 @@ if (isset($stepgo)) {
             break;
         case 4:
 			$steptitle = 'Etape 4 : inscription enseignants';
-			$url = '/course/wizard/enrol/teacher.php';
+			$url = '/local/crswizard/enrol/teacher.php';
 			wizard_navigation(4);
 			redirect(new moodle_url($url));
             break;
         case 5:
 			$steptitle = 'Etape 5 : inscription des groupes';
 			wizard_navigation(5);
-            $url = '/course/wizard/enrol/cohort.php';
+            $url = '/local/crswizard/enrol/cohort.php';
             redirect(new moodle_url($url));
             break;
         case 6:

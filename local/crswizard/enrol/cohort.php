@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package    local
+ * @subpackage crswizard
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 require_once('../../../config.php');
 
 require_login();
@@ -8,18 +13,18 @@ $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);
 has_capability('moodle/course:request', $systemcontext);
 
-$PAGE->set_url('/course/wizard/enrol/cohort.php');
+$PAGE->set_url('/local/crswizard/enrol/cohort.php');
 
 $PAGE->set_title('Nom du cours : Cohortes');
 
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'));
-$PAGE->requires->js(new moodle_url('/course/wizard/js/wizard.js'));
+$PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Inscrire des groupes');
-echo '<form action="' . $CFG->wwwroot . '/course/wizard/index.php" method="post">';
+echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
 
 <div class="by-widget group-select group-select-internal">
