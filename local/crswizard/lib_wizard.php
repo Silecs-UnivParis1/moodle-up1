@@ -1,4 +1,20 @@
 <?php
+/**
+ * Vérifie si l'utilisateur à le droit de créer un cours,
+ * sinon, vérifie si il a le droit de demander la création
+ * d'un cours
+ * @param $context $systemcontext
+ * @return bool ou error
+ */
+function use_crswizard($systemcontext){
+	//si capacité créer un cours (moodle/course:create)
+	$create = has_capability('moodle/course:create', $systemcontext);
+	if (!$create) {
+		// si capacité demander création d'un cours (moodle/course:request)
+		require_capability('moodle/course:request', $systemcontext);
+	}
+	return $create;
+}
 
 function get_stepgo($stepin, $post) {
 	switch ($stepin) {

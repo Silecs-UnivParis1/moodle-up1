@@ -6,12 +6,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once('../../../config.php');
+require_once('../lib_wizard.php');
 
 require_login();
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);
-has_capability('moodle/course:request', $systemcontext);
+
+//has_capability('moodle/course:request', $systemcontext);
+$capcreate = use_crswizard($systemcontext);
 
 $PAGE->set_url('/local/crswizard/enrol/cohort.php');
 

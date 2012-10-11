@@ -12,7 +12,9 @@ require_login();
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);
-has_capability('moodle/course:request', $systemcontext);
+
+//has_capability('moodle/course:request', $systemcontext);
+$capcreate = use_crswizard($systemcontext);
 
 $PAGE->set_url('/local/crswizard/enrol/teacher.php');
 
