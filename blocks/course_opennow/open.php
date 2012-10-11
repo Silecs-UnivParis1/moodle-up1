@@ -11,13 +11,9 @@
             if (!$course = $DB->get_record('course', array('id' =>$data->courseid))) {
                     error('Course ID was incorrect');
             } else {
-				$date = date('d-m-Y');
-				$tabDate = explode('-', $date);
-				$datetime = mktime(0, 0, 0, $tabDate[1], $tabDate[0], $tabDate[2]);
-                $course->startdate = $datetime;
-                $course->timemodified = time();
+				$visible = 1;
 				if (! $DB->update_record('course', array('id' => $course->id,
-					'startdate' => $course->startdate, 'timemodified' => $course->timemodified))) {
+					'visible' => $visible, 'visibleold' => $visible, 'timemodified' => time()))) {
 					echo 'not updated';
 					print_error('coursenotupdated');
 				}
