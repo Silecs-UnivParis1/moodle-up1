@@ -54,9 +54,27 @@ function mws_userGroupsId($uid) {
         . "JOIN {user} u ON (u.id = cm.userid) "
         . "WHERE username=?";
 
-    // echo $sql;
-    // die();
     $records = $DB->get_records_sql($sql, array($uid));
+        foreach ($records as $record) {
+        $groups[] = array(
+            'key' => $record->idnumber,
+            'name' => $record->name,
+            'description' => strip_tags($record->description)
+        );
+    }
+    return $groups;
+}
+
+function mws_userGroupsId_bis($uid) {
+    global $DB;
+
+    $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
+    $groups = array();
+    $sql = "SELECT c.name, c.idnumber, c.description FROM {cohort} c "
+        . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
+        . "WHERE userid=?";
+
+    $records = $DB->get_records_sql($sql, array($user->id));
         foreach ($records as $record) {
         $groups[] = array(
             'key' => $record->idnumber,
