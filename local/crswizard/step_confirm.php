@@ -23,19 +23,19 @@ class course_wizard_step_confirm extends moodleform {
         $tabfreeze = array();
         $mform    = $this->_form;
 
-        $mform->addElement('header','confirmation', 'Confirmation');
+        $mform->addElement('header','confirmation', get_string('confirmation', 'local_crswizard'));
 
-        $mform->addElement('html', html_writer::tag('p', 'Votre demande d\'ouverture d\'espace de cours va être transmise aux modérateurs de la plateforme :'));
+        $mform->addElement('html', html_writer::tag('p', get_string('confirmationblock', 'local_crswizard') . ' :'));
         $mform->addElement('html', html_writer::tag('p', '[Prénom Nom du modérateur et/ou membres du service TICE]'));
-        $mform->addElement('textarea', 'remarques', 'Vos remarques ou questions concernant cet espace de cours', array('rows'=>15, 'cols'=>80));
+        $mform->addElement('textarea', 'remarques', get_string('noticeconfirmation', 'local_crswizard'), array('rows'=>15, 'cols'=>80));
         $mform->setType('content', PARAM_RAW);
 
         $user_name = $USER->firstname . ' '. $USER->lastname;
-        $mform->addElement('header','resume', 'Récapitulatif de la demande');
-        $mform->addElement('text', 'user_name', 'Nom du demandeur', 'maxlength="40" size="20", disabled="disabled"');
+        $mform->addElement('header','resume', get_string('summaryof', 'local_crswizard'));
+        $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
         $mform->setConstant('user_name', $user_name);
         $tabfreeze[] = 'user_name';
-        $mform->addElement('date_selector', 'requestdate', 'Date de la demande de création');
+        $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
         $mform->setDefault('requestdate', time());
         $tabfreeze[] = 'requestdate';
 
@@ -70,14 +70,14 @@ class course_wizard_step_confirm extends moodleform {
 
         $enseigants = wizard_list_enrolement_enseignants();
 		if (count($enseigants)) {
-			$mform->addElement('header','resume', 'Enseignants');
+			$mform->addElement('header','resume', get_string('teachers', 'local_crswizard'));
 			$labels = $myconfig->role_teachers;
 			foreach ($enseigants as $type => $tab) {
 				$label = $type;
 				if (array_key_exists($type, $labels)) {
 					$label = $labels[$type];
 				}
-				$mform->addElement('html', html_writer::tag('h4', $label));
+				$mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
 				foreach ($tab as $e) {
 					$mform->addElement('html', html_writer::tag('div', $e, array('class' => 'fitem')));
 				}
@@ -86,7 +86,7 @@ class course_wizard_step_confirm extends moodleform {
 
 		$groupes = wizard_list_enrolement_group();
 		if (count($groupes)) {
-			$mform->addElement('header','groupes', 'Groupes');
+			$mform->addElement('header','groupes', get_string('cohorts', 'local_crswizard'));
 			foreach ($groupes as $g) {
 				$mform->addElement('html', html_writer::tag('div', $g, array('class' => 'fitem')));
 			}
@@ -94,7 +94,7 @@ class course_wizard_step_confirm extends moodleform {
 
 		$clefs = wizard_list_clef();
 		if (count($clefs)) {
-			$mform->addElement('header','clefs', 'Clefs d\'inscription');
+			$mform->addElement('header','clefs', get_string('enrolkey', 'local_crswizard'));
 			foreach ($clefs as $type => $clef) {
 				$mform->addElement('html', html_writer::tag('h4', $type . ' : '));
 				$c = $clef['code'];
@@ -150,7 +150,7 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setConstant('message', $message);
 
         $buttonarray=array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_8', 'Terminer');
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 

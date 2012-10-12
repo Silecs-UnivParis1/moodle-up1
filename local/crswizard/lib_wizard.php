@@ -416,7 +416,7 @@ class my_elements_config {
 		'Compposante','Niveau'
 	);
 
-	public $role_teachers = array('editingteacher' => 'Enseignant',
-		'teacher' => 'Enseignant non éditeur'
+	public $role_teachers = array('editingteacher' => 'editingteacher',
+		'teacher' => 'noeditingteacher'
 	);
 }

@@ -18,17 +18,12 @@ class course_wizard_step_cle extends moodleform {
         $mform    = $this->_form;
 
 //--------------------------------------------------------------------------------
-		$message = 'Si vous n\'avez trouvé aucun groupe d\'utilisateurs '
-			. 'étudiants correspondant à la permission d\'acces que vous souhaitez '
-			. 'accorder à l\'espace de cours, vous avez la possibilité de communiquer '
-			. 'à vos étudiants un code (appelé "clef d\'inscription") leur permettant de '
-			. 's\'inscrire aux-mêmes à l\'espace de cours lors de leur premier accès';
-		$messagecle = '<b>Attention : </b>Il faut renseigner le champ ' . get_string('password', 'enrol_self')
-			. ' pour que la clef soit crée.';
+		$message = get_string('messagekeyblock1', 'local_crswizard');
+		$messagecle = get_string('messagekeyblock2', 'local_crswizard');
 		$mform->addElement('html', html_writer::tag('div', $message, array('class' => 'fitem')));
 
-		$tabCle = array('u' =>'Clé d\'inscription pour le rôle "étudiants"',
-			'v' => 'Clé d\'inscription pour le rôle "visiteurs"'
+		$tabCle = array('u' => get_string('studentkey', 'local_crswizard'),
+			'v' => get_string('guestkey', 'local_crswizard')
 		);
 
 		foreach ($tabCle as $c => $label) {
@@ -69,8 +64,8 @@ class course_wizard_step_cle extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray=array();
-		$buttonarray[] = &$mform->createElement('submit', 'stepgo_5', 'Etape précédente');
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_7', 'Etape suivante');
+		$buttonarray[] = &$mform->createElement('submit', 'stepgo_5', get_string('previousstage', 'local_crswizard'));
+        $buttonarray[] = &$mform->createElement('submit', 'stepgo_7', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }
