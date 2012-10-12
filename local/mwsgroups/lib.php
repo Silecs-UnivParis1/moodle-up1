@@ -9,7 +9,7 @@
  */
 
 /**
- * emulates wsgroups search action from Moodle data
+ * emulates wsgroups "search" action from Moodle data
  * @global type $DB
  * @param string $token to search in user and cohort tables
  * @param int $maxrows (default 10)
@@ -44,7 +44,8 @@ function mws_search($token, $maxrows=10) {
     return array('users' => $users, 'groups' => $groups);
 }
 
-
+// fonction abandonnée, remplacée par mws_userGroupsId_fast
+// lenteur dûe sans doute à la 2e jointure sur user.id
 function mws_userGroupsId($uid) {
     global $DB;
 
@@ -65,7 +66,13 @@ function mws_userGroupsId($uid) {
     return $groups;
 }
 
-function mws_userGroupsId_bis($uid) {
+/**
+ * emulates wsgroups "userGroupsId" action from Moodle data
+ * @global type $DB
+ * @param string $uid (sens ldap) Moodle username
+ * @return $groups as wsgroups structure
+ */
+function mws_userGroupsId_fast($uid) {
     global $DB;
 
     $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
