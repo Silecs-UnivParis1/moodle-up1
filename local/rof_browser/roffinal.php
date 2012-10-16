@@ -10,6 +10,8 @@ $rofid = optional_param('rofid',NULL,PARAM_ALPHANUMEXT);
 $path = optional_param('path',NULL,PARAM_ALPHANUMEXT);
 
 $format = optional_param('format',NULL,PARAM_ALPHANUMEXT);
+$typedip = optional_param('typedip',NULL,PARAM_ALPHANUMEXT);
+
 $action = optional_param('action',NULL,PARAM_ALPHANUMEXT);
 $detail = optional_param('detail',NULL,PARAM_INT);
 
@@ -29,6 +31,16 @@ if (array_key_exists ($niveau, $rb->tabNiveau)) {
 	}
 	if (isset($path)) {
 		$rb->setPath($path);
+	}
+	if (isset($format)) {
+		$rb->setFormat($format);
+	} else {
+		$rb->setFormat(0);
+	}
+	if (isset($typedip) && $typedip != 'undefined') {
+		$rb->setTypedip($typedip);
+	} else {
+		$rb->setTypedip(0);
 	}
 
     $htmlblock = $rb->createBlock();

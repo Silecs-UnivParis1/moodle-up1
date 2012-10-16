@@ -3,6 +3,38 @@ jQuery(function () {
 	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
     $('div.item-select').load(rootUrl + 'ajax.php');
 
+    $('div.item-select').on("change", ".selectmenu", function(event) {
+		var id = $(this).attr('id');
+		$('#'+id+' ~ *').remove();
+
+		var select = $(this).children('option[selected=selected]');
+		var codeid = select.attr('id');
+
+		if (codeid) {
+			var niv = select.attr('data_deep');
+			var rofid = select.attr('data_rofid');
+			var path = select.attr('data_path');
+			if (niv < 3) {
+				var format = 1;
+			} else {
+				var format = 0;
+			}
+
+			var typedip = 0;
+			if (niv == 2) {
+				typedip = select.attr('data_typedip');
+			}
+
+			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1,
+				path: path, format: format, typedip: typedip},
+				function(data){
+				$('#'+id).after(data);
+			}, 'html');
+		}
+	});
+
+
+
     $('div.item-select').on("click", ".collapse", function(event) {
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
