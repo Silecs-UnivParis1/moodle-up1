@@ -259,18 +259,25 @@ class rof_browser {
 		if ($this->niveau == 2) {
 			$sub = subToString($pere->sub);
 			$sort = " ORDER BY FIND_IN_SET(typedip, '" . typeDiplomeOrderedList() . "') ";
-			if ($this->typedip) {
-				$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip='".$this->typedip."' " . $sort;
-				$subList = $DB->get_records_sql($sql);
+
+			if($this->format) {
+				if ($this->typedip) {
+					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip='".$this->typedip."' " . $sort;
+					$subList = $DB->get_records_sql($sql);
+				} else {
+					$sql = "SELECT c.value, c.dataimport FROM {rof_constant} c JOIN " . $tabEnf
+						. " r ON (r.typedip=c.dataimport) "
+						. "WHERE " . " r.rofid in ({$sub}) AND element LIKE 'typeDiplome' "
+						. "GROUP BY  c.value, c.dataimport "
+						. $sort;
+					$subList = $DB->get_records_sql($sql);
+					return $this->print_select_type_diplome($subList, $this->rofid, 2);
+				}
 			} else {
-				$sql = "SELECT c.value, c.dataimport FROM {rof_constant} c JOIN " . $tabEnf
-					. " r ON (r.typedip=c.dataimport) "
-					. "WHERE " . " r.rofid in ({$sub}) AND element LIKE 'typeDiplome' "
-					. "GROUP BY  c.value, c.dataimport "
-					. $sort;
+				$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
 				$subList = $DB->get_records_sql($sql);
-				return $this->print_select_type_diplome($subList, $this->rofid, 2);
 			}
+
 		} elseif ($this->niveau==4) {
 			// dans rof_progam, la liste des enfants courses est dans le champ courses
 			if (isset($pere->courses)) {
