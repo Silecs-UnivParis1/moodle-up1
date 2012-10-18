@@ -43,10 +43,10 @@ jQuery(function () {
 
 		var plus = $(this).text();
 		$(this).empty();
-		if (plus=='[+] ') {
-			plus = '[-] ';
+		if (plus==' + ') {
+			plus = ' - ';
 		} else {
-			plus = '[+] ';
+			plus = ' + ';
 		}
 		$(this).append(plus);
 
@@ -73,7 +73,7 @@ jQuery(function () {
 	$('div.item-select').on("click", ".element", function(event) {
 		var rofid = $(this).prevAll('span.collapse').attr('data_rofid');
 		var path =  $(this).prevAll('span.collapse').attr('data_path');
-		var intitule = $(this).text();
+		var intitule = $(this).prevAll('span.intitule').text();
 
 		var reg=new RegExp("_", "gi");
 		path = path.replace(reg, "/");

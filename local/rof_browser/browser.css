@@ -8,7 +8,6 @@
 
 .curser-point {
 	cursor: pointer;
-	color: blue;
 }
 
 .component-tree {
@@ -32,8 +31,25 @@ div#liste-selected {
 	cursor: pointer;
 }
 
-.list-none {
+li.list-none {
 	list-style-type: none;
+}
+
+li.list-item {
+	padding-bottom: 4px;
+	line-height: 1.0;
+	font-weight: 16px;
+	margin-top: 2px;
+	font-family: "Verdana", "Arial", sans-serif;
+}
+
+li.list-item span.oplus {
+	font-size: 24px;
+	margin: -6px 2px 0 2px;
+}
+
+li.list-item span.nbenfant {
+	margin: 0 2px 0 2px;
 }
 
 ul.item {
