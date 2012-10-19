@@ -4,7 +4,7 @@ define('NO_OUTPUT_BUFFERING', true);
 require('../../config.php');
 require_once('./lib.php');
 
-$token = required_param('token', PARAM_ALPHANUMEXT);
+$token = required_param('token', PARAM_RAW);
 $maxrows = optional_param('maxRows', 10, PARAM_INT);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
