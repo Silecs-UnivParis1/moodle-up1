@@ -27,6 +27,9 @@ $PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'));
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading(get_string('enrolteachers', 'local_crswizard'));
+echo $OUTPUT->heading(get_string('blocktitleE4', 'local_crswizard'), 4, '');
+echo $OUTPUT->box(get_string('bockhelpE4', 'local_crswizard'), '');
+
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
 

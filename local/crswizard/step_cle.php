@@ -30,7 +30,7 @@ class course_wizard_step_cle extends moodleform {
 
 			$mform->addElement('header','general' . $c, $label);
 			$mform->addElement('html', html_writer::tag('div', $messagecle, array('class' => 'fitem')));
-			$mform->addElement('passwordunmask', 'password' . $c, get_string('password', 'enrol_self'));
+			$mform->addElement('passwordunmask', 'password' . $c, get_string('enrolkey', 'local_crswizard'));
 			$mform->addHelpButton('password' . $c, 'password', 'enrol_self');
 			if (isset($SESSION->wizard['form_step6']['password' . $c])) {
 				$mform->setDefault('password' . $c, $SESSION->wizard['form_step6']['password' . $c]);

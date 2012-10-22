@@ -29,23 +29,23 @@ class course_wizard_step2_form extends moodleform {
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
-        $mform->addHelpButton('category', 'category');
+        //$mform->addHelpButton('category', 'category');
         if (isset($SESSION->wizard['form_step2']['category'])) {
 			 $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
 		}
 
         $mform->addElement('header','general', get_string('generalinfoblock', 'local_crswizard'));
 
-        $mform->addElement('text','fullname', get_string('fullnamecourse'),'maxlength="254" size="50"');
-        $mform->addHelpButton('fullname', 'fullnamecourse');
+        $mform->addElement('text','fullname', get_string('fullnamecourse', 'local_crswizard'),'maxlength="254" size="50"');
+        //$mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');
         $mform->setType('fullname', PARAM_MULTILANG);
         if (isset($SESSION->wizard['form_step2']['fullname'])) {
             $mform->setConstant('fullname', $SESSION->wizard['form_step2']['fullname']);
  	    }
 
-        $mform->addElement('text', 'shortname', get_string('shortnamecourse'), 'maxlength="100" size="20"');
-        $mform->addHelpButton('shortname', 'shortnamecourse');
+        $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
+        //$mform->addHelpButton('shortname', 'shortnamecourse');
         $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
         $mform->setType('shortname', PARAM_MULTILANG);
         if (isset($SESSION->wizard['form_step2']['shortname'])) {
@@ -55,8 +55,8 @@ class course_wizard_step2_form extends moodleform {
             $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['shortname'], array('class' => 'required')));
  	    }
 
-        $mform->addElement('editor','summary_editor', get_string('coursesummary'), null, $editoroptions);
-        $mform->addHelpButton('summary_editor', 'coursesummary');
+        $mform->addElement('editor','summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
+        //$mform->addHelpButton('summary_editor', 'coursesummary');
         $mform->setType('summary_editor', PARAM_RAW);
         if (isset($SESSION->wizard['form_step2']['summary_editor'])) {
             $mform->setConstant('summary_editor', $SESSION->wizard['form_step2']['summary_editor']);
@@ -64,8 +64,8 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('header','parametre', get_string('coursesettingsblock', 'local_crswizard'));
 
-        $mform->addElement('date_selector', 'startdate', get_string('startdate'));
-        $mform->addHelpButton('startdate', 'startdate');
+        $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
+       // $mform->addHelpButton('startdate', 'startdate');
         if (isset($SESSION->wizard['form_step2']['startdate'])) {
 			$date = $SESSION->wizard['form_step2']['startdate'];
 			$mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));

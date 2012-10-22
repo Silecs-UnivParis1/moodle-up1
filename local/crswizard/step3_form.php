@@ -23,7 +23,7 @@ class course_wizard_step3_form extends moodleform {
         $tabfreeze = array();
         $mform    = $this->_form;
 
-        $mform->addElement('header','general', get_string('categoryblock', 'local_crswizard'));
+        $mform->addElement('header','general', get_string('categoryblockE3', 'local_crswizard'));
 
 		$myconfig = new my_elements_config();
 		if (isset($SESSION->wizard['form_step2']['category'])) {
@@ -36,17 +36,6 @@ class course_wizard_step3_form extends moodleform {
 				$tabfreeze[] = $type;
 			}
 		}
-
-        $mform->addElement('header','gestion', get_string('managecourseblock', 'local_crswizard'));
-        $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'),
-			'maxlength="40" size="20", disabled="disabled"');
-        $mform->setConstant('user_name', $USER->firstname . ' '. $USER->lastname);
-        $tabfreeze[] = 'user_name';
-
-        $mform->addElement('date_selector', 'requestdate',  get_string('courserequestdate', 'local_crswizard'));
-        $mform->setDefault('requestdate', time());
-        $tabfreeze[] = 'requestdate';
-
 
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
@@ -65,6 +54,18 @@ class course_wizard_step3_form extends moodleform {
         $this->custominfo->definition($mform, $canviewall);
 
 //--------------------------------------------------------------------------------
+
+		$mform->addElement('header','gestion', get_string('managecourseblock', 'local_crswizard'));
+        $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'),
+			'maxlength="40" size="20", disabled="disabled"');
+        $mform->setConstant('user_name', $USER->firstname . ' '. $USER->lastname);
+        $tabfreeze[] = 'user_name';
+
+        $mform->addElement('date_selector', 'requestdate',  get_string('courserequestdate', 'local_crswizard'));
+        $mform->setDefault('requestdate', time());
+        $tabfreeze[] = 'requestdate';
+
+//---------------------------------------------------------------------------------
 
         $buttonarray=array();
         $buttonarray[] = $mform->createElement('submit', 'stepgo_2', get_string('previousstage', 'local_crswizard'));

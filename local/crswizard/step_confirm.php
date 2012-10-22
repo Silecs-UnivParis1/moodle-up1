@@ -48,23 +48,23 @@ class course_wizard_step_confirm extends moodleform {
         $tabfreeze[] = 'category';
 
         $fullname = $SESSION->wizard['form_step2']['fullname'];
-        $mform->addElement('text','fullname', get_string('fullnamecourse'),'maxlength="254" size="50"');
+        $mform->addElement('text','fullname', get_string('fullnamecourse', 'local_crswizard'),'maxlength="254" size="50"');
         $mform->setConstant('fullname', $fullname);
         $tabfreeze[] = 'fullname';
 
         $shortname = $SESSION->wizard['form_step2']['shortname'];
-        $mform->addElement('text', 'shortname', get_string('shortnamecourse'), 'maxlength="100" size="20"');
+        $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
         $mform->setConstant('shortname', $shortname);
         $tabfreeze[] = 'shortname';
 
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
-            . get_string('coursesummary') . '</label></div></div>'
+            . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
             . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
         $date = $SESSION->wizard['form_step2']['startdate'];
         $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-        $mform->addElement('date_selector', 'startdate', get_string('startdate'));
+        $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
         $mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
 
