@@ -1,5 +1,5 @@
 /*
- * @license http://www.gnu.org/licenses/gpl-2.0.html  GNU GPL v2
+ * @license http://opensource.org/licenses/mit-license.php MIT/X11 License
  */
 
 jQuery(function () {
