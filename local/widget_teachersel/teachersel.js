@@ -3,6 +3,7 @@
  */
 
 jQuery(function () {
+    var selected = new Array();
     $("<link/>", {
         rel: "stylesheet",
         type: "text/css",
@@ -66,10 +67,10 @@ jQuery(function () {
 			role = $('#roleteacher > option:selected').text();
 		}
 
-		var present = $('input[type=hidden][value='+item.value+']').size();
-		if (present) {
+		if (typeof selected[item.value] != 'undefined' && selected[item.value] == 1) {
 			alert(item.label+' fait déjà partie de la sélection.');
 		} else {
+            selected[item.value] = 1;
 			return $('<div class="teacher-item-block"></div>')
 				.html('<div class="teacher-item-selected">' + item.label + ' (' + role + ') </div>')
 				.prepend('<div class="selected-remove">&#10799;</div>')
@@ -77,6 +78,8 @@ jQuery(function () {
         }
     }
     $(".by-widget.teacher-select .teachers-selected").on("click", ".selected-remove", function(event) {
+        var item = $(this).closest(".teacher-item-block").find('input[type="hidden"]').first();
+        selected[item.val()] = 0;
         $(this).closest(".teacher-item-block").remove();
     });
     // load the custom CSS
