@@ -265,11 +265,10 @@ class rof_browser {
 					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip='".$this->typedip."' " . $sort;
 					$subList = $DB->get_records_sql($sql);
 				} else {
-					$sql = "SELECT c.id, c.value, c.dataimport FROM {rof_constant} c JOIN " . $tabEnf
-						. " r ON (r.typedip=c.dataimport) "
-						. "WHERE " . " r.rofid in ({$sub}) AND element LIKE 'typeDiplome' "
-						. "GROUP BY  c.id "
-						. $sort;
+					$sql = "SELECT concat(COALESCE(c.value, 'Inconnue'), ' - ', r.typedip) as label, r.typedip, c.value "
+                        . "FROM (SELECT typedip FROM rof_program  WHERE rofid in ({$sub}) ) AS r "
+                        . "LEFT JOIN (SELECT value, dataimport FROM {rof_constant} WHERE element LIKE 'typeDiplome') AS c "
+                        . "ON (r.typedip=c.dataimport) GROUP BY label ". $sort;
 					$subList = $DB->get_records_sql($sql);
 					return $this->print_select_type_diplome($subList, $this->rofid, 2);
 				}
@@ -378,11 +377,11 @@ class rof_browser {
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
 			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Type diplôme</option>';
-				foreach ($subList as $id => $sl) {
+				foreach ($subList as $sl) {
 					$list .= '<option data_deep="' . $nivEnf . '" data_path="'
 						. $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
-						. $rofid . '_'.$sl->dataimport.'" data_typedip="' . $sl->dataimport . '">'
-						. $sl->value . '</option>';
+						. $rofid . '_' . $sl->typedip . '" data_typedip="' . $sl->typedip . '">'
+						. $sl->label . '</option>';
 				}
 			$list .= '</select>';
 			$list .= '</div>';
