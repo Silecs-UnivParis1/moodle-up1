@@ -1,19 +1,19 @@
 <?php
 
 /**
- * renvoie l'identifiant du custom_info_field 'tovalidate'
+ * renvoie l'identifiant du custom_info_field 'up1avalider'
  */
 function getIdTovalidate () {
 	global $DB;
-	return $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'tovalidate'));
+	return $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1avalider'));
 }
 
 /**
- * renvoie l'identifiant du custom_info_field 'validatedate'
+ * renvoie l'identifiant du custom_info_field 'up1datevalid'
  */
 function getIdvalidatedate () {
 	global $DB;
-	return $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'validatedate'));
+	return $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1datevalid'));
 }
 
 /**

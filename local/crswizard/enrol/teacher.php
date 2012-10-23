@@ -18,19 +18,23 @@ $capcreate = use_crswizard($systemcontext);
 
 $PAGE->set_url('/local/crswizard/enrol/teacher.php');
 
-$PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': '.'enseignant');
+$PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('teacher', 'local_crswizard'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 $PAGE->requires->js(new moodle_url('/local/widget_teachersel/teachersel.js'));
 $PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(' Inscrire des enseignants');
+echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
+echo $OUTPUT->heading(get_string('enrolteachers', 'local_crswizard'));
+echo $OUTPUT->heading(get_string('blocktitleE4', 'local_crswizard'), 4, '');
+echo $OUTPUT->box(get_string('bockhelpE4', 'local_crswizard'), '');
+
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
 
 <div class="role">
-<h3>Rôle</h3>
+<h3><?php echo get_string('role', 'local_crswizard');?></h3>
 	<select name="role" size="1" id="roleteacher">
 	<?php
 		$myconfig = new my_elements_config();
@@ -41,7 +45,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 			if (array_key_exists($r['shortname'], $labels)) {
 				$label = $labels[$r['shortname']];
 			}
-			echo '<option value="' . $r['shortname'] . '">' . $label . '</option>';
+			echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
 		}
 	?>
 	</select>
@@ -49,11 +53,11 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 <br/>
 <div class="by-widget teacher-select">
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
-        <h3>Rechercher un enseignant</h3>
-        <input type="text" class="teacher-selector" name="something" data-inputname="teacher" size="50" placeholder="Libellé de nom d'utilisateur" />
+        <h3><?php echo get_string('findteacher', 'local_crswizard');?></h3>
+        <input type="text" class="teacher-selector" name="something" data-inputname="teacher" size="50" placeholder="<?php echo get_string('teachername', 'local_crswizard');?>" />
     </div>
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
-        <h3>Enseignants sélectionnés</h3>
+        <h3><?php echo get_string('selectedteacher', 'local_crswizard');?></h3>
         <div class="teachers-selected"></div>
     </div>
 </div>
@@ -72,8 +76,10 @@ echo '<input type="hidden" name="stepgo-suite" value="'.$suite.'"/>';
 echo '<input type="hidden" id="stepgo" name="stepgo_" value=""/>';
 
 echo '<input type="hidden" name="sesskey" value="'.sesskey().'"/>';
-echo '<button type="submit" id="etaper" value="retour">Etape précédente</button>';
-echo '<button type="submit" id="etapes" value="suivant">Etape suivante</button>';
+echo '<button type="submit" id="etaper" value="retour">'
+	. get_string('previousstage', 'local_crswizard') . '</button>';
+echo '<button type="submit" id="etapes" value="suivant">'
+	. get_string('nextstage', 'local_crswizard') . '</button>';
 
 echo '</div>';
 echo '</div>';

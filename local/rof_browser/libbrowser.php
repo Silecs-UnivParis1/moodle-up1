@@ -75,6 +75,46 @@ function afficheArbre() {
 	return $list;
 }
 
+/**
+ * construit l'arbre du rof (arbre selected) avec des select pour
+ * component, program et subprogram
+ * @return string code html
+ */
+function print_rof() {
+	$components = getRofComponents();
+	$list = '<div class="select-elem">';
+	$list .= '<select class="selectmenu" id="select-2">';
+	$list .= '<option selected="selected" data_deep="2">Composante</option>';
+	foreach ($components as $c) {
+		$id = 'deep2_' . $c->number;
+		$idElem = $id . '-elem';
+		$data_path = $c->number;
+		$data_rofid = $c->number;
+		$disabled = ' disabled="disabled" ';
+
+		$style = 'collapse';
+		$collapse = '';
+		$infoNbEnf = '';
+		$listStyle = 'list-none';
+		if ($c->sub != '') {
+			$disabled = ' ';
+
+			$nbEnf = nbSub($c->sub);
+			$style = 'collapse curser-point';
+			$collapse = '[+] ';
+			$infoNbEnf = '('. $nbEnf .')';
+		}
+		$list .= '<option '.$disabled.' data_deep="2" '
+			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
+			. '>'
+			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf
+			. '</option>';
+	}
+	$list .= '</select>';
+	$list .= '</div>';
+	return $list;
+}
+
 /*
  * réécrit la liste les éléments fils en suivant le format "'fils_1', 'fils2'"
  * @param string $sub : "fils_1, fils2"
@@ -105,12 +145,13 @@ class rof_browser {
 
 	public $action = 'view'; // create, view
 	public $detail = 1; // simple,
-	public $format = 'list'; // list, table
 
 	protected $niveau;
 	protected $rofid;
 	protected $selected;
 	protected $path;
+	protected $format;
+	protected $typedip;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -140,6 +181,17 @@ class rof_browser {
 
 	public function setPath($path) {
 		$this->path = $path;
+	}
+
+	/**
+	 * format=1 : select, format=0 : list
+	 */
+	public function setFormat($format) {
+		$this->format = $format;
+	}
+
+	public function setTypedip($typedip) {
+		$this->typedip = $typedip;
 	}
 
 	/**
@@ -207,8 +259,25 @@ class rof_browser {
 		if ($this->niveau == 2) {
 			$sub = subToString($pere->sub);
 			$sort = " ORDER BY FIND_IN_SET(typedip, '" . typeDiplomeOrderedList() . "') ";
-			$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
-			$subList = $DB->get_records_sql($sql);
+
+			if($this->format) {
+				if ($this->typedip) {
+					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip='".$this->typedip."' " . $sort;
+					$subList = $DB->get_records_sql($sql);
+				} else {
+					$sql = "SELECT c.id, c.value, c.dataimport FROM {rof_constant} c JOIN " . $tabEnf
+						. " r ON (r.typedip=c.dataimport) "
+						. "WHERE " . " r.rofid in ({$sub}) AND element LIKE 'typeDiplome' "
+						. "GROUP BY  c.id "
+						. $sort;
+					$subList = $DB->get_records_sql($sql);
+					return $this->print_select_type_diplome($subList, $this->rofid, 2);
+				}
+			} else {
+				$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
+				$subList = $DB->get_records_sql($sql);
+			}
+
 		} elseif ($this->niveau==4) {
 			// dans rof_progam, la liste des enfants courses est dans le champ courses
 			if (isset($pere->courses)) {
@@ -234,8 +303,13 @@ class rof_browser {
 		}
 
 		$blocListe = '';
+		$nomFonction = 'afficheListe';
+		if ($this->format) {
+			$nomFonction = 'print_select';
+		}
+
 		if (isset($subList) && count($subList)) {
-			$blocListe .= $this->afficheListe($subList, $nivEnf);
+			$blocListe .= $this->$nomFonction($subList, $nivEnf);
 		}
 		if (isset($subList2) && count($subList2)) {
 			$blocListe .= $this->afficheListe($subList2, $nivEnf);
@@ -273,7 +347,50 @@ class rof_browser {
 		return $list;
 	}
 
-/**
+	/**
+	 * construit le code HTML sous forme d'un élement select des les elements $subList
+	 * @param array() $subList
+	 * @param int $nivEnf
+	 * return string code HTML d'un élément select
+	 */
+	function print_select($subList, $nivEnf) {
+		$list = '';
+		$nbSubList = count($subList);
+
+		if ($nbSubList) {
+			$list = '<div class="select-elem">';
+			$list .= '<select class="selectmenu" id="select-' . $nivEnf . '">';
+			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Diplôme</option>';
+				foreach ($subList as $id => $sl) {
+					$list .= $this->print_option($sl, $nivEnf);
+				}
+			$list .= '</select>';
+			$list .= '</div>';
+		}
+		return $list;
+	}
+
+	function print_select_type_diplome($subList, $rofid, $nivEnf) {
+		$list = '';
+		$nbSubList = count($subList);
+
+		if ($nbSubList) {
+			$list = '<div class="select-elem">';
+			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
+			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Type diplôme</option>';
+				foreach ($subList as $id => $sl) {
+					$list .= '<option data_deep="' . $nivEnf . '" data_path="'
+						. $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
+						. $rofid . '_'.$sl->dataimport.'" data_typedip="' . $sl->dataimport . '">'
+						. $sl->value . '</option>';
+				}
+			$list .= '</select>';
+			$list .= '</div>';
+		}
+		return $list;
+	}
+
+	/**
 	 * Construit un item d'une liste (arbre selected)
 	 * @param $object $sp correspond à l'objet à afficher
 	 * @param $niveau
@@ -299,6 +416,7 @@ class rof_browser {
 		$idElem = $id . '-elem';
 		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
 		$data_path = $this->path . '_' . $sp->rofid;
+		$intitule = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
 
 		$nbEnf = $nbSub + $nbCourses;
         $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
@@ -306,21 +424,66 @@ class rof_browser {
 		$style = 'collapse';
 		$collapse = '';
 		$infoNbEnf = '';
-		$listStyle = 'list-none';
+		$listStyle = 'list-none list-item';
 		if ($nbEnf) {
 			$style = 'collapse curser-point';
-			$collapse = '[+] ';
+			$collapse = ' + ';
 			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$element .= '<li class="' . $listStyle . '">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
-			. html_writer::link($detUrl, '( i )', array('title'=>'Information')) . "  "
-			. '<span class="element pointer" id="' . $idElem
-			. '" title="' . $titleElem . '">'
-			. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>'
+			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
+			. '<span class="nbenfant">' . $infoNbEnf . '</span>'
+			. html_writer::link($detUrl, '<img src="pix/info.png" alt="( i )"/>', array('title'=>'Information')) . "  "
+			. '<span class="element pointer oplus" title="Sélectionner" id="'
+			. $idElem . '">&oplus;</span>'
 			. '</li>';
+		return $element;
+	}
+
+	/*
+	 * Construit un item d'une liste (arbre selected)
+	 * @param $object $sp correspond à l'objet à afficher
+	 * @param $niveau
+	 * @return string
+	 */
+	function print_option($sp, $niveau) {
+		$element = '';
+
+		$listeTitle = '';
+		// table rof_program
+		if (isset($sp->typedip)) {
+			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
+			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
+		}
+		$nbSub = nbSub($sp->sub);
+		$nbCourses = 0;
+		if (isset($sp->courses)) {
+			$nbCourses = nbSub($sp->courses);
+		}
+
+		$coden = trim('deep'.$niveau);
+		$id = $coden.'_'.$sp->rofid;
+		$idElem = $id . '-elem';
+		$labelelem = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
+		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+		$data_path = $this->path . '_' . $sp->rofid;
+
+		$nbEnf = $nbSub + $nbCourses;
+
+		$infoNbEnf = '';
+		$disabled = ' disabled="disabled" ';
+		if ($nbEnf) {
+			$disabled = '';
+			$infoNbEnf = '('. $nbEnf .')';
+		}
+		$element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+			. '" id="' . $id . '" data_path="' . $data_path . '" '
+			. 'title="' . $titleElem . '" '.$disabled.'>'
+			. $labelelem . $infoNbEnf . '</span>'
+			. '</option>';
 		return $element;
 	}
 }

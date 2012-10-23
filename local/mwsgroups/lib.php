@@ -9,7 +9,7 @@
  */
 
 /**
- * emulates wsgroups search action from Moodle data
+ * emulates wsgroups "search" action from Moodle data
  * @global type $DB
  * @param string $token to search in user and cohort tables
  * @param int $maxrows (default 10)
@@ -44,7 +44,8 @@ function mws_search($token, $maxrows=10) {
     return array('users' => $users, 'groups' => $groups);
 }
 
-
+// fonction abandonnée, remplacée par mws_userGroupsId_fast
+// lenteur dûe sans doute à la 2e jointure sur user.id
 function mws_userGroupsId($uid) {
     global $DB;
 
@@ -54,9 +55,33 @@ function mws_userGroupsId($uid) {
         . "JOIN {user} u ON (u.id = cm.userid) "
         . "WHERE username=?";
 
-    // echo $sql;
-    // die();
     $records = $DB->get_records_sql($sql, array($uid));
+        foreach ($records as $record) {
+        $groups[] = array(
+            'key' => $record->idnumber,
+            'name' => $record->name,
+            'description' => strip_tags($record->description)
+        );
+    }
+    return $groups;
+}
+
+/**
+ * emulates wsgroups "userGroupsId" action from Moodle data
+ * @global type $DB
+ * @param string $uid (sens ldap) Moodle username
+ * @return $groups as wsgroups structure
+ */
+function mws_userGroupsId_fast($uid) {
+    global $DB;
+
+    $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
+    $groups = array();
+    $sql = "SELECT c.name, c.idnumber, c.description FROM {cohort} c "
+        . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
+        . "WHERE userid=?";
+
+    $records = $DB->get_records_sql($sql, array($user->id));
         foreach ($records as $record) {
         $groups[] = array(
             'key' => $record->idnumber,

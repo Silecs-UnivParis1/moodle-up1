@@ -397,8 +397,8 @@ class core_wizard {
 		$mydata = (object) $datamerge;
 		$mydata->startdate = $startdate;
 		// cours doit être validé
-		$mydata->profile_field_tovalidate = 1;
-		$mydata->profile_field_validatedate = 0;
+		$mydata->profile_field_up1avalider = 1;
+		$mydata->profile_field_up1datevalid = 0;
 
 		return $mydata;
 	}
@@ -416,7 +416,7 @@ class my_elements_config {
 		'Compposante','Niveau'
 	);
 
-	public $role_teachers = array('editingteacher' => 'Enseignant',
-		'teacher' => 'Enseignant non éditeur'
+	public $role_teachers = array('editingteacher' => 'editingteacher',
+		'teacher' => 'noeditingteacher'
 	);
 }

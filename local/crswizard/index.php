@@ -58,11 +58,11 @@ if (isset($stepgo)) {
     $SESSION->wizard['form_step' . $stepin] = $_POST;
     switch ($stepgo) {
         case 1:
-            $steptitle = 'Etape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
+            $steptitle = get_string('selectcourse', 'local_crswizard');
             $step1form = step1_form();
             break;
         case 2:
-            $steptitle = 'Etape 2 - Identification de l\'espace de cours';
+            $steptitle = get_string('coursedefinition', 'local_crswizard');
             $editoroptions = array(
                 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
             );
@@ -76,9 +76,9 @@ if (isset($stepgo)) {
                 $data['erreurs'] = $errors;
                 $SESSION->wizard['form_step2'] = $data;
                 $editform = new course_wizard_step2_form(NULL);
-                $steptitle = 'Etape 2 - Identification de l\'espace de cours';
+                $steptitle = get_string('coursedefinition', 'local_crswizard');
             } else {
-                $steptitle = 'Etape 3 - Description de l\'espace de cours';
+                $steptitle = get_string('coursedescription', 'local_crswizard');
                 $editform = new course_wizard_step3_form();
                 if (isset($SESSION->wizard['form_step3'])) {
                     $editform->set_data((object) $SESSION->wizard['form_step3']);
@@ -86,24 +86,24 @@ if (isset($stepgo)) {
             }
             break;
         case 4:
-			$steptitle = 'Etape 4 : inscription enseignants';
+			$steptitle = get_string('enrolteachers', 'local_crswizard');
 			$url = '/local/crswizard/enrol/teacher.php';
 			wizard_navigation(4);
 			redirect(new moodle_url($url));
             break;
         case 5:
-			$steptitle = 'Etape 5 : inscription des groupes';
+			$steptitle = get_string('enrolcohorts', 'local_crswizard');
 			wizard_navigation(5);
             $url = '/local/crswizard/enrol/cohort.php';
             redirect(new moodle_url($url));
             break;
         case 6:
-			$steptitle = 'Etape 6 : Définition d\'une clef d\'inscription';
+			$steptitle = get_string('stepkey', 'local_crswizard');
 			wizard_navigation(6);
 			$editform = new course_wizard_step_cle();
             break;
         case 7:
-			$steptitle = 'Confirmation de la demande d\'espace de cours';
+			$steptitle = get_string('confirmationtitle', 'local_crswizard');
             wizard_navigation(7);
             $editform = new course_wizard_step_confirm();
             break;
@@ -137,7 +137,7 @@ $PAGE->set_title($title);
 $PAGE->set_heading($fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading("Assistant ouverture/paramétrage coursMoodle");
+echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
 
 if (isset($messageInterface)) {
