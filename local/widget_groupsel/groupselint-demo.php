@@ -20,7 +20,7 @@ echo $OUTPUT->heading('Démo du sélecteur de cohortes Moodle (interne)');
 <div id="group-select">
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
         <h3>Rechercher un groupe d'étudiants</h3>
-        <input type="text" class="group-selector" name="something" data-inputname="group" size="50" placeholder="Libellé de groupe ou nom d'étudiant" />
+        <input type="text" class="group-selector" name="something" size="50" placeholder="Libellé de groupe ou nom d'étudiant" />
     </div>
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
         <h3>Groupes sélectionnés</h3>

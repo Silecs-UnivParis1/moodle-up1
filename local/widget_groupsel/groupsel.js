@@ -15,21 +15,24 @@
     var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
     $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
 
-    $.fn.autocompleteGroupPlugin = {
+    var autocompleteGroup = {
         defaultSettings: {
             urlGroups: 'http://wsgroups.univ-paris1.fr/search',
             urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
             minLength: 4,
-            wsParams: { maxRows : 10 }
+            wsParams: { maxRows : 10 }, // default parameters for the web service
+            inputSelector: 'input.group-selector', // class of the input field where completion takes place
+            outputSelector: '.group-selected',
+            fieldName: 'group' // name of the array (<input type="hidden" name="...[]"/>) for the selected items
         }
     };
 
     $.fn.autocompleteGroup = function (options) {
-        var settings = $.extend(true, {}, $.fn.autocompleteGroupPlugin.defaultSettings, options || {});
+        var settings = $.extend(true, {}, autocompleteGroup.defaultSettings, options || {});
 
         return this.each(function() {
             var $elem = $(this);
-            var $input = $elem.find('input.group-selector').first();
+            var $input = $elem.find(settings.inputSelector).first();
             $elem.addClass('autocomplete-group-select');
             $input.on('click', function () {
                 $(this).autocomplete("search");
@@ -37,9 +40,8 @@
             $input.autocomplete({
                 source: mainSource(settings),
                 select: function (event, ui) {
-                    var inputName = $(this).attr('data-inputname');
                     if (ui.item.source == 'groups') {
-                        $(".group-selected", $elem).prepend(buildSelectedBlock(ui.item, inputName));
+                        $(settings.outputSelector, $elem).prepend(buildSelectedBlock(ui.item, settings.fieldName));
                         $input.val('');
                     } else if (ui.item.source == 'users') {
                         $input.val(ui.item.label);
@@ -52,7 +54,7 @@
                 minLength: settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
 
-            $(".group-selected", $(this)).on("click", ".selected-remove", function(event) {
+            $(settings.outputSelector, $elem).on("click", ".selected-remove", function(event) {
                 $(this).closest(".group-item-block").remove();
             });
         });
