@@ -5,7 +5,7 @@
 
 .group-item-block { margin: 2px 2px 2px 5px; }
 .group-item-block .group-item-selected { margin-right: 38px; padding: 3px 5px; background-color: #ededed; }
-.group-selected .selected-remove { float: right; font-size: 20px; color: #A0A0A0; padding: 0 5px; cursor: pointer;}
+.group-selected .selected-remove { float: right; clear: right; font-size: 20px; color: #A0A0A0; padding: 0 5px; cursor: pointer;}
 
 .ui-autocomplete-loading { background: white url('ui-anim_basic_16x16.gif') right center no-repeat !important; }
 

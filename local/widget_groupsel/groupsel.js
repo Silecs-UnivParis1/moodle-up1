@@ -1,53 +1,62 @@
-/*
+/**
+ * Group Selector, AKA autocompleteGroup
+ *
  * @license http://opensource.org/licenses/mit-license.php MIT/X11 License
  */
 
-jQuery(function () {
+(function($){
     $("<link/>", {
         rel: "stylesheet",
         type: "text/css",
         href: "http://code.jquery.com/ui/1.8.22/themes/base/jquery-ui.css"
     }).appendTo("head");
-    $(".by-widget.group-select input.group-selector").each(function(){
-        var internal = $(this).closest('.group-select').hasClass('group-select-internal');
-        $(this).on('click', function () { $(this).autocomplete("search"); });
-        $(this).autocomplete({
-            minLength: 4,
-            source: mainSource(internal),
-            select: function (event, ui) {
-                var inputName = $(this).attr('data-inputname');
-                var widget = $(this).closest('.by-widget.group-select');
-                if (ui.item.source == 'groups') {
-                    $(".group-selected", widget).prepend(buildSelectedBlock(ui.item, inputName));
-                    $(this).val('');
-                } else if (ui.item.source == 'users') {
-                    $(this).val(ui.item.label);
-                    setGroupsbyUser(ui.item.value, $('input.ui-autocomplete-input', widget), internal);
-                }
-                return false;
-            },
-            open: function () {},
-            close: function () {}
-        })
-    }).data("autocomplete")._renderItem = function(ul, item) {
-        if (item.source == 'title') {
-            return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
-        }
-        if (item.pre) {
-            $('<li class="kind"><span>' + item.pre + "</span></li>").appendTo(ul);
-        }
 
-        return $("<li></li>")
-            .data("item.autocomplete", item)
-            .append("<a><span>&oplus;</span>" + item.label + '</a>')
-            .appendTo(ul);
-    };
-    function mainSource(internal) {
-        var sourceUrl = "http://wsgroups.univ-paris1.fr/search";
-        if (internal) {
-            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/widget_groupsel/groupsel.js', '/mwsgroups/service-search.php');
-        }
+    // load the custom CSS
+    var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
+    $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
+
+    $.fn.autocompleteGroup = function (options) {
+        var settings = $.extend($.fn.autocompleteGroupPlugin.defaultSettings, options || {});
+
+        return this.each(function() {
+            var $elem = $(this);
+            var $input = $elem.find('input.group-selector').first();
+            $elem.addClass('autocomplete-group-select');
+            $input.on('click', function () {
+                $(this).autocomplete("search");
+            });
+            $input.autocomplete({
+                source: mainSource(settings),
+                select: function (event, ui) {
+                    var inputName = $(this).attr('data-inputname');
+                    if (ui.item.source == 'groups') {
+                        $(".group-selected", $elem).prepend(buildSelectedBlock(ui.item, inputName));
+                        $input.val('');
+                    } else if (ui.item.source == 'users') {
+                        $input.val(ui.item.label);
+                        setGroupsbyUser(ui.item.value, $input, settings);
+                    }
+                    return false;
+                },
+                open: function () {},
+                close: function () {},
+                minLength: settings.minLength
+            }).data("autocomplete")._renderItem = customRenderItem;
+
+            $(".group-selected", $(this)).on("click", ".selected-remove", function(event) {
+                $(this).closest(".group-item-block").remove();
+            });
+        });
     }
+
+    $.fn.autocompleteGroupPlugin = {
+        defaultSettings: {
+            urlGroups: 'http://wsgroups.univ-paris1.fr/search',
+            urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
+            minLength: 4,
+            maxRows : 10
+        }
+    };
 
     function sortByCategory (items) {
         return items.sort(function (a, b) {
@@ -65,42 +74,38 @@ jQuery(function () {
       });
     }
 
-    function mainSource() {
-        var sourceUrl = "http://ticetest.univ-paris1.fr/wsgroups/search";
+    function mainSource(settings) {
         return function(request, response) {
-        $.ajax({
-            url: sourceUrl,
-            dataType: "jsonp",
-            data: {
-                maxRows: 10,
-                token: request.term
-            },
-            success: function (data) {
-                var groups = sortByCategory(data.groups);
-                transformItems(groups);
-                response($.merge(
-                    $.merge(
-                        (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
-                        $.map(groups, function (item) {
-                            return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
-                    })),
-                    $.merge(
-                        (data.users.length === 0 ? [] : [{ label: "Personnes", source: "title" }]),
-                        $.map(data.users, function (item) {
-                            return { label: item.displayName, value: item.uid, source: 'users' };
-                    }))
-                ));
-            }
-        });
+            $.ajax({
+                url: settings.urlGroups,
+                dataType: "jsonp",
+                data: {
+                    maxRows: settings.maxRows,
+                    token: request.term
+                },
+                success: function (data) {
+                    var groups = sortByCategory(data.groups);
+                    transformItems(groups);
+                    response($.merge(
+                        $.merge(
+                            (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
+                            $.map(groups, function (item) {
+                                return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
+                        })),
+                        $.merge(
+                            (data.users.length === 0 ? [] : [{ label: "Personnes", source: "title" }]),
+                            $.map(data.users, function (item) {
+                                return { label: item.displayName, value: item.uid, source: 'users' };
+                        }))
+                    ));
+                }
+            });
         }
     }
-    function setGroupsbyUser(uid, ac, internal) {
-        var sourceUrl = 'http://wsgroups.univ-paris1.fr/userGroupsId';
-        if (internal) {
-            sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/widget_groupsel/groupsel.js', '/mwsgroups/service-userGroups.php');
-        }
+
+    function setGroupsbyUser(uid, ac, settings) {
         $.ajax({
-            url: sourceUrl,
+            url: settings.urlUserToGroups,
             dataType: "jsonp",
             data: {
                 uid: uid
@@ -120,6 +125,7 @@ jQuery(function () {
             }
         });
     }
+
     function groupItemToLabel(item) {
         var $s = '<b>' + item.name + '</b>';
         if ('description' in item && item.name !== item.description) {
@@ -127,6 +133,7 @@ jQuery(function () {
         }
         return $s;
     }
+
     function buildSelectedBlock(item, inputName) {
         return $('<div class="group-item-block"></div>')
             .html('<div class="group-item-selected">' + item.label + '</div>')
@@ -134,11 +141,17 @@ jQuery(function () {
             .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }
 
-    $(".by-widget.group-select .group-selected").on("click", ".selected-remove", function(event) {
-        $(this).closest(".group-item-block").remove();
-    });
+    function customRenderItem(ul, item) {
+        if (item.source == 'title') {
+            return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
+        }
+        if (item.pre) {
+            $('<li class="kind"><span>' + item.pre + "</span></li>").appendTo(ul);
+        }
 
-    // load the custom CSS
-    var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
-    $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
-});
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a><span>&oplus;</span>" + item.label + '</a>')
+            .appendTo(ul);
+    }
+})(jQuery);
