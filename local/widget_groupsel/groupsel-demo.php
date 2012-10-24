@@ -30,10 +30,7 @@ echo $OUTPUT->heading('Démo du sélecteur de cohortes Moodle');
 <script type="text/javascript">
 //<![CDATA[
 jQuery(document).ready(function () {
-    $('#group-select').autocompleteGroup({
-        minLength: 4,
-        maxRows : 10
-    });
+    $('#group-select').autocompleteGroup();
 });
 //]]>
 </script>

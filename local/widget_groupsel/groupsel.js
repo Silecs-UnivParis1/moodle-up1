@@ -15,8 +15,17 @@
     var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
     $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
 
+    $.fn.autocompleteGroupPlugin = {
+        defaultSettings: {
+            urlGroups: 'http://wsgroups.univ-paris1.fr/search',
+            urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
+            minLength: 4,
+            wsParams: { maxRows : 10 }
+        }
+    };
+
     $.fn.autocompleteGroup = function (options) {
-        var settings = $.extend($.fn.autocompleteGroupPlugin.defaultSettings, options || {});
+        var settings = $.extend(true, {}, $.fn.autocompleteGroupPlugin.defaultSettings, options || {});
 
         return this.each(function() {
             var $elem = $(this);
@@ -49,15 +58,6 @@
         });
     }
 
-    $.fn.autocompleteGroupPlugin = {
-        defaultSettings: {
-            urlGroups: 'http://wsgroups.univ-paris1.fr/search',
-            urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
-            minLength: 4,
-            maxRows : 10
-        }
-    };
-
     function sortByCategory (items) {
         return items.sort(function (a, b) {
             return a.category == b.category ? 0 : a.category > b.category ? 1 : -1;
@@ -76,13 +76,12 @@
 
     function mainSource(settings) {
         return function(request, response) {
+            var wsParams = $.extend({}, settings.wsParams);
+            wsParams.token = request.term;
             $.ajax({
                 url: settings.urlGroups,
                 dataType: "jsonp",
-                data: {
-                    maxRows: settings.maxRows,
-                    token: request.term
-                },
+                data: wsParams,
                 success: function (data) {
                     var groups = sortByCategory(data.groups);
                     transformItems(groups);
