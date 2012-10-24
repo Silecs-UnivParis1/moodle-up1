@@ -140,9 +140,9 @@ function remove_memberships($userid, $memberof) {
 function define_cohort($wscohort) {
     $newcohort = array(
                         'contextid' => 1,
-                        'name' => (property_exists($wscohort, 'description') ? substr($wscohort->description, 0, 254) : ''),
+                        'name' => (property_exists($wscohort, 'name') ? substr($wscohort->name, 0, 254) : ''),
                         'idnumber' => $wscohort->key,
-                        'description' => (property_exists($wscohort, 'name') ? $wscohort->name : $wscohort->key),
+                        'description' => (property_exists($wscohort, 'description') ? $wscohort->description : $wscohort->key),
                         'descriptionformat' => 0, //** @todo check
                         'component' => 'local_cohortsyncup1'
                     );
