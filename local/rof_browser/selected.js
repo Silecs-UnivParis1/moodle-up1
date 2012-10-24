@@ -1,5 +1,5 @@
 jQuery(function () {
-
+    var selected = new Array();
 	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
     $('div.item-select').load(rootUrl + 'ajax.php');
 
@@ -78,10 +78,11 @@ jQuery(function () {
 		var reg=new RegExp("_", "gi");
 		path = path.replace(reg, "/");
 
-		var present = $('#items-selected > div#select_'+rofid).size();
-		if (present) {
+		 var name = 'select_'+rofid;
+        if (typeof selected[name] != 'undefined' && selected[name] == 1) {
 			alert(rofid+' fait déjà partie de la sélection.');
 		} else {
+            selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
 				+'<div class="selected-remove" title="Supprimer">&#10799;</div>'
 				+'<div class="intitule-selected">'+path+' : '+intitule+'</div>'
@@ -94,6 +95,8 @@ jQuery(function () {
 
 	$("#items-selected").on("click", ".selected-remove", function(event) {
 		if (confirm('Supprimez cet élément de la sélection ?')) {
+            var rofid = $(this).siblings('input[type=hidden]').val();
+            selected['select_'+rofid] = 0;
 			$(this).parent('div.item-selected').remove();
 		}
 	});
