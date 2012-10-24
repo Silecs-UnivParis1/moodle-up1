@@ -24,7 +24,8 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 
 
 // now get cli options
-list($options, $unrecognized) = cli_get_params(array('help'=>false, 'init'=>false, 'cleanall'=>false, 'since'=>0, 'verb'=>1),
+list($options, $unrecognized) = cli_get_params(array('help'=>false, 'init'=>false, 'cleanall'=>false, 'allGroups'=>false,
+                                               'since'=>false, 'verb'=>1, 'printlast'=>false),
                                                array('h'=>'help', 'i'=>'init'));
 
 if ($unrecognized) {
@@ -38,9 +39,11 @@ $help =
 Options:
 --verb=N              Verbosity (0 to 3), 1 by default
 --since=(timestamp)   Apply only to users synchronized since given timestamp. If not set, use last cohort sync.
+--allGroups           Uses 'allGroups' webservice instead of the standard one (from users)
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
 --cleanall            Empty cohort_members, then cohort
+--printlast           Display last syncs (diagnostic)
 
 If you want to force initialization, you should execute --cleanall first but it may be faster
 to manually empty tables cohort and cohort_members with the following MySQL command:
@@ -66,14 +69,30 @@ if ( $options['cleanall'] ) {
     return 0;
 }
 
+if ( $options['printlast'] ) {
+    echo "last sync from users = \n";
+    print_r(get_cohort_last_sync('sync'));
+    echo "last sync AllGroups = \n";
+    print_r(get_cohort_last_sync('syncAllGroups'));
+    return 0;
+}
+
+
 if ( $options['init'] ) {
     $since = 0;
-} elseif (isset($options['since']) && $options['since']>0 ) {
+} elseif ( $options['since'] || $options['since'] === '0' ) {
     $since = $options['since'];
 } else {
-    $last = get_cohort_last_sync();
+    if ($options['allGroups']) {
+        $last = get_cohort_last_sync('syncAllGroups');
+    } else {
+        $last = get_cohort_last_sync('sync');
+    }
     $since = $last['begin'];
 }
 
-sync_cohorts($since, 0, $options['verb']);
-
+if ($options['allGroups']) {
+    sync_cohorts_all_groups($since, 0, $options['verb']);
+} else {
+    sync_cohorts_from_users($since, 0, $options['verb']);
+}
