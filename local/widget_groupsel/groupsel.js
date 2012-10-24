@@ -128,8 +128,15 @@
 
     function groupItemToLabel(item) {
         var $s = '<b>' + item.name + '</b>';
+        var description = '';
         if ('description' in item && item.name !== item.description) {
-            $s += '<div>' + item.description + '</div>';
+            description = item.description;
+        }
+        if ('size' in item) {
+            description += ' (' + item.size + ')';
+        }
+        if (description) {
+            $s += '<div>' + description + '</div>';
         }
         return $s;
     }
