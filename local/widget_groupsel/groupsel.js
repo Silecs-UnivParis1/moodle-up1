@@ -38,6 +38,7 @@ jQuery(function () {
     };
     function mainSource(internal) {
         var sourceUrl = "http://wsgroups.univ-paris1.fr/search";
+        var inscrits = "";
         if (internal) {
             sourceUrl = $('script[src$="groupsel.js"]').attr('src').replace('/widget_groupsel/groupsel.js', '/mwsgroups/service-search.php');
         }
@@ -54,7 +55,12 @@ jQuery(function () {
                     $.merge(
                         [{ label: "Groupes d'étudiants", source: "title" }],
                         $.map(data.groups, function (item) {
-                            return { label: '<b>' + item.name + '</b><div>' + item.description + '</div>', value: item.key, source: 'groups' };
+                            if ('size' in item) {
+                                inscrits = ' (' + item.size + ' inscrits) ';
+                            }
+                            return { label: '<b>' + item.name + '</b><div>' + item.description + inscrits + '</div>',
+                                value: item.key,
+                                source: 'groups' };
                     })),
                     $.merge(
                         [{ label: "Étudiants", source: "title" }],
