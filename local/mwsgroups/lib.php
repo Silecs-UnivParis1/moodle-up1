@@ -30,15 +30,17 @@ function mws_search($token, $maxrows=10) {
         );
     }
 
-    $sql = "SELECT name, idnumber, description FROM {cohort} WHERE "
+    $sql = "SELECT id, name, idnumber, description FROM {cohort} WHERE "
         . "name LIKE ? OR idnumber LIKE ? OR description LIKE ?" ;
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
     $groups = array();
     foreach ($records as $record) {
+        $size = $DB->count_records('cohort_members', array('cohortid' => $record->id));
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
-            'description' => strip_tags($record->description)
+            'description' => strip_tags($record->description),
+            'size' => $size
         );
     }
     return array('users' => $users, 'groups' => $groups);
