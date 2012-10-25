@@ -5,7 +5,7 @@
 
 .teacher-item-block { margin: 2px 2px 2px 5px; }
 
-.teachers-selected .selected-remove { float: right; font-size: 20px; color: #A0A0A0; padding: 0 5px;}
+.users-selected .selected-remove { float: right; font-size: 20px; color: #A0A0A0; padding: 0 5px;}
 .selected-remove { cursor: pointer;}
 
 .teacher-item-block .teacher-item-selected { margin-right: 38px; padding: 3px 5px; background-color: #ededed; border: 1px solid #dad9c7; }
