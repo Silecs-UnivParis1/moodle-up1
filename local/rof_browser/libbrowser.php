@@ -384,7 +384,7 @@ class rof_browser {
 		$collapse = '';
 		$listStyle = 'list-none list-item';
 		if ($nbEnf) {
-			$style = 'collapse curser-point';
+			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
 		}
 		$element .= '<li class="' . $listStyle . '">'

@@ -44,8 +44,12 @@ jQuery(function () {
 		var plus = $(this).text();
 		$(this).empty();
 		if (plus==' + ') {
+            $(this).removeClass('collapsed');
+            $(this).addClass('expanded');
 			plus = ' - ';
 		} else {
+            $(this).removeClass('expanded');
+            $(this).addClass('collapsed');
 			plus = ' + ';
 		}
 		$(this).append(plus);
