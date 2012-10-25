@@ -15,72 +15,126 @@
     var cssUrl = $('script[src$="groupsel.js"]').attr('src').replace('/groupsel.js', '/groupsel.css');
     $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
 
-    var autocompleteGroup = {
-        defaultSettings: {
-            urlGroups: 'http://wsgroups.univ-paris1.fr/search',
-            urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
-            minLength: 4,
-            wsParams: { maxRows : 10 }, // default parameters for the web service
-            inputSelector: 'input.group-selector', // class of the input field where completion takes place
-            outputSelector: '.group-selected',
-            fieldName: 'group' // name of the array (<input type="hidden" name="...[]"/>) for the selected items
-        }
+    var defaultSettings = {
+        urlGroups: 'http://wsgroups.univ-paris1.fr/search',
+        urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
+        minLength: 4,
+        wsParams: { maxRows : 9 }, // default parameters for the web service
+        inputSelector: 'input.group-selector', // class of the input field where completion takes place
+        outputSelector: '.group-selected',
+        fieldName: 'group' // name of the array (<input type="hidden" name="...[]"/>) for the selected items
     };
 
     $.fn.autocompleteGroup = function (options) {
-        var settings = $.extend(true, {}, autocompleteGroup.defaultSettings, options || {});
+        var settings = $.extend(true, {}, defaultSettings, options || {});
 
         return this.each(function() {
             var $elem = $(this);
             var $input = $elem.find(settings.inputSelector).first();
-            $elem.addClass('autocomplete-group-select');
-            $input.on('click', function () {
+            var acg = new AutocompleteGroup(settings, $elem, $input);
+            acg.init();
+            acg.run();
+        });
+    }
+
+    function AutocompleteGroup(settings, elem, input) {
+        this.settings = settings;
+        this.elem = elem;
+        this.input = input;
+        return this;
+    }
+
+    AutocompleteGroup.prototype =
+    {
+        init: function() {
+            this.elem.addClass('autocomplete-group-select');
+            this.input.on('click', function () {
                 $(this).autocomplete("search");
             });
-            $input.autocomplete({
-                source: mainSource(settings),
+            $(this.settings.outputSelector, this.elem).on("click", ".selected-remove", function(event) {
+                $(this).closest(".group-item-block").remove();
+            });
+        },
+
+        run: function() {
+            var $this = this;
+            $this.input.autocomplete({
+                source: $this.mainSource($this.settings),
                 select: function (event, ui) {
                     if (ui.item.source == 'groups') {
-                        $(settings.outputSelector, $elem).prepend(buildSelectedBlock(ui.item, settings.fieldName));
-                        $input.val('');
+                        $($this.settings.outputSelector, $this.elem)
+                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName));
+                        $this.input.val('');
                     } else if (ui.item.source == 'users') {
-                        $input.val(ui.item.label);
-                        setGroupsbyUser(ui.item.value, $input, settings);
+                        $this.input.val(ui.item.label);
+                        $this.setGroupsbyUser(ui.item.value, $this.input, $this.settings);
                     }
                     return false;
                 },
                 open: function () {},
                 close: function () {},
-                minLength: settings.minLength
+                minLength: $this.settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
+        },
 
-            $(settings.outputSelector, $elem).on("click", ".selected-remove", function(event) {
-                $(this).closest(".group-item-block").remove();
+        setGroupsbyUser: function(uid, ac) {
+            var $this = this;
+            $.ajax({
+                url: $this.settings.urlUserToGroups,
+                dataType: "jsonp",
+                data: {
+                    uid: uid
+                },
+                success: function (data) {
+                    var items = $.merge(
+                        [{ label: "est membre des groupes :", source: "title" }],
+                        $.map(data, function (item) {
+                           return {
+                               label: groupItemToLabel(item),
+                               value: item.key,
+                               source: 'groups'
+                           };
+                        })
+                    );
+                    ac.data("autocomplete")._suggest(items);
+                }
             });
-        });
-    }
+        },
 
-    function setGroupsbyUser(uid, ac, settings) {
-        $.ajax({
-            url: settings.urlUserToGroups,
-            dataType: "jsonp",
-            data: {
-                uid: uid
-            },
-            success: function (data) {
-                var items = $.merge(
-                    [{ label: "est membre des groupes :", source: "title" }],
-                    $.map(data, function (item) {
-                       return {
-                           label: groupItemToLabel(item),
-                           value: item.key,
-                           source: 'groups'
-                       };
-                    })
-                );
-                ac.data("autocomplete")._suggest(items);
+        mainSource: function() {
+        var $this = this;
+            return function(request, response) {
+                var wsParams = $.extend({}, $this.settings.wsParams);
+                wsParams.token = request.term;
+                $.ajax({
+                    url: $this.settings.urlGroups,
+                    dataType: "jsonp",
+                    data: wsParams,
+                    success: function (data) {
+                        var groups = sortByCategory(data.groups);
+                        transformGroupItems(groups);
+                        transformUserItems(data.users);
+                        response($.merge(
+                            $this.prepareList(groups, 'Groupes', function (item) {
+                                    return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
+                            }),
+                            $this.prepareList(data.users, 'Personnes', function (item) {
+                                    return { label: userItemToLabel(item), value: item.uid, source: 'users' };
+                            })
+                        ));
+                    }
+                });
             }
-        });
+        },
+
+        prepareList: function(list, titleLabel, itemToResponse) {
+            var $this = this;
+            var len = list.length;
+            return $.merge(
+                (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
+                $.map(list, itemToResponse)
+            );
+        }
     }
 
     function sortByCategory (items) {
@@ -112,38 +166,6 @@
             previousUserItemName = items[i].displayName;
         }
       }
-    }
-
-    function prepareList(list, titleLabel, itemToResponse) {
-        return $.merge(
-            (list.length === 0 ? [] : [{ label: titleLabel, source: "title" }]),
-            $.map(list, itemToResponse)
-        );
-    }
-
-    function mainSource(settings) {
-        return function(request, response) {
-            var wsParams = $.extend({}, settings.wsParams);
-            wsParams.token = request.term;
-            $.ajax({
-                url: settings.urlGroups,
-                dataType: "jsonp",
-                data: wsParams,
-                success: function (data) {
-                    var groups = sortByCategory(data.groups);
-                    transformGroupItems(groups);
-                    transformUserItems(data.users);
-                    response($.merge(
-                        prepareList(groups, 'Groupes', function (item) {
-                                return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
-                        }),
-                        prepareList(data.users, 'Personnes', function (item) {
-                                return { label: userItemToLabel(item), value: item.uid, source: 'users' };
-                        })
-                    ));
-                }
-            });
-        }
     }
 
     function groupItemToLabel(item) {
