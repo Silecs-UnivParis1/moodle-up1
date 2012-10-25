@@ -11,8 +11,8 @@ function up1_metadata() {
 
     $res = array(
         'Identification' => array(
-            'nom-norme' => array('name' => 'Nom normé', 'datatype' => 'text', 'locked' => 0),
-            'abrege-norme' => array('name' => 'Nom abrégé normé', 'datatype' => 'text', 'locked' => 0),
+            'nomnorme' => array('name' => 'Nom normé', 'datatype' => 'text', 'locked' => 0),
+            'abregenorme' => array('name' => 'Nom abrégé normé', 'datatype' => 'text', 'locked' => 0),
             'rofpath' => array('name' => 'Chemin ROF', 'datatype' => 'text', 'locked' => 0),
             'rofpathid' => array('name' => 'Chemin ROFid', 'datatype' => 'text', 'locked' => 0),
             'code' => array('name' => 'Code Apogée', 'datatype' => 'text', 'locked' => 1),
