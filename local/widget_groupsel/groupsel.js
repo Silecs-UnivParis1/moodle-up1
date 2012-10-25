@@ -60,6 +60,29 @@
         });
     }
 
+    function setGroupsbyUser(uid, ac, settings) {
+        $.ajax({
+            url: settings.urlUserToGroups,
+            dataType: "jsonp",
+            data: {
+                uid: uid
+            },
+            success: function (data) {
+                var items = $.merge(
+                    [{ label: "est membre des groupes :", source: "title" }],
+                    $.map(data, function (item) {
+                       return {
+                           label: groupItemToLabel(item),
+                           value: item.key,
+                           source: 'groups'
+                       };
+                    })
+                );
+                ac.data("autocomplete")._suggest(items);
+            }
+        });
+    }
+
     function sortByCategory (items) {
         return items.sort(function (a, b) {
             return a.category == b.category ? 0 : a.category > b.category ? 1 : -1;
@@ -91,6 +114,13 @@
       }
     }
 
+    function prepareList(list, titleLabel, itemToResponse) {
+        return $.merge(
+            (list.length === 0 ? [] : [{ label: titleLabel, source: "title" }]),
+            $.map(list, itemToResponse)
+        );
+    }
+
     function mainSource(settings) {
         return function(request, response) {
             var wsParams = $.extend({}, settings.wsParams);
@@ -104,43 +134,16 @@
                     transformGroupItems(groups);
                     transformUserItems(data.users);
                     response($.merge(
-                        $.merge(
-                            (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
-                            $.map(groups, function (item) {
+                        prepareList(groups, 'Groupes', function (item) {
                                 return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
-                        })),
-                        $.merge(
-                            (data.users.length === 0 ? [] : [{ label: "Personnes", source: "title" }]),
-                            $.map(data.users, function (item) {
+                        }),
+                        prepareList(data.users, 'Personnes', function (item) {
                                 return { label: userItemToLabel(item), value: item.uid, source: 'users' };
-                        }))
+                        })
                     ));
                 }
             });
         }
-    }
-
-    function setGroupsbyUser(uid, ac, settings) {
-        $.ajax({
-            url: settings.urlUserToGroups,
-            dataType: "jsonp",
-            data: {
-                uid: uid
-            },
-            success: function (data) {
-                var items = $.merge(
-                    [{ label: "est membre des groupes :", source: "title" }],
-                    $.map(data, function (item) {
-                       return {
-                           label: groupItemToLabel(item),
-                           value: item.key,
-                           source: 'groups'
-                       };
-                    })
-                );
-                ac.data("autocomplete")._suggest(items);
-            }
-        });
     }
 
     function groupItemToLabel(item) {
