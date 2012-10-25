@@ -148,19 +148,32 @@
     }
 
     function sortByCategory (items) {
+        var order = { structures: 5, affiliation: 5, diploma: 1, elp: 2, gpelp: 3, gpetp: 4 };
         return items.sort(function (a, b) {
-            return a.category == b.category ? 0 : a.category > b.category ? 1 : -1;
+            return a.category == b.category ? 0 : (order[a.category] > order[b.category] ? 1 : -1);
         });
     }
 
     function transformGroupItems(items) {
-      var category;
-      $.each(items, function ( i, item ) {
-        if (category != item.category) {
-            category = item.category;
-            item.pre = category || "";
-        }
-      });
+        var category;
+        var category2text = {
+            structures: 'établissement',
+            affiliation: 'établissement',
+            diploma: 'étapes',
+            elp: 'matières',
+            gpelp: 'TD',
+            gpetp: 'Groupe étape',
+            '': 'autre'
+        };
+        $.each(items, function ( i, item ) {
+            if (item.category in category2text) {
+                item.category = category2text[item.category];
+            }
+            if (category != item.category) {
+                category = item.category;
+                item.pre = category || "";
+            }
+        });
     }
 
     function transformUserItems(items) {
