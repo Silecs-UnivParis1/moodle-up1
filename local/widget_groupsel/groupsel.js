@@ -27,6 +27,7 @@
 
     $.fn.autocompleteGroup = function (options) {
         var settings = $.extend(true, {}, defaultSettings, options || {});
+        settings.wsParams.maxRows++;
 
         return this.each(function() {
             var $elem = $(this);
@@ -130,9 +131,18 @@
         prepareList: function(list, titleLabel, itemToResponse) {
             var $this = this;
             var len = list.length;
+            if (len >= ($this.settings.wsParams.maxRows)) {
+                list[len-1] = { source: 'title', label: '…'};
+            }
             return $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
-                $.map(list, itemToResponse)
+                $.map(list, function(item) {
+                    if ('source' in item && item.source == 'title') {
+                        return item;
+                    } else {
+                        return itemToResponse.apply(this, [item]);
+                    }
+                })
             );
         }
     }
