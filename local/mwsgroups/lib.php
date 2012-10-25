@@ -20,7 +20,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
     global $DB;
     $ptoken = '%' . $token . '%';
 
-    $sql = "SELECT username, firstname, lastname FROM {user} WHERE "
+    $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
         . "( username LIKE ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
     if ($filterstudent == 'no') {
         $sql .= " AND idnumber = '' ";
@@ -32,9 +32,13 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
     $users = array();
     foreach ($records as $record) {
+        $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
+             . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
+        $res = $DB->get_records_sql_menu($sql, array($record->id));
         $users[] = array(
             'uid' => $record->username,
-            'displayName' => $record->firstname .' '. $record->lastname
+            'displayName' => $record->firstname .' '. $record->lastname,
+            'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
         );
     }
 
@@ -100,4 +104,17 @@ function mws_userGroupsId_fast($uid) {
         );
     }
     return $groups;
+}
+
+
+/**
+ * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5082)
+ * @param type $name group name for a "structures" group
+ * @return type
+ */
+function groupNameToShortname($name) {
+    if (preg_match('/(.*?)\s*:/', $name, $matches))
+      return $matches[1];
+    else
+      return $name;
 }
