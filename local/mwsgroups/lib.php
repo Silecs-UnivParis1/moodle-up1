@@ -13,14 +13,22 @@
  * @global type $DB
  * @param string $token to search in user and cohort tables
  * @param int $maxrows (default 10)
+ * @param string $filterstudent = 'no' | 'only' | 'both'
  * @return array('users' => $users, 'groups' => $groups)
  */
-function mws_search($token, $maxrows=10) {
+function mws_search($token, $maxrows=10, $filterstudent='both') {
     global $DB;
     $ptoken = '%' . $token . '%';
 
     $sql = "SELECT username, firstname, lastname FROM {user} WHERE "
-        . "username LIKE ? OR firstname LIKE ? OR lastname LIKE ?" ;
+        . "( username LIKE ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
+    if ($filterstudent == 'no') {
+        $sql .= " AND idnumber = '' ";
+    }
+    if ($filterstudent == 'only') {
+        $sql .= " AND idnumber != '' ";
+    }
+    $sql .= "ORDER BY lastname ASC, firstname ASC";
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
     $users = array();
     foreach ($records as $record) {

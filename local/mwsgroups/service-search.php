@@ -6,9 +6,10 @@ require_once('./lib.php');
 
 $token = required_param('token', PARAM_RAW);
 $maxrows = optional_param('maxRows', 10, PARAM_INT);
+$filterstudent = optional_param('filter_student', 'both', PARAM_ALPHANUMEXT);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
-$res = mws_search($token, $maxrows);
+$res = mws_search($token, $maxrows, $filterstudent);
 // echo "$token";
 // die();
 
