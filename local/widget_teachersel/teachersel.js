@@ -1,35 +1,68 @@
 /*
- * @license http://www.gnu.org/licenses/gpl-2.0.html  GNU GPL v2
+ *  @license http://opensource.org/licenses/mit-license.php MIT/X11 License
  */
 
-jQuery(function () {
+(function($){
+
     var selected = new Array();
+
     $("<link/>", {
         rel: "stylesheet",
         type: "text/css",
         href: "http://code.jquery.com/ui/1.8.22/themes/base/jquery-ui.css"
     }).appendTo("head");
-    $(".by-widget.teacher-select input.teacher-selector").each(function(){
-        $(this).autocomplete({
-			minLength: 4,
-			source: mainSource(),
-			select: function (event, ui) {
 
-				if($('#roleteacher').size()) {
-					var inputName = $('#roleteacher').val();
-				} else {
-					var inputName = $(this).attr('data-inputname');
-				}
-				var widget = $(this).closest('.by-widget.teacher-select');
-				if (ui.item.source == 'users') {
-					$(".teachers-selected", widget).prepend(buildSelectedBlock(ui.item, inputName));
-					$(this).val('');
-				}
-				return false;
-			},
-        open: function () {},
-        close: function () {}
-		})}).data("autocomplete")._renderItem = function(ul, item) {
+    // load the custom CSS
+    var cssUrl = $('script[src$="teachersel.js"]').attr('src').replace('/teachersel.js', '/teachersel.css');
+    $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
+
+    var autocompleteUser = {
+        defaultSettings: {
+            urlUsers: '../mwsteachers/service-search.php',
+            minLength: 4,
+            wsParams: { maxRows : 10 }, // default parameters for the web service
+            inputSelector: 'input.user-selector', // class of the input field where completion takes place
+            outputSelector: '.users-selected',
+        }
+    };
+
+    $.fn.autocompleteUser = function (options) {
+        var settings = $.extend(true, {}, autocompleteUser.defaultSettings, options || {});
+        return this.each(function() {
+            var $elem = $(this);
+            var $input = $elem.find(settings.inputSelector).first();
+            $elem.addClass('autocomplete-user-select');
+            $input.on('click', function () {
+                $(this).autocomplete("search");
+            });
+            $input.autocomplete({
+                source: mainSource(settings),
+                select: function (event, ui) {
+                    if($('#roleteacher').size()) {
+					    var inputName = $('#roleteacher').val();
+				    } else {
+					    var inputName = $(this).attr('data-inputname');
+				    }
+                    if (ui.item.source == 'users') {
+                        $(settings.outputSelector, $elem).prepend(buildSelectedBlock(ui.item, inputName));
+                        $input.val('');
+                    }
+                    return false;
+                },
+                open: function () {},
+                close: function () {},
+                minLength: settings.minLength
+            }).data("autocomplete")._renderItem = customRenderItem;
+
+            $(settings.outputSelector, $elem).on("click", ".selected-remove", function(event) {
+                var item = $(this).closest(".teacher-item-block").find('input[type="hidden"]').first();
+                selected[item.val()] = 0;
+                $(this).closest(".teacher-item-block").remove();
+            });
+        });
+    }
+
+    function customRenderItem(ul, item) {
         if (item.source == 'title') {
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
@@ -38,26 +71,25 @@ jQuery(function () {
             .append("<a><span>&oplus;</span>" + item.label + '</a>')
             .appendTo(ul);
     };
-    function mainSource() {
-        sourceUrl = $('script[src$="teachersel.js"]').attr('src').replace('/widget_teachersel/teachersel.js', '/mwsteachers/service-search.php');
+
+    function mainSource(settings) {
         return function(request, response) {
-        $.ajax({
-            url: sourceUrl,
-            dataType: "jsonp",
-            data: {
-                maxRows: 10,
-                token: request.term
-            },
-            success: function (data) {
-                response(
-                    $.merge(
-                        [{ label: "Utilisateurs", source: "title" }],
-                        $.map(data, function (item) {
-                            return { label: item.displayName, value: item.uid, source: 'users' };
-                    }))
-                );
-            }
-        });
+            var wsParams = $.extend({}, settings.wsParams);
+            wsParams.token = request.term;
+            $.ajax({
+                url: settings.urlUsers,
+                dataType: "jsonp",
+                data: wsParams,
+                success: function (data) {
+                    response(
+                        $.merge(
+                            [{ label: "Utilisateurs", source: "title" }],
+                            $.map(data, function (item) {
+                                return { label: item.displayName, value: item.uid, source: 'users' };
+                         }))
+                    );
+                }
+            });
         }
     }
 
@@ -77,12 +109,5 @@ jQuery(function () {
 				.append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
         }
     }
-    $(".by-widget.teacher-select .teachers-selected").on("click", ".selected-remove", function(event) {
-        var item = $(this).closest(".teacher-item-block").find('input[type="hidden"]').first();
-        selected[item.val()] = 0;
-        $(this).closest(".teacher-item-block").remove();
-    });
-    // load the custom CSS
-    var cssUrl = $('script[src$="teachersel.js"]').attr('src').replace('/teachersel.js', '/teachersel.css');
-    $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
-});
+
+})(jQuery);

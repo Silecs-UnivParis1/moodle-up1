@@ -19,10 +19,11 @@ $PAGE->set_url('/local/crswizard/enrol/cohort.php');
 
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('cohort', 'local_crswizard'));
 
-$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
-$PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
-$PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'));
-$PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'));
+$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+$PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'), true);
+$PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'), true);
+$PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'), true);
+
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
@@ -33,16 +34,29 @@ echo $OUTPUT->box(get_string('bockhelpE4s', 'local_crswizard'), '');
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
 
-<div class="by-widget group-select group-select-internal">
+<div id="group-select">
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
         <h3><?php echo get_string('findcohort', 'local_crswizard');?></h3>
-        <input type="text" class="group-selector" name="something" data-inputname="group" size="50" placeholder="<?php echo get_string('teachername', 'local_crswizard');?>" />
+        <input type="text" class="group-selector" name="something" data-inputname="group" size="50" placeholder="<?php echo get_string('cohortname', 'local_crswizard');?>" />
     </div>
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
         <h3><?php echo get_string('selectedcohort', 'local_crswizard');?></h3>
         <div class="group-selected"></div>
     </div>
 </div>
+
+<script type="text/javascript">
+//<![CDATA[
+jQuery(document).ready(function () {
+    $('#group-select').autocompleteGroup({
+        urlGroups: '../../mwsgroups/service-search.php',
+        urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
+        minLength: 4,
+        wsParams: { maxRows: 10, filter: 'none' }
+    });
+});
+//]]>
+</script>
 
 <?php
 $stepin = $SESSION->wizard['navigation']['stepin'];
