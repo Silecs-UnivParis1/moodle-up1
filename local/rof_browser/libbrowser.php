@@ -41,41 +41,6 @@ function treeComponent () {
 }
 
 /**
- * construit l'arbre du rof (arbre selected)
- * @return string code html
- */
-function afficheArbre() {
-	$components = getRofComponents();
-	$list = '<ul>';
-	foreach ($components as $c) {
-		$id = 'deep2_' . $c->number;
-		$idElem = $id . '-elem';
-		$data_path = $c->number;
-		$data_rofid = $c->number;
-
-		$style = 'collapse';
-		$collapse = '';
-		$infoNbEnf = '';
-		$listStyle = 'list-none';
-		if ($c->sub != '') {
-			$nbEnf = nbSub($c->sub);
-			$style = 'collapse curser-point';
-			$collapse = '[+] ';
-			$infoNbEnf = '('. $nbEnf .')';
-		}
-		$list .= '<li class="' . $listStyle . '">';
-		$list .= '<span class="' . $style . '" data_deep="2" '
-			.'title="Déplier" '
-			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
-			. $collapse . '</span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
-			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
-		$list .= '</li>';
-	}
-	$list .= '</ul>';
-	return $list;
-}
-
-/**
  * construit l'arbre du rof (arbre selected) avec des select pour
  * component, program et subprogram
  * @return string code html
