@@ -87,6 +87,7 @@
                 success: function (data) {
                     var groups = sortByCategory(data.groups);
                     transformItems(groups);
+                    previousUserItemName = '';
                     response($.merge(
                         $.merge(
                             (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
@@ -147,8 +148,14 @@
         return $s;
     }
 
+    var previousUserItemName = '';
     function userItemToLabel(item) {
         var $s = item.displayName;
+        if ($s == previousUserItemName) {
+            $s += ' (' + item.uid + ' )';
+        } else {
+            previousUserItemName = $s;
+        }
         if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
             $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
         }
