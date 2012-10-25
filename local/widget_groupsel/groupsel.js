@@ -66,7 +66,7 @@
         });
     }
 
-    function transformItems(items) {
+    function transformGroupItems(items) {
       var category;
       $.each(items, function ( i, item ) {
         if (category != item.category) {
@@ -74,6 +74,21 @@
             item.pre = category || "";
         }
       });
+    }
+
+    function transformUserItems(items) {
+      var previousUserItemName = '';
+      if (items.length < 2) {
+          return;
+      }
+      for (var i=0; i < items.length; i++) {
+        if (previousUserItemName && previousUserItemName == items[i].displayName) {
+            items[i-1].duplicate = true;
+            items[i].duplicate = true;
+        } else {
+            previousUserItemName = items[i].displayName;
+        }
+      }
     }
 
     function mainSource(settings) {
@@ -86,8 +101,8 @@
                 data: wsParams,
                 success: function (data) {
                     var groups = sortByCategory(data.groups);
-                    transformItems(groups);
-                    previousUserItemName = '';
+                    transformGroupItems(groups);
+                    transformUserItems(data.users);
                     response($.merge(
                         $.merge(
                             (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
@@ -148,13 +163,10 @@
         return $s;
     }
 
-    var previousUserItemName = '';
     function userItemToLabel(item) {
         var $s = item.displayName;
-        if ($s == previousUserItemName) {
+        if ('duplicate' in item && item.duplicate) {
             $s += ' (' + item.uid + ' )';
-        } else {
-            previousUserItemName = $s;
         }
         if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
             $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
