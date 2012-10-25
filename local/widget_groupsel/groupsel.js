@@ -69,10 +69,10 @@
     function transformItems(items) {
       var category;
       $.each(items, function ( i, item ) {
-	    if (category != item.category) {
-		category = item.category;
-		item.pre = category || "";
-	    }
+        if (category != item.category) {
+            category = item.category;
+            item.pre = category || "";
+        }
       });
     }
 
@@ -87,6 +87,7 @@
                 success: function (data) {
                     var groups = sortByCategory(data.groups);
                     transformItems(groups);
+                    previousUserItemName = '';
                     response($.merge(
                         $.merge(
                             (groups.length === 0 ? [] : [{ label: "Groupes", source: "title" }]),
@@ -96,7 +97,7 @@
                         $.merge(
                             (data.users.length === 0 ? [] : [{ label: "Personnes", source: "title" }]),
                             $.map(data.users, function (item) {
-                                return { label: item.displayName, value: item.uid, source: 'users' };
+                                return { label: userItemToLabel(item), value: item.uid, source: 'users' };
                         }))
                     ));
                 }
@@ -143,6 +144,20 @@
         }
         if (description) {
             $s += '<div>' + description + '</div>';
+        }
+        return $s;
+    }
+
+    var previousUserItemName = '';
+    function userItemToLabel(item) {
+        var $s = item.displayName;
+        if ($s == previousUserItemName) {
+            $s += ' (' + item.uid + ' )';
+        } else {
+            previousUserItemName = $s;
+        }
+        if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
+            $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
         }
         return $s;
     }
