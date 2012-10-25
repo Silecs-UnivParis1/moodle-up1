@@ -20,6 +20,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
     global $DB;
     $ptoken = '%' . $token . '%';
 
+    // search on users
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
         . "( username LIKE ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
     if ($filterstudent == 'no') {
@@ -42,6 +43,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
         );
     }
 
+    // search on cohorts
     $sql = "SELECT id, name, idnumber, description FROM {cohort} WHERE "
         . "name LIKE ? OR idnumber LIKE ? OR description LIKE ?" ;
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
@@ -52,6 +54,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
             'key' => $record->idnumber,
             'name' => $record->name,
             'description' => strip_tags($record->description),
+            'category' => groupKeyToCategory($record->idnumber),
             'size' => $size
         );
     }
@@ -107,14 +110,36 @@ function mws_userGroupsId_fast($uid) {
 }
 
 
+
 /**
  * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5082)
- * @param type $name group name for a "structures" group
- * @return type
+ * @param string $name group/cohort name for a "structures-.*" group/cohort
+ * @return string short name, ex. 'UFR 05'
  */
 function groupNameToShortname($name) {
     if (preg_match('/(.*?)\s*:/', $name, $matches))
       return $matches[1];
     else
       return $name;
+}
+/**
+ * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5089)
+ * @param string $key group key == cohort idnumber
+ * @return string category, among (structures, affiliation, diploma, elp, gpelp, gpetp)
+ */
+function groupKeyToCategory($key) {
+    if ( preg_match('/^(structures|affiliation|diploma)-/', $key, $matches) ||
+         preg_match('/^groups-(gpelp|gpetp)\./', $key, $matches))
+    return $matches[1];
+    else if (startsWith($key, 'groups-mati'))
+        return 'elp';
+    else if (startsWith($key, 'groups-'))
+        return 'local';
+    else
+        return null;
+}
+
+function startsWith($haystack, $needle)
+{
+    return strpos($haystack, $needle) === 0;
 }
