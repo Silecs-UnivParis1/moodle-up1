@@ -59,20 +59,16 @@ function print_rof() {
 
 		$style = 'collapse';
 		$collapse = '';
-		$infoNbEnf = '';
 		$listStyle = 'list-none';
 		if ($c->sub != '') {
 			$disabled = ' ';
-
-			$nbEnf = nbSub($c->sub);
 			$style = 'collapse curser-point';
 			$collapse = '[+] ';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$list .= '<option '.$disabled.' data_deep="2" '
 			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
 			. '>'
-			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf
+			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8')
 			. '</option>';
 	}
 	$list .= '</select>';
@@ -383,24 +379,19 @@ class rof_browser {
 		$intitule = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
 
 		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
 
 		$style = 'collapse';
 		$collapse = '';
-		$infoNbEnf = '';
 		$listStyle = 'list-none list-item';
 		if ($nbEnf) {
 			$style = 'collapse curser-point';
 			$collapse = ' + ';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$element .= '<li class="' . $listStyle . '">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
-			. '<span class="nbenfant">' . $infoNbEnf . '</span>'
-			. html_writer::link($detUrl, '<img src="pix/info.png" alt="( i )"/>', array('title'=>'Information')) . "  "
 			. '<span class="element pointer oplus" title="Sélectionner" id="'
 			. $idElem . '">&oplus;</span>'
 			. '</li>';
@@ -436,17 +427,14 @@ class rof_browser {
 		$data_path = $this->path . '_' . $sp->rofid;
 
 		$nbEnf = $nbSub + $nbCourses;
-
-		$infoNbEnf = '';
 		$disabled = ' disabled="disabled" ';
 		if ($nbEnf) {
 			$disabled = '';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" id="' . $id . '" data_path="' . $data_path . '" '
 			. 'title="' . $titleElem . '" '.$disabled.'>'
-			. $labelelem . $infoNbEnf . '</span>'
+			. $labelelem . '</span>'
 			. '</option>';
 		return $element;
 	}
