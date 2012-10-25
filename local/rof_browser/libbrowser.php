@@ -242,14 +242,6 @@ class rof_browser {
 				$subList = $DB->get_records_sql($sql);
 			}
 
-		} elseif ($this->niveau==4) {
-			// dans rof_progam, la liste des enfants courses est dans le champ courses
-			if (isset($pere->courses)) {
-				$sub = subToString($pere->courses);
-			} else {
-				$sub = subToString($pere->sub);
-			}
-			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		} elseif ($this->niveau==3) {
 			if ($pere->sub != '') {
 				$sub = subToString($pere->sub);
@@ -261,7 +253,15 @@ class rof_browser {
 				$tabEnf = 'rof_course';
 				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 			}
-		} else {
+		} elseif ($this->niveau==4) {
+			// dans rof_progam, la liste des enfants courses est dans le champ courses
+			if (isset($pere->courses)) {
+				$sub = subToString($pere->courses);
+			} else {
+				$sub = subToString($pere->sub);
+			}
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+		}  else {
 			$sub = subToString($pere->sub);
 			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
