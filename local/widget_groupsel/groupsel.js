@@ -203,7 +203,7 @@
             description = item.description;
         }
         if ('size' in item) {
-            description += ' (' + item.size + ')';
+            description += ' (' + item.size + ' inscrits)';
         }
         if (description) {
             $s += '<div>' + description + '</div>';
