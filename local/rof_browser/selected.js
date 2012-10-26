@@ -1,5 +1,6 @@
 jQuery(function () {
     var selected = new Array();
+    var visited = new Array();
 	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
     $('div.item-select').load(rootUrl + 'ajax.php');
 
@@ -20,10 +21,10 @@ jQuery(function () {
 				var format = 0;
 			}
 
-			var typedip = 0;
-			if (niv == 2) {
-				typedip = select.attr('data_typedip');
-			}
+            var typedip = select.attr('data_typedip');
+            if (typeof typedip == 'undefined')  {
+                visited[rofid] = select.text();
+            }
 
 			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1,
 				path: path, format: format, typedip: typedip},
@@ -40,6 +41,11 @@ jQuery(function () {
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data_rofid');
 		var path = $(this).attr('data_path');
+
+        if (typeof visited[rofid] == 'undefined') {
+            var intitule = $(this).siblings('span.intitule').text();
+            visited[rofid] = intitule;
+        }
 
 		var plus = $(this).text();
 		$(this).empty();
@@ -79,17 +85,33 @@ jQuery(function () {
 		var path =  $(this).prevAll('span.collapse').attr('data_path');
 		var intitule = $(this).prevAll('span.intitule').text();
 
+        if (typeof visited[rofid] == 'undefined') {
+            var intitule = $(this).siblings('span.intitule').text();
+            visited[rofid] = intitule;
+        }
+
+        var regtab=new RegExp("[ ,_]+", "g");
+        var tableau=path.split(regtab);
+        var chemin = new String();
+        for (var i=0; i<tableau.length; i++) {
+            var c = tableau[i];
+            if (typeof visited[c] != 'undefined') {
+                chemin = chemin+' > '+visited[c];
+            }
+        }
+        chemin = chemin.substr(3);
+        /**
 		var reg=new RegExp("_", "gi");
 		path = path.replace(reg, "/");
-
-		 var name = 'select_'+rofid;
+        **/
+        var name = 'select_'+rofid;
         if (typeof selected[name] != 'undefined' && selected[name] == 1) {
 			alert(rofid+' fait déjà partie de la sélection.');
 		} else {
             selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
 				+'<div class="selected-remove" title="Supprimer">&#10799;</div>'
-				+'<div class="intitule-selected">'+path+' : '+intitule+'</div>'
+				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
 				+'<input type="hidden" name="item[]" value="'+rofid+'"/>'
 				+'</div>';
 			$("#items-selected").append(elem);
