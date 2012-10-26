@@ -41,41 +41,6 @@ function treeComponent () {
 }
 
 /**
- * construit l'arbre du rof (arbre selected)
- * @return string code html
- */
-function afficheArbre() {
-	$components = getRofComponents();
-	$list = '<ul>';
-	foreach ($components as $c) {
-		$id = 'deep2_' . $c->number;
-		$idElem = $id . '-elem';
-		$data_path = $c->number;
-		$data_rofid = $c->number;
-
-		$style = 'collapse';
-		$collapse = '';
-		$infoNbEnf = '';
-		$listStyle = 'list-none';
-		if ($c->sub != '') {
-			$nbEnf = nbSub($c->sub);
-			$style = 'collapse curser-point';
-			$collapse = '[+] ';
-			$infoNbEnf = '('. $nbEnf .')';
-		}
-		$list .= '<li class="' . $listStyle . '">';
-		$list .= '<span class="' . $style . '" data_deep="2" '
-			.'title="Déplier" '
-			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
-			. $collapse . '</span><span class="element pointer" id="' . $idElem . '" title="Sélectionner">'
-			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf . '</span>';
-		$list .= '</li>';
-	}
-	$list .= '</ul>';
-	return $list;
-}
-
-/**
  * construit l'arbre du rof (arbre selected) avec des select pour
  * component, program et subprogram
  * @return string code html
@@ -94,20 +59,16 @@ function print_rof() {
 
 		$style = 'collapse';
 		$collapse = '';
-		$infoNbEnf = '';
 		$listStyle = 'list-none';
 		if ($c->sub != '') {
 			$disabled = ' ';
-
-			$nbEnf = nbSub($c->sub);
 			$style = 'collapse curser-point';
 			$collapse = '[+] ';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$list .= '<option '.$disabled.' data_deep="2" '
 			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
 			. '>'
-			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . $infoNbEnf
+			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8')
 			. '</option>';
 	}
 	$list .= '</select>';
@@ -277,14 +238,6 @@ class rof_browser {
 				$subList = $DB->get_records_sql($sql);
 			}
 
-		} elseif ($this->niveau==4) {
-			// dans rof_progam, la liste des enfants courses est dans le champ courses
-			if (isset($pere->courses)) {
-				$sub = subToString($pere->courses);
-			} else {
-				$sub = subToString($pere->sub);
-			}
-			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		} elseif ($this->niveau==3) {
 			if ($pere->sub != '') {
 				$sub = subToString($pere->sub);
@@ -296,7 +249,15 @@ class rof_browser {
 				$tabEnf = 'rof_course';
 				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 			}
-		} else {
+		} elseif ($this->niveau==4) {
+			// dans rof_progam, la liste des enfants courses est dans le champ courses
+			if (isset($pere->courses)) {
+				$sub = subToString($pere->courses);
+			} else {
+				$sub = subToString($pere->sub);
+			}
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+		}  else {
 			$sub = subToString($pere->sub);
 			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
 		}
@@ -418,24 +379,19 @@ class rof_browser {
 		$intitule = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
 
 		$nbEnf = $nbSub + $nbCourses;
-        $detUrl = new moodle_url('/report/rofstats/view.php', array('rofid' => $sp->rofid, 'path' => $data_path));
 
 		$style = 'collapse';
 		$collapse = '';
-		$infoNbEnf = '';
 		$listStyle = 'list-none list-item';
 		if ($nbEnf) {
-			$style = 'collapse curser-point';
+			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$element .= '<li class="' . $listStyle . '">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
-			. '<span class="nbenfant">' . $infoNbEnf . '</span>'
-			. html_writer::link($detUrl, '<img src="pix/info.png" alt="( i )"/>', array('title'=>'Information')) . "  "
 			. '<span class="element pointer oplus" title="Sélectionner" id="'
 			. $idElem . '">&oplus;</span>'
 			. '</li>';
@@ -471,17 +427,14 @@ class rof_browser {
 		$data_path = $this->path . '_' . $sp->rofid;
 
 		$nbEnf = $nbSub + $nbCourses;
-
-		$infoNbEnf = '';
 		$disabled = ' disabled="disabled" ';
 		if ($nbEnf) {
 			$disabled = '';
-			$infoNbEnf = '('. $nbEnf .')';
 		}
 		$element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" id="' . $id . '" data_path="' . $data_path . '" '
 			. 'title="' . $titleElem . '" '.$disabled.'>'
-			. $labelelem . $infoNbEnf . '</span>'
+			. $labelelem . '</span>'
 			. '</option>';
 		return $element;
 	}
