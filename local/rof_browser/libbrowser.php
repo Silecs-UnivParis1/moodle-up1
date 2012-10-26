@@ -241,13 +241,13 @@ class rof_browser {
 		} elseif ($this->niveau==3) {
 			if ($pere->sub != '') {
 				$sub = subToString($pere->sub);
-				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
 			}
 			// si il y a aussi des cours à ce niveau
 			if ($pere->courses != '') {
 				$sub = subToString($pere->courses);
 				$tabEnf = 'rof_course';
-				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+				$subList2 = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
 			}
 		} elseif ($this->niveau==4) {
 			// dans rof_progam, la liste des enfants courses est dans le champ courses
@@ -256,10 +256,10 @@ class rof_browser {
 			} else {
 				$sub = subToString($pere->sub);
 			}
-			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
 		}  else {
 			$sub = subToString($pere->sub);
-			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub})");
+			$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
 		}
 
 		$blocListe = '';
