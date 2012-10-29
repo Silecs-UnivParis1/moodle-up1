@@ -110,7 +110,7 @@ jQuery(function () {
 		} else {
             selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
-				+'<div class="selected-remove" title="Supprimer">&#10799;</div>'
+				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
 				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
 				+'<input type="hidden" name="item[]" value="'+rofid+'"/>'
 				+'</div>';
@@ -120,7 +120,7 @@ jQuery(function () {
 	});
 
 	$("#items-selected").on("click", ".selected-remove", function(event) {
-		if (confirm('Supprimez cet élément de la sélection ?')) {
+		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
             var rofid = $(this).siblings('input[type=hidden]').val();
             selected['select_'+rofid] = 0;
 			$(this).parent('div.item-selected').remove();

@@ -93,3 +93,7 @@ div.block-item-selected {
 div.select-elem {
 	margin-top: 2px;
 }
+
+div.item-select > div:first-child {
+    margin-bottom: 6px;
+}

@@ -47,7 +47,8 @@ function treeComponent () {
  */
 function print_rof() {
 	$components = getRofComponents();
-	$list = '<div class="select-elem">';
+     $list = '<div>Rechercher un élément pédagogique dans l\'offre de formation de l\'établissement</div>';
+	$list .= '<div class="select-elem">';
 	$list .= '<select class="selectmenu" id="select-2">';
 	$list .= '<option selected="selected" data_deep="2">Composante</option>';
 	foreach ($components as $c) {
@@ -337,7 +338,7 @@ class rof_browser {
 		if ($nbSubList) {
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
-			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Type diplôme</option>';
+			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Diplôme</option>';
 				foreach ($subList as $sl) {
 					$list .= '<option data_deep="' . $nivEnf . '" data_path="'
 						. $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
