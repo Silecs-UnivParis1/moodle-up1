@@ -35,7 +35,7 @@ li.list-none {
 	list-style-type: none;
 }
 
-li.list-item {
+li.list-item, div.dip-sel {
 	/*padding-bottom: 4px;*/
 	line-height: 1.0;
 	font-weight: 16px;
@@ -43,7 +43,7 @@ li.list-item {
 	font-family: "Verdana", "Arial", sans-serif;
 }
 
-li.list-item span.oplus {
+li.list-item span.oplus, div.dip-sel span.oplus {
 	font-size: 24px;
 	/*margin: -6px 2px 0 2px;*/
     margin-top: -2px; margin-left: 4px;
@@ -58,7 +58,7 @@ background-repeat: no-repeat;
 background-position: 0px 10%;
 }
 
-li.list-item span.expanded {
+li.list-item span.expanded, div.dip-sel span.expanded {
 background-image: url(pix/expanded.png); color: transparent;
 background-repeat: no-repeat;
 background-position: 0px 10%;
@@ -92,4 +92,8 @@ div.block-item-selected {
 
 div.select-elem {
 	margin-top: 2px;
+}
+
+div.item-select > div:first-child {
+    margin-bottom: 6px;
 }

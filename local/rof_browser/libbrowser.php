@@ -47,7 +47,8 @@ function treeComponent () {
  */
 function print_rof() {
 	$components = getRofComponents();
-	$list = '<div class="select-elem">';
+     $list = '<div>Rechercher un élément pédagogique dans l\'offre de formation de l\'établissement</div>';
+	$list .= '<div class="select-elem">';
 	$list .= '<select class="selectmenu" id="select-2">';
 	$list .= '<option selected="selected" data_deep="2">Composante</option>';
 	foreach ($components as $c) {
@@ -113,6 +114,8 @@ class rof_browser {
 	protected $path;
 	protected $format;
 	protected $typedip;
+
+    protected $elemPere;
 
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
@@ -239,6 +242,10 @@ class rof_browser {
 			}
 
 		} elseif ($this->niveau==3) {
+            if ( $this->selected == 1) {
+                $this->elemPere = $DB->get_record($tabSub, array('rofid' => $this->rofid));
+            }
+
 			if ($pere->sub != '') {
 				$sub = subToString($pere->sub);
 				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
@@ -293,8 +300,26 @@ class rof_browser {
 		}
 		$cf .= ' item ';
 
+        if ($this->niveau == 3 && $this->selected == 1) {
+            $coden = trim('deep'.$this->niveau);
+            $id = $coden.'_'.$this->rofid;
+            $idElem = $id . '-elem';
+            $intitule = htmlentities( $this->elemPere->name, ENT_QUOTES, 'UTF-8');
+
+			$listeTitle = ', type:'.$this->elemPere->typedip.', domaine:'.$this->elemPere->domainedip
+			.', nature:'.$this->elemPere->naturedip.', cycle:'.$this->elemPere->cycledip.', rythme: '
+            .$this->elemPere->rythmedip.', langue:'.$this->elemPere->languedip;
+
+            $list .= '<div class="dip-sel">'
+                . '<span class="expanded collapse" data_deep="'.$this->niveau.'" data_path="'
+                . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
+                . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
+                . '<span class="element pointer oplus" title="Sélectionner" id="'.$idElem.'">&oplus;</span>'
+                . '</div>';
+        }
+
 		if ($nbSubList) {
-		$list = '<ul class="'.$cf.'">';
+		$list .= '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
 				if ($this->selected == 1) {
 					$list .= $this->createItem($sl, $nivEnf);
@@ -337,7 +362,7 @@ class rof_browser {
 		if ($nbSubList) {
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
-			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Type diplôme</option>';
+			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Diplôme</option>';
 				foreach ($subList as $sl) {
 					$list .= '<option data_deep="' . $nivEnf . '" data_path="'
 						. $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
