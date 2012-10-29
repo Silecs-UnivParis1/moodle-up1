@@ -115,6 +115,8 @@ class rof_browser {
 	protected $format;
 	protected $typedip;
 
+    protected $elemPere;
+
 	public $tabNiveau = array(
 		1 => array('code' =>'component', 'tabsub' => 'rof_component', 'tabenf' => 'rof_component'),
 		2 => array('code' =>'progam', 'tabsub' => 'rof_component', 'tabenf' => 'rof_program'),
@@ -240,6 +242,10 @@ class rof_browser {
 			}
 
 		} elseif ($this->niveau==3) {
+            if ( $this->selected == 1) {
+                $this->elemPere = $DB->get_record($tabSub, array('rofid' => $this->rofid));
+            }
+
 			if ($pere->sub != '') {
 				$sub = subToString($pere->sub);
 				$subList = $DB->get_records_select($tabEnf, " rofid in ({$sub}) order by FIELD(rofid, {$sub})");
@@ -294,8 +300,26 @@ class rof_browser {
 		}
 		$cf .= ' item ';
 
+        if ($this->niveau == 3 && $this->selected == 1) {
+            $coden = trim('deep'.$this->niveau);
+            $id = $coden.'_'.$this->rofid;
+            $idElem = $id . '-elem';
+            $intitule = htmlentities( $this->elemPere->name, ENT_QUOTES, 'UTF-8');
+
+			$listeTitle = ', type:'.$this->elemPere->typedip.', domaine:'.$this->elemPere->domainedip
+			.', nature:'.$this->elemPere->naturedip.', cycle:'.$this->elemPere->cycledip.', rythme: '
+            .$this->elemPere->rythmedip.', langue:'.$this->elemPere->languedip;
+
+            $list .= '<div class="dip-sel">'
+                . '<span class="expanded collapse" data_deep="'.$this->niveau.'" data_path="'
+                . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
+                . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
+                . '<span class="element pointer oplus" title="Sélectionner" id="'.$idElem.'">&oplus;</span>'
+                . '</div>';
+        }
+
 		if ($nbSubList) {
-		$list = '<ul class="'.$cf.'">';
+		$list .= '<ul class="'.$cf.'">';
 			foreach ($subList as $id => $sl) {
 				if ($this->selected == 1) {
 					$list .= $this->createItem($sl, $nivEnf);

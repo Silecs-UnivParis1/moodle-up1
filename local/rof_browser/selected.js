@@ -34,9 +34,10 @@ jQuery(function () {
 		}
 	});
 
-
-
     $('div.item-select').on("click", ".collapse", function(event) {
+        if ($(this).parent(".dip-sel").size()) {
+            return false;
+        }
 		var niv = $(this).attr('data_deep');
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data_rofid');
@@ -106,7 +107,7 @@ jQuery(function () {
         **/
         var name = 'select_'+rofid;
         if (typeof selected[name] != 'undefined' && selected[name] == 1) {
-			alert(rofid+' fait déjà partie de la sélection.');
+			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
             selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
