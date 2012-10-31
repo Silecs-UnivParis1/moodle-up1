@@ -314,7 +314,8 @@ class rof_browser {
                 . '<span class="expanded collapse" data_deep="'.$this->niveau.'" data_path="'
                 . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
                 . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
-                . '<span class="element pointer oplus" title="Sélectionner" id="'.$idElem.'">&oplus;</span>'
+                . '<span class="element pointer oplus" title="Sélectionner" id="'
+                . $idElem . '"><img src="pix/switch_plus.gif" alt="&oplus;"/></span>'
                 . '</div>';
         }
 
@@ -418,7 +419,7 @@ class rof_browser {
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
 			. '<span class="element pointer oplus" title="Sélectionner" id="'
-			. $idElem . '">&oplus;</span>'
+			. $idElem . '"><img src="pix/switch_plus.gif" alt="&oplus;"/></span>'
 			. '</li>';
 		return $element;
 	}
