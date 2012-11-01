@@ -27,7 +27,6 @@
 
     $.fn.autocompleteGroup = function (options) {
         var settings = $.extend(true, {}, defaultSettings, options || {});
-        settings.wsParams.maxRows++;
 
         return this.each(function() {
             var $elem = $(this);
@@ -35,6 +34,7 @@
             var acg = new AutocompleteGroup(settings, $elem, $input);
             acg.init();
             acg.run();
+            $elem.data('autocompleteGroup', acg);
         });
     }
 
@@ -107,6 +107,7 @@
             return function(request, response) {
                 var wsParams = $.extend({}, $this.settings.wsParams);
                 wsParams.token = request.term;
+                wsParams.maxRows++;
                 $.ajax({
                     url: $this.settings.urlGroups,
                     dataType: "jsonp",
@@ -131,7 +132,7 @@
         prepareList: function(list, titleLabel, itemToResponse) {
             var $this = this;
             var len = list.length;
-            if (len >= ($this.settings.wsParams.maxRows)) {
+            if (len > ($this.settings.wsParams.maxRows)) {
                 list[len-1] = { source: 'title', label: '…'};
             }
             return $.merge(
