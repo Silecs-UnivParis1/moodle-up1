@@ -23,7 +23,8 @@
         labelDetails: '', // will be printed after the selected label
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
-        fieldName: 'group' // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+        fieldName: 'group', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+        preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {...} ]
     };
 
     $.fn.autocompleteGroup = function (options) {
@@ -35,6 +36,9 @@
             var acg = new AutocompleteGroup(settings, $elem, $input);
             acg.init();
             acg.run();
+            if (settings.preSelected.length) {
+                acg.fillSelection(settings.preSelected);
+            }
             $elem.data('autocompleteGroup', acg);
         });
     }
@@ -77,6 +81,14 @@
                 close: function () {},
                 minLength: $this.settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
+        },
+
+        fillSelection: function(items) {
+            var $this = this;
+            for (var i=0; i < items.length; i++) {
+                $($this.settings.outputSelector, $this.elem)
+                    .append(buildSelectedBlock(items[i], $this.settings.fieldName, $this.settings.labelDetails));
+            }
         },
 
         setGroupsbyUser: function(uid, ac) {
@@ -224,7 +236,7 @@
         return $s;
     }
 
-    function buildSelectedBlock(item, inputName) {
+    function buildSelectedBlock(item, inputName, details) {
         return $(
                 '<div class="group-item-block"><div class="group-item-selected">'
                 + item.label + details + '</div></div>'
