@@ -20,14 +20,15 @@
         urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
         minLength: 4,
         wsParams: { maxRows : 9 }, // default parameters for the web service
+        labelDetails: '', // will be printed after the selected label
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
-        fieldName: 'group' // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+        fieldName: 'group', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+        preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {...} ]
     };
 
     $.fn.autocompleteGroup = function (options) {
         var settings = $.extend(true, {}, defaultSettings, options || {});
-        settings.wsParams.maxRows++;
 
         return this.each(function() {
             var $elem = $(this);
@@ -35,6 +36,10 @@
             var acg = new AutocompleteGroup(settings, $elem, $input);
             acg.init();
             acg.run();
+            if (settings.preSelected.length) {
+                acg.fillSelection(settings.preSelected);
+            }
+            $elem.data('autocompleteGroup', acg);
         });
     }
 
@@ -64,7 +69,7 @@
                 select: function (event, ui) {
                     if (ui.item.source == 'groups') {
                         $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName));
+                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelDetails));
                         $this.input.val('');
                     } else if (ui.item.source == 'users') {
                         $this.input.val(ui.item.label);
@@ -76,6 +81,14 @@
                 close: function () {},
                 minLength: $this.settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
+        },
+
+        fillSelection: function(items) {
+            var $this = this;
+            for (var i=0; i < items.length; i++) {
+                $($this.settings.outputSelector, $this.elem)
+                    .append(buildSelectedBlock(items[i], $this.settings.fieldName, $this.settings.labelDetails));
+            }
         },
 
         setGroupsbyUser: function(uid, ac) {
@@ -107,6 +120,7 @@
             return function(request, response) {
                 var wsParams = $.extend({}, $this.settings.wsParams);
                 wsParams.token = request.term;
+                wsParams.maxRows++;
                 $.ajax({
                     url: $this.settings.urlGroups,
                     dataType: "jsonp",
@@ -131,7 +145,7 @@
         prepareList: function(list, titleLabel, itemToResponse) {
             var $this = this;
             var len = list.length;
-            if (len >= ($this.settings.wsParams.maxRows)) {
+            if (len > ($this.settings.wsParams.maxRows)) {
                 list[len-1] = { source: 'title', label: '…'};
             }
             return $.merge(
@@ -222,9 +236,11 @@
         return $s;
     }
 
-    function buildSelectedBlock(item, inputName) {
-        return $('<div class="group-item-block"></div>')
-            .html('<div class="group-item-selected">' + item.label + '</div>')
+    function buildSelectedBlock(item, inputName, details) {
+        return $(
+                '<div class="group-item-block"><div class="group-item-selected">'
+                + item.label + details + '</div></div>'
+            )
             .prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
             .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
     }

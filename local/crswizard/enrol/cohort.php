@@ -33,6 +33,13 @@ echo $OUTPUT->box(get_string('bockhelpE4s', 'local_crswizard'), '');
 
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
+<div>
+	<select name="role" size="1" id="group-role">
+        <option value="role1">A</option>
+        <option value="role2">B</option>
+        <option value="role3">C</option>
+	</select>
+</div>
 
 <div id="group-select">
     <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
@@ -49,11 +56,17 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#group-select').autocompleteGroup({
-        urlGroups: '../../mwsgroups/service-search.php',
+        urlGroups: '<?php echo new moodle_url('/local/mwsgroups/service-search.php'); ?>',
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
-        wsParams: { maxRows: 10, filter: 'none' }
+        wsParams: { maxRows: 10 }
     });
+
+    $('#group-role').on('change', function() {
+        var sel = $(this).val();
+        $('#group-select').data('autocompleteGroup').settings.fieldName = 'group[' + sel + ']';
+    });
+    $('#group-role').change();
 });
 //]]>
 </script>
