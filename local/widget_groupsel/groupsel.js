@@ -24,7 +24,7 @@
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
         fieldName: 'group', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
-        preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {...} ]
+        preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {label: "T2", value: "4", fieldName: "myGroup"} ... ]
     };
 
     $.fn.autocompleteGroup = function (options) {
@@ -86,8 +86,12 @@
         fillSelection: function(items) {
             var $this = this;
             for (var i=0; i < items.length; i++) {
+                var fieldName = $this.settings.fieldName;
+                if ('fieldName' in items[i]) {
+                    fieldName = items[i].fieldName;
+                }
                 $($this.settings.outputSelector, $this.elem)
-                    .append(buildSelectedBlock(items[i], $this.settings.fieldName, $this.settings.labelDetails));
+                    .append(buildSelectedBlock(items[i], fieldName, ''));
             }
         },
 
