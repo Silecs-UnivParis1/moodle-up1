@@ -43,10 +43,10 @@ function up1_metadata() {
             'demandeur' => array('name' => 'Demandeur', 'datatype' => 'text', 'locked' => 0),
             'responsable' => array('name' => 'Responsable', 'datatype' => 'text', 'locked' => 0),
             'datedemande' => array('name' => 'Date demande', 'datatype' => 'datetime', 'locked' => 0),
-            'tovalidate' => array('name' => 'Attente de validation', 'datatype' => 'checkbox', 'locked' => 0),
+            'avalider' => array('name' => 'Attente de validation', 'datatype' => 'checkbox', 'locked' => 0),
             'approbateurid' => array('name' => 'Approbateur Id', 'datatype' => 'text', 'locked' => 0),
             'approbateur' => array('name' => 'Approbateur', 'datatype' => 'text', 'locked' => 0),
-            'validatedate' => array('name' => 'Date validation', 'datatype' => 'datetime', 'locked' => 0),
+            'datevalid' => array('name' => 'Date validation', 'datatype' => 'datetime', 'locked' => 0),
             'datefermeture' => array('name' => 'Date fermeture', 'datatype' => 'datetime', 'locked' => 0),
             'dateprevarchivage' => array('name' => 'Date prévis. archivage', 'datatype' => 'datetime', 'locked' => 0),
             'datearchivage' => array('name' => 'Date archivage', 'datatype' => 'datetime', 'locked' => 0),
@@ -105,4 +105,83 @@ function insert_metadata_categories() {
     }
 }
 
+function insert_metadata_fields() {
+    global $DB;
+    $metadata = up1_metadata();
+    $prefix = 'up1';
+    $fieldsnb = 0;
 
+    foreach ($metadata as $cat => $fields) {
+        $catdb = $DB->get_record('custom_info_category', array('objectname'=>'course', 'name'=>$cat), 'id', MUST_EXIST);
+        if ($catdb->id) {
+            $sortorder = 0;
+            foreach ($fields as $shortname => $ofields) {
+                if ( $DB->record_exists('custom_info_field', array('objectname'=>'course', 'shortname'=>$prefix.$shortname)) ) {
+                    echo "$shortname already exists. Keeping it.\n";
+                    continue; // next field
+                }
+                $sortorder++;
+                $fieldsnb++;
+                echo "inserting $shortname... ";
+                $record = new StdClass;
+                $record->objectname = 'course';
+                $record->shortname = $prefix . $shortname;
+                $record->name = $ofields['name'];
+                $record->datatype = $ofields['datatype'];
+                $record->description = '';
+                $record->descriptionformat = 1;
+                $record->categoryid = $catdb->id;
+                $record->sortorder = $sortorder;
+                $record->required = 0;
+                $record->locked = $ofields['locked'];
+                $record->visible = 2;
+                $record->forceunique = 0;
+                $record->signup = 0;
+                if ($record->datatype == 'text') {
+                    $record->defaultdata = '';
+                    $record->defaultdataformat = 0;
+                    $record->param1 = 30;
+                    $record->param2 = 2048;
+                    $record->param3 = 0;
+                } elseif ($record->datatype == 'datetime') {
+                    $record->defaultdata = 0;
+                    $record->defaultdataformat = 0;
+                    $record->param1 = 2010;
+                    $record->param2 = 2020;
+                    $record->param3 = 1;
+                } elseif ($record->datatype == 'checkbox') {
+                    $record->defaultdata = 0;
+                    $record->defaultdataformat = 0;
+                }
+                $id = $DB->insert_record('custom_info_field', $record);
+                echo "OK. id=$id\n";
+            } // $shortname
+        }
+    } // $cat
+    echo "\n$fieldsnb champs créés.\n\n";
+}
+
+
+function delete_metadata_fields() {
+    global $DB;
+    $metadata = up1_metadata();
+    $prefix = 'up1';
+    $fieldsnb = 0;
+
+    foreach ($metadata as $cat => $fields) {
+        $catdb = $DB->get_record('custom_info_category', array('objectname'=>'course', 'name'=>$cat), 'id', MUST_EXIST);
+        if ($catdb->id) {
+            $sortorder = 0;
+            foreach ($fields as $shortname => $ofields) {
+                if ( $DB->record_exists('custom_info_field', array('objectname'=>'course', 'shortname'=>$prefix.$shortname)) ) {
+                    echo "$shortname exists. Deleting it.\n";
+                    $fieldsnb++;
+                    $DB->delete_records('custom_info_field', array('objectname'=>'course', 'shortname'=>$prefix.$shortname));
+                } else {
+                    echo "$shortname does NOT exist. No change.\n";
+                }
+            } // $shortname
+        }
+    } // $cat
+    echo "\n$fieldsnb champs supprimés.\n\n";
+}
