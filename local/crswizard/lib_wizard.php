@@ -256,6 +256,68 @@ function wizard_list_enrolement_group()
 }
 
 /**
+ * Construit le tableau des groupes sélectionnés et les sauvegrade dans la
+ * variable de session $SESSION->wizard['form_step5']['all-cohorts']
+ */
+function wizard_get_enrolement_cohorts()
+{
+	global $DB, $SESSION;
+	$list = array();
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_cohort;
+	$roles = wizard_role_group($labels);
+    if (!isset($SESSION->wizard['form_step5']['group'])) {
+        return false;
+    }
+	$form5g = $SESSION->wizard['form_step5']['group'];
+
+	foreach ($roles as $r) {
+		$code = $r['shortname'];
+		if (array_key_exists($code, $form5g)) {
+			foreach ($form5g[$code] as $g) {
+				$group = $DB->get_record('cohort', array('idnumber' => $g));
+				if ($group) {
+                    $size = $DB->count_records('cohort_members', array('cohortid' => $group->id));
+                    $group->size = $size;
+					$list[$code][$group->idnumber] = $group;
+				}
+			}
+		}
+	}
+	$SESSION->wizard['form_step5']['all-cohorts'] = $list;
+}
+
+/*
+ * construit la liste des groupes sélectionnés encodé en json
+ * @return string
+ */
+function wizard_preselected_cohort()
+{
+    global $SESSION;
+    $liste = '';
+    if (isset($SESSION->wizard['form_step5']['all-cohorts'])) {
+        foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
+            foreach ($groups as $id => $group) {
+                $desc = '';
+                if ($group->description != '') {
+                    $desc .= strip_tags($group->description);
+                }
+                if (isset($group->size) && $group->size != '') {
+                    $desc .=  ' (' . $group->size . ' inscrits)';
+                }
+                if ($desc != '') {
+                    $desc = '<div>' . $desc . '</div>';
+                }
+                $liste .= '{"label":"<b>' . $group->name . '</b>'
+                    . $desc . '", "value": "'
+                    . $id . '", "fieldName" : "group[' . $role . ']"},';
+            }
+        }
+    }
+    return $liste;
+}
+
+/**
  * renvoie un tableau d'enseignants à afficher dans étape confirmation
  * utilise $SESSION->wizard['form_step4']
  * @retun array $list
