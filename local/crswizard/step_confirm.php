@@ -84,13 +84,20 @@ class course_wizard_step_confirm extends moodleform {
 			}
 		}
 
-		$groupes = wizard_list_enrolement_group();
-		if (count($groupes)) {
-			$mform->addElement('header','groupes', get_string('cohorts', 'local_crswizard'));
-			foreach ($groupes as $g) {
-				$mform->addElement('html', html_writer::tag('div', $g, array('class' => 'fitem')));
-			}
-		}
+        if (isset($SESSION->wizard['form_step5']['all-cohorts']) && count($SESSION->wizard['form_step5']['all-cohorts'])) {
+            $allgroupes = $SESSION->wizard['form_step5']['all-cohorts'];
+            $mform->addElement('header','groupes', get_string('cohorts', 'local_crswizard'));
+            $labels = $myconfig->role_cohort;
+            foreach ($allgroupes as $role => $groupes) {
+                if (array_key_exists($role, $labels)) {
+					$label = $labels[$role];
+                    $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
+				}
+                foreach ($groupes as $id => $group) {
+                    $mform->addElement('html', html_writer::tag('div', $group->name, array('class' => 'fitem')));
+                }
+            }
+        }
 
 		$clefs = wizard_list_clef();
 		if (count($clefs)) {

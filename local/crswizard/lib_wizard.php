@@ -235,27 +235,6 @@ function myenrol_teacher($courseid, $tabTeachers, $roleid) {
 }
 
 /**
- * renvoie un tableau des groupes à afficher dans étape confirmation
- * utilise $SESSION->wizard['form_step5']
- * @retun array $list
- */
-function wizard_list_enrolement_group()
-{
-	global $DB, $SESSION;
-	$list = array();
-	$form5 = $SESSION->wizard['form_step5'];
-	if (array_key_exists('group', $form5)) {
-		foreach ($form5['group'] as $group) {
-			$cohort = $DB->get_field('cohort', 'name', array('idnumber' => $group));
-			if ($cohort) {
-				$list[] = $cohort;
-			}
-		}
-	}
-	return $list;
-}
-
-/**
  * Construit le tableau des groupes sélectionnés et les sauvegrade dans la
  * variable de session $SESSION->wizard['form_step5']['all-cohorts']
  */
