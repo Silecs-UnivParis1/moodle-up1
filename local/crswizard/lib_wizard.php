@@ -198,6 +198,27 @@ function wizard_role_teacher($token) {
     return $rolet;
 }
 
+/**
+ * renvoie les rôles permis pour une inscription de groupe
+ * @param $labels array
+ * @return array object role
+ */
+function wizard_role_group($labels) {
+	global $DB;
+	$roles = array();
+    foreach ($labels as $key => $label) {
+        $sql = "SELECT * FROM {role} WHERE "
+        . "shortname = ?" ;
+        $record = $DB->get_record_sql($sql, array($key));
+        $roles[] = array(
+            'shortname' => $record->shortname,
+            'name' => $record->name,
+            'id' => $record->id
+        );
+    }
+    return $roles;
+}
+
 function myenrol_teacher($courseid, $tabTeachers, $roleid) {
 	global $DB, $CFG;
 	require_once("$CFG->dirroot/lib/enrollib.php");
@@ -419,4 +440,6 @@ class my_elements_config {
 	public $role_teachers = array('editingteacher' => 'editingteacher',
 		'teacher' => 'noeditingteacher'
 	);
+
+    public $role_cohort = array('student' => 'student', 'guest' => 'guest');
 }

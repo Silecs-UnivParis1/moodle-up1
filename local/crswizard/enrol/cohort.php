@@ -33,11 +33,21 @@ echo $OUTPUT->box(get_string('bockhelpE4s', 'local_crswizard'), '');
 
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
-<div>
-	<select name="role" size="1" id="group-role">
-        <option value="role1">A</option>
-        <option value="role2">B</option>
-        <option value="role3">C</option>
+<div class="role">
+    <h3><?php echo get_string('role', 'local_crswizard');?></h3>
+    <select name="role" size="1" id="group-role">
+        <?php
+        $myconfig = new my_elements_config();
+        $labels = $myconfig->role_cohort;
+        $roles = wizard_role_group($labels);
+        foreach ($roles as $r) {
+			$label = $r['name'];
+			if (array_key_exists($r['shortname'], $labels)) {
+				$label = $labels[$r['shortname']];
+			}
+			echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
+		}
+    ?>
 	</select>
 </div>
 
