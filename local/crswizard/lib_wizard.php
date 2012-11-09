@@ -135,29 +135,34 @@ function myenrol_cohort($idcourse, $tabGroup) {
     }
     $error = array();
     $enrol = 'cohort';
-    $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
     $status = 0;   //ENROL_INSTANCE_ENABLED
-    foreach ($tabGroup as $idgroup) {
-        $cohort = $DB->get_record('cohort', array('idnumber' => $idgroup));
-        if ($cohort) {
-            if (!$DB->record_exists('enrol', array('enrol' => $enrol, 'courseid' => $idcourse, 'customint1' => $cohort->id))) {
-                $instance = new stdClass();
-                $instance->enrol = $enrol;
-                $instance->status = $status;
-                $instance->courseid = $idcourse;
-                $instance->customint1 = $cohort->id;
-                $instance->roleid = $roleid;
-                $instance->enrolstartdate = 0;
-                $instance->enrolenddate = 0;
-                $instance->timemodified = time();
-                $instance->timecreated = $instance->timemodified;
-                $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
-                $DB->insert_record('enrol', $instance);
+    $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
+
+    foreach ($tabGroup as $role => $groupes) {
+        $roleid = $DB->get_field('role', 'id', array('shortname' => $role));
+        foreach ($groupes as $idgroup) {
+            $cohort = $DB->get_record('cohort', array('idnumber' => $idgroup));
+            if ($cohort) {
+                if (!$DB->record_exists('enrol', array('enrol' => $enrol, 'courseid' => $idcourse, 'customint1' => $cohort->id))) {
+                    $instance = new stdClass();
+                    $instance->enrol = $enrol;
+                    $instance->status = $status;
+                    $instance->courseid = $idcourse;
+                    $instance->customint1 = $cohort->id;
+                    $instance->roleid = $roleid;
+                    $instance->enrolstartdate = 0;
+                    $instance->enrolenddate = 0;
+                    $instance->timemodified = time();
+                    $instance->timecreated = $instance->timemodified;
+                    $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
+                    $DB->insert_record('enrol', $instance);
+                }
+            } else {
+                $error[] = 'groupe "' . $idgroup . '" n\'existe pas dans la base';
             }
-        } else {
-            $error[] = 'groupe "' . $idgroup . '" n\'existe pas dans la base';
         }
     }
+
     require_once("$CFG->dirroot/enrol/cohort/locallib.php");
     enrol_cohort_sync($idcourse);
     return $error;
