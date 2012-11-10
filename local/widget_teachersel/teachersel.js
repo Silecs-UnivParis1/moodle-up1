@@ -19,6 +19,7 @@
     var defaultSettings = {
             urlUsers: '../mwsteachers/service-search.php',
             minLength: 4,
+            labelDetails: '', // will be printed after the selected label
             wsParams: { maxRows : 10 }, // default parameters for the web service
             inputSelector: 'input.user-selector', // class of the input field where completion takes place
             outputSelector: '.users-selected',
@@ -72,7 +73,7 @@
 
                     if (ui.item.source == 'users') {
                         $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, inputName));
+                            .prepend(buildSelectedBlock(ui.item, inputName, $this.settings.labelDetails));
                     }
                     return false;
                 },
@@ -117,7 +118,7 @@
             .appendTo(ul);
     };
 
-    function buildSelectedBlock(item, inputName) {
+    function buildSelectedBlock(item, inputName, details) {
 		var role = inputName;
 		if($('#roleteacher').size()) {
 			role = $('#roleteacher > option:selected').text();
@@ -128,7 +129,7 @@
 		} else {
             selected[item.value] = 1;
 			return $('<div class="teacher-item-block"></div>')
-				.html('<div class="teacher-item-selected">' + item.label + ' (' + role + ') </div>')
+				.html('<div class="teacher-item-selected">' + item.label + ' (' + details + ') </div>')
 				.prepend('<div class="selected-remove">&#10799;</div>')
 				.append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
         }
