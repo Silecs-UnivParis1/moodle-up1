@@ -75,7 +75,9 @@ jQuery(document).ready(function () {
 
     $('#group-role').on('change', function() {
         var sel = $(this).val();
+        var label = $('#group-role > option:selected').text();
         $('#group-select').data('autocompleteGroup').settings.fieldName = 'group[' + sel + ']';
+        $('#group-select').data('autocompleteGroup').settings.labelDetails = label;
     });
     $('#group-role').change();
 });

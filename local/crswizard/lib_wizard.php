@@ -278,9 +278,17 @@ function wizard_get_enrolement_cohorts()
 function wizard_preselected_cohort()
 {
     global $SESSION;
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_cohort;
     $liste = '';
     if (isset($SESSION->wizard['form_step5']['all-cohorts'])) {
         foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
+            $labelrole = '';
+            if (array_key_exists($role, $labels)) {
+				$label = $labels[$role];
+                $labelrole = get_string($role, 'local_crswizard');
+			}
+
             foreach ($groups as $id => $group) {
                 $desc = '';
                 if ($group->description != '') {
@@ -293,7 +301,7 @@ function wizard_preselected_cohort()
                     $desc = '<div>' . $desc . '</div>';
                 }
                 $liste .= '{"label":"<b>' . $group->name . '</b>'
-                    . $desc . '", "value": "'
+                    . $desc .  $labelrole . '", "value": "'
                     . $id . '", "fieldName" : "group[' . $role . ']"},';
             }
         }
