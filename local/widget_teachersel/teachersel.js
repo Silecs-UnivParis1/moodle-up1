@@ -119,11 +119,6 @@
     };
 
     function buildSelectedBlock(item, inputName, details) {
-		var role = inputName;
-		if($('#roleteacher').size()) {
-			role = $('#roleteacher > option:selected').text();
-		}
-
 		if (typeof selected[item.value] != 'undefined' && selected[item.value] == 1) {
 			alert(item.label+' fait déjà partie de la sélection.');
 		} else {

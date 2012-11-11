@@ -46,7 +46,7 @@ jQuery(document).ready(function () {
     });
 
     $('#roleteacher').on('change', function() {
-        var sel = $(this).val();
+        var sel = $('#roleteacher > option:selected').text();
         $('#user-select').data('autocompleteUser').settings.labelDetails = sel;
     });
     $('#roleteacher').change();
