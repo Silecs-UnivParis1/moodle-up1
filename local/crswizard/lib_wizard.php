@@ -376,31 +376,6 @@ function wizard_preselected_users()
     return $liste;
 }
 
-/**
- * renvoie un tableau d'enseignants à afficher dans étape confirmation
- * utilise $SESSION->wizard['form_step4']
- * @retun array $list
- */
-function wizard_list_enrolement_enseignants()
-{
-	global $DB, $SESSION;
-	$list = array();
-	$roles = wizard_role_teacher('teacher');
-	$form4 = $SESSION->wizard['form_step4'];
-	foreach ($roles as $r) {
-		$code = $r['shortname'];
-		if (array_key_exists($code, $form4)) {
-			foreach ($form4[$code] as $u) {
-				$user = $DB->get_record('user', array('username' => $u));
-				if ($user) {
-					$list[$code][] = $user->firstname .' '. $user->lastname;
-				}
-			}
-		}
-	}
-	return $list;
-}
-
 function wizard_list_clef() {
 	global $SESSION;
 	$list = array();

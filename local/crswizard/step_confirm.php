@@ -68,21 +68,21 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setConstant('startdate', $startdate);
         $tabfreeze[] = 'startdate';
 
-        $enseigants = wizard_list_enrolement_enseignants();
-		if (count($enseigants)) {
-			$mform->addElement('header','resume', get_string('teachers', 'local_crswizard'));
-			$labels = $myconfig->role_teachers;
-			foreach ($enseigants as $type => $tab) {
-				$label = $type;
-				if (array_key_exists($type, $labels)) {
-					$label = $labels[$type];
+        if (isset($SESSION->wizard['form_step4']['all-users']) && count($SESSION->wizard['form_step4']['all-users'])) {
+            $allusers = $SESSION->wizard['form_step4']['all-users'];
+            $mform->addElement('header', 'enseignants', get_string('teachers', 'local_crswizard'));
+            $labels = $myconfig->role_teachers;
+            foreach ($allusers as $role => $users) {
+                if (array_key_exists($role, $labels)) {
+					$label = $labels[$role];
+                    $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
 				}
-				$mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
-				foreach ($tab as $e) {
-					$mform->addElement('html', html_writer::tag('div', $e, array('class' => 'fitem')));
-				}
-			}
-		}
+                foreach ($users as $id => $user) {
+                    $identite = $user->firstname . ' ' . $user->lastname;
+                    $mform->addElement('html', html_writer::tag('div', $identite, array('class' => 'fitem')));
+                }
+            }
+        }
 
         if (isset($SESSION->wizard['form_step5']['all-cohorts']) && count($SESSION->wizard['form_step5']['all-cohorts'])) {
             $allgroupes = $SESSION->wizard['form_step5']['all-cohorts'];
