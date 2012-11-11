@@ -24,6 +24,7 @@
             inputSelector: 'input.user-selector', // class of the input field where completion takes place
             outputSelector: '.users-selected',
             fieldName: 'user', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+            preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {label: "T2", value: "4", fieldName: "myGroup"} ... ]
     };
 
     $.fn.autocompleteUser = function (options) {
@@ -35,6 +36,9 @@
             var acg = new autocompleteUser(settings, $elem, $input);
             acg.init();
             acg.run();
+            if (settings.preSelected.length) {
+                acg.fillSelection(settings.preSelected);
+            }
             $elem.data('autocompleteUser', acg);
         });
     }
@@ -75,6 +79,18 @@
                 close: function () {},
                 minLength: $this.settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
+        },
+
+        fillSelection: function(items) {
+            var $this = this;
+            for (var i=0; i < items.length; i++) {
+                var fieldName = $this.settings.fieldName;
+                if ('fieldName' in items[i]) {
+                    fieldName = items[i].fieldName;
+                }
+                $($this.settings.outputSelector, $this.elem)
+                    .append(buildSelectedBlock(items[i], fieldName, ''));
+            }
         },
 
         mainSource: function() {
