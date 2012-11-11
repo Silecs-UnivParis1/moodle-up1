@@ -186,25 +186,8 @@ function wizard_navigation ($stepin) {
 	$SESSION->wizard['navigation']['retour'] = $stepin - 1;
 }
 
-function wizard_role_teacher($token) {
-	global $DB;
-	$ptoken = '%' . $token . '%';
-	$sql = "SELECT * FROM {role} WHERE "
-        . "shortname LIKE ?" ;
-    $records = $DB->get_records_sql($sql, array($ptoken));
-    $rolet = array();
-    foreach ($records as $record) {
-        $rolet[] = array(
-            'shortname' => $record->shortname,
-            'name' => $record->name,
-            'id' => $record->id
-        );
-    }
-    return $rolet;
-}
-
 /**
- * renvoie les rôles permis pour une inscription de groupe
+ * renvoie les rôles permis pour une inscription
  * @param $labels array
  * @return array object role
  */
@@ -288,7 +271,7 @@ function wizard_get_enrolement_users()
 	$list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
-	$roles = wizard_role_teacher('teacher');;
+	$roles = wizard_role($labels);;
 
     if (!isset($SESSION->wizard['form_step4']['user'])) {
         return false;
