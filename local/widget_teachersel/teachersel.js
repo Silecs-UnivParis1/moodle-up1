@@ -23,6 +23,7 @@
             wsParams: { maxRows : 10 }, // default parameters for the web service
             inputSelector: 'input.user-selector', // class of the input field where completion takes place
             outputSelector: '.users-selected',
+            fieldName: 'user', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
     };
 
     $.fn.autocompleteUser = function (options) {
@@ -64,16 +65,9 @@
             $this.input.autocomplete({
                 source: $this.mainSource($this.settings),
                 select: function (event, ui) {
-
-                    if($('#roleteacher').size()) {
-					    var inputName = $('#roleteacher').val();
-				    } else {
-					    var inputName = $(this).attr('data-inputname');
-				    }
-
                     if (ui.item.source == 'users') {
                         $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, inputName, $this.settings.labelDetails));
+                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelDetails));
                     }
                     return false;
                 },

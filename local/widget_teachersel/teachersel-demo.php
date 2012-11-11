@@ -46,8 +46,10 @@ jQuery(document).ready(function () {
     });
 
     $('#roleteacher').on('change', function() {
-        var sel = $('#roleteacher > option:selected').text();
-        $('#user-select').data('autocompleteUser').settings.labelDetails = sel;
+        var sel = $(this).val();
+        var sellabel = $('#roleteacher > option:selected').text();
+        $('#user-select').data('autocompleteUser').settings.fieldName = 'user[' + sel + ']';
+        $('#user-select').data('autocompleteUser').settings.labelDetails = sellabel;
     });
     $('#roleteacher').change();
 });
