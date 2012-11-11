@@ -208,7 +208,7 @@ function wizard_role_teacher($token) {
  * @param $labels array
  * @return array object role
  */
-function wizard_role_group($labels) {
+function wizard_role($labels) {
 	global $DB;
 	$roles = array();
     foreach ($labels as $key => $label) {
@@ -256,7 +256,7 @@ function wizard_get_enrolement_cohorts()
 	$list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
-	$roles = wizard_role_group($labels);
+	$roles = wizard_role($labels);
     if (!isset($SESSION->wizard['form_step5']['group'])) {
         return false;
     }

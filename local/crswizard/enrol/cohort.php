@@ -39,7 +39,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
         <?php
         $myconfig = new my_elements_config();
         $labels = $myconfig->role_cohort;
-        $roles = wizard_role_group($labels);
+        $roles = wizard_role($labels);
         foreach ($roles as $r) {
 			$label = $r['name'];
 			if (array_key_exists($r['shortname'], $labels)) {
