@@ -68,6 +68,14 @@ jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
         urlUsers: '../../mwsteachers/service-search.php',
     });
+
+    $('#roleteacher').on('change', function() {
+        var sel = $(this).val();
+        var sellabel = $('#roleteacher > option:selected').text();
+        $('#user-select').data('autocompleteUser').settings.fieldName = 'user[' + sel + ']';
+        $('#user-select').data('autocompleteUser').settings.labelDetails = sellabel;
+    });
+    $('#roleteacher').change();
 });
 //]]>
 </script>

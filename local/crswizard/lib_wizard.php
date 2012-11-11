@@ -224,18 +224,25 @@ function wizard_role_group($labels) {
     return $roles;
 }
 
-function myenrol_teacher($courseid, $tabTeachers, $roleid) {
+/**
+ * Enscrit des utilisateurs à un cours sous le rôle sélectionné
+ * @param int $courseid identifiant du cours
+ * @param array $tabUsers array[rolename]=>array(iduser)
+ */
+function myenrol_teacher($courseid, $tabUsers) {
 	global $DB, $CFG;
 	require_once("$CFG->dirroot/lib/enrollib.php");
     if ($courseid == SITEID) {
         throw new coding_exception('Invalid request to add enrol instance to frontpage.');
     }
-
-	foreach ($tabTeachers as $user) {
-		$userid = $DB->get_field('user', 'id', array('username' => $user));
-		if ($userid) {
-			enrol_try_internal_enrol($courseid, $userid, $roleid);
-		}
+    foreach ($tabUsers as $role => $users) {
+        $roleid = $DB->get_field('role', 'id', array('shortname' => $role));
+        foreach ($users as $user) {
+            $userid = $DB->get_field('user', 'id', array('username' => $user));
+            if ($userid) {
+                enrol_try_internal_enrol($courseid, $userid, $roleid);
+            }
+        }
 	}
 }
 
@@ -438,14 +445,11 @@ class core_wizard {
         //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
 
 		// inscrire des enseignants
-		$form4 = $SESSION->wizard['form_step4'];
-		$roles = wizard_role_teacher('teacher');
-		foreach ($roles as $r) {
-			$code = $r['shortname'];
-			if (array_key_exists($code, $form4)) {
-				myenrol_teacher($course->id, $form4[$code], $r['id']);
-			}
-		}
+		if (isset($SESSION->wizard['form_step4']['user']) && count($SESSION->wizard['form_step4']['user'])) {
+            $tabUser = $SESSION->wizard['form_step4']['user'];
+            myenrol_teacher($course->id, $tabUser);
+        }
+
 		// inscrire des cohortes
 		if (isset($SESSION->wizard['form_step5']['group']) && count($SESSION->wizard['form_step5']['group'])) {
 			$tabGroup = $SESSION->wizard['form_step5']['group'];
