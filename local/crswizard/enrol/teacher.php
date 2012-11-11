@@ -67,6 +67,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
         urlUsers: '../../mwsteachers/service-search.php',
+        preSelected: [<?php echo wizard_preselected_users(); ?>]
     });
 
     $('#roleteacher').on('change', function() {

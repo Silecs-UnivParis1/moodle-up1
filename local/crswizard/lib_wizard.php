@@ -278,6 +278,37 @@ function wizard_get_enrolement_cohorts()
 	$SESSION->wizard['form_step5']['all-cohorts'] = $list;
 }
 
+/**
+ * Construit le tableau des enseignants sélectionnés et les sauvegrade dans la
+ * variable de session $SESSION->wizard['form_step4']['all-users']
+ */
+function wizard_get_enrolement_users()
+{
+    global $DB, $SESSION;
+	$list = array();
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_teachers;
+	$roles = wizard_role_teacher('teacher');;
+
+    if (!isset($SESSION->wizard['form_step4']['user'])) {
+        return false;
+    }
+	$form4u = $SESSION->wizard['form_step4']['user'];
+
+	foreach ($roles as $r) {
+		$code = $r['shortname'];
+		if (array_key_exists($code, $form4u)) {
+			foreach ($form4u[$code] as $u) {
+				$user = $DB->get_record('user', array('username' => $u));
+				if ($user) {
+					$list[$code][$user->username] = $user;
+				}
+			}
+		}
+	}
+	$SESSION->wizard['form_step4']['all-users'] = $list;
+}
+
 /*
  * construit la liste des groupes sélectionnés encodé en json
  * @return string
@@ -310,6 +341,35 @@ function wizard_preselected_cohort()
                 $liste .= '{"label":"<b>' . $group->name . '</b>'
                     . $desc .  $labelrole . '", "value": "'
                     . $id . '", "fieldName" : "group[' . $role . ']"},';
+            }
+        }
+    }
+    return $liste;
+}
+
+/*
+ * construit la liste des enseignants sélectionnés encodé en json
+ * @return string
+ */
+function wizard_preselected_users()
+{
+    global $SESSION;
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_teachers;
+    $liste = '';
+    if (isset($SESSION->wizard['form_step4']['all-users'])) {
+        foreach ($SESSION->wizard['form_step4']['all-users'] as $role => $users) {
+            $labelrole = '';
+            if (array_key_exists($role, $labels)) {
+				$label = $labels[$role];
+                $labelrole = get_string($role, 'local_crswizard');
+			}
+
+            foreach ($users as $id => $user) {
+                $desc = $user->firstname . ' ' . $user->lastname;
+                $desc .= ' (' . $labelrole . ')';
+                $liste .= '{"label":"' . $desc . '", "value": "'
+                    . $id . '", "fieldName" : "user[' . $role . ']"},';
             }
         }
     }
