@@ -307,7 +307,7 @@ function wizard_preselected_cohort()
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
 				$label = $labels[$role];
-                $labelrole = get_string($role, 'local_crswizard');
+                $labelrole = get_string($label, 'local_crswizard');
 			}
 
             foreach ($groups as $id => $group) {
@@ -345,7 +345,7 @@ function wizard_preselected_users()
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
 				$label = $labels[$role];
-                $labelrole = get_string($role, 'local_crswizard');
+                $labelrole = get_string($label, 'local_crswizard');
 			}
 
             foreach ($users as $id => $user) {
