@@ -79,15 +79,16 @@ if (empty($courses)) {
     <form id="movecourses" action="batch.php" method="post">
         <div class="generalbox boxaligncenter">
             <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>" />
-            <table border="0" cellspacing="2" cellpadding="4">
+            <table border="0" cellspacing="2" cellpadding="4" class="course-selection">
                 <tr>
+                    <th><input type="checkbox" name="course-selectall" id="course-selectall" value="0" onclick="toggleCourseSelection()" /></th>
                     <th class="header" scope="col"><?php echo get_string('courses'); ?></th>
                 </tr>
                 <?php
                 foreach ($courses as $course) {
                     echo '<tr>';
                     echo '<td align="center">';
-                    echo '<input type="checkbox" name="c[]" value="' . $course->id . '" />';
+                    echo '<input type="checkbox" name="c[]" value="' . $course->id . '" class="course-select" />';
                     echo '</td>';
                     $linkcss = $course->visible ? '' : ' class="dimmed" ';
                     $coursename = get_course_display_name_for_list($course);
@@ -113,6 +114,24 @@ if (empty($courses)) {
             </fieldset>
         </div>
     </form>
+    <script type="text/javascript">
+//<![CDATA[
+function toggleCourseSelection() {
+    var current = document.getElementById('course-selectall');
+    var checkboxes = document.getElementsByClassName('course-select');
+    for (var i=0; i<checkboxes.length; i++) {
+        if (checkboxes[i].type == 'checkbox') {
+            checkboxes[i].checked = (current.value == '0');
+        }
+    }
+    if (current.value == '0') {
+        current.value = '1';
+    } else {
+        current.value = '0';
+    }
+}
+//]]>
+    </script>
 <?php
 }
 
