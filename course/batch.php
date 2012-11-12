@@ -81,7 +81,7 @@ if (empty($courses)) {
             <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>" />
             <table border="0" cellspacing="2" cellpadding="4" class="course-selection">
                 <tr>
-                    <th><input type="checkbox" name="course-selectall" id="course-selectall" value="0" onclick="toggleCourseSelection()" /></th>
+                    <th><input type="checkbox" name="course-selectall" id="course-selectall" value="0" /></th>
                     <th class="header" scope="col"><?php echo get_string('courses'); ?></th>
                 </tr>
                 <?php
@@ -116,6 +116,31 @@ if (empty($courses)) {
     </form>
     <script type="text/javascript">
 //<![CDATA[
+var mvForm = document.getElementById('movecourses');
+try {
+    mvForm.addEventListener("submit", confirmCourseRenaming, false);
+    document.getElementById('course-selectall').addEventListener("click", toggleCourseSelection);
+} catch(e) {
+    mvForm.attachEvent("onsubmit", confirmCourseRenaming); // IE
+    document.getElementById('course-selectall').attachEvent("onclick", toggleCourseSelection);
+}
+function confirmCourseRenaming(event) {
+    var coursesCount = 0;
+    var checkboxes = document.getElementsByClassName('course-select');
+    for (var i=0; i<checkboxes.length; i++) {
+        if (checkboxes[i].type == 'checkbox' && checkboxes[i].checked) {
+            coursesCount++;
+        }
+    }
+    if (!confirm(coursesCount + " cours seront impactés.\nÊtes-vous certain de vouloir agir sur ces cours ?")) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false
+        }
+        return false;
+    }
+}
 function toggleCourseSelection() {
     var current = document.getElementById('course-selectall');
     var checkboxes = document.getElementsByClassName('course-select');
