@@ -33,11 +33,21 @@ echo $OUTPUT->box(get_string('bockhelpE4s', 'local_crswizard'), '');
 
 echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
 ?>
-<div>
-	<select name="role" size="1" id="group-role">
-        <option value="role1">A</option>
-        <option value="role2">B</option>
-        <option value="role3">C</option>
+<div class="role">
+    <h3><?php echo get_string('role', 'local_crswizard');?></h3>
+    <select name="role" size="1" id="group-role">
+        <?php
+        $myconfig = new my_elements_config();
+        $labels = $myconfig->role_cohort;
+        $roles = wizard_role($labels);
+        foreach ($roles as $r) {
+			$label = $r['name'];
+			if (array_key_exists($r['shortname'], $labels)) {
+				$label = $labels[$r['shortname']];
+			}
+			echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
+		}
+    ?>
 	</select>
 </div>
 
@@ -59,12 +69,15 @@ jQuery(document).ready(function () {
         urlGroups: '<?php echo new moodle_url('/local/mwsgroups/service-search.php'); ?>',
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
-        wsParams: { maxRows: 10 }
+        wsParams: { maxRows: 10 },
+        preSelected: [<?php echo wizard_preselected_cohort(); ?>]
     });
 
     $('#group-role').on('change', function() {
         var sel = $(this).val();
+        var label = $('#group-role > option:selected').text();
         $('#group-select').data('autocompleteGroup').settings.fieldName = 'group[' + sel + ']';
+        $('#group-select').data('autocompleteGroup').settings.labelDetails = label;
     });
     $('#group-role').change();
 });

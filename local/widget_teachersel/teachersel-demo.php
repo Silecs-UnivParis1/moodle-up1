@@ -44,6 +44,14 @@ jQuery(document).ready(function () {
         urlUsers: '../mwsteachers/service-search.php',
         minLength: 4,
     });
+
+    $('#roleteacher').on('change', function() {
+        var sel = $(this).val();
+        var sellabel = $('#roleteacher > option:selected').text();
+        $('#user-select').data('autocompleteUser').settings.fieldName = 'user[' + sel + ']';
+        $('#user-select').data('autocompleteUser').settings.labelDetails = sellabel;
+    });
+    $('#roleteacher').change();
 });
 //]]>
 </script>

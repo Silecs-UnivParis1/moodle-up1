@@ -78,6 +78,9 @@ if (isset($stepgo)) {
                 $editform = new course_wizard_step2_form(NULL);
                 $steptitle = get_string('coursedefinition', 'local_crswizard');
             } else {
+                if (isset($SESSION->wizard['form_step4'])) {
+                    wizard_get_enrolement_users();
+                }
                 $steptitle = get_string('coursedescription', 'local_crswizard');
                 $editform = new course_wizard_step3_form();
                 if (isset($SESSION->wizard['form_step3'])) {
@@ -89,12 +92,18 @@ if (isset($stepgo)) {
 			$steptitle = get_string('enrolteachers', 'local_crswizard');
 			$url = '/local/crswizard/enrol/teacher.php';
 			wizard_navigation(4);
+            if (isset($SESSION->wizard['form_step5'])) {
+                wizard_get_enrolement_cohorts();
+            }
 			redirect(new moodle_url($url));
             break;
         case 5:
 			$steptitle = get_string('enrolcohorts', 'local_crswizard');
-			wizard_navigation(5);
             $url = '/local/crswizard/enrol/cohort.php';
+			wizard_navigation(5);
+            if (isset($SESSION->wizard['form_step4'])) {
+                wizard_get_enrolement_users();
+            }
             redirect(new moodle_url($url));
             break;
         case 6:
@@ -105,6 +114,9 @@ if (isset($stepgo)) {
         case 7:
 			$steptitle = get_string('confirmationtitle', 'local_crswizard');
             wizard_navigation(7);
+            if (isset($SESSION->wizard['form_step5'])) {
+                wizard_get_enrolement_cohorts();
+            }
             $editform = new course_wizard_step_confirm();
             break;
         case 8:

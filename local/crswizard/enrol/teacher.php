@@ -39,7 +39,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 	<?php
 		$myconfig = new my_elements_config();
 		$labels = $myconfig->role_teachers;
-		$roles = wizard_role_teacher('teacher');
+		$roles = wizard_role($labels);
 		foreach ($roles as $r) {
 			$label = $r['name'];
 			if (array_key_exists($r['shortname'], $labels)) {
@@ -67,7 +67,16 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
         urlUsers: '../../mwsteachers/service-search.php',
+        preSelected: [<?php echo wizard_preselected_users(); ?>]
     });
+
+    $('#roleteacher').on('change', function() {
+        var sel = $(this).val();
+        var sellabel = $('#roleteacher > option:selected').text();
+        $('#user-select').data('autocompleteUser').settings.fieldName = 'user[' + sel + ']';
+        $('#user-select').data('autocompleteUser').settings.labelDetails = sellabel;
+    });
+    $('#roleteacher').change();
 });
 //]]>
 </script>
