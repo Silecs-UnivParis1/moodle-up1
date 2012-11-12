@@ -133,8 +133,12 @@
 			alert(item.label+' fait déjà partie de la sélection.');
 		} else {
             selected[item.value] = 1;
+            var labeldetails = '';
+            if (details) {
+                labeldetails = ' (' + details + ') ';
+            }
 			return $('<div class="teacher-item-block"></div>')
-				.html('<div class="teacher-item-selected">' + item.label + ' (' + details + ') </div>')
+				.html('<div class="teacher-item-selected">' + item.label + labeldetails + '</div>')
 				.prepend('<div class="selected-remove">&#10799;</div>')
 				.append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
         }
