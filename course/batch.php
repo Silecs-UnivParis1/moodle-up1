@@ -75,33 +75,45 @@ if (empty($courses)) {
         echo $OUTPUT->heading(get_string("nocoursesyet"));
     }
 } else {
-    echo '<form id="movecourses" action="batch.php" method="post"><div class="generalbox boxaligncenter">';
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
-    echo '<table border="0" cellspacing="2" cellpadding="4"><tr>';
-    echo '<th class="header" scope="col">'.get_string('courses').'</th>';
-    echo '</tr>';
-    foreach ($courses as $course) {
-        echo '<tr>';
-        echo '<td align="center">';
-        echo '<input type="checkbox" name="c[]" value="' . $course->id . '" />';
-        echo '</td>';
-        $linkcss = $course->visible ? '' : ' class="dimmed" ';
-        $coursename = get_course_display_name_for_list($course);
-        echo '<td><a '.$linkcss.' href="view.php?id='.$course->id.'">'. format_string($coursename) .'</a></td>';
-        echo "</tr>";
-    }
-    echo '</table>';
-
-    echo "<fieldset><legend>" . get_string('actions') . "</legend>";
-    echo "<ul>";
-    echo '<li><input type="text" name="batchprefix" /> '
-        , '<button name="action" value="prefix">' , get_string('prefix', 'admin') , '</button></li>';
-    echo '<li><input type="text" name="batchsuffix" /> '
-        , '<button name="action" value="suffix">' , get_string('suffix', 'admin') , '</button></li>';
-    echo '<li><button name="action" value="close">' , get_string('close', 'admin') , '</button></li>';
-    echo "</ul>";
-    echo "</fieldset>";
-    echo '</div></form>';
+?>
+    <form id="movecourses" action="batch.php" method="post">
+        <div class="generalbox boxaligncenter">
+            <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>" />
+            <table border="0" cellspacing="2" cellpadding="4">
+                <tr>
+                    <th class="header" scope="col"><?php echo get_string('courses'); ?></th>
+                </tr>
+                <?php
+                foreach ($courses as $course) {
+                    echo '<tr>';
+                    echo '<td align="center">';
+                    echo '<input type="checkbox" name="c[]" value="' . $course->id . '" />';
+                    echo '</td>';
+                    $linkcss = $course->visible ? '' : ' class="dimmed" ';
+                    $coursename = get_course_display_name_for_list($course);
+                    echo '<td><a '.$linkcss.' href="view.php?id='.$course->id.'">'. format_string($coursename) .'</a></td>';
+                    echo "</tr>";
+                }
+                ?>
+            </table>
+            <fieldset><legend><?php echo get_string('actions'); ?></legend>
+                <ul>
+                    <li>
+                        <input type="text" name="batchprefix" />
+                        <button name="action" value="prefix"><?php echo get_string('prefix', 'admin'); ?></button>
+                    </li>
+                    <li>
+                        <input type="text" name="batchsuffix" />
+                        <button name="action" value="suffix"><?php echo get_string('suffix', 'admin'); ?></button>
+                    </li>
+                    <li>
+                        <button name="action" value="close"><?php echo get_string('close', 'admin'); ?></button>
+                    </li>
+                </ul>
+            </fieldset>
+        </div>
+    </form>
+<?php
 }
 
 $form->display();
