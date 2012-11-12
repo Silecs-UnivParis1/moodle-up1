@@ -66,6 +66,12 @@ if (isset($stepgo)) {
             $editoroptions = array(
                 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
             );
+
+            $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.json.js'), true);
+            $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+
             $course = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
             $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
             break;
@@ -151,6 +157,10 @@ $PAGE->set_heading($fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
+
+if (isset($stepgo) && $stepgo==2) {
+    echo call_jquery_select_into_subselects();
+}
 
 if (isset($messageInterface)) {
     echo $OUTPUT->box_start();

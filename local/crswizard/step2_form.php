@@ -28,8 +28,8 @@ class course_wizard_step2_form extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('category'), $displaylist);
-        //$mform->addHelpButton('category', 'category');
+        $mform->addElement('select', 'category', '', wizard_get_mydisplaylist($displaylist),
+            array('class' => 'transformIntoSubselects cache'));
         if (isset($SESSION->wizard['form_step2']['category'])) {
 			 $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
 		}

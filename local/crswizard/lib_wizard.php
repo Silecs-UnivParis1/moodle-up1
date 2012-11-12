@@ -441,6 +441,46 @@ function myenrol_clef($idcourse, $tabClefs){
 
 }
 
+/**
+ * Reconstruit lle tableau $displaylist pour le plugin jquery select-into-subselects.js
+ * @param array $displaylist généré par make_categories_list
+ * @retun array() $mydisplaylist
+ **/
+function wizard_get_mydisplaylist($displaylist)
+{
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->categorie_deph;
+    $mydisplaylist = array(0 => implode(' / ', $labels));
+
+    foreach ($displaylist as $id => $label) {
+        $tab = explode('/', $label);
+        $nb = count($tab);
+        for ($i = $nb; $i < 4; ++$i) {
+            $j = $i +1;
+            if ($i == $nb) {
+                $tab[$j] = ' ... ';
+            } else {
+                $tab[$j] = $labels[$j];
+            }
+        }
+        $mydisplaylist[$id] = implode('/', $tab);
+    }
+    return $mydisplaylist;
+}
+
+
+function call_jquery_select_into_subselects()
+{
+    $script = "\n" . '<script type="text/javascript">' . "\n"
+        . '//<![CDATA[' . "\n";
+     $script .= '$(document).ready(function() {'
+        . 'var separator = / *\/ */;'
+        . "$('select.transformIntoSubselects').transformIntoSubselects(separator);"
+        . '});' . "\n";
+    $script .= '//]]>'."\n".'</script>';
+    return $script;
+}
+
 class core_wizard {
 
 	function create_course_to_validate () {
@@ -518,4 +558,7 @@ class my_elements_config {
 	);
 
     public $role_cohort = array('student' => 'student', 'guest' => 'guest');
+
+    public $categorie_deph = array('1' => 'Période', '2' => 'Etablissement',
+        '3' => 'Composante', '4' => 'Niveau');
 }
