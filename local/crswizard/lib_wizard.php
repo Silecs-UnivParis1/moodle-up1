@@ -450,7 +450,9 @@ function wizard_get_mydisplaylist($displaylist)
 {
     $myconfig = new my_elements_config();
     $labels = $myconfig->categorie_deph;
-    $mydisplaylist = array(0 => implode(' / ', $labels));
+    $label0 = implode(' * / ', $labels);
+    $label0 .= ' * ';
+    $mydisplaylist = array(0 => $label0);
 
     foreach ($displaylist as $id => $label) {
         $tab = explode('/', $label);
@@ -460,7 +462,7 @@ function wizard_get_mydisplaylist($displaylist)
             if ($i == $nb) {
                 $tab[$j] = ' ... ';
             } else {
-                $tab[$j] = $labels[$j];
+                $tab[$j] = $labels[$j] . ' * ';
             }
         }
         $mydisplaylist[$id] = implode('/', $tab);
