@@ -20,6 +20,8 @@ class course_wizard_step2_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $courseconfig = get_config('moodlecourse');
 
+        $bockhelpE2 = get_string('bockhelpE2', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $bockhelpE2, array('class' => 'fitem')));
 
 /// form definition with new course defaults
 //--------------------------------------------------------------------------------

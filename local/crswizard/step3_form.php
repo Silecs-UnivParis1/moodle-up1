@@ -23,6 +23,9 @@ class course_wizard_step3_form extends moodleform {
         $tabfreeze = array();
         $mform    = $this->_form;
 
+        $bockhelpE3 = get_string('bockhelpE3', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $bockhelpE3, array('class' => 'fitem')));
+
         $mform->addElement('header','general', get_string('categoryblockE3', 'local_crswizard'));
 
 		$myconfig = new my_elements_config();
