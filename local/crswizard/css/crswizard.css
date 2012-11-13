@@ -1,3 +1,9 @@
 .cache {
 	display: none;
 }
+
+div.subselects > select{
+     display: block;
+     padding-bottom: 2px;
+     margin-bottom: 4px;
+}
