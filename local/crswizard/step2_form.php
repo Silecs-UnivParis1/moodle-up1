@@ -27,14 +27,14 @@ class course_wizard_step2_form extends moodleform {
 //--------------------------------------------------------------------------------
         $mform->addElement('header','categorie', get_string('categoryblock', 'local_crswizard'));
 
-        $displaylist = array();
-        $parentlist = array();
-        make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', '', wizard_get_mydisplaylist($displaylist),
+        $mform->addElement('select', 'category', '', wizard_get_mydisplaylist(),
             array('class' => 'transformIntoSubselects cache'));
         if (isset($SESSION->wizard['form_step2']['category'])) {
 			 $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
 		}
+        if (isset($SESSION->wizard['form_step2']['erreurs']['category'])) {
+            $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['category'], array('class' => 'required')));
+ 	    }
 
         $mform->addElement('header','general', get_string('generalinfoblock', 'local_crswizard'));
 
@@ -53,7 +53,7 @@ class course_wizard_step2_form extends moodleform {
         if (isset($SESSION->wizard['form_step2']['shortname'])) {
             $mform->setConstant('shortname', $SESSION->wizard['form_step2']['shortname']);
  	    }
-        if (isset($SESSION->wizard['form_step2']['erreurs'])) {
+        if (isset($SESSION->wizard['form_step2']['erreurs']['shortname'])) {
             $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['shortname'], array('class' => 'required')));
  	    }
 

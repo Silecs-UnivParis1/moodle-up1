@@ -58,6 +58,21 @@ function validation_shortname($shortname) {
     return $errors;
 }
 
+function validation_categorie($idcategory) {
+     global $DB;
+
+    $errors = array();
+    $category = $DB->get_record('course_categories', array('id' => $idcategory));
+    if ($category) {
+        if ($category->depth < 4 ) {
+           $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
+        }
+    } else {
+        $errors['category'] = get_string('categoryerrormsg2', 'local_crswizard');
+    }
+    return $errors;
+}
+
 function get_list_category($idcategory) {
 	global $DB;
 	$categories = array();
@@ -442,12 +457,15 @@ function myenrol_clef($idcourse, $tabClefs){
 }
 
 /**
- * Reconstruit lle tableau $displaylist pour le plugin jquery select-into-subselects.js
- * @param array $displaylist généré par make_categories_list
+ * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
  * @retun array() $mydisplaylist
  **/
+ /**
 function wizard_get_mydisplaylist($displaylist)
 {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
     $myconfig = new my_elements_config();
     $labels = $myconfig->categorie_deph;
     $label0 = implode(' * / ', $labels);
@@ -469,7 +487,30 @@ function wizard_get_mydisplaylist($displaylist)
     }
     return $mydisplaylist;
 }
+**/
 
+/**
+ * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
+ * @retun array() $mydisplaylist
+ **/
+function wizard_get_mydisplaylist()
+{
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->categorie_deph;
+    $label0 = implode(' * / ', $labels);
+    $label0 .= ' * ';
+    $mydisplaylist = array(0 => $label0);
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id])==3) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
 
 function call_jquery_select_into_subselects()
 {

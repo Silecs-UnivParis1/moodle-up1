@@ -77,8 +77,16 @@ if (isset($stepgo)) {
             break;
         case 3:
             $data = $SESSION->wizard['form_step2'];
-            $errors = validation_shortname($data['shortname']);
+            $errors_name = validation_shortname($data['shortname']);
+            $errors_cat = validation_categorie($data['category']);
+            $errors = array_merge($errors_name, $errors_cat);
             if (count($errors)) {
+                $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+                $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+                $PAGE->requires->js(new moodle_url('/local/jquery/jquery.json.js'), true);
+                $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+                $stepgo = 2;
+
                 $data['erreurs'] = $errors;
                 $SESSION->wizard['form_step2'] = $data;
                 $editform = new course_wizard_step2_form(NULL);
