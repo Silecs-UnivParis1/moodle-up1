@@ -28,6 +28,7 @@ $string['coursedefinition'] = 'Étape 2 - Identification de l\'espace de cours';
 $string['coursedescription'] = 'Étape 3 - Description de l\'espace de cours';
 $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
+$string['coursesettingshelp'] = 'Texte d’aide et de conseil. Suite du texte d’aide et de conseil. Suite du texte d’aide et de conseil.';
 $string['coursestartdate'] = 'Date d\'ouverture aux étudiants : ';
 $string['coursesummary'] = 'Texte de présentation : ';
 $string['editingteacher'] = 'Enseignant';

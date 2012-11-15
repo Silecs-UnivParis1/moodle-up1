@@ -66,13 +66,16 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('header','parametre', get_string('coursesettingsblock', 'local_crswizard'));
 
+        $coursesettingshelp = get_string('coursesettingshelp', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $coursesettingshelp, array('class' => 'fitem')));
+
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
        // $mform->addHelpButton('startdate', 'startdate');
         if (isset($SESSION->wizard['form_step2']['startdate'])) {
 			$date = $SESSION->wizard['form_step2']['startdate'];
 			$mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
 		} else {
-            $mform->setDefault('startdate', time() + 3600 * 24);
+            $mform->setDefault('startdate');
         }
 
         /**

@@ -29,6 +29,7 @@ $string['coursedefinition'] = 'Step 2 - Course definition';
 $string['coursedescription'] = 'Step 3 - Course description';
 $string['courserequestdate'] = 'Course request date';
 $string['coursesettingsblock'] = 'Course settings';
+$string['coursesettingshelp'] = 'Texte d’aide et de conseil. Suite du texte d’aide et de conseil. Suite du texte d’aide et de conseil.';
 $string['coursestartdate'] = 'Start Date : ';
 $string['coursesummary'] = 'Summary : ';
 $string['editingteacher'] = 'Editing teacher';
