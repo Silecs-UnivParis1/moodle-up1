@@ -593,7 +593,7 @@ class core_wizard {
 
 class my_elements_config {
 	public $categorie_cours = array('Période', 'Etablissement',
-		'Compposante','Niveau'
+		'Composante','Niveau'
 	);
 
 	public $role_teachers = array('editingteacher' => 'editingteacher',
