@@ -69,7 +69,6 @@ if (isset($stepgo)) {
 
             $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.json.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
 
             $course = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
@@ -83,7 +82,6 @@ if (isset($stepgo)) {
             if (count($errors)) {
                 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
                 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
-                $PAGE->requires->js(new moodle_url('/local/jquery/jquery.json.js'), true);
                 $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
                 $stepgo = 2;
 

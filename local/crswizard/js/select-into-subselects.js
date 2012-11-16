@@ -27,7 +27,7 @@ var getTree = function (options, separator) {
 
 	    current[lastElem] = val;
     });
-    if (console && console.log) console.log($.toJSON(root));
+    //if (console && console.log) console.log($.toJSON(root)); // jquery-json plugin
     return root;
 };
 
