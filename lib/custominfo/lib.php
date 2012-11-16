@@ -277,16 +277,21 @@ abstract class custominfo_field_base {
     /**
      * Accessor method: Load the field record and the data associated with the object's fieldid and objectid
      */
-    public function load_data() {
+    public function load_data($field=null) {
         global $DB;
 
         /// Load the field object
-        if ($this->fieldid == 0 or !($field = $DB->get_record('custom_info_field', array('id' => $this->fieldid)))) {
-            $this->field = NULL;
-            $this->inputname = '';
-        } else {
+        if ($field) {
+            $this->set_fieldid($field->id);
+        } else if ($this->fieldid != 0) {
+            $field = $DB->get_record('custom_info_field', array('id' => $this->fieldid));
+        }
+        if ($field) {
             $this->field = $field;
             $this->inputname = 'profile_field_'.$field->shortname;
+        } else {
+            $this->field = NULL;
+            $this->inputname = '';
         }
 
         if (!empty($this->field)) {
@@ -368,6 +373,25 @@ function custominfo_field_factory($objectname, $fieldtype, $fieldid=0, $objectid
     require_once($CFG->libdir.'/custominfo/field/'.$fieldtype.'/field.class.php');
     $newfield = 'profile_field_'.$fieldtype;
     if (empty($fieldid)) {
+        return (new $newfield($objectname));
+    } else {
+        return (new $newfield($objectname, $fieldid, $objectid));
+    }
+}
+
+/**
+ * Create a new instance of a child class of custominfo_field_base.
+ *
+ * @param string $objectname The model has uses custominfo (user, course)
+ * @param object $field  The custominfo field
+ * @param integer $objectid  (opt) The objectid to fill the field from
+ * @return custominfo_field_base
+ */
+function custominfo_field_from_record($objectname, $field, $objectid=0) {
+    global $CFG;
+    require_once($CFG->libdir.'/custominfo/field/'.$field->type.'/field.class.php');
+    $newfield = 'profile_field_'.$field->type;
+    if (empty($field->id)) {
         return (new $newfield($objectname));
     } else {
         return (new $newfield($objectname, $fieldid, $objectid));

@@ -40,10 +40,17 @@ class course_batch_search_form extends moodleform {
                     // display the header and the fields
                     $mform->addElement('header', 'category_'.$category->id, format_string($category->name));
                     foreach ($fields as $field) {
-                        if ($field->datatype != 'menu' && $field->datatype != 'checkbox') {
+                        // do not display the normal field when a search criteria is expected
+                        if (in_array($field->datatype, array('datetime', 'textarea'))) {
+                            $field->param1 = '';
+                            $field->param2 = '';
+                            $field->param3 = '';
                             $field->datatype = 'text';
                         }
+                        //var_dump($field); die();
+                        // add the custom field
                         $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
+                        $formfield->load_data($field);
                         $formfield->options[''] = '';
                         $formfield->edit_field($mform);
                         $mform->setDefault($formfield->inputname, '');
