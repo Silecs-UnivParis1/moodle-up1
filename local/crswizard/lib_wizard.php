@@ -524,6 +524,18 @@ function call_jquery_select_into_subselects()
     return $script;
 }
 
+/**
+ * Renvoie le nom du Course custom fields de nom abrégé $shortname
+ * @param string $shortname nom abrégé du champ
+ * @return string $name nom du champ
+ */
+function get_custom_info_field_label($shortname)
+{
+    global $DB;
+    $name = $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
+    return $name;
+}
+
 class core_wizard {
 
 	function create_course_to_validate () {
@@ -573,12 +585,17 @@ class core_wizard {
 		$date = $SESSION->wizard['form_step2']['startdate'];
 		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
+        $date2 = $SESSION->wizard['form_step2']['up1datefermeture'];
+        $enddate = mktime(0, 0, 0, $date2['month'], $date2['day'], $date2['year']);
+
 		$datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
 		$mydata = (object) $datamerge;
 		$mydata->startdate = $startdate;
 		// cours doit être validé
 		$mydata->profile_field_up1avalider = 1;
 		$mydata->profile_field_up1datevalid = 0;
+
+        $mydata->profile_field_up1datefermeture = $enddate;
 
 		return $mydata;
 	}

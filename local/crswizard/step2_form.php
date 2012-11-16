@@ -78,6 +78,16 @@ class course_wizard_step2_form extends moodleform {
             $mform->setDefault('startdate', time());
         }
 
+        $datefermeture = 'up1datefermeture';
+        $label_up1datefermeture = get_custom_info_field_label($datefermeture);
+        $mform->addElement('date_selector', $datefermeture, $label_up1datefermeture);
+        if (isset($SESSION->wizard['form_step2'][$datefermeture])) {
+			$date = $SESSION->wizard['form_step2'][$datefermeture];
+			$mform->setDefault($datefermeture, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
+		} else {
+            $mform->setDefault($datefermeture, time());
+        }
+
         /**
          * liste des paramètres de cours ayant une valeur par défaut
          */
