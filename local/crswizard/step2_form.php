@@ -75,7 +75,7 @@ class course_wizard_step2_form extends moodleform {
 			$date = $SESSION->wizard['form_step2']['startdate'];
 			$mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
 		} else {
-            $mform->setDefault('startdate');
+            $mform->setDefault('startdate', time());
         }
 
         /**
