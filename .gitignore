@@ -28,3 +28,4 @@ CVS
 phpunit.xml
 *.log
 xmlsamples
+/theme/leatherbound_up1_devlocal/

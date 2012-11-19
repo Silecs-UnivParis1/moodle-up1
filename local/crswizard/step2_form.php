@@ -20,19 +20,21 @@ class course_wizard_step2_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $courseconfig = get_config('moodlecourse');
 
+        $bockhelpE2 = get_string('bockhelpE2', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $bockhelpE2, array('class' => 'fitem')));
 
 /// form definition with new course defaults
 //--------------------------------------------------------------------------------
         $mform->addElement('header','categorie', get_string('categoryblock', 'local_crswizard'));
 
-        $displaylist = array();
-        $parentlist = array();
-        make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('category'), $displaylist);
-        //$mform->addHelpButton('category', 'category');
+        $mform->addElement('select', 'category', '', wizard_get_mydisplaylist(),
+            array('class' => 'transformIntoSubselects cache'));
         if (isset($SESSION->wizard['form_step2']['category'])) {
 			 $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
 		}
+        if (isset($SESSION->wizard['form_step2']['erreurs']['category'])) {
+            $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['category'], array('class' => 'required')));
+ 	    }
 
         $mform->addElement('header','general', get_string('generalinfoblock', 'local_crswizard'));
 
@@ -51,7 +53,7 @@ class course_wizard_step2_form extends moodleform {
         if (isset($SESSION->wizard['form_step2']['shortname'])) {
             $mform->setConstant('shortname', $SESSION->wizard['form_step2']['shortname']);
  	    }
-        if (isset($SESSION->wizard['form_step2']['erreurs'])) {
+        if (isset($SESSION->wizard['form_step2']['erreurs']['shortname'])) {
             $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['shortname'], array('class' => 'required')));
  	    }
 
@@ -64,13 +66,26 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('header','parametre', get_string('coursesettingsblock', 'local_crswizard'));
 
+        $coursesettingshelp = get_string('coursesettingshelp', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $coursesettingshelp, array('class' => 'fitem')));
+
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
        // $mform->addHelpButton('startdate', 'startdate');
         if (isset($SESSION->wizard['form_step2']['startdate'])) {
 			$date = $SESSION->wizard['form_step2']['startdate'];
 			$mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
 		} else {
-            $mform->setDefault('startdate', time() + 3600 * 24);
+            $mform->setDefault('startdate', time());
+        }
+
+        $datefermeture = 'up1datefermeture';
+        $label_up1datefermeture = get_custom_info_field_label($datefermeture);
+        $mform->addElement('date_selector', $datefermeture, $label_up1datefermeture);
+        if (isset($SESSION->wizard['form_step2'][$datefermeture])) {
+			$date = $SESSION->wizard['form_step2'][$datefermeture];
+			$mform->setDefault($datefermeture, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
+		} else {
+            $mform->setDefault($datefermeture, time());
         }
 
         /**

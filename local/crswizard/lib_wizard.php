@@ -58,6 +58,21 @@ function validation_shortname($shortname) {
     return $errors;
 }
 
+function validation_categorie($idcategory) {
+     global $DB;
+
+    $errors = array();
+    $category = $DB->get_record('course_categories', array('id' => $idcategory));
+    if ($category) {
+        if ($category->depth < 4 ) {
+           $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
+        }
+    } else {
+        $errors['category'] = get_string('categoryerrormsg2', 'local_crswizard');
+    }
+    return $errors;
+}
+
 function get_list_category($idcategory) {
 	global $DB;
 	$categories = array();
@@ -441,6 +456,86 @@ function myenrol_clef($idcourse, $tabClefs){
 
 }
 
+/**
+ * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
+ * @retun array() $mydisplaylist
+ **/
+ /**
+function wizard_get_mydisplaylist($displaylist)
+{
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->categorie_deph;
+    $label0 = implode(' * / ', $labels);
+    $label0 .= ' * ';
+    $mydisplaylist = array(0 => $label0);
+
+    foreach ($displaylist as $id => $label) {
+        $tab = explode('/', $label);
+        $nb = count($tab);
+        for ($i = $nb; $i < 4; ++$i) {
+            $j = $i +1;
+            if ($i == $nb) {
+                $tab[$j] = ' ... ';
+            } else {
+                $tab[$j] = $labels[$j] . ' * ';
+            }
+        }
+        $mydisplaylist[$id] = implode('/', $tab);
+    }
+    return $mydisplaylist;
+}
+**/
+
+/**
+ * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
+ * @retun array() $mydisplaylist
+ **/
+function wizard_get_mydisplaylist()
+{
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->categorie_deph;
+    $label0 = implode(' * / ', $labels);
+    $label0 .= ' * ';
+    $mydisplaylist = array(0 => $label0);
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id])==3) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+function call_jquery_select_into_subselects()
+{
+    $script = "\n" . '<script type="text/javascript">' . "\n"
+        . '//<![CDATA[' . "\n";
+     $script .= '$(document).ready(function() {'
+        . 'var separator = / *\/ */;'
+        . "$('select.transformIntoSubselects').transformIntoSubselects(separator);"
+        . '});' . "\n";
+    $script .= '//]]>'."\n".'</script>';
+    return $script;
+}
+
+/**
+ * Renvoie le nom du Course custom fields de nom abrégé $shortname
+ * @param string $shortname nom abrégé du champ
+ * @return string $name nom du champ
+ */
+function get_custom_info_field_label($shortname)
+{
+    global $DB;
+    $name = $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
+    return $name;
+}
+
 class core_wizard {
 
 	function create_course_to_validate () {
@@ -490,12 +585,17 @@ class core_wizard {
 		$date = $SESSION->wizard['form_step2']['startdate'];
 		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
+        $date2 = $SESSION->wizard['form_step2']['up1datefermeture'];
+        $enddate = mktime(0, 0, 0, $date2['month'], $date2['day'], $date2['year']);
+
 		$datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
 		$mydata = (object) $datamerge;
 		$mydata->startdate = $startdate;
 		// cours doit être validé
 		$mydata->profile_field_up1avalider = 1;
 		$mydata->profile_field_up1datevalid = 0;
+
+        $mydata->profile_field_up1datefermeture = $enddate;
 
 		return $mydata;
 	}
@@ -510,7 +610,7 @@ class core_wizard {
 
 class my_elements_config {
 	public $categorie_cours = array('Période', 'Etablissement',
-		'Compposante','Niveau'
+		'Composante','Niveau'
 	);
 
 	public $role_teachers = array('editingteacher' => 'editingteacher',
@@ -518,4 +618,7 @@ class my_elements_config {
 	);
 
     public $role_cohort = array('student' => 'student', 'guest' => 'guest');
+
+    public $categorie_deph = array('1' => 'Période', '2' => 'Etablissement',
+        '3' => 'Composante', '4' => 'Niveau');
 }
