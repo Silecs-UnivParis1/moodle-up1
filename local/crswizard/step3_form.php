@@ -29,16 +29,56 @@ class course_wizard_step3_form extends moodleform {
         $mform->addElement('header','general', get_string('categoryblockE3', 'local_crswizard'));
 
 		$myconfig = new my_elements_config();
+
+        // Next the customisable fields
+        $this->custominfo = new custominfo_form_extension('course');
+
 		if (isset($SESSION->wizard['form_step2']['category'])) {
 			$idcat = (int) $SESSION->wizard['form_step2']['category'];
             $tabcategories = get_list_category($idcat);
-            foreach ($tabcategories as  $key => $nom) {
-				$type = $myconfig->categorie_cours[$key];
-				$mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
-				$mform->setConstant($type, $nom);
-				$tabfreeze[] = $type;
-			}
+            //Composante
+            $type = $myconfig->categorie_cours[2];
+            $nom = $tabcategories[2];
+            $mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
+            $mform->setConstant($type, $nom);
+            $tabfreeze[] = $type;
+
+            $field = $DB->get_record('custom_info_field', array('objectname' => 'course', 'shortname' => 'up1composante'));
+            $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
+            $formfield->edit_field($mform);
+
+            //Niveau
+            $type = $myconfig->categorie_cours[3];
+            $nom = $tabcategories[3];
+            $mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
+            $mform->setConstant($type, $nom);
+            $tabfreeze[] = $type;
+
+            $field = $DB->get_record('custom_info_field', array('objectname' => 'course', 'shortname' => 'up1niveau'));
+            $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
+            $formfield->edit_field($mform);
 		}
+
+        // champs de la catégorie "Identification"
+        $customcat = $this->custominfo->getCategories();
+        $this->custominfo->setCategoriesByNames(array('Diplome'));
+        $customDiplome = $this->custominfo->getFields();
+
+        $tabDip = array();
+        foreach ($customDiplome as $id => $objet) {
+            $tabDip[$objet->shortname] = $objet;
+        }
+        $formfield = custominfo_field_factory('course', $tabDip['up1domaine']->datatype, $tabDip['up1domaine']->id);
+        $formfield->edit_field($mform);
+
+        $formfield = custominfo_field_factory('course', $tabDip['up1mention']->datatype, $tabDip['up1mention']->id);
+        $formfield->edit_field($mform);
+
+        $formfield = custominfo_field_factory('course', $tabDip['up1parcours']->datatype, $tabDip['up1parcours']->id);
+        $formfield->edit_field($mform);
+
+        $formfield = custominfo_field_factory('course', $tabDip['up1specialite']->datatype, $tabDip['up1specialite']->id);
+        $formfield->edit_field($mform);
 
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
@@ -49,12 +89,6 @@ class course_wizard_step3_form extends moodleform {
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 3);
-
-//--------------------------------------------------------------------------------
-        // Next the customisable fields
-        $this->custominfo = new custominfo_form_extension('course');
-        $canviewall = has_capability('moodle/course:update', get_context_instance(CONTEXT_SYSTEM));
-        $this->custominfo->definition($mform, $canviewall);
 
 //--------------------------------------------------------------------------------
 
