@@ -67,6 +67,7 @@ $string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiants"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
+$string['up1datefermeture'] = 'Date de fermeture aux étudiants : ';
 $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
 $string['up1mention'] = 'Mention(s) : ';
 $string['up1parcours'] = 'Parcours(s) : ';

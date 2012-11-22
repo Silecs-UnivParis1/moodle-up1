@@ -64,6 +64,7 @@ $string['teacher'] = 'Teacher';
 $string['teachername'] = 'Teacher name';
 $string['teachers'] = 'Enseignants';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
+$string['up1datefermeture'] = 'Date de fermeture aux étudiants : ';
 $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
 $string['up1mention'] = 'Mention(s) : ';
 $string['up1parcours'] = 'Parcours(s) : ';
