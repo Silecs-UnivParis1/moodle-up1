@@ -581,7 +581,7 @@ class core_wizard {
 	}
 
 	function prepare_course_to_validate () {
-		global $SESSION;
+		global $SESSION, $USER;
 		$date = $SESSION->wizard['form_step2']['startdate'];
 		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
@@ -610,7 +610,8 @@ class core_wizard {
 		// cours doit être validé
 		$mydata->profile_field_up1avalider = 1;
 		$mydata->profile_field_up1datevalid = 0;
-
+        $mydata->profile_field_up1datedemande = time();
+        $mydata->profile_field_up1demandeur = $USER->firstname . ' '. $USER->lastname;
         $mydata->profile_field_up1datefermeture = $enddate;
 
 		return $mydata;
