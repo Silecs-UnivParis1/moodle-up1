@@ -591,6 +591,22 @@ class core_wizard {
 		$datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
 		$mydata = (object) $datamerge;
 		$mydata->startdate = $startdate;
+
+        //step3 custominfo_field
+        // compoante
+        $up1composante = trim($mydata->profile_field_up1composante);
+        if ($up1composante != '' && substr($up1composante, -1) != ';') {
+            $mydata->profile_field_up1composante .= ';';
+        }
+        $mydata->profile_field_up1composante .= $SESSION->wizard['form_step3']['composante'];
+
+        // niveau
+        $up1niveau = trim($mydata->profile_field_up1niveau);
+        if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
+            $mydata->profile_field_up1niveau .= ';';
+        }
+        $mydata->profile_field_up1niveau .= $SESSION->wizard['form_step3']['niveau'];
+
 		// cours doit être validé
 		$mydata->profile_field_up1avalider = 1;
 		$mydata->profile_field_up1datevalid = 0;
