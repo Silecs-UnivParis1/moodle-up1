@@ -43,9 +43,17 @@ class course_wizard_step3_form extends moodleform {
             $mform->setConstant($type, $nom);
             $tabfreeze[] = $type;
 
-            $field = $DB->get_record('custom_info_field', array('objectname' => 'course', 'shortname' => 'up1composante'));
-            $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
-            $formfield->edit_field($mform);
+            $mform->addElement('hidden', 'composante', null);
+            $mform->setType('composante', PARAM_MULTILANG);
+            $mform->setConstant('composante', $nom);
+
+            $label = 'up1composante';
+            $field = 'profile_field_' . $label;
+            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
+            $mform->setType($field, PARAM_MULTILANG);
+            if (isset($SESSION->wizard['form_step3'][$field])) {
+                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
+            }
 
             //Niveau
             $type = $myconfig->categorie_cours[3];
@@ -54,32 +62,32 @@ class course_wizard_step3_form extends moodleform {
             $mform->setConstant($type, $nom);
             $tabfreeze[] = $type;
 
-            $field = $DB->get_record('custom_info_field', array('objectname' => 'course', 'shortname' => 'up1niveau'));
-            $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
-            $formfield->edit_field($mform);
+            $mform->addElement('hidden', 'niveau', null);
+            $mform->setType('niveau', PARAM_MULTILANG);
+            $mform->setConstant('niveau', $nom);
+
+            $label = 'up1niveau';
+            $field = 'profile_field_' . $label;
+            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
+            $mform->setType($field, PARAM_MULTILANG);
+            if (isset($SESSION->wizard['form_step3'][$field])) {
+                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
+            }
 		}
 
         // champs de la catégorie "Identification"
-        $customcat = $this->custominfo->getCategories();
-        $this->custominfo->setCategoriesByNames(array('Diplome'));
-        $customDiplome = $this->custominfo->getFields();
-
-        $tabDip = array();
-        foreach ($customDiplome as $id => $objet) {
-            $tabDip[$objet->shortname] = $objet;
+        $custominfo_fields = array('up1domaine', 'up1mention', 'up1parcours', 'up1specialite');
+        foreach ($custominfo_fields as $field) {
+            $label = $field;
+            $field = 'profile_field_' . $field;
+            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
+            $mform->setType($field, PARAM_MULTILANG);
+            if (isset($SESSION->wizard['form_step3'][$field])) {
+                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
+            }
         }
-        $formfield = custominfo_field_factory('course', $tabDip['up1domaine']->datatype, $tabDip['up1domaine']->id);
-        $formfield->edit_field($mform);
 
-        $formfield = custominfo_field_factory('course', $tabDip['up1mention']->datatype, $tabDip['up1mention']->id);
-        $formfield->edit_field($mform);
-
-        $formfield = custominfo_field_factory('course', $tabDip['up1parcours']->datatype, $tabDip['up1parcours']->id);
-        $formfield->edit_field($mform);
-
-        $formfield = custominfo_field_factory('course', $tabDip['up1specialite']->datatype, $tabDip['up1specialite']->id);
-        $formfield->edit_field($mform);
-
+        //*********************************************
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 3);

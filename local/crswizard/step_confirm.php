@@ -69,10 +69,9 @@ class course_wizard_step_confirm extends moodleform {
         $tabfreeze[] = 'startdate';
 
         $datefermeture = 'up1datefermeture';
-        $label_up1datefermeture = get_custom_info_field_label($datefermeture);
         $date = $SESSION->wizard['form_step2'][$datefermeture];
         $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-        $mform->addElement('date_selector', $datefermeture, $label_up1datefermeture);
+        $mform->addElement('date_selector', $datefermeture, get_string('up1datefermeture', 'local_crswizard'));
         $mform->setConstant($datefermeture, $enddate);
         $tabfreeze[] = $datefermeture;
 
