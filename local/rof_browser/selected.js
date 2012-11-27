@@ -54,10 +54,12 @@ jQuery(function () {
             $(this).removeClass('collapsed');
             $(this).addClass('expanded');
 			plus = ' - ';
+            $(this).attr("title","Replier");
 		} else {
             $(this).removeClass('expanded');
             $(this).addClass('collapsed');
 			plus = ' + ';
+            $(this).attr("title","Déplier");
 		}
 		$(this).append(plus);
 

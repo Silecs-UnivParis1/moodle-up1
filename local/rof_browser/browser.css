@@ -73,6 +73,7 @@ li.list-item span.expanded, div.dip-sel span.expanded {
 background-image: url(pix/expanded.png); color: transparent;
 background-repeat: no-repeat;
 background-position: 0px 10%;
+margin-right: 5px;
 }
 
 ul.item {
