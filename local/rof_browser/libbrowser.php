@@ -315,7 +315,7 @@ class rof_browser {
                 . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
                 . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
                 . '<span class="element pointer oplus" title="Sélectionner" id="'
-                . $idElem . '"><img src="pix/switch_plus.gif" alt="&oplus;"/></span>'
+                . $idElem . '"></span>'
                 . '</div>';
         }
 
@@ -413,14 +413,14 @@ class rof_browser {
 			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
 		}
-		$element .= '<li class="' . $listStyle . '">'
+		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
 			. '<span class="element pointer oplus" title="Sélectionner" id="'
-			. $idElem . '"><img src="pix/switch_plus.gif" alt="&oplus;"/></span>'
-			. '</li>';
+			. $idElem . '"></span>'
+			. '</div></li>';
 		return $element;
 	}
 

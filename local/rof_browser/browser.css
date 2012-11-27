@@ -35,6 +35,18 @@ li.list-none {
 	list-style-type: none;
 }
 
+li.list-item div.elem-li {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: block;
+    float: none;
+}
+
+li.list-item div.elem-li:hover {
+    background: #DADADA;
+    /**border: 1px solid #999999;**/
+}
+
 li.list-item, div.dip-sel {
 	/*padding-bottom: 4px;*/
 	line-height: 1.0;
@@ -42,16 +54,27 @@ li.list-item, div.dip-sel {
 	margin-top: 2px;
 	font-family: "Verdana", "Arial", sans-serif;
 }
-/**
+
+div.dip-sel {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 1px;
+}
+
+div.dip-sel:hover {
+    background: #DADADA;
+}
+
 li.list-item span.oplus, div.dip-sel span.oplus {
 	font-size: 24px;
     margin-top: -2px; margin-left: 4px;
     width: 20px; height: 20px; background-image: url(pix/switch_plus.gif); color: transparent;
     background-repeat: no-repeat;
     background-position: bottom;
+    display: block; float: right; clear: right;
 }
-**/
 
+/**
 li.list-item span.oplus, div.dip-sel span.oplus {
 	font-size: 24px;
      margin-top: -2px;
@@ -62,18 +85,19 @@ li.list-item span.oplus, div.dip-sel span.oplus {
 li.list-item span.oplus img, div.dip-sel span.oplus img {
     margin-bottom: -6px;
 }
+**/
 
 li.list-item span.collapsed {
-background-image: url(pix/collapsed.png); color: transparent;
-background-repeat: no-repeat;
-background-position: 0px 10%;
+    background-image: url(pix/collapsed.png); color: transparent;
+    background-repeat: no-repeat;
+    background-position: 0px 10%;
 }
 
 li.list-item span.expanded, div.dip-sel span.expanded {
-background-image: url(pix/expanded.png); color: transparent;
-background-repeat: no-repeat;
-background-position: 0px 10%;
-margin-right: 5px;
+    background-image: url(pix/expanded.png); color: transparent;
+    background-repeat: no-repeat;
+    background-position: 0px 10%;
+    margin-right: 5px;
 }
 
 ul.item {
