@@ -4,6 +4,8 @@
  * @license http://www.gnu.org/licenses/gpl-2.0.html  GNU GPL v2
  */
 
+require_once($CFG->libdir.'/custominfo/lib.php');
+
 /**
  * A list of courses that match a search
  *
@@ -137,7 +139,6 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
            $ccjoin $searchjoin
              WHERE $searchcond AND c.id <> ".SITEID."
           ORDER BY $sort";
-
     $rs = $DB->get_recordset_sql($sql, $params);
     foreach($rs as $course) {
         context_instance_preload($course);
