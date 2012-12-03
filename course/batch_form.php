@@ -1,4 +1,5 @@
 <?php
+/* @var $DB moodle_database */
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -32,10 +33,35 @@ class course_batch_search_form extends moodleform {
 
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');
+        if (empty($this->_customdata['fields'])) {
+            $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
+        } else {
+            list ($sqlin, $sqlparams) = $DB->get_in_or_equal(array_keys($this->_customdata['fields']));
+            if ($sqlin) {
+                $categories = $DB->get_records_select(
+                        'custom_info_category', "objectname = 'course' AND name " . $sqlin, $sqlparams, 'sortorder ASC'
+                );
+            } else {
+                $categories = array();
+            }
+        }
         $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
         if ($categories) {
             foreach ($categories as $category) {
-                $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
+                if (isset($this->_customdata['fields'][$category->name])) {
+                    $fields = array();
+                    if (!empty($this->_customdata['fields'][$category->name])) {
+                        list ($sqlin, $sqlparams) = $DB->get_in_or_equal($this->_customdata['fields'][$category->name]);
+                        if ($sqlin) {
+                            $sqlparams[] = $category->id;
+                            $fields = $DB->get_records_select(
+                                    'custom_info_field', "shortname $sqlin AND categoryid = ?", $sqlparams, 'sortorder ASC'
+                            );
+                        }
+                    }
+                } else {
+                    $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
+                }
                 if ($fields) {
                     // display the header and the fields
                     $mform->addElement('header', 'category_'.$category->id, format_string($category->name));
