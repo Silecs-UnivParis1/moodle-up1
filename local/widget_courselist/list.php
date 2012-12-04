@@ -32,9 +32,9 @@ if (empty($courses)) {
         echo "Aucun cours ne correspond aux critères.";
     }
 } else {
-    echo '<table border="0" cellspacing="2" cellpadding="4"><tr>';
-    echo '<th class="header" scope="col">Cours correspondant : ' . $totalcount . '</th>';
-    echo '</tr>';
+    echo '<table border="0" cellspacing="2" cellpadding="4"><thead><tr>';
+    echo '<th class="header" scope="col">Cours</th>';
+    echo '</tr></thead><tbody>';
     foreach ($courses as $course) {
         echo '<tr>';
         $coursename = get_course_display_name_for_list($course);
@@ -42,7 +42,7 @@ if (empty($courses)) {
         echo '<td><a href="' . $url . '">'. clean_text($coursename) .'</a></td>';
         echo "</tr>";
     }
-    echo '</table>';
+    echo '</tbody></table>';
 }
 
 function isoDateToTs($date) {
