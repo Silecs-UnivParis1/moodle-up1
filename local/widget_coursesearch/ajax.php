@@ -9,8 +9,27 @@ $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
 
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
-
-$form = new course_batch_search_form(null, null, 'get');
+$searchconfig = array(
+    'fields' => array(
+        'Identification' => array(
+            'up1nomnorme',
+            'up1code',
+            'up1rofid',
+        ),
+        'Indexation' => array(
+            'up1composante',
+            'up1semestre',
+            'up1niveau',
+        ),
+        'Diplome' => array(
+            'up1diplome',
+            'up1domaine',
+        ),
+        'Cycle de vie' => array(
+        )
+    )
+);
+$form = new course_batch_search_form(null, $searchconfig, 'get');
 $data = $form->get_data();
 $totalcount = 0;
 $courses = null;

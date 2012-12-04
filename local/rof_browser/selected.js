@@ -54,18 +54,20 @@ jQuery(function () {
             $(this).removeClass('collapsed');
             $(this).addClass('expanded');
 			plus = ' - ';
+            $(this).attr("title","Replier");
 		} else {
             $(this).removeClass('expanded');
             $(this).addClass('collapsed');
 			plus = ' + ';
+            $(this).attr("title","Déplier");
 		}
 		$(this).append(plus);
 
-		var fr = $(this).siblings('ul').size();
+		var fr = $(this).parent('.elem-li').siblings('ul').size();
 		if (fr == 0) {
 		// creation liste ul
 			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
-				$("#"+codeid+'-elem').after(data);
+				$("#"+codeid+'-elem').parent('.elem-li').after(data);
 			}, 'html');
 		}
 		else {
