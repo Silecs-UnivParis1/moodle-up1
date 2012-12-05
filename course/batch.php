@@ -178,8 +178,17 @@ function confirmCourseRenaming(event) {
     }
     if (!coursesCount) {
         alert("Aucun cours sélectionné.");
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false
+        }
+        return false;
     }
-    if (!coursesCount || !confirm(coursesCount + " cours seront impactés.\nÊtes-vous certain de vouloir agir sur ces cours ?")) {
+    if (event.relatedTarget.value === "regexp") { // do not warn when there is a confirmation step
+        return true;
+    }
+    if (!confirm(coursesCount + " cours seront impactés.\nÊtes-vous certain de vouloir agir sur ces cours ?")) {
         if (event.preventDefault) {
             event.preventDefault();
         } else {
