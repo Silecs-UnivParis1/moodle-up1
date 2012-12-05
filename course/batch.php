@@ -18,6 +18,11 @@ $PAGE->set_url('/course/batch.php');
 $PAGE->set_title(get_string("coursebatchactions", 'admin'));
 $PAGE->set_heading(get_string("coursebatchactions", 'admin'));
 
+$preview = array();
+$regexp = '';
+$replace = '';
+$confirm = false;
+
 if ($action) {
     $courses = $DB->get_records_list('course', 'id', $coursesid);
     switch ($action) {
@@ -45,6 +50,26 @@ if ($action) {
                 exit();
             }
             break;
+        case 'regexp':
+            $regexp = optional_param('batchregexp', '', PARAM_RAW);
+            $replace = optional_param('batchreplace', '', PARAM_RAW);
+            $confirm = optional_param('batchconfirm', '', PARAM_BOOL);
+            if ($regexp) {
+                if ($confirm) {
+                    foreach ($courses as $course) {
+                        $course->fullname = preg_replace('/' . $regexp . '/', $replace, $course->fullname);
+                        // $course->shortname = $course->shortname . $suffix;
+                        $DB->update_record('course', $course);
+                    }
+                    redirect($CFG->wwwroot . '/course/batch.php');
+                    exit();
+                } else {
+                    foreach ($courses as $course) {
+                        $preview[$course->id] = preg_replace('/' . $regexp . '/', $replace, $course->fullname);
+                    }
+                }
+            }
+            break;
         case 'close':
             foreach ($courses as $course) {
                 $course->visible = 0;
@@ -61,6 +86,8 @@ $totalcount = 0;
 $courses = null;
 if ($data) {
     $courses = get_courses_batch_search($data, "c.fullname ASC", $page, $perpage, $totalcount);
+} else if ($coursesid) {
+    $courses = $DB->get_records_list('course', 'id', $coursesid);
 }
 
 require_once($CFG->libdir . '/adminlib.php');
@@ -83,6 +110,9 @@ if (empty($courses)) {
                 <tr>
                     <th><input type="checkbox" name="course-selectall" id="course-selectall" value="0" /></th>
                     <th class="header" scope="col"><?php echo get_string('courses'); ?></th>
+                    <?php if ($preview) { ?>
+                    <th class="header" scope="col"><?php echo get_string('preview'); ?></th>
+                    <?php } ?>
                 </tr>
                 <?php
                 foreach ($courses as $course) {
@@ -93,12 +123,18 @@ if (empty($courses)) {
                     $linkcss = $course->visible ? '' : ' class="dimmed" ';
                     $coursename = get_course_display_name_for_list($course);
                     echo '<td><a '.$linkcss.' href="view.php?id='.$course->id.'">'. format_string($coursename) .'</a></td>';
+                    if ($preview && isset($preview[$course->id])) {
+                        echo "<td>" . format_string($preview[$course->id]) . "</td>";
+                    }
                     echo "</tr>";
                 }
                 ?>
             </table>
             <fieldset><legend><?php echo get_string('actions'); ?></legend>
                 <ul>
+                    <li>
+                        <button name="action" value="close"><?php echo get_string('close', 'admin'); ?></button>
+                    </li>
                     <li>
                         <input type="text" name="batchprefix" />
                         <button name="action" value="prefix"><?php echo get_string('prefix', 'admin'); ?></button>
@@ -108,7 +144,15 @@ if (empty($courses)) {
                         <button name="action" value="suffix"><?php echo get_string('suffix', 'admin'); ?></button>
                     </li>
                     <li>
-                        <button name="action" value="close"><?php echo get_string('close', 'admin'); ?></button>
+                        s/<input type="text" name="batchregexp" value="<?php echo htmlspecialchars($regexp); ?>" />/
+                        <input type="text" name="batchreplace" value="<?php echo htmlspecialchars($replace); ?>" />/
+                        <button name="action" value="regexp">Regexp</button>
+                        <?php if ($action === 'regexp') { ?>
+                        <label>
+                            <input type="checkbox" name="batchconfirm" value="1" />
+                            <?php echo get_string('confirm'); ?>
+                        </label>
+                        <?php } ?>
                     </li>
                 </ul>
             </fieldset>
@@ -155,6 +199,11 @@ function toggleCourseSelection() {
         current.value = '0';
     }
 }
+<?php
+if ($preview) {
+    echo "toggleCourseSelection();\n";
+}
+?>
 //]]>
     </script>
 <?php
