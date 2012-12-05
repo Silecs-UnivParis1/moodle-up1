@@ -124,7 +124,13 @@ if (empty($courses)) {
                     $coursename = get_course_display_name_for_list($course);
                     echo '<td><a '.$linkcss.' href="view.php?id='.$course->id.'">'. format_string($coursename) .'</a></td>';
                     if ($preview && isset($preview[$course->id])) {
-                        echo "<td>" . format_string($preview[$course->id]) . "</td>";
+                        echo "<td>";
+                        if ($course->fullname !== $preview[$course->id]) {
+                            echo "<strong>" . format_string($preview[$course->id]) . "</strong>";
+                        } else {
+                            echo '<span class="dimmed_text">' . format_string($preview[$course->id]) . "</span>";
+                        }
+                        echo "</td>";
                     }
                     echo "</tr>";
                 }
