@@ -176,7 +176,10 @@ function confirmCourseRenaming(event) {
             coursesCount++;
         }
     }
-    if (!confirm(coursesCount + " cours seront impactés.\nÊtes-vous certain de vouloir agir sur ces cours ?")) {
+    if (!coursesCount) {
+        alert("Aucun cours sélectionné.");
+    }
+    if (!coursesCount || !confirm(coursesCount + " cours seront impactés.\nÊtes-vous certain de vouloir agir sur ces cours ?")) {
         if (event.preventDefault) {
             event.preventDefault();
         } else {
