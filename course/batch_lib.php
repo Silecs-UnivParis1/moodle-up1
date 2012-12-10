@@ -107,9 +107,9 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         $i = 0;
         foreach ($fields as $field) {
             $formfield = custominfo_field_factory('course', $field->datatype, $field->id, null);
-            $formfield->edit_data($criteria);
-            if (!empty($formfield->data)) {
+            if (!empty($criteria->{$formfield->inputname})) {
                 $i++;
+                $formfield->edit_data($criteria);
                 $searchjoin[] = "JOIN {custom_info_data} d$i "
                     ."ON (d$i.objectid = c.id AND d$i.objectname='course' AND d$i.fieldid={$field->id})";
                 $searchcond[] = $DB->sql_like("d$i.data", ":dd$i", false, true, false);
