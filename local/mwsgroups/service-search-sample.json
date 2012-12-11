@@ -1,1 +1,107 @@
-{"users":[{"uid":"e0792076908@univ-paris1.fr","displayName":"Aurelie Droin","supannEntiteAffectation":[]},{"uid":"e0g411g0362@univ-paris1.fr","displayName":"Adle Droish","supannEntiteAffectation":["UFR 05"]},{"uid":"droit@univ-paris1.fr","displayName":"Delphine Droit","supannEntiteAffectation":["SCD"]},{"uid":"e0g411l04jx@univ-paris1.fr","displayName":"Colette Ladroit","supannEntiteAffectation":[]},{"uid":"pedroia@univ-paris1.fr","displayName":"Albino Pedroia","supannEntiteAffectation":["UFR 07"]}],"groups":[{"key":"groups-crir-invites","name":"Invit\u00e9s de la DSI (droit de lecture \u00e0 DSIDOC et autres ressources)","description":"DSI : Direction du syst\u00e8me d'information","category":"local","size":"2"},{"key":"groups-gpelp.24564","name":"Droit constit. S1 Option - TD01 (MARDI 11H30-13H C1501) - 2012-13","description":"262PZ110 - Droit constitutionnel S1 Optionnelle","category":"gpelp","size":"36"},{"key":"groups-gpelp.24565","name":"Droit constit. S1 Option - TD02 (JEUDI 08H30-10H) - 2012-13","description":"262PZ110 - Droit constitutionnel S1 Optionnelle","category":"gpelp","size":"27"},{"key":"structures-U05","name":"UFR 05 : Droit des Affaires","description":"","category":"structures","size":"1091"},{"key":"structures-U05-affiliation-faculty","name":"UFR 05 : Droit des Affaires (enseignants)","description":" (enseignants)","category":"structures","size":"173"},{"key":"groups-gpelp.21923","name":"Droit de la famille - TD1102 (MERCREDI de 9H45 \u00e0 11H15 - SH 12) - 2012-13","description":"2610705 - Droit de la famille","category":"gpelp","size":"33"},{"key":"groups-gpelp.21922","name":"Droit de la famille - TD1101 (MERCREDI de 11H30 \u00e0 13H00 - SH 13) - 2012-13","description":"2610705 - Droit de la famille","category":"gpelp","size":"34"},{"key":"groups-gpelp.21933","name":"Droit de la famille - TD1112 (JEUDI de 13H15 \u00e0 14H45 - SH 10) - 2012-13","description":"2610705 - Droit de la famille","category":"gpelp","size":"35"},{"key":"groups-gpelp.21935","name":"Droit de la famille - TD1114 (MARDI de 9H45 \u00e0 11H15 - SH 9) - 2012-13","description":"2610705 - Droit de la famille","category":"gpelp","size":"29"},{"key":"groups-gpelp.27503","name":"Droit de la famille - TD1115 (MARDI de 13H \u00e0 14H30 - SH 5) - 2012-13","description":"2610705 - Droit de la famille","category":"gpelp","size":"32"}]}
+{
+   "groups" : [
+      {
+         "name" : "Invités de la DSI (droit de lecture à DSIDOC et autres ressources)",
+         "category" : "local",
+         "description" : "DSI : Direction du système d'information",
+         "size" : "2",
+         "key" : "groups-crir-invites"
+      },
+      {
+         "name" : "Droit constit. S1 Option - TD01 (MARDI 11H30-13H C1501) - 2012-13",
+         "category" : "gpelp",
+         "description" : "262PZ110 - Droit constitutionnel S1 Optionnelle",
+         "size" : "36",
+         "key" : "groups-gpelp.24564"
+      },
+      {
+         "name" : "Droit constit. S1 Option - TD02 (JEUDI 08H30-10H) - 2012-13",
+         "category" : "gpelp",
+         "description" : "262PZ110 - Droit constitutionnel S1 Optionnelle",
+         "size" : "27",
+         "key" : "groups-gpelp.24565"
+      },
+      {
+         "name" : "UFR 05 : Droit des Affaires",
+         "category" : "structures",
+         "description" : "",
+         "size" : "1091",
+         "key" : "structures-U05"
+      },
+      {
+         "name" : "UFR 05 : Droit des Affaires (enseignants)",
+         "category" : "structures",
+         "description" : " (enseignants)",
+         "size" : "173",
+         "key" : "structures-U05-affiliation-faculty"
+      },
+      {
+         "name" : "Droit de la famille - TD1102 (MERCREDI de 9H45 à 11H15 - SH 12) - 2012-13",
+         "category" : "gpelp",
+         "description" : "2610705 - Droit de la famille",
+         "size" : "33",
+         "key" : "groups-gpelp.21923"
+      },
+      {
+         "name" : "Droit de la famille - TD1101 (MERCREDI de 11H30 à 13H00 - SH 13) - 2012-13",
+         "category" : "gpelp",
+         "description" : "2610705 - Droit de la famille",
+         "size" : "34",
+         "key" : "groups-gpelp.21922"
+      },
+      {
+         "name" : "Droit de la famille - TD1112 (JEUDI de 13H15 à 14H45 - SH 10) - 2012-13",
+         "category" : "gpelp",
+         "description" : "2610705 - Droit de la famille",
+         "size" : "35",
+         "key" : "groups-gpelp.21933"
+      },
+      {
+         "name" : "Droit de la famille - TD1114 (MARDI de 9H45 à 11H15 - SH 9) - 2012-13",
+         "category" : "gpelp",
+         "description" : "2610705 - Droit de la famille",
+         "size" : "29",
+         "key" : "groups-gpelp.21935"
+      },
+      {
+         "name" : "Droit de la famille - TD1115 (MARDI de 13H à 14H30 - SH 5) - 2012-13",
+         "category" : "gpelp",
+         "description" : "2610705 - Droit de la famille",
+         "size" : "32",
+         "key" : "groups-gpelp.27503"
+      }
+   ],
+   "users" : [
+      {
+         "uid" : "XXXXXXX6908@univ-paris1.fr",
+         "supannEntiteAffectation" : [],
+         "displayName" : "Aurelie XXXXX"
+      },
+      {
+         "uid" : "XXXXXXg0362@univ-paris1.fr",
+         "supannEntiteAffectation" : [
+            "UFR 05"
+         ],
+         "displayName" : "Adle XXXXXX"
+      },
+      {
+         "uid" : "XXXXX@univ-paris1.fr",
+         "supannEntiteAffectation" : [
+            "SCD"
+         ],
+         "displayName" : "Delphine XXXXX"
+      },
+      {
+         "uid" : "XXXXXXX04jx@univ-paris1.fr",
+         "supannEntiteAffectation" : [],
+         "displayName" : "Colette XXXXXXX"
+      },
+      {
+         "uid" : "XXXXXXa@univ-paris1.fr",
+         "supannEntiteAffectation" : [
+            "UFR 07"
+         ],
+         "displayName" : "Albino XXXXXXX"
+      }
+   ]
+}
