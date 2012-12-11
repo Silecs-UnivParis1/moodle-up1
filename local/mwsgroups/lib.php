@@ -141,5 +141,5 @@ function groupKeyToCategory($key) {
 
 function startsWith($haystack, $needle)
 {
-    return strpos($haystack, $needle) === 0;
+    return strncmp($haystack, $needle, strlen($needle)) === 0;
 }
