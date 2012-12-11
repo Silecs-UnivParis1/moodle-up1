@@ -13,11 +13,11 @@ $res = mws_search($token, $maxrows, $filterstudent);
 // echo "$token";
 // die();
 
-header('Content-Type: application/json; charset="UTF-8"');
-
 if (empty($callback)) {
+    header('Content-Type: application/json; charset="UTF-8"');
     echo json_encode($res);
 } else {
+    header('Content-Type: application/javascript; charset="UTF-8"');
     echo $callback . '(' . json_encode($res) . ');';
 }
 

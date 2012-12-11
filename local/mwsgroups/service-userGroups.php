@@ -9,10 +9,11 @@ $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use js
 
 $res = mws_userGroupsId_fast($uid);
 
-header('Content-Type: application/json; charset="UTF-8"');
 
 if (empty($callback)) {
+    header('Content-Type: application/json; charset="UTF-8"');
     echo json_encode($res);
 } else {
+    header('Content-Type: application/javascript; charset="UTF-8"');
     echo $callback . '(' . json_encode($res) . ');';
 }
