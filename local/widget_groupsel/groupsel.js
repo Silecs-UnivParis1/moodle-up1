@@ -224,7 +224,7 @@
             description += ' (' + item.size + ' inscrits)';
         }
         if (description) {
-            $s += '<div>' + description + '</div>';
+            $s += '<div class="autocompletegroup-descr">' + description + '</div>';
         }
         return $s;
     }

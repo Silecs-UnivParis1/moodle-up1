@@ -32,3 +32,14 @@
     border-top: none;
     padding-top: 0;
 }
+
+.autocompletegroup-descr {
+	display: none;
+}
+.ui-menu-item:hover .autocompletegroup-descr {
+	display: block;
+	position: absolute;
+	padding: 1ex;
+	border: 1px solid black;
+}
+
