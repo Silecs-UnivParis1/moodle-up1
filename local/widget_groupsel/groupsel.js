@@ -104,23 +104,22 @@
                     uid: uid
                 },
                 success: function (data) {
-                    var items = $.merge(
-                        [{ label: "est membre des groupes :", source: "title" }],
-                        $.map(data, function (item) {
-                           return {
-                               label: groupItemToLabel(item),
-                               value: item.key,
-                               source: 'groups'
-                           };
-                        })
-                    );
+					var groups = sortByCategory(data);
+					transformGroupItems(groups);
+                    var items = $this.prepareList(groups, 'est membre des groupes :', function (item) {
+					   return {
+						   label: groupItemToLabel(item),
+						   value: item.key,
+						   source: 'groups'
+					   };
+					});
                     ac.data("autocomplete")._suggest(items);
                 }
             });
         },
 
         mainSource: function() {
-        var $this = this;
+            var $this = this;
             return function(request, response) {
                 var wsParams = $.extend({}, $this.settings.wsParams);
                 wsParams.token = request.term;
