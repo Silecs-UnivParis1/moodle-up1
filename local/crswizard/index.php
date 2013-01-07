@@ -122,6 +122,9 @@ if (isset($stepgo)) {
 			$steptitle = get_string('stepkey', 'local_crswizard');
 			wizard_navigation(6);
 			$editform = new course_wizard_step_cle();
+            if (isset($SESSION->wizard['form_step5'])) {
+                wizard_get_enrolement_cohorts();
+            }
             break;
         case 7:
 			$steptitle = get_string('confirmationtitle', 'local_crswizard');
