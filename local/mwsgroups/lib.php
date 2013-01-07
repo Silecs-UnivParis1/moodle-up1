@@ -44,7 +44,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
     }
 
     // search on cohorts
-    $sql = "SELECT id, name, idnumber, description FROM {cohort} WHERE "
+    $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
         . "name LIKE ? OR idnumber LIKE ? OR description LIKE ?" ;
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
     $groups = array();
@@ -53,7 +53,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
-            'description' => strip_tags($record->description),
+            'description' => format_text($record->description, $record->descriptionformat),
             'category' => groupKeyToCategory($record->idnumber),
             'size' => $size
         );
@@ -67,7 +67,7 @@ function mws_userGroupsId($uid) {
     global $DB;
 
     $groups = array();
-    $sql = "SELECT c.name, c.idnumber, c.description FROM {cohort} c "
+    $sql = "SELECT c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
         . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
         . "JOIN {user} u ON (u.id = cm.userid) "
         . "WHERE username=?";
@@ -77,7 +77,7 @@ function mws_userGroupsId($uid) {
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
-            'description' => strip_tags($record->description)
+            'description' => format_text($record->description, $record->descriptionformat),
         );
     }
     return $groups;
@@ -94,7 +94,7 @@ function mws_userGroupsId_fast($uid) {
 
     $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
     $groups = array();
-    $sql = "SELECT c.name, c.idnumber, c.description FROM {cohort} c "
+    $sql = "SELECT c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
         . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
         . "WHERE userid=?";
 
@@ -103,7 +103,7 @@ function mws_userGroupsId_fast($uid) {
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
-            'description' => strip_tags($record->description)
+            'description' => format_text($record->description, $record->descriptionformat),
         );
     }
     return $groups;

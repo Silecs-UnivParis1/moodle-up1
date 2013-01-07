@@ -9,6 +9,8 @@ $maxrows = optional_param('maxRows', 10, PARAM_INT);
 $filterstudent = optional_param('filter_student', 'both', PARAM_ALPHANUMEXT);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
+$PAGE->set_context(get_system_context());
+
 $res = mws_search($token, $maxrows, $filterstudent);
 // echo "$token";
 // die();

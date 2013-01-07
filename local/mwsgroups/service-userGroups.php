@@ -7,8 +7,9 @@ require_once('./lib.php');
 $uid = required_param('uid', PARAM_RAW);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
-$res = mws_userGroupsId_fast($uid);
+$PAGE->set_context(get_system_context());
 
+$res = mws_userGroupsId_fast($uid);
 
 if (empty($callback)) {
     header('Content-Type: application/json; charset="UTF-8"');
