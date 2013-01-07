@@ -47,14 +47,6 @@ class course_wizard_step3_form extends moodleform {
             $mform->setType('composante', PARAM_MULTILANG);
             $mform->setConstant('composante', $nom);
 
-            $label = 'up1composante';
-            $field = 'profile_field_' . $label;
-            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_MULTILANG);
-            if (isset($SESSION->wizard['form_step3'][$field])) {
-                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
-            }
-
             //Niveau
             $type = $myconfig->categorie_cours[3];
             $nom = $tabcategories[3];
@@ -66,6 +58,18 @@ class course_wizard_step3_form extends moodleform {
             $mform->setType('niveau', PARAM_MULTILANG);
             $mform->setConstant('niveau', $nom);
 
+            $mform->addElement('header','autre_rattachement', get_string('categoryblockE3s1', 'local_crswizard'));
+
+            $label = 'up1composante';
+            $field = 'profile_field_' . $label;
+            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
+            $mform->setType($field, PARAM_MULTILANG);
+            if (isset($SESSION->wizard['form_step3'][$field])) {
+                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
+            }
+
+
+
             $label = 'up1niveau';
             $field = 'profile_field_' . $label;
             $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
@@ -75,6 +79,7 @@ class course_wizard_step3_form extends moodleform {
             }
 		}
 
+        $mform->addElement('header','identification', get_string('categoryblockE3s2', 'local_crswizard'));
         // champs de la catégorie "Identification"
         $custominfo_fields = array('up1domaine', 'up1mention', 'up1parcours', 'up1specialite');
         foreach ($custominfo_fields as $field) {
@@ -105,6 +110,11 @@ class course_wizard_step3_form extends moodleform {
 			'maxlength="40" size="20", disabled="disabled"');
         $mform->setConstant('user_name', $USER->firstname . ' '. $USER->lastname);
         $tabfreeze[] = 'user_name';
+
+        $mform->addElement('text', 'user_login', get_string('userlogin', 'local_crswizard'),
+			'maxlength="40" size="20", disabled="disabled"');
+        $mform->setConstant('user_login', $USER->username);
+        $tabfreeze[] = 'user_login';
 
         $mform->addElement('date_selector', 'requestdate',  get_string('courserequestdate', 'local_crswizard'));
         $mform->setDefault('requestdate', time());
