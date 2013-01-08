@@ -10,6 +10,59 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2012112200;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2012061700;        // Requires this Moodle version
-$plugin->component = 'local_crswizard';       // Full name of the plugin (used for diagnostics)
+/* Cf documentation
+http://docs.moodle.org/dev/NEWMODULE_Adding_capabilities
+http://docs.moodle.org/dev/Hardening_new_Roles_system
+ */
+
+$capabilities = array(
+    'local/crswizard:creator' => array(
+        'riskbitmask'  => 0,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => array(
+            'student'        => CAP_PREVENT,
+            'teacher'        => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager'          => CAP_ALLOW
+        )
+    ),
+
+        'local/crswizard:validator' => array(
+        'riskbitmask'  => 0,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => array(
+            'student'        => CAP_PREVENT,
+            'teacher'        => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager'          => CAP_ALLOW
+        )
+    ),
+
+        'local/crswizard:supervalidator' => array(
+        'riskbitmask'  => 0,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => array(
+            'student'        => CAP_PREVENT,
+            'teacher'        => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager'          => CAP_ALLOW
+        )
+    ),
+        'local/crswizard:localsupervalidator' => array(
+        'riskbitmask'  => 0,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes'   => array(
+            'student'        => CAP_PREVENT,
+            'teacher'        => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager'          => CAP_ALLOW
+        )
+    ),
+
+);
+
+//** @todo localsupervalidator : est-ce la bonne méthode ? peut-on surcharger un nom avec 2 contextes ?
