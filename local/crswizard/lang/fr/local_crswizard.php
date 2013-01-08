@@ -1,12 +1,19 @@
 <?php
 /**
- * Strings for component 'wizard', language 'fr', branch 'MOODLE_20_STABLE'
+ * Strings for component 'wizard', language 'fr'
  *
  * @package    local
  * @subpackage crswizard
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+$string['pluginname'] = 'Assistant de création de cours';
+// capabilities
+$string['crswizard:creator'] = 'Créer un cours avec l\'assistant';
+$string['crswizard:validator'] = 'Approuver un cours créé avec l\'assistant';
+$string['crswizard:supervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant';
+$string['crswizard:localsupervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant, contexte local';
 
 $string['anotherneed'] = 'Un autre besoin';
 $string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
@@ -53,7 +60,6 @@ $string['messagekeyblock2'] = '<b>Attention : </b>Il faut renseigner le champ "<
 $string['nextstage'] = 'Étape suivante';
 $string['noeditingteacher'] = 'Enseignant non éditeur';
 $string['noticeconfirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
-$string['pluginname'] = 'Course Wizard';
 $string['previousstage'] = 'Étape précédente';
 $string['role'] = 'Rôle';
 $string['selectcourse'] = 'Étape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
