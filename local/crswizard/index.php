@@ -131,6 +131,16 @@ switch ($stepin) {
     case 7:
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
         $editform = new course_wizard_step_confirm();
+
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step7'])) {
+                $editform->set_data($SESSION->wizard['form_step7']);
+            }
+        }
         break;
     case 8:
         // envoi message
@@ -149,16 +159,13 @@ switch ($stepin) {
         redirect(new moodle_url('/'));
         break;
 }
-$site = get_site();
 
 $straddnewcourse = get_string("addnewcourse");
 $PAGE->navbar->add($straddnewcourse);
 
-$title = "$site->shortname: $straddnewcourse";
-$fullname = $site->fullname;
-
-$PAGE->set_title($title);
-$PAGE->set_heading($fullname);
+$site = get_site();
+$PAGE->set_title("$site->shortname: $straddnewcourse");
+$PAGE->set_heading($site->fullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));

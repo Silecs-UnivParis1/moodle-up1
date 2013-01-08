@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step_cle extends moodleform {
 
     function definition() {
-        global $SESSION;
+        global $SESSION, $OUTPUT;
 
         $mform = $this->_form;
 
@@ -33,28 +33,14 @@ class course_wizard_step_cle extends moodleform {
             $mform->addElement('html', html_writer::tag('div', $messagecle, array('class' => 'fitem')));
             $mform->addElement('passwordunmask', 'password' . $c, get_string('enrolkey', 'local_crswizard'));
             $mform->addHelpButton('password' . $c, 'password', 'enrol_self');
-            if (isset($SESSION->wizard['form_step6']['password' . $c])) {
-                $mform->setDefault('password' . $c, $SESSION->wizard['form_step6']['password' . $c]);
-            }
 
             $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'), array('optional' => true));
             $mform->addHelpButton('enrolstartdate' . $c, 'enrolstartdate', 'enrol_self');
-            if (isset($SESSION->wizard['form_step6']['enrolstartdate' . $c])) {
-                $date = $SESSION->wizard['form_step6']['enrolstartdate' . $c];
-                $mform->setDefault('enrolstartdate' . $c, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
-            } else {
-                $mform->setDefault('enrolstartdate' . $c, time() + 3600 * 24);
-            }
+            $mform->setDefault('enrolstartdate' . $c, time() + 3600 * 24);
 
             $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'), array('optional' => true));
             $mform->addHelpButton('enrolenddate' . $c, 'enrolenddate', 'enrol_self');
             $mform->setDefault('enrolenddate' . $c, 0);
-            if (isset($SESSION->wizard['form_step6']['enrolenddate' . $c])) {
-                $date = $SESSION->wizard['form_step6']['enrolenddate' . $c];
-                $mform->setDefault('enrolenddate' . $c, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
-            } else {
-                $mform->setDefault('enrolenddate' . $c, 0);
-            }
         }
 
 //--------------------------------------------------------------------------------
@@ -65,8 +51,14 @@ class course_wizard_step_cle extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_5', get_string('previousstage', 'local_crswizard'));
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_7', get_string('nextstage', 'local_crswizard'));
+        $buttonarray[] = $mform->createElement(
+                'html',
+                '<div class="previousstage">' . $OUTPUT->action_link(
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 5)),
+                    get_string('previousstage', 'local_crswizard')
+                ) . '</div>'
+        );
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_7', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
     }

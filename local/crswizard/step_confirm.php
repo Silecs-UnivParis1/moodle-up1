@@ -17,7 +17,7 @@ require_once('lib_wizard.php');
 class course_wizard_step_confirm extends moodleform {
 
     function definition() {
-        global $USER, $DB, $SESSION;
+        global $USER, $DB, $SESSION, $OUTPUT;
 
         $myconfig = new my_elements_config();
 
@@ -31,8 +31,8 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('textarea', 'remarques', get_string('noticeconfirmation', 'local_crswizard'), array('rows' => 15, 'cols' => 80));
         $mform->setType('content', PARAM_RAW);
 
-        $user_name = $USER->firstname . ' ' . $USER->lastname;
         $mform->addElement('header', 'resume', get_string('summaryof', 'local_crswizard'));
+        $user_name = fullname($USER);
         $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
         $mform->setConstant('user_name', $user_name);
         $tabfreeze[] = 'user_name';
@@ -92,16 +92,16 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 
-        if (isset($SESSION->wizard['form_step5']['all-cohorts']) && count($SESSION->wizard['form_step5']['all-cohorts'])) {
-            $allgroupes = $SESSION->wizard['form_step5']['all-cohorts'];
-            $mform->addElement('header', 'groupes', get_string('cohorts', 'local_crswizard'));
+        if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
+            $groupsbyrole = $SESSION->wizard['form_step5']['all-cohorts'];
+            $mform->addElement('header', 'groups', get_string('cohorts', 'local_crswizard'));
             $labels = $myconfig->role_cohort;
-            foreach ($allgroupes as $role => $groupes) {
+            foreach ($groupsbyrole as $role => $groups) {
                 if (array_key_exists($role, $labels)) {
                     $label = $labels[$role];
                     $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
                 }
-                foreach ($groupes as $id => $group) {
+                foreach ($groups as $id => $group) {
                     $mform->addElement('html', html_writer::tag('div', $group->name, array('class' => 'fitem')));
                 }
             }
@@ -165,7 +165,14 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setConstant('message', $message);
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
+        $buttonarray[] = $mform->createElement(
+                'html',
+                '<div class="previousstage">' . $OUTPUT->action_link(
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 7)),
+                    get_string('previousstage', 'local_crswizard')
+                ) . '</div>'
+        );
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 
