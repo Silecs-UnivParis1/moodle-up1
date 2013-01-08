@@ -4,7 +4,7 @@
 /**
  * @package    local
  * @subpackage crswizard
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ $capabilities = array(
         )
     ),
 
-        'local/crswizard:validator' => array(
+    'local/crswizard:validator' => array(
         'riskbitmask'  => 0,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
@@ -40,7 +40,7 @@ $capabilities = array(
         )
     ),
 
-        'local/crswizard:supervalidator' => array(
+    'local/crswizard:supervalidator' => array(
         'riskbitmask'  => 0,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
@@ -51,7 +51,7 @@ $capabilities = array(
             'manager'          => CAP_ALLOW
         )
     ),
-        'local/crswizard:localsupervalidator' => array(
+    'local/crswizard:localsupervalidator' => array(
         'riskbitmask'  => 0,
         'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSECAT,
