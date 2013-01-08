@@ -38,16 +38,16 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 	<select name="role" size="1" id="roleteacher">
 	<?php
 		$myconfig = new my_elements_config();
-		$labels = $myconfig->role_teachers;
-		$roles = wizard_role($labels);
-		foreach ($roles as $r) {
-			$label = $r['name'];
-			if (array_key_exists($r['shortname'], $labels)) {
-				$label = $labels[$r['shortname']];
-			}
-			echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
-		}
-	?>
+        $labels = $myconfig->role_teachers;
+        $roles = wizard_role($labels);
+        foreach ($roles as $r) {
+            $label = $r['name'];
+            if (array_key_exists($r['shortname'], $labels)) {
+                $label = $labels[$r['shortname']];
+            }
+            echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
+        }
+?>
 	</select>
 </div>
 <br/>

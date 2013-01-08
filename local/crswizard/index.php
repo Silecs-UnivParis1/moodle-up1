@@ -100,30 +100,30 @@ if (isset($stepgo)) {
             }
             break;
         case 4:
-			$steptitle = get_string('enrolteachers', 'local_crswizard');
-			$url = '/local/crswizard/enrol/teacher.php';
-			wizard_navigation(4);
+            $steptitle = get_string('enrolteachers', 'local_crswizard');
+            $url = '/local/crswizard/enrol/teacher.php';
+            wizard_navigation(4);
             if (isset($SESSION->wizard['form_step5'])) {
                 wizard_get_enrolement_cohorts();
             }
-			redirect(new moodle_url($url));
+            redirect(new moodle_url($url));
             break;
         case 5:
-			$steptitle = get_string('enrolcohorts', 'local_crswizard');
+            $steptitle = get_string('enrolcohorts', 'local_crswizard');
             $url = '/local/crswizard/enrol/cohort.php';
-			wizard_navigation(5);
+            wizard_navigation(5);
             if (isset($SESSION->wizard['form_step4'])) {
                 wizard_get_enrolement_users();
             }
             redirect(new moodle_url($url));
             break;
         case 6:
-			$steptitle = get_string('stepkey', 'local_crswizard');
-			wizard_navigation(6);
-			$editform = new course_wizard_step_cle();
+            $steptitle = get_string('stepkey', 'local_crswizard');
+            wizard_navigation(6);
+            $editform = new course_wizard_step_cle();
             break;
         case 7:
-			$steptitle = get_string('confirmationtitle', 'local_crswizard');
+            $steptitle = get_string('confirmationtitle', 'local_crswizard');
             wizard_navigation(7);
             if (isset($SESSION->wizard['form_step5'])) {
                 wizard_get_enrolement_cohorts();
@@ -133,7 +133,7 @@ if (isset($stepgo)) {
         case 8:
             // envoi message
             $corewizard = new core_wizard();
-			$corewizard->create_course_to_validate();
+            $corewizard->create_course_to_validate();
             $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
             $message = $SESSION->wizard['form_step7']['message'];
             if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
@@ -163,7 +163,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
 
-if (isset($stepgo) && $stepgo==2) {
+if (isset($stepgo) && $stepgo == 2) {
     echo call_jquery_select_into_subselects();
 }
 

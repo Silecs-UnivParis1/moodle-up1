@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Stop process if current user has no "create" or "request" course capabilities.
  * @param $context (system)context
@@ -13,29 +14,29 @@ function require_capabilities($context) {
 }
 
 function get_stepgo($stepin, $post) {
-	switch ($stepin) {
-		case 5:
-			if (array_key_exists('stepgo_4', $post)) {
-				$stepgo = 4;
-				break;
-			}
-			if (array_key_exists('stepgo_6', $post)) {
-				$stepgo = 6;
-				break;
-			}
-			if (array_key_exists('stepgo_7', $post)) {
-				$stepgo = 7;
-				break;
-			}
+    switch ($stepin) {
+        case 5:
+            if (array_key_exists('stepgo_4', $post)) {
+                $stepgo = 4;
+                break;
+            }
+            if (array_key_exists('stepgo_6', $post)) {
+                $stepgo = 6;
+                break;
+            }
+            if (array_key_exists('stepgo_7', $post)) {
+                $stepgo = 7;
+                break;
+            }
 
-		default :
-			$stepgo = $stepin + 1;
-			$stepretour = $stepin - 1;
-			$clefr = 'stepgo_' . $stepretour;
-			if (array_key_exists($clefr, $post)) {
-				$stepgo = $stepretour;
-			}
-	}
+        default :
+            $stepgo = $stepin + 1;
+            $stepretour = $stepin - 1;
+            $clefr = 'stepgo_' . $stepretour;
+            if (array_key_exists($clefr, $post)) {
+                $stepgo = $stepretour;
+            }
+    }
     return $stepgo;
 }
 
@@ -55,13 +56,13 @@ function validation_shortname($shortname) {
 }
 
 function validation_categorie($idcategory) {
-     global $DB;
+    global $DB;
 
     $errors = array();
     $category = $DB->get_record('course_categories', array('id' => $idcategory));
     if ($category) {
-        if ($category->depth < 4 ) {
-           $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
+        if ($category->depth < 4) {
+            $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
         }
     } else {
         $errors['category'] = get_string('categoryerrormsg2', 'local_crswizard');
@@ -70,20 +71,20 @@ function validation_categorie($idcategory) {
 }
 
 function get_list_category($idcategory) {
-	global $DB;
-	$categories = array();
-	$selected = $DB->get_record('course_categories', array('id' => $idcategory));
-	$tabidpath = explode('/', $selected->path);
-	$tabcategory = array();
-	foreach ($tabidpath as $id) {
-		if ($id) {
-			$name = $DB->get_field('course_categories', 'name', array('id' => $id));
-			if ($name) {
-				$tabcategory[] = $name;
-			}
-		}
-	}
-	return $tabcategory;
+    global $DB;
+    $categories = array();
+    $selected = $DB->get_record('course_categories', array('id' => $idcategory));
+    $tabidpath = explode('/', $selected->path);
+    $tabcategory = array();
+    foreach ($tabidpath as $id) {
+        if ($id) {
+            $name = $DB->get_field('course_categories', 'name', array('id' => $id));
+            if ($name) {
+                $tabcategory[] = $name;
+            }
+        }
+    }
+    return $tabcategory;
 }
 
 function send_course_request($message, $messagehtml) {
@@ -190,11 +191,11 @@ function affiche_error_enrolcohort($erreurs) {
     return $message;
 }
 
-function wizard_navigation ($stepin) {
-	global $SESSION;
-	$SESSION->wizard['navigation']['stepin'] = $stepin;
-	$SESSION->wizard['navigation']['suite'] = $stepin + 1;
-	$SESSION->wizard['navigation']['retour'] = $stepin - 1;
+function wizard_navigation($stepin) {
+    global $SESSION;
+    $SESSION->wizard['navigation']['stepin'] = $stepin;
+    $SESSION->wizard['navigation']['suite'] = $stepin + 1;
+    $SESSION->wizard['navigation']['retour'] = $stepin - 1;
 }
 
 /**
@@ -203,11 +204,11 @@ function wizard_navigation ($stepin) {
  * @return array object role
  */
 function wizard_role($labels) {
-	global $DB;
-	$roles = array();
+    global $DB;
+    $roles = array();
     foreach ($labels as $key => $label) {
         $sql = "SELECT * FROM {role} WHERE "
-        . "shortname = ?" ;
+                . "shortname = ?";
         $record = $DB->get_record_sql($sql, array($key));
         $roles[] = array(
             'shortname' => $record->shortname,
@@ -224,8 +225,8 @@ function wizard_role($labels) {
  * @param array $tabUsers array[rolename]=>array(iduser)
  */
 function myenrol_teacher($courseid, $tabUsers) {
-	global $DB, $CFG;
-	require_once("$CFG->dirroot/lib/enrollib.php");
+    global $DB, $CFG;
+    require_once("$CFG->dirroot/lib/enrollib.php");
     if ($courseid == SITEID) {
         throw new coding_exception('Invalid request to add enrol instance to frontpage.');
     }
@@ -237,78 +238,77 @@ function myenrol_teacher($courseid, $tabUsers) {
                 enrol_try_internal_enrol($courseid, $userid, $roleid);
             }
         }
-	}
+    }
 }
 
 /**
  * Construit le tableau des groupes sélectionnés et les sauvegrade dans la
  * variable de session $SESSION->wizard['form_step5']['all-cohorts']
  */
-function wizard_get_enrolement_cohorts()
-{
-	global $DB, $SESSION;
-	$list = array();
+function wizard_get_enrolement_cohorts() {
+    global $DB, $SESSION;
+    $list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
-	$roles = wizard_role($labels);
+    $roles = wizard_role($labels);
     if (!isset($SESSION->wizard['form_step5']['group'])) {
         return false;
     }
-	$form5g = $SESSION->wizard['form_step5']['group'];
+    $form5g = $SESSION->wizard['form_step5']['group'];
 
-	foreach ($roles as $r) {
-		$code = $r['shortname'];
-		if (array_key_exists($code, $form5g)) {
-			foreach ($form5g[$code] as $g) {
-				$group = $DB->get_record('cohort', array('idnumber' => $g));
-				if ($group) {
+    foreach ($roles as $r) {
+        $code = $r['shortname'];
+        if (array_key_exists($code, $form5g)) {
+            foreach ($form5g[$code] as $g) {
+                $group = $DB->get_record('cohort', array('idnumber' => $g));
+                if ($group) {
                     $size = $DB->count_records('cohort_members', array('cohortid' => $group->id));
                     $group->size = $size;
-					$list[$code][$group->idnumber] = $group;
-				}
-			}
-		}
-	}
-	$SESSION->wizard['form_step5']['all-cohorts'] = $list;
+                    $list[$code][$group->idnumber] = $group;
+                }
+            }
+        }
+    }
+    $SESSION->wizard['form_step5']['all-cohorts'] = $list;
 }
 
 /**
  * Construit le tableau des enseignants sélectionnés et les sauvegrade dans la
  * variable de session $SESSION->wizard['form_step4']['all-users']
  */
-function wizard_get_enrolement_users()
-{
+function wizard_get_enrolement_users() {
     global $DB, $SESSION;
-	$list = array();
+    $list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
-	$roles = wizard_role($labels);;
+    $roles = wizard_role($labels);
+    ;
 
     if (!isset($SESSION->wizard['form_step4']['user'])) {
         return false;
     }
-	$form4u = $SESSION->wizard['form_step4']['user'];
+    $form4u = $SESSION->wizard['form_step4']['user'];
 
-	foreach ($roles as $r) {
-		$code = $r['shortname'];
-		if (array_key_exists($code, $form4u)) {
-			foreach ($form4u[$code] as $u) {
-				$user = $DB->get_record('user', array('username' => $u));
-				if ($user) {
-					$list[$code][$user->username] = $user;
-				}
-			}
-		}
-	}
-	$SESSION->wizard['form_step4']['all-users'] = $list;
+    foreach ($roles as $r) {
+        $code = $r['shortname'];
+        if (array_key_exists($code, $form4u)) {
+            foreach ($form4u[$code] as $u) {
+                $user = $DB->get_record('user', array('username' => $u));
+                if ($user) {
+                    $list[$code][$user->username] = $user;
+                }
+            }
+        }
+    }
+    $SESSION->wizard['form_step4']['all-users'] = $list;
 }
 
 /*
  * construit la liste des groupes sélectionnés encodé en json
  * @return string
  */
-function wizard_preselected_cohort()
-{
+
+function wizard_preselected_cohort() {
     global $SESSION;
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
@@ -317,9 +317,9 @@ function wizard_preselected_cohort()
         foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
-				$label = $labels[$role];
+                $label = $labels[$role];
                 $labelrole = get_string($label, 'local_crswizard');
-			}
+            }
 
             foreach ($groups as $id => $group) {
                 $desc = '';
@@ -327,14 +327,14 @@ function wizard_preselected_cohort()
                     $desc .= strip_tags($group->description);
                 }
                 if (isset($group->size) && $group->size != '') {
-                    $desc .=  ' (' . $group->size . ' inscrits)';
+                    $desc .= ' (' . $group->size . ' inscrits)';
                 }
                 if ($desc != '') {
                     $desc = '<div>' . $desc . '</div>';
                 }
                 $liste .= '{"label":"<b>' . $group->name . '</b>'
-                    . $desc .  $labelrole . '", "value": "'
-                    . $id . '", "fieldName" : "group[' . $role . ']"},';
+                        . $desc . $labelrole . '", "value": "'
+                        . $id . '", "fieldName" : "group[' . $role . ']"},';
             }
         }
     }
@@ -345,8 +345,8 @@ function wizard_preselected_cohort()
  * construit la liste des enseignants sélectionnés encodé en json
  * @return string
  */
-function wizard_preselected_users()
-{
+
+function wizard_preselected_users() {
     global $SESSION;
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
@@ -355,15 +355,15 @@ function wizard_preselected_users()
         foreach ($SESSION->wizard['form_step4']['all-users'] as $role => $users) {
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
-				$label = $labels[$role];
+                $label = $labels[$role];
                 $labelrole = get_string($label, 'local_crswizard');
-			}
+            }
 
             foreach ($users as $id => $user) {
                 $desc = $user->firstname . ' ' . $user->lastname;
                 $desc .= ' (' . $labelrole . ')';
                 $liste .= '{"label":"' . $desc . '", "value": "'
-                    . $id . '", "fieldName" : "user[' . $role . ']"},';
+                        . $id . '", "fieldName" : "user[' . $role . ']"},';
             }
         }
     }
@@ -371,126 +371,91 @@ function wizard_preselected_users()
 }
 
 function wizard_list_clef() {
-	global $SESSION;
-	$list = array();
-	$tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
+    global $SESSION;
+    $list = array();
+    $tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
 
-	if (isset($SESSION->wizard['form_step6'])) {
-		$form6 = $SESSION->wizard['form_step6'];
+    if (isset($SESSION->wizard['form_step6'])) {
+        $form6 = $SESSION->wizard['form_step6'];
 
-		foreach ($tabCle as $c => $type) {
-			$password = 'password' . $c;
-			$enrolstartdate = 'enrolstartdate' . $c;
-			$enrolenddate = 'enrolenddate' . $c;
-			if (isset($form6[$password])) {
-				$pass = trim($form6[$password]);
-				if ($pass !='') {
-					$list[$type]['code'] = $c;
-					$list[$type]['password'] = $pass;
-					if (isset($form6[$enrolstartdate])) {
-						$list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
-					}
-					if (isset($form6[$enrolenddate])) {
-						$list[$type]['enrolenddate'] = $form6[$enrolenddate];
-					}
-				}
-			}
-		}
-	}
-	return $list;
+        foreach ($tabCle as $c => $type) {
+            $password = 'password' . $c;
+            $enrolstartdate = 'enrolstartdate' . $c;
+            $enrolenddate = 'enrolenddate' . $c;
+            if (isset($form6[$password])) {
+                $pass = trim($form6[$password]);
+                if ($pass != '') {
+                    $list[$type]['code'] = $c;
+                    $list[$type]['password'] = $pass;
+                    if (isset($form6[$enrolstartdate])) {
+                        $list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
+                    }
+                    if (isset($form6[$enrolenddate])) {
+                        $list[$type]['enrolenddate'] = $form6[$enrolenddate];
+                    }
+                }
+            }
+        }
+    }
+    return $list;
 }
 
-function myenrol_clef($idcourse, $tabClefs){
-	global $DB;
+function myenrol_clef($idcourse, $tabClefs) {
+    global $DB;
     if ($idcourse == SITEID) {
         throw new coding_exception('Invalid request to add enrol instance to frontpage.');
     }
     // traitement des données
     foreach ($tabClefs as $type => $tabClef) {
-		$name = 'clef '. $type;
+        $name = 'clef ' . $type;
 
-		if ($type == 'Etudiante') {
-			$enrol = 'self';
-			$roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
-		} elseif ($type == 'Visiteur') {
-			$enrol = 'guest';
-			$roleid = 0;
-		}
-		$status = 0;   //0 pour auto-inscription
-		if (isset($tabClef['enrolstartdate'])) {
-			$date = $tabClef['enrolstartdate'];
-			$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-		} else {
-			$startdate = 0;
-		}
-		if (isset($tabClef['enrolenddate'])) {
-			$date = $tabClef['enrolenddate'];
-			$enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-		} else {
-			$enddate = 0;
-		}
-
-		$instance = new stdClass();
-		$instance->enrol = $enrol;
-		$instance->status = $status;
-		$instance->courseid = $idcourse;
-		$instance->roleid = $roleid;
-		$instance->name = $name;
-		$instance->password = $tabClef['password'];
-		$instance->customint1 = 0; // clef d'inscription groupe ?
-		$instance->customint2 = 0;
-		$instance->customint3 = 0;
-		$instance->customint4 = 0; // envoie d'un message
-
-		$instance->enrolstartdate = $startdate;
-		$instance->enrolenddate = $enddate;
-		$instance->timemodified = time();
-		$instance->timecreated = $instance->timemodified;
-		$instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
-		$DB->insert_record('enrol', $instance);
-	}
-
-}
-
-/**
- * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
- * @retun array() $mydisplaylist
- **/
- /**
-function wizard_get_mydisplaylist($displaylist)
-{
-    $displaylist = array();
-    $parentlist = array();
-    make_categories_list($displaylist, $parentlist);
-    $myconfig = new my_elements_config();
-    $labels = $myconfig->categorie_deph;
-    $label0 = implode(' * / ', $labels);
-    $label0 .= ' * ';
-    $mydisplaylist = array(0 => $label0);
-
-    foreach ($displaylist as $id => $label) {
-        $tab = explode('/', $label);
-        $nb = count($tab);
-        for ($i = $nb; $i < 4; ++$i) {
-            $j = $i +1;
-            if ($i == $nb) {
-                $tab[$j] = ' ... ';
-            } else {
-                $tab[$j] = $labels[$j] . ' * ';
-            }
+        if ($type == 'Etudiante') {
+            $enrol = 'self';
+            $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
+        } elseif ($type == 'Visiteur') {
+            $enrol = 'guest';
+            $roleid = 0;
         }
-        $mydisplaylist[$id] = implode('/', $tab);
+        $status = 0;   //0 pour auto-inscription
+        if (isset($tabClef['enrolstartdate'])) {
+            $date = $tabClef['enrolstartdate'];
+            $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+        } else {
+            $startdate = 0;
+        }
+        if (isset($tabClef['enrolenddate'])) {
+            $date = $tabClef['enrolenddate'];
+            $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+        } else {
+            $enddate = 0;
+        }
+
+        $instance = new stdClass();
+        $instance->enrol = $enrol;
+        $instance->status = $status;
+        $instance->courseid = $idcourse;
+        $instance->roleid = $roleid;
+        $instance->name = $name;
+        $instance->password = $tabClef['password'];
+        $instance->customint1 = 0; // clef d'inscription groupe ?
+        $instance->customint2 = 0;
+        $instance->customint3 = 0;
+        $instance->customint4 = 0; // envoie d'un message
+
+        $instance->enrolstartdate = $startdate;
+        $instance->enrolenddate = $enddate;
+        $instance->timemodified = time();
+        $instance->timecreated = $instance->timemodified;
+        $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
+        $DB->insert_record('enrol', $instance);
     }
-    return $mydisplaylist;
 }
-**/
 
 /**
  * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
  * @retun array() $mydisplaylist
- **/
-function wizard_get_mydisplaylist()
-{
+ * */
+function wizard_get_mydisplaylist() {
     $displaylist = array();
     $parentlist = array();
     make_categories_list($displaylist, $parentlist);
@@ -501,22 +466,21 @@ function wizard_get_mydisplaylist()
     $mydisplaylist = array(0 => $label0);
 
     foreach ($displaylist as $id => $label) {
-        if (array_key_exists($id, $parentlist) && count($parentlist[$id])==3) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {
             $mydisplaylist[$id] = $label;
         }
     }
     return $mydisplaylist;
 }
 
-function call_jquery_select_into_subselects()
-{
+function call_jquery_select_into_subselects() {
     $script = "\n" . '<script type="text/javascript">' . "\n"
-        . '//<![CDATA[' . "\n";
-     $script .= '$(document).ready(function() {'
-        . 'var separator = / *\/ */;'
-        . "$('select.transformIntoSubselects').transformIntoSubselects(separator);"
-        . '});' . "\n";
-    $script .= '//]]>'."\n".'</script>';
+            . '//<![CDATA[' . "\n";
+    $script .= '$(document).ready(function() {'
+            . 'var separator = / *\/ */;'
+            . "$('select.transformIntoSubselects').transformIntoSubselects(separator);"
+            . '});' . "\n";
+    $script .= '//]]>' . "\n" . '</script>';
     return $script;
 }
 
@@ -525,68 +489,65 @@ function call_jquery_select_into_subselects()
  * @param string $shortname nom abrégé du champ
  * @return string $name nom du champ
  */
-function get_custom_info_field_label($shortname)
-{
+function get_custom_info_field_label($shortname) {
     global $DB;
     $name = $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
     return $name;
 }
 
 class core_wizard {
+    function create_course_to_validate() {
+        global $SESSION, $DB, $CFG;
+        // créer cours
+        $mydata = $this->prepare_course_to_validate();
+        $course = create_course($mydata);
+        // fonction addhoc - on supprime les enrols par défaut
+        $this->delete_default_enrol_course($course->id);
+        // save custom fields data
+        $mydata->id = $course->id;
+        $custominfo_data = custominfo_data::type('course');
 
-	function create_course_to_validate () {
-		global $SESSION, $DB, $CFG;
-		// créer cours
-		$mydata = $this->prepare_course_to_validate();
-		$course = create_course($mydata);
-		// fonction addhoc - on supprime les enrols par défaut
-		$this->delete_default_enrol_course($course->id);
-		// save custom fields data
-		$mydata->id = $course->id;
-		$custominfo_data = custominfo_data::type('course');
+        $mydata = customfields_wash($mydata);
 
-		$mydata = customfields_wash($mydata);
-
-		$custominfo_data->save_data($mydata);
-		$SESSION->wizard['idcourse'] = $course->id;
-		$SESSION->wizard['idenrolment'] = 'manual';
-		// tester si le cours existe bien ?
+        $custominfo_data->save_data($mydata);
+        $SESSION->wizard['idcourse'] = $course->id;
+        $SESSION->wizard['idenrolment'] = 'manual';
+        // tester si le cours existe bien ?
         //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
-
-		// inscrire des enseignants
-		if (isset($SESSION->wizard['form_step4']['user']) && count($SESSION->wizard['form_step4']['user'])) {
+        // inscrire des enseignants
+        if (isset($SESSION->wizard['form_step4']['user']) && count($SESSION->wizard['form_step4']['user'])) {
             $tabUser = $SESSION->wizard['form_step4']['user'];
             myenrol_teacher($course->id, $tabUser);
         }
 
-		// inscrire des cohortes
-		if (isset($SESSION->wizard['form_step5']['group']) && count($SESSION->wizard['form_step5']['group'])) {
-			$tabGroup = $SESSION->wizard['form_step5']['group'];
-			$erreurs = myenrol_cohort($course->id, $tabGroup);
-			if (count($erreurs)) {
-				$SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
-				$messageInterface = affiche_error_enrolcohort($erreurs);
-			}
-		} else {
-			// inscrire des clefs
-			$clefs = wizard_list_clef();
-			if (count($clefs)) {
-				myenrol_clef($course->id, $clefs);
-			}
-		}
-	}
+        // inscrire des cohortes
+        if (isset($SESSION->wizard['form_step5']['group']) && count($SESSION->wizard['form_step5']['group'])) {
+            $tabGroup = $SESSION->wizard['form_step5']['group'];
+            $erreurs = myenrol_cohort($course->id, $tabGroup);
+            if (count($erreurs)) {
+                $SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
+                $messageInterface = affiche_error_enrolcohort($erreurs);
+            }
+        } else {
+            // inscrire des clefs
+            $clefs = wizard_list_clef();
+            if (count($clefs)) {
+                myenrol_clef($course->id, $clefs);
+            }
+        }
+    }
 
-	function prepare_course_to_validate () {
-		global $SESSION, $USER;
-		$date = $SESSION->wizard['form_step2']['startdate'];
-		$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+    function prepare_course_to_validate() {
+        global $SESSION, $USER;
+        $date = $SESSION->wizard['form_step2']['startdate'];
+        $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
 
         $date2 = $SESSION->wizard['form_step2']['up1datefermeture'];
         $enddate = mktime(0, 0, 0, $date2['month'], $date2['day'], $date2['year']);
 
-		$datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
-		$mydata = (object) $datamerge;
-		$mydata->startdate = $startdate;
+        $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
+        $mydata = (object) $datamerge;
+        $mydata->startdate = $startdate;
 
         //step3 custominfo_field
         // compoante
@@ -603,35 +564,34 @@ class core_wizard {
         }
         $mydata->profile_field_up1niveau .= $SESSION->wizard['form_step3']['niveau'];
 
-		// cours doit être validé
-		$mydata->profile_field_up1avalider = 1;
-		$mydata->profile_field_up1datevalid = 0;
+        // cours doit être validé
+        $mydata->profile_field_up1avalider = 1;
+        $mydata->profile_field_up1datevalid = 0;
         $mydata->profile_field_up1datedemande = time();
-        $mydata->profile_field_up1demandeur = $USER->firstname . ' '. $USER->lastname;
+        $mydata->profile_field_up1demandeur = $USER->firstname . ' ' . $USER->lastname;
         $mydata->profile_field_up1datefermeture = $enddate;
 
-		return $mydata;
-	}
+        return $mydata;
+    }
 
-	// methode ad hoc : supprime les méthodes d'inscriptions guest et self
-	function delete_default_enrol_course ($courseid) {
-		global $DB;
-		$DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'self'));
-		$DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
-	}
+    // methode ad hoc : supprime les méthodes d'inscriptions guest et self
+    function delete_default_enrol_course($courseid) {
+        global $DB;
+        $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'self'));
+        $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
+    }
+
 }
 
 class my_elements_config {
-	public $categorie_cours = array('Période', 'Etablissement',
-		'Composante','Niveau'
-	);
-
-	public $role_teachers = array('editingteacher' => 'editingteacher',
-		'teacher' => 'noeditingteacher'
-	);
-
+    public $categorie_cours = array('Période', 'Etablissement',
+        'Composante', 'Niveau'
+    );
+    public $role_teachers = array('editingteacher' => 'editingteacher',
+        'teacher' => 'noeditingteacher'
+    );
     public $role_cohort = array('student' => 'student', 'guest' => 'guest');
-
     public $categorie_deph = array('1' => 'Période', '2' => 'Etablissement',
         '3' => 'Composante', '4' => 'Niveau');
+
 }
