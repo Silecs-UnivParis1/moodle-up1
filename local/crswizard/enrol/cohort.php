@@ -11,18 +11,15 @@ require_once('../lib_wizard.php');
 require_login();
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+
+require_capabilities($systemcontext);
+
 $PAGE->set_context($systemcontext);
-
-$capcreate = use_crswizard($systemcontext);
-
 $PAGE->set_url('/local/crswizard/enrol/cohort.php');
-
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('cohort', 'local_crswizard'));
-
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'), true);
 $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'), true);
-$PAGE->requires->js(new moodle_url('/local/crswizard/js/wizard.js'), true);
 
 
 echo $OUTPUT->header();
@@ -47,7 +44,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
             }
             echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
         }
-?>
+        ?>
 	</select>
 </div>
 
@@ -85,27 +82,5 @@ jQuery(document).ready(function () {
 </script>
 
 <?php
-$stepin = $SESSION->wizard['navigation']['stepin'];
-$suite = $SESSION->wizard['navigation']['suite'];
-$retour = $SESSION->wizard['navigation']['retour'];
-
-echo '<div align="center" style="margin:50px; clear:both"><div class="buttons">';
-echo '<input type="hidden" name="stepin" value="'.$stepin.'"/>';
-
-echo '<input type="hidden" name="stepgo-retour" value="'.$retour.'"/>';
-echo '<input type="hidden" name="stepgo-suite" value="'.$suite.'"/>';
-echo '<input type="hidden" id="stepgo" name="stepgo_" value=""/>';
-
-echo '<input type="hidden" id="cohort" value="1"/>';
-
-echo '<input type="hidden" name="sesskey" value="'.sesskey().'"/>';
-echo '<button type="submit" id="etaper" value="retour">'
-	. get_string('previousstage', 'local_crswizard') . '</button>';
-echo '<button type="submit" id="etapes" value="suivant">'
-	. get_string('nextstage', 'local_crswizard') . '</button>';
-
-echo '</div>';
-echo '</div>';
-echo '</form>';
-
-echo $OUTPUT->footer();
+echo '<input type="hidden" id="cohort" value="1" />';
+require __DIR__ . '/footer.php';

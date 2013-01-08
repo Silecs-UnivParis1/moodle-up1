@@ -14,33 +14,6 @@ function require_capabilities($context) {
     }
 }
 
-function get_stepgo($stepin, $post) {
-    switch ($stepin) {
-        case 5:
-            if (array_key_exists('stepgo_4', $post)) {
-                $stepgo = 4;
-                break;
-            }
-            if (array_key_exists('stepgo_6', $post)) {
-                $stepgo = 6;
-                break;
-            }
-            if (array_key_exists('stepgo_7', $post)) {
-                $stepgo = 7;
-                break;
-            }
-
-        default :
-            $stepgo = $stepin + 1;
-            $stepretour = $stepin - 1;
-            $clefr = 'stepgo_' . $stepretour;
-            if (array_key_exists($clefr, $post)) {
-                $stepgo = $stepretour;
-            }
-    }
-    return $stepgo;
-}
-
 /**
  * Returns the list of the names of the ancestor categories, including the target.
  * @global moodle_database $DB
@@ -199,7 +172,7 @@ function wizard_role($labels) {
 }
 
 /**
- * Enscrit des utilisateurs à un cours sous le rôle sélectionné
+ * Inscrit des utilisateurs à un cours sous le rôle sélectionné
  * @param int $courseid identifiant du cours
  * @param array $tabUsers array[rolename]=>array(iduser)
  */
@@ -221,18 +194,20 @@ function myenrol_teacher($courseid, $tabUsers) {
 }
 
 /**
- * Construit le tableau des groupes sélectionnés et les sauvegrade dans la
- * variable de session $SESSION->wizard['form_step5']['all-cohorts']
+ * Construit le tableau des groupes sélectionnés
+ * @return array
  */
 function wizard_get_enrolement_cohorts() {
     global $DB, $SESSION;
+
+    if (!isset($SESSION->wizard['form_step5']['group'])) {
+        return false;
+    }
+
     $list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
     $roles = wizard_role($labels);
-    if (!isset($SESSION->wizard['form_step5']['group'])) {
-        return false;
-    }
     $form5g = $SESSION->wizard['form_step5']['group'];
 
     foreach ($roles as $r) {
@@ -248,7 +223,7 @@ function wizard_get_enrolement_cohorts() {
             }
         }
     }
-    $SESSION->wizard['form_step5']['all-cohorts'] = $list;
+    return $list;
 }
 
 /**
@@ -257,14 +232,15 @@ function wizard_get_enrolement_cohorts() {
  */
 function wizard_get_enrolement_users() {
     global $DB, $SESSION;
-    $list = array();
-    $myconfig = new my_elements_config();
-    $labels = $myconfig->role_teachers;
-    $roles = wizard_role($labels);
 
     if (!isset($SESSION->wizard['form_step4']['user'])) {
         return false;
     }
+
+    $list = array();
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_teachers;
+    $roles = wizard_role($labels);
     $form4u = $SESSION->wizard['form_step4']['user'];
 
     foreach ($roles as $r) {
@@ -283,20 +259,19 @@ function wizard_get_enrolement_users() {
 
 /*
  * construit la liste des groupes sélectionnés encodé en json
+ * @todo Use json_encode(), or at least encode strings.
  * @return string
  */
-
 function wizard_preselected_cohort() {
     global $SESSION;
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
     $liste = '';
-    if (isset($SESSION->wizard['form_step5']['all-cohorts'])) {
+    if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
         foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
-                $label = $labels[$role];
-                $labelrole = get_string($label, 'local_crswizard');
+                $labelrole = get_string($labels[$role], 'local_crswizard');
             }
 
             foreach ($groups as $id => $group) {
@@ -321,20 +296,19 @@ function wizard_preselected_cohort() {
 
 /*
  * construit la liste des enseignants sélectionnés encodé en json
+ * @todo Use json_encode(), or at least encode strings.
  * @return string
  */
-
 function wizard_preselected_users() {
     global $SESSION;
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
     $liste = '';
-    if (isset($SESSION->wizard['form_step4']['all-users'])) {
+    if (!empty($SESSION->wizard['form_step4']['all-users'])) {
         foreach ($SESSION->wizard['form_step4']['all-users'] as $role => $users) {
             $labelrole = '';
             if (array_key_exists($role, $labels)) {
-                $label = $labels[$role];
-                $labelrole = get_string($label, 'local_crswizard');
+                $labelrole = get_string($labels[$role], 'local_crswizard');
             }
 
             foreach ($users as $id => $user) {

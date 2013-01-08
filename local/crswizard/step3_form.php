@@ -94,12 +94,6 @@ class course_wizard_step3_form extends moodleform {
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 3);
 
-        $mform->hardFreeze($tabfreeze);
-
-        $mform->addElement('hidden', 'stepin', null);
-        $mform->setType('stepin', PARAM_INT);
-        $mform->setConstant('stepin', 3);
-
 //--------------------------------------------------------------------------------
 
         $mform->addElement('header', 'gestion', get_string('managecourseblock', 'local_crswizard'));
@@ -110,6 +104,7 @@ class course_wizard_step3_form extends moodleform {
         $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
         $mform->setDefault('requestdate', time());
         $tabfreeze[] = 'requestdate';
+
         $mform->hardFreeze($tabfreeze);
 
 //---------------------------------------------------------------------------------

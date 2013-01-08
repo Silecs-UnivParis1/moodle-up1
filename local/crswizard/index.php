@@ -52,8 +52,9 @@ if (!$stepin) {
         unset($SESSION->wizard);
     }
 } else {
-    $stepgo = get_stepgo($stepin, $_POST);
+    $stepgo = $stepin + 1;
 }
+wizard_navigation($stepin);
 
 switch ($stepin) {
     case 1:
@@ -96,37 +97,39 @@ switch ($stepin) {
         }
         break;
     case 4:
-        if (!isset($SESSION->wizard['form_step4']['all-users'])) {
+        if (isset($_POST['step'])) {
+            //* @todo Validate user list
+            $SESSION->wizard['form_step' . $stepin] = $_POST;
             $SESSION->wizard['form_step4']['all-users'] = wizard_get_enrolement_users();
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         }
-        $steptitle = get_string('enrolteachers', 'local_crswizard');
-        $url = '/local/crswizard/enrol/teacher.php';
-        wizard_navigation(4);
-        if (isset($SESSION->wizard['form_step5'])) {
-            wizard_get_enrolement_cohorts();
-        }
-        redirect(new moodle_url($url));
+        redirect(new moodle_url('/local/crswizard/enrol/teacher.php'));
         break;
     case 5:
-        $steptitle = get_string('enrolcohorts', 'local_crswizard');
-        $url = '/local/crswizard/enrol/cohort.php';
-        wizard_navigation(5);
-        if (isset($SESSION->wizard['form_step4'])) {
-            wizard_get_enrolement_users();
+        if (isset($_POST['step'])) {
+            //* @todo Validate cohort list
+            $SESSION->wizard['form_step' . $stepin] = $_POST;
+            $SESSION->wizard['form_step5']['all-cohorts'] = wizard_get_enrolement_cohorts();
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         }
-        redirect(new moodle_url($url));
+        redirect(new moodle_url('/local/crswizard/enrol/cohort.php'));
         break;
     case 6:
         $steptitle = get_string('stepkey', 'local_crswizard');
-        wizard_navigation(6);
         $editform = new course_wizard_step_cle();
+
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step' . $stepin])) {
+                $editform->set_data($SESSION->wizard['form_step' . $stepin]);
+            }
+        }
         break;
     case 7:
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
-        wizard_navigation(7);
-        if (isset($SESSION->wizard['form_step5'])) {
-            wizard_get_enrolement_cohorts();
-        }
         $editform = new course_wizard_step_confirm();
         break;
     case 8:
