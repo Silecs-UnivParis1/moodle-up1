@@ -40,35 +40,6 @@ function get_stepgo($stepin, $post) {
     return $stepgo;
 }
 
-function validation_shortname($shortname) {
-    global $DB;
-
-    $errors = array();
-    $foundcourses = $DB->get_records('course', array('shortname' => $shortname));
-    if ($foundcourses) {
-        foreach ($foundcourses as $foundcourse) {
-            $foundcoursenames[] = $foundcourse->fullname;
-        }
-        $foundcoursenamestring = implode(',', $foundcoursenames);
-        $errors['shortname'] = get_string('shortnametaken', '', $foundcoursenamestring);
-    }
-    return $errors;
-}
-
-function validation_categorie($idcategory) {
-    global $DB;
-
-    $errors = array();
-    $category = $DB->get_record('course_categories', array('id' => $idcategory));
-    if ($category) {
-        if ($category->depth < 4) {
-            $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
-        }
-    } else {
-        $errors['category'] = get_string('categoryerrormsg2', 'local_crswizard');
-    }
-    return $errors;
-}
 
 function get_list_category($idcategory) {
     global $DB;
@@ -471,17 +442,6 @@ function wizard_get_mydisplaylist() {
         }
     }
     return $mydisplaylist;
-}
-
-function call_jquery_select_into_subselects() {
-    $script = "\n" . '<script type="text/javascript">' . "\n"
-            . '//<![CDATA[' . "\n";
-    $script .= '$(document).ready(function() {'
-            . 'var separator = / *\/ */;'
-            . "$('select.transformIntoSubselects').transformIntoSubselects(separator);"
-            . '});' . "\n";
-    $script .= '//]]>' . "\n" . '</script>';
-    return $script;
 }
 
 /**

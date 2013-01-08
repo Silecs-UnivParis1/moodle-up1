@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step2_form extends moodleform {
 
     function definition() {
-        global $SESSION;
+        global $OUTPUT;
 
         $mform = $this->_form;
 
@@ -26,15 +26,8 @@ class course_wizard_step2_form extends moodleform {
 
 /// form definition with new course defaults
 //--------------------------------------------------------------------------------
-        $mform->addElement('header', 'categorie', get_string('categoryblock', 'local_crswizard'));
-
+        $mform->addElement('header', 'categoryheader', get_string('categoryblock', 'local_crswizard'));
         $mform->addElement('select', 'category', '', wizard_get_mydisplaylist(), array('class' => 'transformIntoSubselects cache'));
-        if (isset($SESSION->wizard['form_step2']['category'])) {
-            $mform->setConstant('category', $SESSION->wizard['form_step2']['category']);
-        }
-        if (isset($SESSION->wizard['form_step2']['erreurs']['category'])) {
-            $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['category'], array('class' => 'required')));
-        }
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 
@@ -42,27 +35,15 @@ class course_wizard_step2_form extends moodleform {
         //$mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');
         $mform->setType('fullname', PARAM_MULTILANG);
-        if (isset($SESSION->wizard['form_step2']['fullname'])) {
-            $mform->setConstant('fullname', $SESSION->wizard['form_step2']['fullname']);
-        }
 
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
         //$mform->addHelpButton('shortname', 'shortnamecourse');
         $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
         $mform->setType('shortname', PARAM_MULTILANG);
-        if (isset($SESSION->wizard['form_step2']['shortname'])) {
-            $mform->setConstant('shortname', $SESSION->wizard['form_step2']['shortname']);
-        }
-        if (isset($SESSION->wizard['form_step2']['erreurs']['shortname'])) {
-            $mform->addElement('html', html_writer::tag('div', $SESSION->wizard['form_step2']['erreurs']['shortname'], array('class' => 'required')));
-        }
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');
         $mform->setType('summary_editor', PARAM_RAW);
-        if (isset($SESSION->wizard['form_step2']['summary_editor'])) {
-            $mform->setConstant('summary_editor', $SESSION->wizard['form_step2']['summary_editor']);
-        }
 
         $mform->addElement('header', 'parametre', get_string('coursesettingsblock', 'local_crswizard'));
 
@@ -71,21 +52,11 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
         // $mform->addHelpButton('startdate', 'startdate');
-        if (isset($SESSION->wizard['form_step2']['startdate'])) {
-            $date = $SESSION->wizard['form_step2']['startdate'];
-            $mform->setDefault('startdate', mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
-        } else {
-            $mform->setDefault('startdate', time());
-        }
+        $mform->setDefault('startdate', time());
 
         $datefermeture = 'up1datefermeture';
         $mform->addElement('date_selector', $datefermeture, get_string('up1datefermeture', 'local_crswizard'));
-        if (isset($SESSION->wizard['form_step2'][$datefermeture])) {
-            $date = $SESSION->wizard['form_step2'][$datefermeture];
-            $mform->setDefault($datefermeture, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
-        } else {
-            $mform->setDefault($datefermeture, time());
-        }
+        $mform->setDefault($datefermeture, time());
 
         /**
          * liste des paramètres de cours ayant une valeur par défaut
@@ -154,10 +125,52 @@ class course_wizard_step2_form extends moodleform {
 //--------------------------------------------------------------------------------
 
         $buttonarray = array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_1', get_string('previousstage', 'local_crswizard'), array('onclick' => 'skipClientValidation = true; return true;'));
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_3', get_string('nextstage', 'local_crswizard'));
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $buttonarray[] = $mform->createElement(
+                'html',
+                '<div class="previousstage">' . $OUTPUT->action_link(
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 1)),
+                    get_string('previousstage', 'local_crswizard')
+                ) . '</div>'
+        );
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_3', get_string('nextstage', 'local_crswizard'));
+        $mform->addGroup($buttonarray, 'buttonar', '', null, false);
         $mform->closeHeaderBefore('buttonar');
     }
 
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if (empty($errors)) {
+            $this->validation_shortname($data['shortname'], $errors);
+            $this->validation_category($data['category'], $errors);
+        }
+        return $errors;
+    }
+
+    private function validation_shortname($shortname, &$errors) {
+        global $DB;
+
+        $foundcourses = $DB->get_records('course', array('shortname' => $shortname));
+        if ($foundcourses) {
+            foreach ($foundcourses as $foundcourse) {
+                $foundcoursenames[] = $foundcourse->fullname;
+            }
+            $foundcoursenamestring = implode(',', $foundcoursenames);
+            $errors['shortname'] = get_string('shortnametaken', '', $foundcoursenamestring);
+        }
+        return $errors;
+    }
+
+    private function validation_category($idcategory, &$errors) {
+        global $DB;
+
+        $category = $DB->get_record('course_categories', array('id' => $idcategory));
+        if ($category) {
+            if ($category->depth < 4) {
+                $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
+            }
+        } else {
+            $errors['category'] = get_string('categoryerrormsg2', 'local_crswizard');
+        }
+        return $errors;
+    }
 }
