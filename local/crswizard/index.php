@@ -143,9 +143,9 @@ switch ($stepin) {
         }
         break;
     case 8:
-        // envoi message
         $corewizard = new core_wizard();
-        $corewizard->create_course_to_validate();
+        $errorMsg = $corewizard->create_course_to_validate();
+        // envoi message
         $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
         $message = $SESSION->wizard['form_step7']['message'];
         if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
@@ -153,6 +153,10 @@ switch ($stepin) {
                     . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
             $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
                     . $SESSION->wizard['form_step7']['remarques'];
+        }
+        if (isset($errorMsg)) {
+            $message .= "\n\nErreur lors de la demande :\n" . $errorMsg;
+            $messagehtml .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }
         send_course_request($message, $messagehtml);
         unset($SESSION->wizard);
@@ -170,12 +174,6 @@ $PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
-
-if (isset($messageInterface)) {
-    echo $OUTPUT->box_start();
-    echo $messageInterface;
-    echo $OUTPUT->box_end();
-}
 
 if (isset($editform)) {
     $editform->display();

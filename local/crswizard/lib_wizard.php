@@ -467,7 +467,7 @@ class core_wizard {
             $erreurs = myenrol_cohort($course->id, $tabGroup);
             if (count($erreurs)) {
                 $SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
-                $messageInterface = affiche_error_enrolcohort($erreurs);
+                return affiche_error_enrolcohort($erreurs);
             }
         } else {
             // inscrire des clefs
@@ -476,6 +476,7 @@ class core_wizard {
                 myenrol_clef($course->id, $clefs);
             }
         }
+        return '';
     }
 
     function prepare_course_to_validate() {
@@ -525,14 +526,21 @@ class core_wizard {
 }
 
 class my_elements_config {
-    public $categorie_cours = array('Période', 'Etablissement',
-        'Composante', 'Niveau'
+    public $categorie_cours = array(
+        'Période', 'Etablissement', 'Composante', 'Niveau'
     );
-    public $role_teachers = array('editingteacher' => 'editingteacher',
+    public $role_teachers = array(
+        'editingteacher' => 'editingteacher',
         'teacher' => 'noeditingteacher'
     );
-    public $role_cohort = array('student' => 'student', 'guest' => 'guest');
-    public $categorie_deph = array('1' => 'Période', '2' => 'Etablissement',
-        '3' => 'Composante', '4' => 'Niveau');
-
+    public $role_cohort = array(
+        'student' => 'student',
+        'guest' => 'guest'
+    );
+    public $categorie_deph = array(
+        '1' => 'Période',
+        '2' => 'Etablissement',
+        '3' => 'Composante',
+        '4' => 'Niveau',
+    );
 }
