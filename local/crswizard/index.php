@@ -40,8 +40,7 @@ $systemcontext = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
 
-//require_capability('moodle/course:request', $systemcontext);
-$capcreate = use_crswizard($systemcontext);
+require_capabilities($systemcontext);
 
 if (!isset($_POST['stepin'])) {
     $stepin = optional_param('stepin', 1, PARAM_INT);
