@@ -39,6 +39,7 @@ require_login();
 $systemcontext = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
+$PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
 require_capabilities($systemcontext);
 
@@ -54,7 +55,6 @@ if (!$stepin) {
     $stepgo = get_stepgo($stepin, $_POST);
 }
 
-$SESSION->wizard['form_step' . $stepin] = $_POST;
 switch ($stepin) {
     case 1:
         $steptitle = get_string('selectcourse', 'local_crswizard');
@@ -76,23 +76,29 @@ switch ($stepin) {
             if (isset($SESSION->wizard['form_step' . $stepin])) {
                 $editform->set_data($SESSION->wizard['form_step' . $stepin]);
             }
-            $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselects.js'));
         }
         break;
     case 3:
-        if (isset($SESSION->wizard['form_step4'])) {
-            wizard_get_enrolement_users();
-        }
         $steptitle = get_string('coursedescription', 'local_crswizard');
         $editform = new course_wizard_step3_form();
-        if (isset($SESSION->wizard['form_step3'])) {
-            $editform->set_data((object) $SESSION->wizard['form_step3']);
+
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step3'])) {
+                $editform->set_data($SESSION->wizard['form_step3']);
+            }
         }
         break;
     case 4:
+        if (!isset($SESSION->wizard['form_step4']['all-users'])) {
+            $SESSION->wizard['form_step4']['all-users'] = wizard_get_enrolement_users();
+        }
         $steptitle = get_string('enrolteachers', 'local_crswizard');
         $url = '/local/crswizard/enrol/teacher.php';
         wizard_navigation(4);

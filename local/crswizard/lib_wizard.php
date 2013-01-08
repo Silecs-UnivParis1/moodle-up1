@@ -1,4 +1,5 @@
 <?php
+/* @var $DB moodle_database */
 
 /**
  * Stop process if current user has no "create" or "request" course capabilities.
@@ -40,13 +41,20 @@ function get_stepgo($stepin, $post) {
     return $stepgo;
 }
 
-
+/**
+ * Returns the list of the names of the ancestor categories, including the target.
+ * @global moodle_database $DB
+ * @param integer $idcategory
+ * @return array
+ */
 function get_list_category($idcategory) {
     global $DB;
-    $categories = array();
     $selected = $DB->get_record('course_categories', array('id' => $idcategory));
     $tabidpath = explode('/', $selected->path);
     $tabcategory = array();
+    /**
+     * @todo Fetch all names in one call to $DB->get_records_menu()
+     */
     foreach ($tabidpath as $id) {
         if ($id) {
             $name = $DB->get_field('course_categories', 'name', array('id' => $id));
@@ -244,8 +252,8 @@ function wizard_get_enrolement_cohorts() {
 }
 
 /**
- * Construit le tableau des enseignants sélectionnés et les sauvegrade dans la
- * variable de session $SESSION->wizard['form_step4']['all-users']
+ * Construit le tableau des enseignants sélectionnés
+ * @return array
  */
 function wizard_get_enrolement_users() {
     global $DB, $SESSION;
@@ -253,7 +261,6 @@ function wizard_get_enrolement_users() {
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
     $roles = wizard_role($labels);
-    ;
 
     if (!isset($SESSION->wizard['form_step4']['user'])) {
         return false;
@@ -271,7 +278,7 @@ function wizard_get_enrolement_users() {
             }
         }
     }
-    $SESSION->wizard['form_step4']['all-users'] = $list;
+    return $list;
 }
 
 /*

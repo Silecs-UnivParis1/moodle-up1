@@ -19,7 +19,7 @@ class course_wizard_step3_form extends moodleform {
     protected $custominfo;
 
     function definition() {
-        global $USER, $DB, $SESSION;
+        global $USER, $DB, $SESSION, $OUTPUT;
 
         $tabfreeze = array();
         $mform = $this->_form;
@@ -37,6 +37,7 @@ class course_wizard_step3_form extends moodleform {
         if (isset($SESSION->wizard['form_step2']['category'])) {
             $idcat = (int) $SESSION->wizard['form_step2']['category'];
             $tabcategories = get_list_category($idcat);
+
             //Composante
             $type = $myconfig->categorie_cours[2];
             $nom = $tabcategories[2];
@@ -103,7 +104,7 @@ class course_wizard_step3_form extends moodleform {
 
         $mform->addElement('header', 'gestion', get_string('managecourseblock', 'local_crswizard'));
         $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
-        $mform->setConstant('user_name', $USER->firstname . ' ' . $USER->lastname);
+        $mform->setConstant('user_name', fullname($USER));
         $tabfreeze[] = 'user_name';
 
         $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
@@ -114,7 +115,13 @@ class course_wizard_step3_form extends moodleform {
 //---------------------------------------------------------------------------------
 
         $buttonarray = array();
-        $buttonarray[] = $mform->createElement('submit', 'stepgo_2', get_string('previousstage', 'local_crswizard'));
+        $buttonarray[] = $mform->createElement(
+                'html',
+                '<div class="previousstage">' . $OUTPUT->action_link(
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 2)),
+                    get_string('previousstage', 'local_crswizard')
+                ) . '</div>'
+        );
         $buttonarray[] = $mform->createElement(
                 'submit', 'stepgo_4', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
