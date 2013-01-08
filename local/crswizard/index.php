@@ -39,148 +39,144 @@ require_login();
 $systemcontext = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
+$PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
-//require_capability('moodle/course:request', $systemcontext);
-$capcreate = use_crswizard($systemcontext);
+require_capabilities($systemcontext);
 
-if (!isset($_POST['stepin'])) {
-    $stepin = optional_param('stepin', 1, PARAM_INT);
-    $stepgo = $stepin;
+$stepin = optional_param('stepin', 0, PARAM_INT);
+if (!$stepin) {
+    // new wizard process
+    $stepin = 1;
+    $stepgo = 1;
     if (isset($SESSION->wizard)) {
         unset($SESSION->wizard);
     }
 } else {
-    $stepin = $_POST['stepin'];
-    $stepgo = get_stepgo($stepin, $_POST);
+    $stepgo = $stepin + 1;
 }
+wizard_navigation($stepin);
 
-if (isset($stepgo)) {
-    $SESSION->wizard['form_step' . $stepin] = $_POST;
-    switch ($stepgo) {
-        case 1:
-            $steptitle = get_string('selectcourse', 'local_crswizard');
-            $step1form = step1_form();
-            break;
-        case 2:
-            $steptitle = get_string('coursedefinition', 'local_crswizard');
-            $editoroptions = array(
-                'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
-            );
+switch ($stepin) {
+    case 1:
+        $steptitle = get_string('selectcourse', 'local_crswizard');
+        $editform = new course_wizard_step1_form();
+        break;
+    case 2:
+        $steptitle = get_string('coursedefinition', 'local_crswizard');
+        $editoroptions = array(
+            'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
+        );
+        //$submission = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
+        $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
 
-            $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step' . $stepin])) {
+                $editform->set_data($SESSION->wizard['form_step' . $stepin]);
+            }
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselects.js'));
+        }
+        break;
+    case 3:
+        $steptitle = get_string('coursedescription', 'local_crswizard');
+        $editform = new course_wizard_step3_form();
 
-            $course = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
-            $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
-            break;
-        case 3:
-            $data = $SESSION->wizard['form_step2'];
-            $errors_name = validation_shortname($data['shortname']);
-            $errors_cat = validation_categorie($data['category']);
-            $errors = array_merge($errors_name, $errors_cat);
-            if (count($errors)) {
-                $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
-                $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
-                $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
-                $stepgo = 2;
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step3'])) {
+                $editform->set_data($SESSION->wizard['form_step3']);
+            }
+        }
+        break;
+    case 4:
+        if (isset($_POST['step'])) {
+            //* @todo Validate user list
+            $SESSION->wizard['form_step' . $stepin] = $_POST;
+            $SESSION->wizard['form_step4']['all-users'] = wizard_get_enrolement_users();
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        }
+        redirect(new moodle_url('/local/crswizard/enrol/teacher.php'));
+        break;
+    case 5:
+        if (isset($_POST['step'])) {
+            //* @todo Validate cohort list
+            $SESSION->wizard['form_step' . $stepin] = $_POST;
+            $SESSION->wizard['form_step5']['all-cohorts'] = wizard_get_enrolement_cohorts();
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        }
+        redirect(new moodle_url('/local/crswizard/enrol/cohort.php'));
+        break;
+    case 6:
+        $steptitle = get_string('stepkey', 'local_crswizard');
+        $editform = new course_wizard_step_cle();
 
-                $data['erreurs'] = $errors;
-                $SESSION->wizard['form_step2'] = $data;
-                $editform = new course_wizard_step2_form(NULL);
-                $steptitle = get_string('coursedefinition', 'local_crswizard');
-            } else {
-                if (isset($SESSION->wizard['form_step4'])) {
-                    wizard_get_enrolement_users();
-                }
-                $steptitle = get_string('coursedescription', 'local_crswizard');
-                $editform = new course_wizard_step3_form();
-                if (isset($SESSION->wizard['form_step3'])) {
-                    $editform->set_data((object) $SESSION->wizard['form_step3']);
-                }
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step' . $stepin])) {
+                $editform->set_data($SESSION->wizard['form_step' . $stepin]);
             }
-            break;
-        case 4:
-			$steptitle = get_string('enrolteachers', 'local_crswizard');
-			$url = '/local/crswizard/enrol/teacher.php';
-			wizard_navigation(4);
-            if (isset($SESSION->wizard['form_step5'])) {
-                wizard_get_enrolement_cohorts();
+        }
+        break;
+    case 7:
+        $steptitle = get_string('confirmationtitle', 'local_crswizard');
+        $editform = new course_wizard_step_confirm();
+
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            if (isset($SESSION->wizard['form_step7'])) {
+                $editform->set_data($SESSION->wizard['form_step7']);
             }
-			redirect(new moodle_url($url));
-            break;
-        case 5:
-			$steptitle = get_string('enrolcohorts', 'local_crswizard');
-            $url = '/local/crswizard/enrol/cohort.php';
-			wizard_navigation(5);
-            if (isset($SESSION->wizard['form_step4'])) {
-                wizard_get_enrolement_users();
-            }
-            redirect(new moodle_url($url));
-            break;
-        case 6:
-			$steptitle = get_string('stepkey', 'local_crswizard');
-			wizard_navigation(6);
-			$editform = new course_wizard_step_cle();
-            if (isset($SESSION->wizard['form_step5'])) {
-                wizard_get_enrolement_cohorts();
-            }
-            break;
-        case 7:
-			$steptitle = get_string('confirmationtitle', 'local_crswizard');
-            wizard_navigation(7);
-            if (isset($SESSION->wizard['form_step5'])) {
-                wizard_get_enrolement_cohorts();
-            }
-            $editform = new course_wizard_step_confirm();
-            break;
-        case 8:
-            // envoi message
-            $corewizard = new core_wizard();
-			$corewizard->create_course_to_validate();
-            $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
-            $message = $SESSION->wizard['form_step7']['message'];
-            if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-                $messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
-                        . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
-                $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
-                        . $SESSION->wizard['form_step7']['remarques'];
-            }
-            send_course_request($message, $messagehtml);
-            unset($SESSION->wizard);
-            redirect(new moodle_url('/'));
-            break;
-    }
+        }
+        break;
+    case 8:
+        $corewizard = new core_wizard();
+        $errorMsg = $corewizard->create_course_to_validate();
+        // envoi message
+        $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
+        $message = $SESSION->wizard['form_step7']['message'];
+        if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
+            $messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
+                    . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
+            $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
+                    . $SESSION->wizard['form_step7']['remarques'];
+        }
+        if (isset($errorMsg)) {
+            $message .= "\n\nErreur lors de la demande :\n" . $errorMsg;
+            $messagehtml .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
+        }
+        send_course_request($message, $messagehtml);
+        unset($SESSION->wizard);
+        redirect(new moodle_url('/'));
+        break;
 }
-$site = get_site();
 
 $straddnewcourse = get_string("addnewcourse");
 $PAGE->navbar->add($straddnewcourse);
 
-$title = "$site->shortname: $straddnewcourse";
-$fullname = $site->fullname;
-
-$PAGE->set_title($title);
-$PAGE->set_heading($fullname);
+$site = get_site();
+$PAGE->set_title("$site->shortname: $straddnewcourse");
+$PAGE->set_heading($site->fullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
 
-if (isset($stepgo) && $stepgo==2) {
-    echo call_jquery_select_into_subselects();
-}
-
-if (isset($messageInterface)) {
-    echo $OUTPUT->box_start();
-    echo $messageInterface;
-    echo $OUTPUT->box_end();
-}
-
 if (isset($editform)) {
     $editform->display();
-} elseif (isset($step1form)) {
-    echo $step1form;
 } else {
     echo '<p>Pas de formulaires</p>';
 }
