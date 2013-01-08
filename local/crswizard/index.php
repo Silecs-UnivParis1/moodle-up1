@@ -58,7 +58,7 @@ $SESSION->wizard['form_step' . $stepin] = $_POST;
 switch ($stepgo) {
     case 1:
         $steptitle = get_string('selectcourse', 'local_crswizard');
-        $step1form = step1_form();
+        $editform = new course_wizard_step1_form();
         break;
     case 2:
         $steptitle = get_string('coursedefinition', 'local_crswizard');
@@ -174,8 +174,6 @@ if (isset($messageInterface)) {
 
 if (isset($editform)) {
     $editform->display();
-} elseif (isset($step1form)) {
-    echo $step1form;
 } else {
     echo '<p>Pas de formulaires</p>';
 }
