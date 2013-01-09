@@ -67,14 +67,16 @@ jQuery(document).ready(function () {
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
         wsParams: { maxRows: 10 },
+        labelMaker: function(item) {
+            var label = $('#group-role > option:selected').text();
+            return label + ' : ' + '<b>' + item.label + '</b>';
+        },
         preSelected: <?php echo wizard_preselected_cohort(); ?>
     });
 
     $('#group-role').on('change', function() {
         var sel = $(this).val();
-        var label = $('#group-role > option:selected').text();
         $('#group-select').data('autocompleteGroup').settings.fieldName = 'group[' + sel + ']';
-        $('#group-select').data('autocompleteGroup').settings.labelDetails = label;
     });
     $('#group-role').change();
 });
