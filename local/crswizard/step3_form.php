@@ -44,11 +44,6 @@ class course_wizard_step3_form extends moodleform {
             $mform->setConstant($type, $tabcategories[2]);
             $tabfreeze[] = $type;
 
-            $label = 'up1composante';
-            $field = 'profile_field_' . $label;
-            $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_TEXT);
-
             //Niveau
             $type = strtolower($myconfig->categorie_cours[3]);
             $mform->addElement('text', $type, ucfirst($type), 'maxlength="40" size="20"');
