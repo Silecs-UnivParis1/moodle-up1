@@ -39,54 +39,33 @@ class course_wizard_step3_form extends moodleform {
             $tabcategories = get_list_category($idcat);
 
             //Composante
-            $type = $myconfig->categorie_cours[2];
-            $nom = $tabcategories[2];
-            $mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
-            $mform->setConstant($type, $nom);
+            $type = strtolower($myconfig->categorie_cours[2]);
+            $mform->addElement('text', $type, ucfirst($type), 'maxlength="40" size="20"');
+            $mform->setConstant($type, $tabcategories[2]);
             $tabfreeze[] = $type;
-
-            $mform->addElement('hidden', 'composante', null);
-            $mform->setType('composante', PARAM_MULTILANG);
-            $mform->setConstant('composante', $nom);
 
             $label = 'up1composante';
             $field = 'profile_field_' . $label;
             $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_MULTILANG);
-            if (isset($SESSION->wizard['form_step3'][$field])) {
-                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
-            }
+            $mform->setType($field, PARAM_TEXT);
 
             //Niveau
-            $type = $myconfig->categorie_cours[3];
-            $nom = $tabcategories[3];
-            $mform->addElement('text', $type, $type, 'maxlength="40" size="20", disabled="disabled"');
-            $mform->setConstant($type, $nom);
+            $type = strtolower($myconfig->categorie_cours[3]);
+            $mform->addElement('text', $type, ucfirst($type), 'maxlength="40" size="20"');
+            $mform->setConstant($type, $tabcategories[3]);
             $tabfreeze[] = $type;
-
-            $mform->addElement('hidden', 'niveau', null);
-            $mform->setType('niveau', PARAM_MULTILANG);
-            $mform->setConstant('niveau', $nom);
 
             $mform->addElement('header','autre_rattachement', get_string('categoryblockE3s1', 'local_crswizard'));
 
             $label = 'up1composante';
             $field = 'profile_field_' . $label;
             $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_MULTILANG);
-            if (isset($SESSION->wizard['form_step3'][$field])) {
-                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
-            }
-
-
+            $mform->setType($field, PARAM_TEXT);
 
             $label = 'up1niveau';
             $field = 'profile_field_' . $label;
             $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_MULTILANG);
-            if (isset($SESSION->wizard['form_step3'][$field])) {
-                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
-            }
+            $mform->setType($field, PARAM_TEXT);
         }
 
         $mform->addElement('header','identification', get_string('categoryblockE3s2', 'local_crswizard'));
@@ -96,10 +75,7 @@ class course_wizard_step3_form extends moodleform {
             $label = $field;
             $field = 'profile_field_' . $field;
             $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_MULTILANG);
-            if (isset($SESSION->wizard['form_step3'][$field])) {
-                $mform->setConstant($field, $SESSION->wizard['form_step3'][$field]);
-            }
+            $mform->setType($field, PARAM_TEXT);
         }
 
         //*********************************************
