@@ -1,40 +1,49 @@
 <?php
 /**
- * Strings for component 'wizard', language 'fr', branch 'MOODLE_20_STABLE'
+ * Strings for component 'wizard', language 'fr'
  *
  * @package    local
  * @subpackage crswizard
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+$string['pluginname'] = 'Assistant de création de cours';
+// capabilities
+$string['crswizard:creator'] = 'Créer un cours avec l\'assistant';
+$string['crswizard:validator'] = 'Approuver un cours créé avec l\'assistant';
+$string['crswizard:supervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant';
+$string['crswizard:localsupervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant, contexte local';
 
 $string['anotherneed'] = 'Un autre besoin';
 $string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
 $string['bockhelpE3'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
 $string['bockhelpE4s'] = 'Texte d\'aide et de conseil sur les rôles "Etudiants" et "Visiteur".';
-$string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
-$string['blocktitleE4s'] = 'Étudiants : inscriptions par cohortes';
+$string['blocktitleE4'] = 'Enseignant(s) contributeur(s) de l\'espace de cours';
+$string['blocktitleE4s'] = 'Étudiants : inscriptions par cohorte(s)';
 $string['categoryblock'] = 'Catégorie (rattachement principal de l\'espace de cours)';
-$string['categoryblockE3'] = 'Rattachement de l\'espace à l\'offre de formation';
+$string['categoryblockE3'] = 'Rattachement principal de l\'espace à l\'offre de formation';
+$string['categoryblockE3s1'] = 'Autre Rattachement de l\'espace à l\'offre de formation';
+$string['categoryblockE3s2'] = 'xxx';
 $string['categoryerrormsg1'] = 'Vous devez sélectionner un Niveau.';
 $string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
 $string['cohort'] = 'Cohorte';
 $string['cohortname'] = 'Libellé de groupe ou nom d\'étudiant';
 $string['cohorts'] = 'Groupes';
 $string['confirmation'] = 'Confirmation';
-$string['confirmationtitle'] = 'Étape 6 - Confirmation de la demande d\'ouverture d\'espace de cours';
+$string['confirmationtitle'] = 'Étape 7 - Finalisation de la demande';
 $string['confirmationblock'] = 'Votre demande d\'ouverture d\'espace de cours va être transmise aux modérateurs de la plateforme';
 $string['coursedefinition'] = 'Étape 2 - Identification de l\'espace de cours';
 $string['coursedescription'] = 'Étape 3 - Description de l\'espace de cours';
 $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
 $string['coursesettingshelp'] = 'Texte d’aide et de conseil. Suite du texte d’aide et de conseil. Suite du texte d’aide et de conseil.';
-$string['coursestartdate'] = 'Date d\'ouverture aux étudiants : ';
+$string['coursestartdate'] = 'Date d\'ouverture : ';
 $string['coursesummary'] = 'Texte de présentation : ';
 $string['editingteacher'] = 'Enseignant';
-$string['enrolcohorts'] = 'Étape 4 - Inscription des cohortes à l\'espace de cours';
+$string['enrolcohorts'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
 $string['enrolkey'] = 'Clé d\'inscription';
-$string['enrolteachers'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours';
+$string['enrolteachers'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (enseignants)';
 $string['findcohort'] = 'Rechercher un groupe d\'étudiants';
 $string['findteacher'] = 'Rechercher un enseignant';
 $string['finish'] = 'Terminer';
@@ -53,7 +62,6 @@ $string['messagekeyblock2'] = '<b>Attention : </b>Il faut renseigner le champ "<
 $string['nextstage'] = 'Étape suivante';
 $string['noeditingteacher'] = 'Enseignant non éditeur';
 $string['noticeconfirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
-$string['pluginname'] = 'Course Wizard';
 $string['previousstage'] = 'Étape précédente';
 $string['role'] = 'Rôle';
 $string['selectcourse'] = 'Étape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
@@ -62,17 +70,18 @@ $string['selectedteacher'] = 'Enseignants sélectionnés';
 $string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
 $string['summaryof'] = 'Récapitulatif de la demande';
 $string['student'] = 'Étudiant';
-$string['stepkey'] = 'Étape 5 - Clé d\'inscription';
+$string['stepkey'] = 'Étape 6 - Clé d\'inscription';
 $string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiants"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
-$string['up1datefermeture'] = 'Date de fermeture aux étudiants : ';
+$string['up1datefermeture'] = 'Date de fermeture : ';
 $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
 $string['up1mention'] = 'Mention(s) : ';
 $string['up1parcours'] = 'Parcours(s) : ';
 $string['up1specialite'] = 'Spécialité(s) : ';
-$string['up1niveau'] = 'Autre(s) niveau(x) : ';
+$string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
+$string['userlogin'] = 'Login du demandeur : ';
 $string['username'] = 'Nom du demandeur : ';
 $string['teachers'] = 'Enseignants';
 $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';

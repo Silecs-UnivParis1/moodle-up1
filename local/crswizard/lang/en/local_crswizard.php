@@ -1,12 +1,19 @@
 <?php
 /**
- * Strings for component 'wizard', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'wizard', language 'en'
  *
  * @package    local
  * @subpackage crswizard
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+$string['pluginname'] = 'Course Wizard';
+// capabilities
+$string['crswizard:creator'] = 'Create a course with the wizard';
+$string['crswizard:validator'] = 'Validate a course created with the wizard';
+$string['crswizard:supervalidator'] = 'Validate ANY course created with the wizard';
+$string['crswizard:localsupervalidator'] = 'Validate ANY course created with the wizard, local context';
 
 $string['anotherneed'] = 'Un autre besoin';
 $string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
@@ -16,7 +23,9 @@ $string['bockhelpE4s'] = 'Texte d\'aide et de conseil sur les rôles "Etudiants"
 $string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
 $string['blocktitleE4s'] = 'Étudiants : inscriptions par cohortes';
 $string['categoryblock'] = 'Category';
-$string['categoryblockE3'] = 'Rattachement de l\'espace à l\'offre de formation';
+$string['categoryblockE3'] = 'Rattachement principal de l\'espace à l\'offre de formation';
+$string['categoryblockE3s1'] = 'Autre Rattachement de l\'espace à l\'offre de formation';
+$string['categoryblockE3s2'] = 'xxx';
 $string['categoryerrormsg1'] = 'Vous devez sélectionner un Niveau.';
 $string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
 $string['cohort'] = 'Cohort';
@@ -69,6 +78,7 @@ $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
 $string['up1mention'] = 'Mention(s) : ';
 $string['up1parcours'] = 'Parcours(s) : ';
 $string['up1specialite'] = 'Spécialité(s) : ';
-$string['up1niveau'] = 'Autre(s) niveau(x) : ';
+$string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
+$string['userlogin'] = 'Login';
 $string['username'] = 'Username';
 $string['wizardcourse'] = 'Wizard CourseMoolde';

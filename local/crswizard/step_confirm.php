@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package    local
  * @subpackage crswizard
@@ -9,29 +10,29 @@ defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->libdir.'/custominfo/lib.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/custominfo/lib.php');
 require_once('lib_wizard.php');
 
 class course_wizard_step_confirm extends moodleform {
 
     function definition() {
-        global $USER, $DB, $SESSION;
+        global $USER, $DB, $SESSION, $OUTPUT;
 
-		$myconfig = new my_elements_config();
+        $myconfig = new my_elements_config();
 
         $tabfreeze = array();
-        $mform    = $this->_form;
+        $mform = $this->_form;
 
-        $mform->addElement('header','confirmation', get_string('confirmation', 'local_crswizard'));
+        $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
 
         $mform->addElement('html', html_writer::tag('p', get_string('confirmationblock', 'local_crswizard') . ' :'));
         $mform->addElement('html', html_writer::tag('p', '[Prénom Nom du modérateur et/ou membres du service TICE]'));
-        $mform->addElement('textarea', 'remarques', get_string('noticeconfirmation', 'local_crswizard'), array('rows'=>15, 'cols'=>80));
+        $mform->addElement('textarea', 'remarques', get_string('noticeconfirmation', 'local_crswizard'), array('rows' => 15, 'cols' => 80));
         $mform->setType('content', PARAM_RAW);
 
-        $user_name = $USER->firstname . ' '. $USER->lastname;
-        $mform->addElement('header','resume', get_string('summaryof', 'local_crswizard'));
+        $mform->addElement('header', 'resume', get_string('summaryof', 'local_crswizard'));
+        $user_name = fullname($USER);
         $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
         $mform->setConstant('user_name', $user_name);
         $tabfreeze[] = 'user_name';
@@ -44,11 +45,11 @@ class course_wizard_step_confirm extends moodleform {
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
-        $mform->setConstant('category',$idcat);
+        $mform->setConstant('category', $idcat);
         $tabfreeze[] = 'category';
 
         $fullname = $SESSION->wizard['form_step2']['fullname'];
-        $mform->addElement('text','fullname', get_string('fullnamecourse', 'local_crswizard'),'maxlength="254" size="50"');
+        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
         $mform->setConstant('fullname', $fullname);
         $tabfreeze[] = 'fullname';
 
@@ -58,8 +59,8 @@ class course_wizard_step_confirm extends moodleform {
         $tabfreeze[] = 'shortname';
 
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
-            . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
-            . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
+                . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
+                . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
         $date = $SESSION->wizard['form_step2']['startdate'];
@@ -81,9 +82,9 @@ class course_wizard_step_confirm extends moodleform {
             $labels = $myconfig->role_teachers;
             foreach ($allusers as $role => $users) {
                 if (array_key_exists($role, $labels)) {
-					$label = $labels[$role];
+                    $label = $labels[$role];
                     $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
-				}
+                }
                 foreach ($users as $id => $user) {
                     $identite = $user->firstname . ' ' . $user->lastname;
                     $mform->addElement('html', html_writer::tag('div', $identite, array('class' => 'fitem')));
@@ -91,43 +92,43 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 
-        if (isset($SESSION->wizard['form_step5']['all-cohorts']) && count($SESSION->wizard['form_step5']['all-cohorts'])) {
-            $allgroupes = $SESSION->wizard['form_step5']['all-cohorts'];
-            $mform->addElement('header','groupes', get_string('cohorts', 'local_crswizard'));
+        if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
+            $groupsbyrole = $SESSION->wizard['form_step5']['all-cohorts'];
+            $mform->addElement('header', 'groups', get_string('cohorts', 'local_crswizard'));
             $labels = $myconfig->role_cohort;
-            foreach ($allgroupes as $role => $groupes) {
+            foreach ($groupsbyrole as $role => $groups) {
                 if (array_key_exists($role, $labels)) {
-					$label = $labels[$role];
+                    $label = $labels[$role];
                     $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
-				}
-                foreach ($groupes as $id => $group) {
+                }
+                foreach ($groups as $id => $group) {
                     $mform->addElement('html', html_writer::tag('div', $group->name, array('class' => 'fitem')));
                 }
             }
         }
 
-		$clefs = wizard_list_clef();
-		if (count($clefs)) {
-			$mform->addElement('header','clefs', get_string('enrolkey', 'local_crswizard'));
-			foreach ($clefs as $type => $clef) {
-				$mform->addElement('html', html_writer::tag('h4', $type . ' : '));
-				$c = $clef['code'];
-				if (isset($clef['enrolstartdate'])) {
-					$date = $clef['enrolstartdate'];
-					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-					$mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
-					$mform->setConstant('enrolstartdate' . $c, $startdate);
-					$tabfreeze[] = 'enrolstartdate' . $c;
-				}
-				if (isset($clef['enrolenddate'])) {
-					$date = $clef['enrolenddate'];
-					$startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-					$mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
-					$mform->setConstant('enrolenddate' . $c, $startdate);
-					$tabfreeze[] = 'enrolenddate' . $c;
-				}
-			}
-		}
+        $clefs = wizard_list_clef();
+        if (count($clefs)) {
+            $mform->addElement('header', 'clefs', get_string('enrolkey', 'local_crswizard'));
+            foreach ($clefs as $type => $clef) {
+                $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
+                $c = $clef['code'];
+                if (isset($clef['enrolstartdate'])) {
+                    $date = $clef['enrolstartdate'];
+                    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                    $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
+                    $mform->setConstant('enrolstartdate' . $c, $startdate);
+                    $tabfreeze[] = 'enrolstartdate' . $c;
+                }
+                if (isset($clef['enrolenddate'])) {
+                    $date = $clef['enrolenddate'];
+                    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                    $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
+                    $mform->setConstant('enrolenddate' . $c, $startdate);
+                    $tabfreeze[] = 'enrolenddate' . $c;
+                }
+            }
+        }
 
         //--------------------------------------------------------------------------------
         if (isset($SESSION->wizard['idcourse'])) {
@@ -135,10 +136,10 @@ class course_wizard_step_confirm extends moodleform {
             $custominfo_data = custominfo_data::type('course');
             $cinfos = $custominfo_data->get_record($idcourse);
 
-            foreach ($cinfos as $label=>$info) {
+            foreach ($cinfos as $label => $info) {
                 $htmlinfo = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
-                    . $label . '</label></div></div>'
-                    . '<div class="felement fstatic">' . $info . '</div>';
+                        . $label . '</label></div></div>'
+                        . '<div class="felement fstatic">' . $info . '</div>';
                 $mform->addElement('html', html_writer::tag('div', $htmlinfo, array('class' => 'fitem')));
             }
         }
@@ -148,13 +149,13 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 7);
 
-        $urlCategory = new moodle_url('/course/category.php', array('id' => $idcat, 'edit' => 'on' ));
-        $messagehtml = '<div>Ce message concerne la demande de création de cours '. $fullname . ' ( ' . $shortname . ' )'
-            .' faite par ' . $user_name . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
-            . html_writer::link($urlCategory, $urlCategory)
-            . '</div>';
-        $message = 'Ce message concerne la demande de création de cours '. $fullname . ' ( ' . $shortname . ' )'
-            .' faite par ' . $user_name . '. Vous pouvez valider ou supprimer ce cours : ' . $urlCategory;
+        $urlCategory = new moodle_url('/course/category.php', array('id' => $idcat, 'edit' => 'on'));
+        $messagehtml = '<div>Ce message concerne la demande de création de cours ' . $fullname . ' ( ' . $shortname . ' )'
+                . ' faite par ' . $user_name . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
+                . html_writer::link($urlCategory, $urlCategory)
+                . '</div>';
+        $message = 'Ce message concerne la demande de création de cours ' . $fullname . ' ( ' . $shortname . ' )'
+                . ' faite par ' . $user_name . '. Vous pouvez valider ou supprimer ce cours : ' . $urlCategory;
         $mform->addElement('hidden', 'messagehtml', null);
         $mform->setType('messagehtml', PARAM_RAW);
         $mform->setConstant('messagehtml', $messagehtml);
@@ -163,8 +164,15 @@ class course_wizard_step_confirm extends moodleform {
         $mform->setType('message', PARAM_RAW);
         $mform->setConstant('message', $message);
 
-        $buttonarray=array();
-        $buttonarray[] = &$mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
+        $buttonarray = array();
+        $buttonarray[] = $mform->createElement(
+                'html',
+                '<div class="previousstage">' . $OUTPUT->action_link(
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 7)),
+                    get_string('previousstage', 'local_crswizard')
+                ) . '</div>'
+        );
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 

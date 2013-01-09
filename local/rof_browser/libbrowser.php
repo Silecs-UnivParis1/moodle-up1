@@ -130,6 +130,21 @@ class rof_browser {
 		10 => array('code' =>'course5', 'tabsub' => 'rof_course', 'tabenf' => 'rof_course'),
 	);
 
+    public $constant_diplome = array(
+        'licence' => 'Licence',
+        'master1aa' => 'Master 1',
+        'master2' => 'Master 2',
+        'dipU' => 'Diplôme d\'université',
+        'magistere' => 'Magistère'
+    );
+
+    public $constant_diplome_key = array(
+        'licence' => array('L1', 'L2', 'L3', 'DP'),
+        'master1' => array('M1', 'E1'),
+        'master2' => array('M2', 'E2', 'MA'),
+        'dipU' => array('U2', 'U3', 'U4', 'U5', 'U6'),
+        'magistere' => array('30')
+    );
 
 	public function setNiveau($niveau) {
 		$this->niveau = $niveau;
@@ -226,13 +241,22 @@ class rof_browser {
 
 			if($this->format) {
 				if ($this->typedip) {
-					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip='".$this->typedip."' " . $sort;
+                    $mydip = '';
+                    if ($this->typedip=='divers') {
+                        $listedip = $this->gettypedipdivers();
+                        $mydip = subToString($listedip);
+                    } else {
+                        $listedip = $this->constant_diplome_key[$this->typedip];
+                        foreach ($listedip as $rofid) {
+                            $mydip .= "'".trim($rofid)."',";
+                        }
+                        $mydip = substr($mydip, 0, -1);
+                    }
+
+					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip in (".$mydip.") " . $sort;
 					$subList = $DB->get_records_sql($sql);
 				} else {
-					$sql = "SELECT concat(COALESCE(c.value, 'Inconnue'), ' - ', r.typedip) as label, r.typedip, c.value "
-                        . "FROM (SELECT typedip FROM rof_program  WHERE rofid in ({$sub}) ) AS r "
-                        . "LEFT JOIN (SELECT value, dataimport FROM {rof_constant} WHERE element LIKE 'typeDiplome') AS c "
-                        . "ON (r.typedip=c.dataimport) GROUP BY label ". $sort;
+                    $sql = "SELECT DISTINCT typedip FROM rof_program WHERE rofid in ({$sub})";
 					$subList = $DB->get_records_sql($sql);
 					return $this->print_select_type_diplome($subList, $this->rofid, 2);
 				}
@@ -361,15 +385,38 @@ class rof_browser {
 		$nbSubList = count($subList);
 
 		if ($nbSubList) {
+            $listdipint = array();
+            $divers = FALSE;
+            // tableau intermediaire
+            $tabkey = $this->generate_tabconstantkey();
+
+            foreach ($subList as $key=>$val) {
+                if (array_key_exists($key, $tabkey)) {
+                    $listdipint[$tabkey[$key]] = $tabkey[$key];
+                } else {
+                    $divers = TRUE;
+                }
+            }
+
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
 			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Diplôme</option>';
-				foreach ($subList as $sl) {
-					$list .= '<option data_deep="' . $nivEnf . '" data_path="'
-						. $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
-						. $rofid . '_' . $sl->typedip . '" data_typedip="' . $sl->typedip . '">'
-						. $sl->label . '</option>';
-				}
+            foreach ($this->constant_diplome as $code => $label) {
+                if (array_key_exists($code, $listdipint)) {
+                    $list .= '<option data_deep="' . $nivEnf . '" data_path="'
+                        . $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
+                        . $rofid . '_' . $code . '" data_typedip="' . $code . '">'
+                        . $label . '</option>';
+                }
+            }
+            if ($divers) {
+                $code = 'divers';
+                $label = 'Divers';
+                $list .= '<option data_deep="' . $nivEnf . '" data_path="'
+                    . $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
+                    . $rofid . '_' . $code . '" data_typedip="' . $code . '">'
+                    . $label . '</option>';
+            }
 			$list .= '</select>';
 			$list .= '</div>';
 		}
@@ -464,4 +511,43 @@ class rof_browser {
 			. '</option>';
 		return $element;
 	}
+
+    /**
+     * Construit le tableau intermédiaire faisant correspondre à chaque rof_program.typedip
+     * le code interne de $this->constant_diplome_key
+     * @return array $tabkey
+     */
+    function generate_tabconstantkey()
+    {
+        $tabkey = array();
+        foreach ($this->constant_diplome_key as $dipl =>$keys) {
+            foreach ($keys as $k) {
+                $tabkey[$k] = $dipl;
+            }
+        }
+        return $tabkey;
+    }
+
+    /**
+     * renvoie la liste des rof_program.typedip classés
+     * dans le regroupement de diplôme divers
+     * @return string $list de format "cide1, code2, ..."
+     */
+    function gettypedipdivers()
+    {
+        global $DB;
+        $list = '';
+        $tabkey = $this->generate_tabconstantkey();
+        $sql = "SELECT DISTINCT typedip FROM rof_program";
+        $typesdip = $DB->get_records_sql($sql);
+        foreach ($typesdip as $k=>$v) {
+            if (! array_key_exists($k, $tabkey)) {
+                 $list .= $k . ',';
+            }
+        }
+        if ($list != '') {
+            $list = substr($list, 0, -1);
+        }
+        return $list;
+    }
 }
