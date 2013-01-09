@@ -6,10 +6,8 @@
  * @param $context (system)context
  */
 function require_capabilities($context) {
-    $has_right = has_capability('moodle/course:create', $context);
+    $has_right = has_capability('local/crswizard:creator', $context);
     if (!$has_right) {
-        require_capability('moodle/course:request', $context);
-    } else {
         throw new required_capability_exception($context, 'moodle/course:create', 'nopermissions', '');
     }
 }
