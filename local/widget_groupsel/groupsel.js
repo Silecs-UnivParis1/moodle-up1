@@ -20,7 +20,7 @@
         urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
         minLength: 4,
         wsParams: { maxRows : 9 }, // default parameters for the web service
-        labelDetails: '', // will be printed after the selected label
+        labelMaker: function(item) { return item.label; }, // will build the label from the selected item
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
         fieldName: 'group', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
@@ -69,7 +69,7 @@
                 select: function (event, ui) {
                     if (ui.item.source == 'groups') {
                         $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelDetails));
+                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelMaker));
                         $this.input.val('');
                     } else if (ui.item.source == 'users') {
                         $this.input.val(ui.item.label);
@@ -91,7 +91,7 @@
                     fieldName = items[i].fieldName;
                 }
                 $($this.settings.outputSelector, $this.elem)
-                    .append(buildSelectedBlock(items[i], fieldName, ''));
+                    .append(buildSelectedBlock(items[i], fieldName, defaultSettings.labelMaker));
             }
         },
 
@@ -239,10 +239,11 @@
         return $s;
     }
 
-    function buildSelectedBlock(item, inputName, details) {
+    function buildSelectedBlock(item, inputName, labelMaker) {
+        var a = 5;
         return $(
                 '<div class="group-item-block"><div class="group-item-selected">'
-                + item.label + details + '</div></div>'
+                + labelMaker(item) + '</div></div>'
             )
             .prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
             .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
