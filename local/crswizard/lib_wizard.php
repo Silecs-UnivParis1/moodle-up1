@@ -13,6 +13,25 @@ function require_capabilities($context) {
 }
 
 /**
+ * Reconstruit le tableau de chemins (période/é/c/niveau) pour le plugin jquery select-into-subselects.js
+ * @return array
+ * */
+function wizard_get_mydisplaylist() {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
+    $myconfig = new my_elements_config();
+    $mydisplaylist = array(' - / - / - / -');
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+/**
  * Returns the list of the names of the ancestor categories, including the target.
  * @global moodle_database $DB
  * @param integer $idcategory
@@ -21,7 +40,7 @@ function require_capabilities($context) {
 function get_list_category($idcategory) {
     global $DB;
     $selected = $DB->get_record('course_categories', array('id' => $idcategory));
-    $tabidpath = explode('/', $selected->path);
+    $tabidpath = explode(' / ', $selected->path);
     $tabcategory = array();
     /**
      * @todo Fetch all names in one call to $DB->get_records_menu()
@@ -394,41 +413,18 @@ function myenrol_clef($idcourse, $tabClefs) {
 }
 
 /**
- * Reconstruit le tableau $displaylist pour le plugin jquery select-into-subselects.js
- * @retun array() $mydisplaylist
- * */
-function wizard_get_mydisplaylist() {
-    $displaylist = array();
-    $parentlist = array();
-    make_categories_list($displaylist, $parentlist);
-    $myconfig = new my_elements_config();
-    $labels = $myconfig->categorie_deph;
-    $label0 = implode(' * / ', $labels);
-    $label0 .= ' * ';
-    $mydisplaylist = array(0 => $label0);
-
-    foreach ($displaylist as $id => $label) {
-        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {
-            $mydisplaylist[$id] = $label;
-        }
-    }
-    return $mydisplaylist;
-}
-
-/**
  * Renvoie le nom du Course custom fields de nom abrégé $shortname
  * @param string $shortname nom abrégé du champ
- * @return string $name nom du champ
+ * @return string nom du champ
  */
 function get_custom_info_field_label($shortname) {
     global $DB;
-    $name = $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
-    return $name;
+    return $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
 }
 
 class core_wizard {
     function create_course_to_validate() {
-        global $SESSION, $DB, $CFG;
+        global $SESSION, $CFG;
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
@@ -443,7 +439,7 @@ class core_wizard {
         $custominfo_data->save_data($mydata);
         $SESSION->wizard['idcourse'] = $course->id;
         $SESSION->wizard['idenrolment'] = 'manual';
-        // tester si le cours existe bien ?
+        //! @todo tester si le cours existe bien ?
         //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
         // inscrire des enseignants
         if (isset($SESSION->wizard['form_step4']['user']) && count($SESSION->wizard['form_step4']['user'])) {

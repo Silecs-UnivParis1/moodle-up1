@@ -32,7 +32,7 @@ var getTree = function (options, separator) {
 };
 
 var createOneSubselect = function (onchange, tree, depth) {
-    var subselect = $('<select class="required">').change(onchange).data(
+    var subselect = $('<select>').change(onchange).data(
         { depth: depth, tree: tree }
     );
     $.each(tree, function (pathElem, subtree) {
@@ -53,13 +53,13 @@ var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
 };
 
 var buildSelectLine = function(subselect, depth) {
-    var line = $('<div data-depth="' + depth + '">');
+    var line = $('<div class="fitem required fitem_fselect" data-depth="' + depth + '">');
     if (labels && depth in labels) {
         line.append(
             $('<div class="fitemtitle">').append($('<label>').text(labels[depth]))
         );
     }
-    line.append($('<div class="felement fitem_fselect">').append(subselect));
+    line.append($('<div class="felement fselect">').append(subselect));
     return line;
 }
 
