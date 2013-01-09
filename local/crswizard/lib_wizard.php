@@ -249,9 +249,11 @@ function wizard_get_enrolement_cohorts() {
  */
 function wizard_get_enrolement_users() {
     global $DB, $SESSION;
+
     if (!isset($SESSION->wizard['form_step4']['user'])) {
-        return '[]';
+        return false;
     }
+
     $list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
@@ -309,6 +311,9 @@ function wizard_preselected_cohort() {
  */
 function wizard_preselected_users() {
     global $SESSION;
+    if (!isset($SESSION->wizard['form_step4']['all-users'])) {
+        return '[]';
+    }
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
     $liste = array();
