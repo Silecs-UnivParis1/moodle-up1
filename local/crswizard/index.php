@@ -74,9 +74,6 @@ switch ($stepin) {
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         } else {
-            if (isset($SESSION->wizard['form_step' . $stepin])) {
-                $editform->set_data($SESSION->wizard['form_step' . $stepin]);
-            }
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselects.js'));
@@ -90,10 +87,6 @@ switch ($stepin) {
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
-        } else {
-            if (isset($SESSION->wizard['form_step3'])) {
-                $editform->set_data($SESSION->wizard['form_step3']);
-            }
         }
         break;
     case 4:
@@ -122,10 +115,6 @@ switch ($stepin) {
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
-        } else {
-            if (isset($SESSION->wizard['form_step' . $stepin])) {
-                $editform->set_data($SESSION->wizard['form_step' . $stepin]);
-            }
         }
         break;
     case 7:
@@ -136,10 +125,6 @@ switch ($stepin) {
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
-        } else {
-            if (isset($SESSION->wizard['form_step7'])) {
-                $editform->set_data($SESSION->wizard['form_step7']);
-            }
         }
         break;
     case 8:
@@ -176,6 +161,9 @@ echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
 echo $OUTPUT->heading($steptitle);
 
 if (isset($editform)) {
+    if (isset($SESSION->wizard['form_step' . $stepin])) {
+        $editform->set_data($SESSION->wizard['form_step' . $stepin]);
+    }
     $editform->display();
 } else {
     echo '<p>Pas de formulaires</p>';
