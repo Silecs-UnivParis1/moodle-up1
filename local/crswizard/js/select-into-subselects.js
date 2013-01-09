@@ -3,9 +3,9 @@
 var is_string = function (v){
     return typeof(v) === 'string';
 };
+var labels;
 
 var getTree = function (options, separator) {
-    var selected;
     var root = {};
     options.each(function () {
 	    var option = $(this);
@@ -33,58 +33,70 @@ var getTree = function (options, separator) {
 
 var createOneSubselect = function (onchange, tree, depth) {
     var subselect = $('<select class="required">').change(onchange).data(
-	{ depth: depth, tree: tree }
+        { depth: depth, tree: tree }
     );
     $.each(tree, function (pathElem, subtree) {
-	var option = $('<option>').text(pathElem);
-	subselect.append(option);
+        var option = $('<option>').text(pathElem);
+        subselect.append(option);
     });
     return subselect;
 };
 
 var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
     while (!is_string(tree)) {
-	var subselect = createOneSubselect(onchange, tree, depth);
-	selectsDiv.append(subselect);
-	depth++;
-	tree = tree[subselect.val()]; // use default value (ie first value)
+        var subselect = createOneSubselect(onchange, tree, depth);
+        selectsDiv.append(buildSelectLine(subselect, depth, labels));
+        depth++;
+        tree = tree[subselect.val()]; // use default value (ie first value)
     }
     return tree; // selected value
 };
+
+var buildSelectLine = function(subselect, depth) {
+    var line = $('<div data-depth="' + depth + '">');
+    if (labels && depth in labels) {
+        line.append(
+            $('<div class="fitemtitle">').append($('<label>').text(labels[depth]))
+        );
+    }
+    line.append($('<div class="felement fitem_fselect">').append(subselect));
+    return line;
+}
 
 var setSubselects = function (selectsDiv, onchange, root, wanted) {
     var tree = root;
     var depth_;
     $.each(wanted, function (depth, e) {
-	var subselect = createOneSubselect(onchange, tree, depth);
-	subselect.val(e);
-	selectsDiv.append(subselect);
-	tree = tree[e];
-	depth_ = depth;
+        var subselect = createOneSubselect(onchange, tree, depth);
+        subselect.val(e);
+        selectsDiv.append(buildSelectLine(subselect, depth));
+        tree = tree[e];
+        depth_ = depth;
     });
     addDefaultSubselects(selectsDiv, onchange, tree, depth_+1);
 };
 
 var createOnchangeHandler = function (theSelect, selectsDiv) {
     var onchange = function () {
-	var subselect = $(this);
-	var depth = subselect.data('depth');
-	var tree = subselect.data('tree');
-	var subtree = tree[subselect.val()];
+        var subselect = $(this);
+        var depth = subselect.data('depth');
+        var tree = subselect.data('tree');
+        var subtree = tree[subselect.val()];
 
-	selectsDiv.find("select:gt(" + depth + ")").remove(); // remove subselects
+        selectsDiv.children("div:gt(" + depth + ")").remove(); // remove subselects
 
-	var selectedVal = addDefaultSubselects(selectsDiv, onchange, subtree, depth+1);
-	theSelect.val(selectedVal);
+        var selectedVal = addDefaultSubselects(selectsDiv, onchange, subtree, depth+1);
+        theSelect.val(selectedVal);
     };
     return onchange;
 };
 
 var transformIntoSubselects = function (theSelect, separator) {
     var root = getTree(theSelect.find('option'), separator);
+    labels = theSelect.data('labels');
 
     var selectsDiv = $('<div class="subselects">');
-    theSelect.after(selectsDiv);
+    theSelect.parent().after(selectsDiv);
 
     var onchange = createOnchangeHandler(theSelect, selectsDiv);
 

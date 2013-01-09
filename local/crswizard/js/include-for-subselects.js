@@ -1,4 +1,4 @@
 $(document).ready(function() {
-    var separator = / *\/ */;
+    var separator = / \/ /;
     $('select.transformIntoSubselects').transformIntoSubselects(separator);
 });
