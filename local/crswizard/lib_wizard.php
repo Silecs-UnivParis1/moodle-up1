@@ -232,17 +232,14 @@ function wizard_get_enrolement_cohorts() {
  */
 function wizard_get_enrolement_users() {
     global $DB, $SESSION;
-
     if (!isset($SESSION->wizard['form_step4']['user'])) {
-        return false;
+        return '[]';
     }
-
     $list = array();
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
     $roles = wizard_role($labels);
     $form4u = $SESSION->wizard['form_step4']['user'];
-
     foreach ($roles as $r) {
         $code = $r['shortname'];
         if (array_key_exists($code, $form4u)) {
@@ -258,68 +255,69 @@ function wizard_get_enrolement_users() {
 }
 
 /*
- * construit la liste des groupes sélectionnés encodé en json
- * @todo Use json_encode(), or at least encode strings.
+ * construit la liste des groupes sélectionnés encodée en json
  * @return string
  */
 function wizard_preselected_cohort() {
     global $SESSION;
+    if (empty($SESSION->wizard['form_step5']['all-cohorts'])) {
+        return '[]';
+    }
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_cohort;
-    $liste = '';
-    if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
-        foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
-            $labelrole = '';
-            if (array_key_exists($role, $labels)) {
-                $labelrole = get_string($labels[$role], 'local_crswizard');
+    $liste = array();
+    foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
+        $labelrole = '';
+        if (isset($labels[$role])) {
+            $labelrole = "<div>" . get_string($labels[$role], 'local_crswizard') . "</div>";
+        }
+        foreach ($groups as $id => $group) {
+            $desc = '';
+            if ($group->description != '') {
+                $desc .= nl2br(strip_tags($group->description));
             }
-
-            foreach ($groups as $id => $group) {
-                $desc = '';
-                if ($group->description != '') {
-                    $desc .= strip_tags($group->description);
-                }
-                if (isset($group->size) && $group->size != '') {
-                    $desc .= ' (' . $group->size . ' inscrits)';
-                }
-                if ($desc != '') {
-                    $desc = '<div>' . $desc . '</div>';
-                }
-                $liste .= '{"label":"<b>' . $group->name . '</b>'
-                        . $desc . $labelrole . '", "value": "'
-                        . $id . '", "fieldName" : "group[' . $role . ']"},';
+            if (isset($group->size) && $group->size != '') {
+                $desc .= ' (' . $group->size . ' inscrits)';
             }
+            if ($desc != '') {
+                $desc = '<div>' . $desc . '</div>';
+            }
+            $liste[] = array(
+                "label" => $labelrole . '<div><b>' . $group->name . '</b>' . $desc . '</div>',
+                "value" => $id,
+                "fieldName" => "group[$role]",
+            );
         }
     }
-    return $liste;
+    return json_encode($liste);
 }
 
 /*
- * construit la liste des enseignants sélectionnés encodé en json
- * @todo Use json_encode(), or at least encode strings.
+ * construit la liste des enseignants sélectionnés encodée en json
  * @return string
  */
 function wizard_preselected_users() {
     global $SESSION;
     $myconfig = new my_elements_config();
     $labels = $myconfig->role_teachers;
-    $liste = '';
+    $liste = array();
     if (!empty($SESSION->wizard['form_step4']['all-users'])) {
         foreach ($SESSION->wizard['form_step4']['all-users'] as $role => $users) {
             $labelrole = '';
-            if (array_key_exists($role, $labels)) {
-                $labelrole = get_string($labels[$role], 'local_crswizard');
+            if (isset($labels[$role])) {
+                $labelrole = ' (' . get_string($labels[$role], 'local_crswizard') . ')';
             }
 
             foreach ($users as $id => $user) {
-                $desc = $user->firstname . ' ' . $user->lastname;
-                $desc .= ' (' . $labelrole . ')';
-                $liste .= '{"label":"' . $desc . '", "value": "'
-                        . $id . '", "fieldName" : "user[' . $role . ']"},';
+                $liste[] = array(
+                    "label" => fullname($user) . $labelrole,
+                    "value" => $id,
+                    "fieldName" => "user[$role]",
+                );
             }
         }
     }
-    return $liste;
+    return json_encode($liste);
 }
 
 function wizard_list_clef() {

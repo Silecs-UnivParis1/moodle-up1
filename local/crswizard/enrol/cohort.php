@@ -67,7 +67,7 @@ jQuery(document).ready(function () {
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
         wsParams: { maxRows: 10 },
-        preSelected: [<?php echo wizard_preselected_cohort(); ?>]
+        preSelected: <?php echo wizard_preselected_cohort(); ?>
     });
 
     $('#group-role').on('change', function() {
