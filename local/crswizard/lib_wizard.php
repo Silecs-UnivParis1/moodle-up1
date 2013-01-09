@@ -2,14 +2,11 @@
 /* @var $DB moodle_database */
 
 /**
- * Stop process if current user has no "create" or "request" course capabilities.
+ * Stop process if current user does not have the right permissions.
  * @param $context (system)context
  */
 function require_capabilities($context) {
-    $has_right = has_capability('local/crswizard:creator', $context);
-    if (!$has_right) {
-        throw new required_capability_exception($context, 'moodle/course:create', 'nopermissions', '');
-    }
+    require_capability('local/crswizard:creator', $context);
 }
 
 /**
