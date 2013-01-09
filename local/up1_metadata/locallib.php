@@ -2,7 +2,7 @@
 /**
  * @package    local
  * @subpackage up1_metadata
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -11,19 +11,22 @@ function up1_metadata() {
 
     $res = array(
         'Identification' => array(
+            'complement' => array('name' => 'Complément intitulé', 'datatype' => 'text', 'locked' => 0),
             'nomnorme' => array('name' => 'Nom normé', 'datatype' => 'text', 'locked' => 0),
             'abregenorme' => array('name' => 'Nom abrégé normé', 'datatype' => 'text', 'locked' => 0),
             'rofpath' => array('name' => 'Chemin ROF', 'datatype' => 'text', 'locked' => 0),
             'rofpathid' => array('name' => 'Chemin ROFid', 'datatype' => 'text', 'locked' => 0),
             'code' => array('name' => 'Code Apogée', 'datatype' => 'text', 'locked' => 1),
             'rofid' => array('name' => 'RofId', 'datatype' => 'text', 'locked' => 1),
-            'rofname' => array('name' => 'Nom ROF', 'datatype' => 'text', 'locked' => 0)
+            'rofname' => array('name' => 'Nom ROF', 'datatype' => 'text', 'locked' => 0),
         ),
         'Indexation' => array(
             'periode' => array('name' => 'Période', 'datatype' => 'text', 'locked' => 0),
             'composante' => array('name' => 'Composante', 'datatype' => 'text', 'locked' => 0),
             'semestre' => array('name' => 'Semestre', 'datatype' => 'text', 'locked' => 0),
             'niveau' => array('name' => 'Niveau', 'datatype' => 'text', 'locked' => 0),
+            'niveaulmda' => array('name' => 'Niveau LMDA', 'datatype' => 'text', 'locked' => 0),
+            'niveauannee' => array('name' => 'Niveau année', 'datatype' => 'text', 'locked' => 0),
             'composition' => array('name' => 'Composition', 'datatype' => 'text', 'locked' => 0)
         ),
         'Diplome' => array(
@@ -39,17 +42,21 @@ function up1_metadata() {
             'specialite' => array('name' => 'Spécialité', 'datatype' => 'text', 'locked' => 0),
             'parcours' => array('name' => 'Parcours', 'datatype' => 'text', 'locked' => 0)
         ),
-        'Cycle de vie' => array(
-            'demandeur' => array('name' => 'Demandeur', 'datatype' => 'text', 'locked' => 0),
-            'responsable' => array('name' => 'Responsable', 'datatype' => 'text', 'locked' => 0),
-            'datedemande' => array('name' => 'Date demande', 'datatype' => 'datetime', 'locked' => 0),
+        'Cycle de vie - création' => array(
             'avalider' => array('name' => 'Attente de validation', 'datatype' => 'checkbox', 'locked' => 0),
-            'approbateurid' => array('name' => 'Approbateur Id', 'datatype' => 'text', 'locked' => 0),
-            'approbateur' => array('name' => 'Approbateur', 'datatype' => 'text', 'locked' => 0),
+            'responsable' => array('name' => 'Responsable enseignement (ROF)', 'datatype' => 'text', 'locked' => 0), // d'après le ROF
+            'demandeurid' => array('name' => 'Demandeur Id', 'datatype' => 'text', 'locked' => 0),
+            'datedemande' => array('name' => 'Date demande', 'datatype' => 'datetime', 'locked' => 0),
+            'approbateurpropid' => array('name' => 'Approbateur proposé Id', 'datatype' => 'text', 'locked' => 0),
+            'approbateureffid' => array('name' => 'Approbateur effectif Id', 'datatype' => 'text', 'locked' => 0),
             'datevalid' => array('name' => 'Date validation', 'datatype' => 'datetime', 'locked' => 0),
+        ),
+         'Cycle de vie - gestion' => array(
             'datefermeture' => array('name' => 'Date fermeture', 'datatype' => 'datetime', 'locked' => 0),
             'dateprevarchivage' => array('name' => 'Date prévis. archivage', 'datatype' => 'datetime', 'locked' => 0),
             'datearchivage' => array('name' => 'Date archivage', 'datatype' => 'datetime', 'locked' => 0),
+        ),
+         'Cycle de vie - Informations techniques' => array(
             'generateur' => array('name' => 'Générateur', 'datatype' => 'text', 'locked' => 0),
             'modele' => array('name' => 'Modèle', 'datatype' => 'text', 'locked' => 0)
         )
