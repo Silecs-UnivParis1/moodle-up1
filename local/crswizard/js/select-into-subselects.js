@@ -20,7 +20,7 @@ var getTree = function (options, separator) {
 		        // move the node into subselect
 		        current[e] = { "Tout": current[e] };
 	        }
-	        current = current[e] || (current[e] = {})
+	        current = current[e] || (current[e] = {'-': ''})
 	    });
 	    // handle conflict on leaves text
 	    while (current[lastElem]) lastElem += '_';
