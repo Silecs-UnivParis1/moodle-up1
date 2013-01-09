@@ -37,7 +37,10 @@ function wizard_get_mydisplaylist() {
 function get_list_category($idcategory) {
     global $DB;
     $selected = $DB->get_record('course_categories', array('id' => $idcategory));
-    $tabidpath = explode(' / ', $selected->path);
+    $tabidpath = explode('/', $selected->path);
+    if (count($tabidpath) < 4) {
+        throw new Exception("Wrong category with path {$selected->path}");
+    }
     $tabcategory = array();
     /**
      * @todo Fetch all names in one call to $DB->get_records_menu()
