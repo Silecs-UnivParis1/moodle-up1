@@ -24,7 +24,7 @@ $capabilities = array(
             'student'        => CAP_PREVENT,
             'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager'          => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
 
@@ -34,9 +34,9 @@ $capabilities = array(
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes'   => array(
             'student'        => CAP_PREVENT,
-            'teacher'        => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager'          => CAP_ALLOW
+            'teacher'        => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager'        => CAP_ALLOW
         )
     ),
 
@@ -46,9 +46,9 @@ $capabilities = array(
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes'   => array(
             'student'        => CAP_PREVENT,
-            'teacher'        => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager'          => CAP_ALLOW
+            'teacher'        => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager'        => CAP_ALLOW
         )
     ),
     'local/crswizard:localsupervalidator' => array(
@@ -57,9 +57,9 @@ $capabilities = array(
         'contextlevel' => CONTEXT_COURSECAT,
         'archetypes'   => array(
             'student'        => CAP_PREVENT,
-            'teacher'        => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager'          => CAP_ALLOW
+            'teacher'        => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager'        => CAP_ALLOW
         )
     ),
 
