@@ -15,12 +15,17 @@
  * @param int $usermaxrows
  * @param int $groupmaxrows
  * @param string $filterstudent = 'no' | 'only' | 'both'
+ * @param string $filtergroupcat = '' | 'structures' | 'affiliation' | ...
  * @return array('users' => $users, 'groups' => $groups)
  */
-function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both') {
+function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', $filtergroupcat) {
 
     $users  = mws_search_users($token, $usermaxrows, $filterstudent);
-    $groups = mws_search_groups($token, $groupmaxrows);
+    if ($filtergroupcat == '') {
+        $groups = mws_search_groups($token, $groupmaxrows);
+    } else {
+        $groups = mws_search_groups_category($token, $filtergroupcat, $groupmaxrows);
+    }
     return array('users' => $users, 'groups' => $groups);
 }
 
@@ -94,6 +99,9 @@ function mws_search_groups_category($token, $category, $maxrows) {
     $ptoken = '%' . $token . '%';
 
     $wherecat = categoryToWhere();
+    if ( ! isset($wherecat[$category]) ) {
+        return array();
+    }
     $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
         . "( name LIKE ? OR idnumber LIKE ? ) AND " . $wherecat[$category] ;
     // echo $sql . " <br />\n" ; //DEBUG
