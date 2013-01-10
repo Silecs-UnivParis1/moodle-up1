@@ -8,7 +8,7 @@ $stepback = $SESSION->wizard['navigation']['retour'];
     <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>"/>
 
     <div class="buttons">
-        <span>
+        <span class="previousstage">
             <?php
             echo $OUTPUT->action_link(
                     new moodle_url('/local/crswizard/index.php', array('stepin' => $stepback)),

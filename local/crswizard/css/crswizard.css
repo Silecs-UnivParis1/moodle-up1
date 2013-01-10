@@ -5,3 +5,15 @@
 div.previousstage {
     margin-bottom: -6ex;
 }
+.previousstage a {
+    color: inherit;
+    text-transform: none;
+    padding: 1px 6px;
+    text-align: center;
+    border: 2px outset buttonface;
+    background-color: buttonface;
+    box-sizing: border-box;
+}
+.previousstage a:hover {
+    text-decoration: none;
+}
