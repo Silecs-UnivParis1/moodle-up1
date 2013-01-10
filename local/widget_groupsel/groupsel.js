@@ -111,16 +111,16 @@
                     uid: uid
                 },
                 success: function (data) {
-					var groups = sortByCategory(data);
-					transformGroupItems(groups);
+                    var groups = sortByCategory(data);
+                    transformGroupItems(groups);
                     var items = $this.prepareList(groups, 'est membre des ' + groups.length + ' groupes :', function (item) {
-					   return {
-						   label: groupItemToLabel(item),
-						   value: item.key,
-						   source: 'groups',
-                           pre: item.pre
-					   };
-					}, $this.settings.wsParams.groupMaxRows);
+                        return {
+                            label: groupItemToLabel(item),
+                            value: item.key,
+                            source: 'groups',
+                            pre: item.pre
+                       };
+                    }, $this.settings.wsParams.groupMaxRows);
                     ac.data("autocomplete")._suggest(items);
                 }
             });
