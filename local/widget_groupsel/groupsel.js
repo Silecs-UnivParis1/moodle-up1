@@ -19,7 +19,7 @@
         urlGroups: 'http://wsgroups.univ-paris1.fr/search',
         urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
         minLength: 4,
-        wsParams: { maxRows : 9 }, // default parameters for the web service
+        wsParams: { maxRows: 10 }, // default parameters for the web service (cf userMaxRows, groupMaxRows)
         dataType: "jsonp",
         labelMaker: function(item) { return item.label; }, // will build the label from the selected item
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
@@ -30,6 +30,12 @@
 
     $.fn.autocompleteGroup = function (options) {
         var settings = $.extend(true, {}, defaultSettings, options || {});
+        if (!options.wsParams.userMaxRows) {
+            options.wsParams.userMaxRows = options.wsParams.maxRows
+        }
+        if (!options.wsParams.groupMaxRows) {
+            options.wsParams.groupMaxRows = options.wsParams.maxRows
+        }
 
         return this.each(function() {
             var $elem = $(this);
@@ -114,7 +120,7 @@
 						   source: 'groups',
                            pre: item.pre
 					   };
-					});
+					}, $this.settings.wsParams.groupMaxRows);
                     ac.data("autocomplete")._suggest(items);
                 }
             });
@@ -137,20 +143,20 @@
                         response($.merge(
                             $this.prepareList(groups, 'Groupes', function (item) {
                                     return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
-                            }),
+                            }, $this.settings.wsParams.groupMaxRows),
                             $this.prepareList(data.users, 'Personnes', function (item) {
                                     return { label: userItemToLabel(item), value: item.uid, source: 'users' };
-                            })
+                            }, $this.settings.wsParams.userMaxRows)
                         ));
                     }
                 });
             }
         },
 
-        prepareList: function(list, titleLabel, itemToResponse) {
+        prepareList: function(list, titleLabel, itemToResponse, maxRows) {
             var $this = this;
             var len = list.length;
-            if (len > ($this.settings.wsParams.maxRows)) {
+            if (len > (maxRows)) {
                 list[len-1] = { source: 'title', label: '…'};
             }
             return $.merge(
