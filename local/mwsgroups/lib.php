@@ -4,7 +4,7 @@
 /**
  * @package    local
  * @subpackage mwsgroups
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -22,7 +22,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
 
     // search on users
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
-        . "( username LIKE ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
+        . "( username = ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
     if ($filterstudent == 'no') {
         $sql .= " AND idnumber = '' ";
     }
@@ -30,7 +30,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
         $sql .= " AND idnumber != '' ";
     }
     $sql .= "ORDER BY lastname ASC, firstname ASC";
-    $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
+    $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken), 0, $maxrows);
     $users = array();
     foreach ($records as $record) {
         $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
