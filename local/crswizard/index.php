@@ -118,6 +118,8 @@ switch ($stepin) {
         }
         break;
     case 7:
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+        $PAGE->requires->js(new moodle_url('/local/crswizard/js/jquery_crswizard.js'), true);
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
         $editform = new course_wizard_step_confirm();
         $corewizard = new core_wizard($SESSION->wizard, $USER);
