@@ -42,28 +42,22 @@ class course_wizard_step_confirm extends moodleform {
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
-        $mform->setConstant('category', $idcat);
 
         $fullname = $SESSION->wizard['form_step2']['fullname'];
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
-        $mform->setConstant('fullname', $fullname);
 
         $shortname = $SESSION->wizard['form_step2']['shortname'];
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
-        $mform->setConstant('shortname', $shortname);
 
+        /** @todo display the summary correctly, with Moodle's conversion functions */
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
                 . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
                 . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
-        $startdate = $SESSION->wizard['form_step2']['startdate'];
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
-        $mform->setConstant('startdate', $startdate);
 
-        $enddate = $SESSION->wizard['form_step2']['up1datefermeture'];
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
-        $mform->setConstant('up1datefermeture', $enddate);
 
         if (isset($SESSION->wizard['form_step4']['all-users']) && count($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
@@ -101,6 +95,7 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 
+        /** @todo Do not set the values here, share the code that parses the forms data */
         $clefs = wizard_list_clef();
         if (count($clefs)) {
             $mform->addElement('header', 'clefs', get_string('enrolkey', 'local_crswizard'));
@@ -108,14 +103,12 @@ class course_wizard_step_confirm extends moodleform {
                 $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                 $c = $clef['code'];
                 if (isset($clef['enrolstartdate'])) {
-                    $startdate = $clef['enrolstartdate'];
                     $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
-                    $mform->setConstant('enrolstartdate' . $c, $startdate);
+                    $mform->setConstant('enrolstartdate' . $c, $clef['enrolstartdate']);
                 }
                 if (isset($clef['enrolenddate'])) {
-                    $startdate = $clef['enrolenddate'];
                     $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
-                    $mform->setConstant('enrolenddate' . $c, $startdate);
+                    $mform->setConstant('enrolenddate' . $c, $clef['enrolenddate']);
                 }
             }
         }

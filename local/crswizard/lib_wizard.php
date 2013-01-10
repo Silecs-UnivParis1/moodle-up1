@@ -80,9 +80,9 @@ function send_course_request($message, $messagehtml) {
     }
 }
 
-function myenrol_cohort($idcourse, $tabGroup) {
+function myenrol_cohort($courseid, $tabGroup) {
     global $DB, $CFG;
-    if ($idcourse == SITEID) {
+    if ($courseid == SITEID) {
         throw new coding_exception('Invalid request to add enrol instance to frontpage.');
     }
     $error = array();
@@ -95,18 +95,18 @@ function myenrol_cohort($idcourse, $tabGroup) {
         foreach ($groupes as $idgroup) {
             $cohort = $DB->get_record('cohort', array('idnumber' => $idgroup));
             if ($cohort) {
-                if (!$DB->record_exists('enrol', array('enrol' => $enrol, 'courseid' => $idcourse, 'customint1' => $cohort->id))) {
+                if (!$DB->record_exists('enrol', array('enrol' => $enrol, 'courseid' => $courseid, 'customint1' => $cohort->id))) {
                     $instance = new stdClass();
                     $instance->enrol = $enrol;
                     $instance->status = $status;
-                    $instance->courseid = $idcourse;
+                    $instance->courseid = $courseid;
                     $instance->customint1 = $cohort->id;
                     $instance->roleid = $roleid;
                     $instance->enrolstartdate = 0;
                     $instance->enrolenddate = 0;
                     $instance->timemodified = time();
                     $instance->timecreated = $instance->timemodified;
-                    $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
+                    $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $courseid));
                     $DB->insert_record('enrol', $instance);
                 }
             } else {
@@ -116,7 +116,7 @@ function myenrol_cohort($idcourse, $tabGroup) {
     }
 
     require_once("$CFG->dirroot/enrol/cohort/locallib.php");
-    enrol_cohort_sync($idcourse);
+    enrol_cohort_sync($courseid);
     return $error;
 }
 
@@ -348,12 +348,19 @@ function get_custom_info_field_label($shortname) {
 }
 
 class core_wizard {
+    private $formdata;
+    private $user;
+
+    public function __construct($formdata, $user) {
+        $this->formdata = $formdata;
+        $this->user = $user;
+    }
+
     public function create_course_to_validate() {
-        global $SESSION;
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
-        // fonction addhoc - on supprime les enrols par défaut
+        // on supprime les enrols par défaut
         $this->delete_default_enrol_course($course->id);
         // save custom fields data
         $mydata->id = $course->id;
@@ -361,22 +368,21 @@ class core_wizard {
         $cleandata = $this->customfields_wash($mydata);
         $custominfo_data->save_data($cleandata);
 
-        $SESSION->wizard['idcourse'] = $course->id;
-        $SESSION->wizard['idenrolment'] = 'manual';
+        $this->update_session($course->id);
         //! @todo tester si le cours existe bien ?
         //$context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
         // inscrire des enseignants
-        if (isset($SESSION->wizard['form_step4']['user']) && count($SESSION->wizard['form_step4']['user'])) {
-            $tabUser = $SESSION->wizard['form_step4']['user'];
+        if (isset($this->formdata['form_step4']['user']) && count($this->formdata['form_step4']['user'])) {
+            $tabUser = $this->formdata['form_step4']['user'];
             myenrol_teacher($course->id, $tabUser);
         }
 
         // inscrire des cohortes
-        if (isset($SESSION->wizard['form_step5']['group']) && count($SESSION->wizard['form_step5']['group'])) {
-            $tabGroup = $SESSION->wizard['form_step5']['group'];
+        if (isset($this->formdata['form_step5']['group']) && count($this->formdata['form_step5']['group'])) {
+            $tabGroup = $this->formdata['form_step5']['group'];
             $erreurs = myenrol_cohort($course->id, $tabGroup);
             if (count($erreurs)) {
-                $SESSION->wizard['form_step5']['cohorterreur'] = $erreurs;
+                $this->formdata['form_step5']['cohorterreur'] = $erreurs;
                 return affiche_error_enrolcohort($erreurs);
             }
         } else {
@@ -389,17 +395,19 @@ class core_wizard {
         return '';
     }
 
-    private function prepare_course_to_validate() {
-        global $SESSION, $USER;
-        $date = $SESSION->wizard['form_step2']['startdate'];
-        $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+    private function update_session($courseid) {
+        global $SESSION;
+        $SESSION->wizard['idcourse'] = $course->id;
+        $SESSION->wizard['idenrolment'] = 'manual';
+    }
 
-        $date2 = $SESSION->wizard['form_step2']['up1datefermeture'];
-        $enddate = mktime(0, 0, 0, $date2['month'], $date2['day'], $date2['year']);
-
-        $datamerge = array_merge($SESSION->wizard['form_step2'], $SESSION->wizard['form_step3']);
-        $mydata = (object) $datamerge;
-        $mydata->startdate = $startdate;
+    /**
+     * Returns an object with properties derived from the forms data.
+     * @return object
+     */
+    public function prepare_course_to_validate() {
+        $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        //$mydata->startdate = $this->formdata['form_step2']['startdate'];
 
         //step3 custominfo_field
         // compoante
@@ -407,21 +415,21 @@ class core_wizard {
         if ($up1composante != '' && substr($up1composante, -1) != ';') {
             $mydata->profile_field_up1composante .= ';';
         }
-        $mydata->profile_field_up1composante .= $SESSION->wizard['form_step3']['composante'];
+        $mydata->profile_field_up1composante .= $this->formdata['form_step3']['composante'];
 
         // niveau
         $up1niveau = trim($mydata->profile_field_up1niveau);
         if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
             $mydata->profile_field_up1niveau .= ';';
         }
-        $mydata->profile_field_up1niveau .= $SESSION->wizard['form_step3']['niveau'];
+        $mydata->profile_field_up1niveau .= $this->formdata['form_step3']['niveau'];
 
         // cours doit être validé
         $mydata->profile_field_up1avalider = 1;
         $mydata->profile_field_up1datevalid = 0;
         $mydata->profile_field_up1datedemande = time();
-        $mydata->profile_field_up1demandeur = $USER->firstname . ' ' . $USER->lastname;
-        $mydata->profile_field_up1datefermeture = $enddate;
+        $mydata->profile_field_up1demandeur = fullname($this->user);
+        //$mydata->profile_field_up1datefermeture = $this->formdata['form_step2']['up1datefermeture'];
 
         return $mydata;
     }

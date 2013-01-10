@@ -120,6 +120,8 @@ switch ($stepin) {
     case 7:
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
         $editform = new course_wizard_step_confirm();
+        $corewizard = new core_wizard($SESSION->wizard, $USER);
+        $editform->set_data($corewizard->prepare_course_to_validate());
 
         $data = $editform->get_data();
         if ($data){
@@ -128,7 +130,7 @@ switch ($stepin) {
         }
         break;
     case 8:
-        $corewizard = new core_wizard();
+        $corewizard = new core_wizard($SESSION->wizard, $USER);
         $errorMsg = $corewizard->create_course_to_validate();
         // envoi message
         $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
