@@ -50,12 +50,13 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 </div>
 <br/>
 <div id="user-select">
-    <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
-        <h3><?php echo get_string('findteacher', 'local_crswizard');?></h3>
-        <input type="text" class="user-selector" name="something" data-inputname="teacher" size="50" placeholder="<?php echo get_string('teachername', 'local_crswizard');?>" />
+    <div class="widgetselect-panel-left">
+        <h3><?php echo get_string('findteacher', 'local_crswizard'); ?></h3>
+        <input type="text" class="user-selector" name="something" data-inputname="teacher" size="50"
+               placeholder="<?php echo get_string('teachername', 'local_crswizard');?>" />
     </div>
-    <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
-        <h3><?php echo get_string('selectedteacher', 'local_crswizard');?></h3>
+    <div class="widgetselect-panel-right">
+        <h3><?php echo get_string('selectedteacher', 'local_crswizard'); ?></h3>
         <div class="users-selected"></div>
     </div>
 </div>

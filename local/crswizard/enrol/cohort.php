@@ -49,11 +49,12 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 </div>
 
 <div id="group-select">
-    <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
+    <div class="widgetselect-panel-left">
         <h3><?php echo get_string('findcohort', 'local_crswizard');?></h3>
-        <input type="text" class="group-selector" name="something" data-inputname="group" size="50" placeholder="<?php echo get_string('cohortname', 'local_crswizard');?>" />
+        <input type="text" class="group-selector" name="something" data-inputname="group" size="50"
+               placeholder="<?php echo get_string('cohortname', 'local_crswizard'); ?>" />
     </div>
-    <div style="float: left; width: 45%; height: 60ex; border: 2px solid black; padding: 3px; margin: 2px;">
+    <div class="widgetselect-panel-left">
         <h3><?php echo get_string('selectedcohort', 'local_crswizard');?></h3>
         <div class="group-selected"></div>
     </div>
