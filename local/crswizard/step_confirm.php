@@ -141,7 +141,7 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 
-        $mform->hardFreezeAllVisibleExcept(array('buttonar'));
+        $mform->hardFreezeAllVisibleExcept(array('remarques', 'buttonar'));
     }
 
 }
