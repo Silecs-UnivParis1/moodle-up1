@@ -21,7 +21,6 @@ class course_wizard_step_confirm extends moodleform {
 
         $myconfig = new my_elements_config();
 
-        $tabfreeze = array();
         $mform = $this->_form;
 
         $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
@@ -35,10 +34,8 @@ class course_wizard_step_confirm extends moodleform {
         $user_name = fullname($USER);
         $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
         $mform->setConstant('user_name', $user_name);
-        $tabfreeze[] = 'user_name';
         $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
         $mform->setDefault('requestdate', time());
-        $tabfreeze[] = 'requestdate';
 
         $idcat = $SESSION->wizard['form_step2']['category'];
         $displaylist = array();
@@ -46,17 +43,14 @@ class course_wizard_step_confirm extends moodleform {
         make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
         $mform->setConstant('category', $idcat);
-        $tabfreeze[] = 'category';
 
         $fullname = $SESSION->wizard['form_step2']['fullname'];
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
         $mform->setConstant('fullname', $fullname);
-        $tabfreeze[] = 'fullname';
 
         $shortname = $SESSION->wizard['form_step2']['shortname'];
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
         $mform->setConstant('shortname', $shortname);
-        $tabfreeze[] = 'shortname';
 
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
                 . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
@@ -67,14 +61,12 @@ class course_wizard_step_confirm extends moodleform {
         $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
         $mform->setConstant('startdate', $startdate);
-        $tabfreeze[] = 'startdate';
 
         $datefermeture = 'up1datefermeture';
         $date = $SESSION->wizard['form_step2'][$datefermeture];
         $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
         $mform->addElement('date_selector', $datefermeture, get_string('up1datefermeture', 'local_crswizard'));
         $mform->setConstant($datefermeture, $enddate);
-        $tabfreeze[] = $datefermeture;
 
         if (isset($SESSION->wizard['form_step4']['all-users']) && count($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
@@ -118,14 +110,12 @@ class course_wizard_step_confirm extends moodleform {
                     $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
                     $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
                     $mform->setConstant('enrolstartdate' . $c, $startdate);
-                    $tabfreeze[] = 'enrolstartdate' . $c;
                 }
                 if (isset($clef['enrolenddate'])) {
                     $date = $clef['enrolenddate'];
                     $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
                     $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
                     $mform->setConstant('enrolenddate' . $c, $startdate);
-                    $tabfreeze[] = 'enrolenddate' . $c;
                 }
             }
         }
@@ -168,7 +158,7 @@ class course_wizard_step_confirm extends moodleform {
         $buttonarray[] = $mform->createElement(
                 'html',
                 '<div class="previousstage">' . $OUTPUT->action_link(
-                    new moodle_url('/local/crswizard/index.php', array('stepin' => 7)),
+                    new moodle_url('/local/crswizard/index.php', array('stepin' => 6)),
                     get_string('previousstage', 'local_crswizard')
                 ) . '</div>'
         );
@@ -176,7 +166,7 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
 
-        $mform->hardFreeze($tabfreeze);
+        $mform->hardFreezeAllVisibleExcept(array('buttonar'));
     }
 
 }
