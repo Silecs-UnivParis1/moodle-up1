@@ -45,8 +45,8 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
 
     // search on cohorts
     $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
-        . "name LIKE ? OR idnumber LIKE ? OR description LIKE ?" ;
-    $records = $DB->get_records_sql($sql, array($ptoken, $ptoken, $ptoken), 0, $maxrows);
+        . "name LIKE ? OR idnumber LIKE ?" ;
+    $records = $DB->get_records_sql($sql, array($ptoken, $ptoken), 0, $maxrows);
     $groups = array();
     foreach ($records as $record) {
         $size = $DB->count_records('cohort_members', array('cohortid' => $record->id));
