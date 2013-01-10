@@ -20,6 +20,7 @@
         urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
         minLength: 4,
         wsParams: { maxRows: 10 }, // default parameters for the web service (cf userMaxRows, groupMaxRows)
+        moreRows: 50, // when requesting more results, larger than maxRows
         dataType: "jsonp",
         labelMaker: function(item) { return item.label; }, // will build the label from the selected item
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
@@ -30,11 +31,11 @@
 
     $.fn.autocompleteGroup = function (options) {
         var settings = $.extend(true, {}, defaultSettings, options || {});
-        if (!options.wsParams.userMaxRows) {
-            options.wsParams.userMaxRows = options.wsParams.maxRows
+        if (!('userMaxRows' in settings.wsParams)) {
+            settings.wsParams.userMaxRows = settings.wsParams.maxRows
         }
-        if (!options.wsParams.groupMaxRows) {
-            options.wsParams.groupMaxRows = options.wsParams.maxRows
+        if (!('groupMaxRows' in settings.wsParams)) {
+            settings.wsParams.groupMaxRows = settings.wsParams.maxRows
         }
 
         return this.each(function() {
@@ -75,9 +76,29 @@
                 source: $this.mainSource($this.settings),
                 select: function (event, ui) {
                     if (ui.item.source == 'groups') {
-                        $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelMaker));
-                        $this.input.val('');
+                        if (ui.item.label === '…') {
+                            var category2filters = {
+                                'établissement': 'structures|affiliation',
+                                'étapes': 'diploma',
+                                'matières': 'elp',
+                                'TD': 'gpelp',
+                                'Groupe étape': 'gpetp',
+                                'autre': ''
+                            };
+                            var localSettings = JSON.parse(JSON.stringify($this.settings));
+                            localSettings.wsParams.groupMaxRows = $this.settings.moreRows;
+                            delete localSettings.wsParams.userMaxRows;
+                            var ajaxCall = $this.mainSource(localSettings);
+                            ajaxCall(
+                                {term: $this.input.val(), 'filter_group_category': category2filters[ui.item.category]},
+                                function (items) { $this.input.data("autocomplete")._suggest(items); }
+                            );
+                            return false;
+                        } else {
+                            $($this.settings.outputSelector, $this.elem)
+                                .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelMaker));
+                            $this.input.val('');
+                        }
                     } else if (ui.item.source == 'users') {
                         $this.input.val(ui.item.label);
                         $this.setGroupsbyUser(ui.item.value, $this.input, $this.settings);
@@ -102,11 +123,11 @@
             }
         },
 
-        setGroupsbyUser: function(uid, ac) {
+        setGroupsbyUser: function(uid, ac, settings) {
             var $this = this;
             $.ajax({
-                url: $this.settings.urlUserToGroups,
-                dataType: $this.settings.dataType,
+                url: settings.urlUserToGroups,
+                dataType: settings.dataType,
                 data: {
                     uid: uid
                 },
@@ -120,21 +141,30 @@
                             source: 'groups',
                             pre: item.pre
                        };
-                    }, $this.settings.wsParams.groupMaxRows);
+                    }, settings.wsParams.groupMaxRows);
                     ac.data("autocomplete")._suggest(items);
                 }
             });
         },
 
-        mainSource: function() {
+        mainSource: function(settings) {
             var $this = this;
             return function(request, response) {
-                var wsParams = $.extend({}, $this.settings.wsParams);
+                var wsParams = JSON.parse(JSON.stringify(settings.wsParams));
                 wsParams.token = request.term;
+                if ('filter_group_category' in request) {
+                    wsParams['filter_group_category'] = request['filter_group_category'];
+                }
                 wsParams.maxRows++;
+                if ('userMaxRows' in wsParams) {
+                    wsParams.userMaxRows++;
+                }
+                if ('groupMaxRows' in wsParams) {
+                    wsParams.groupMaxRows++;
+                }
                 $.ajax({
-                    url: $this.settings.urlGroups,
-                    dataType: $this.settings.dataType,
+                    url: settings.urlGroups,
+                    dataType: settings.dataType,
                     data: wsParams,
                     success: function (data) {
                         var groups = sortByCategory(data.groups);
@@ -142,11 +172,11 @@
                         transformUserItems(data.users);
                         response($.merge(
                             $this.prepareList(groups, 'Groupes', function (item) {
-                                    return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre };
-                            }, $this.settings.wsParams.groupMaxRows),
+                                    return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre, category: item.category };
+                            }, settings.wsParams.groupMaxRows),
                             $this.prepareList(data.users, 'Personnes', function (item) {
                                     return { label: userItemToLabel(item), value: item.uid, source: 'users' };
-                            }, $this.settings.wsParams.userMaxRows)
+                            }, settings.wsParams.userMaxRows)
                         ));
                     }
                 });
@@ -156,13 +186,14 @@
         prepareList: function(list, titleLabel, itemToResponse, maxRows) {
             var $this = this;
             var len = list.length;
-            if (len > (maxRows)) {
-                list[len-1] = { source: 'title', label: '…'};
-            }
             return $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
-                $.map(list, function(item) {
-                    if ('source' in item && item.source == 'title') {
+                $.map(list, function(item, index) {
+                    if (len > maxRows && index == len - 1) {
+                        item = itemToResponse.apply(this, [item]);
+                        item.label = '…';
+                        return item;
+                    } else if ('source' in item && item.source == 'title') {
                         return item;
                     } else {
                         return itemToResponse.apply(this, [item]);
@@ -260,6 +291,12 @@
     function customRenderItem(ul, item) {
         if (item.source == 'title') {
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
+        }
+        if (item.label == '…') {
+             return $("<li></li>")
+                .data("item.autocomplete", item)
+                .append("<a>…</a>")
+                .appendTo(ul);
         }
         if (item.pre) {
             $('<li class="kind"><span>' + item.pre + "</span></li>").appendTo(ul);
