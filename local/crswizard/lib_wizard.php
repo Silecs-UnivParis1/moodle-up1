@@ -350,6 +350,7 @@ function get_custom_info_field_label($shortname) {
 class core_wizard {
     private $formdata;
     private $user;
+    public $course;
 
     public function __construct($formdata, $user) {
         $this->formdata = $formdata;
@@ -360,6 +361,7 @@ class core_wizard {
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
+        $this->course = $course;
         // on supprime les enrols par défaut
         $this->delete_default_enrol_course($course->id);
         // save custom fields data
@@ -393,6 +395,19 @@ class core_wizard {
             }
         }
         return '';
+    }
+
+    public function get_messages() {
+        $urlCategory = new moodle_url('/course/category.php', array('id' => $this->course->category, 'edit' => 'on'));
+        $messagehtml = '<div>Ce message concerne la demande de création de cours ' . $this->course->fullname
+                . ' ( ' . $this->course->shortname . ' )'
+                . ' faite par ' . fullname($this->user) . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
+                . html_writer::link($urlCategory, $urlCategory)
+                . '</div>';
+        $message = 'Ce message concerne la demande de création de cours ' . $this->course->fullname
+                . ' ( ' . $this->course->shortname . ' )'
+                . ' faite par ' . fullname($this->user) . '. Vous pouvez valider ou supprimer ce cours : ' . $urlCategory;
+        return array("text" => $message, "html" => $messagehtml);
     }
 
     private function update_session($courseid) {

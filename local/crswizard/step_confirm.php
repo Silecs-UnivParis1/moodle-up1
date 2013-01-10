@@ -37,16 +37,13 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
         $mform->setDefault('requestdate', time());
 
-        $idcat = $SESSION->wizard['form_step2']['category'];
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
 
-        $fullname = $SESSION->wizard['form_step2']['fullname'];
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
 
-        $shortname = $SESSION->wizard['form_step2']['shortname'];
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
 
         /** @todo display the summary correctly, with Moodle's conversion functions */
@@ -131,21 +128,6 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 7);
-
-        $urlCategory = new moodle_url('/course/category.php', array('id' => $idcat, 'edit' => 'on'));
-        $messagehtml = '<div>Ce message concerne la demande de création de cours ' . $fullname . ' ( ' . $shortname . ' )'
-                . ' faite par ' . $user_name . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
-                . html_writer::link($urlCategory, $urlCategory)
-                . '</div>';
-        $message = 'Ce message concerne la demande de création de cours ' . $fullname . ' ( ' . $shortname . ' )'
-                . ' faite par ' . $user_name . '. Vous pouvez valider ou supprimer ce cours : ' . $urlCategory;
-        $mform->addElement('hidden', 'messagehtml', null);
-        $mform->setType('messagehtml', PARAM_RAW);
-        $mform->setConstant('messagehtml', $messagehtml);
-
-        $mform->addElement('hidden', 'message', null);
-        $mform->setType('message', PARAM_RAW);
-        $mform->setConstant('message', $message);
 
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(

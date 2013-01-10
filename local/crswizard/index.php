@@ -135,19 +135,18 @@ switch ($stepin) {
         $corewizard = new core_wizard($SESSION->wizard, $USER);
         $errorMsg = $corewizard->create_course_to_validate();
         // envoi message
-        $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
-        $message = $SESSION->wizard['form_step7']['message'];
+        $messages = $corewizard->get_messages();
         if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-            $messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
-                    . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
-            $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
-                    . $SESSION->wizard['form_step7']['remarques'];
+            $messages['html'] .= '<p>La demande est accompagnée de la remarque suivante : <div>'
+                    . strip_tags($SESSION->wizard['form_step7']['remarques']) . '</div></p>';
+            $messages['text'] .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
+                    . strip_tags($SESSION->wizard['form_step7']['remarques']);
         }
         if (isset($errorMsg)) {
-            $message .= "\n\nErreur lors de la demande :\n" . $errorMsg;
-            $messagehtml .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
+            $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
+            $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }
-        send_course_request($message, $messagehtml);
+        send_course_request($messages['text'], $messages['html']);
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));
         break;
