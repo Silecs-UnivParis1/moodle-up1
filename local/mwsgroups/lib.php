@@ -38,7 +38,8 @@ function mws_search_users($token, $maxrows, $filterstudent) {
     $ptoken = $token . '%';
 
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
-        . "( username = ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
+        . "( username = ?  OR  firstname LIKE ? OR lastname LIKE ? "
+        . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )" ;
     if ($filterstudent == 'no') {
         $sql .= " AND idnumber = '' ";
     }
@@ -46,7 +47,7 @@ function mws_search_users($token, $maxrows, $filterstudent) {
         $sql .= " AND idnumber != '' ";
     }
     $sql .= "ORDER BY lastname ASC, firstname ASC";
-    $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken), 0, $maxrows);
+    $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $maxrows);
     $users = array();
     foreach ($records as $record) {
         $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
