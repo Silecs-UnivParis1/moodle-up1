@@ -22,8 +22,6 @@ $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use js
 $PAGE->set_context(get_system_context());
 
 $res = mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent);
-// echo "$token";
-// die();
 
 if (empty($callback)) {
     header('Content-Type: application/json; charset="UTF-8"');

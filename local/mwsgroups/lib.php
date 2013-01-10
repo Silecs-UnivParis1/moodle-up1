@@ -70,21 +70,46 @@ function mws_search_users($token, $maxrows, $filterstudent) {
  * @return array
  */
 function mws_search_groups($token, $maxrows) {
-    global $DB;
-    $ptoken = $token . '%';
+    $wherecat = categoryToWhere();
 
+    $res = array();
+    foreach ($wherecat as $cat => $where) {
+        $groups = mws_search_groups_category($token, $cat, $maxrows);
+        // echo "<b> $cat -> $where : " . count($groups) . " results</b><br />\n" ; //DEBUG
+        $res = array_merge($res, $groups);
+    }
+    return $res;
+}
+
+/**
+ * search groups according to filters
+ * @global type $DB
+ * @param string $token to search in cohort table
+ * @param string $category Group/cohort category, see below
+ * @param int $maxrows
+ * @return array
+ */
+function mws_search_groups_category($token, $category, $maxrows) {
+    global $DB;
+    $ptoken = '%' . $token . '%';
+
+    $wherecat = categoryToWhere();
     $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
-        . "name LIKE ? OR idnumber LIKE ?" ;
+        . "( name LIKE ? OR idnumber LIKE ? ) AND " . $wherecat[$category] ;
+    // echo $sql . " <br />\n" ; //DEBUG
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken), 0, $maxrows);
     $groups = array();
+    $order = 0;
     foreach ($records as $record) {
+        $order++;
         $size = $DB->count_records('cohort_members', array('cohortid' => $record->id));
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
             'description' => format_text($record->description, $record->descriptionformat),
             'category' => groupKeyToCategory($record->idnumber),
-            'size' => $size
+            'size' => $size,
+            'order' => $order
         );
     }
     return $groups;
@@ -149,6 +174,29 @@ function groupKeyToCategory($key) {
         return 'local';
     else
         return null;
+}
+
+/**
+ * sort of reciprocal from groupKeyToCategory
+ * return assoc. array of WHERE conditions in the SQL syntax
+ */
+function categoryToWhere() {
+    $patterns = array(
+        'structures' => 'structures-%',
+        'affiliation' => 'affiliation-%',
+        'diploma' => 'diploma-%',
+        'gpelp' => 'groups-gpelp.%',
+        'gpetp' => 'groups-gpetp.%',
+        'elp' => 'groups-mati%'
+    );
+    $res = array();
+    $local = '';
+    foreach ($patterns as $cat=>$pattern) {
+        $res[$cat] = "idnumber LIKE '$pattern' ";
+        $local = $local . "idnumber NOT LIKE '$pattern' AND ";
+    }
+    $res['local'] = substr($local, 0, -4); //drop the last AND
+    return $res;
 }
 
 function startsWith($haystack, $needle)
