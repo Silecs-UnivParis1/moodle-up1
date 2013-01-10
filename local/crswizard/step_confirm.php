@@ -57,16 +57,13 @@ class course_wizard_step_confirm extends moodleform {
                 . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
-        $date = $SESSION->wizard['form_step2']['startdate'];
-        $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+        $startdate = $SESSION->wizard['form_step2']['startdate'];
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
         $mform->setConstant('startdate', $startdate);
 
-        $datefermeture = 'up1datefermeture';
-        $date = $SESSION->wizard['form_step2'][$datefermeture];
-        $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-        $mform->addElement('date_selector', $datefermeture, get_string('up1datefermeture', 'local_crswizard'));
-        $mform->setConstant($datefermeture, $enddate);
+        $enddate = $SESSION->wizard['form_step2']['up1datefermeture'];
+        $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
+        $mform->setConstant('up1datefermeture', $enddate);
 
         if (isset($SESSION->wizard['form_step4']['all-users']) && count($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
@@ -111,14 +108,12 @@ class course_wizard_step_confirm extends moodleform {
                 $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                 $c = $clef['code'];
                 if (isset($clef['enrolstartdate'])) {
-                    $date = $clef['enrolstartdate'];
-                    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                    $startdate = $clef['enrolstartdate'];
                     $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
                     $mform->setConstant('enrolstartdate' . $c, $startdate);
                 }
                 if (isset($clef['enrolenddate'])) {
-                    $date = $clef['enrolenddate'];
-                    $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                    $startdate = $clef['enrolenddate'];
                     $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
                     $mform->setConstant('enrolenddate' . $c, $startdate);
                 }
