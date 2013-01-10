@@ -106,11 +106,12 @@
                 success: function (data) {
 					var groups = sortByCategory(data);
 					transformGroupItems(groups);
-                    var items = $this.prepareList(groups, 'est membre des groupes :', function (item) {
+                    var items = $this.prepareList(groups, 'est membre des ' + groups.length + ' groupes :', function (item) {
 					   return {
 						   label: groupItemToLabel(item),
 						   value: item.key,
-						   source: 'groups'
+						   source: 'groups',
+                           pre: item.pre
 					   };
 					});
                     ac.data("autocomplete")._suggest(items);
