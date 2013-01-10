@@ -70,16 +70,18 @@ class course_wizard_step_confirm extends moodleform {
 
         if (isset($SESSION->wizard['form_step4']['all-users']) && count($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
-            $mform->addElement('header', 'enseignants', get_string('teachers', 'local_crswizard'));
+            $mform->addElement('header', 'teachers', get_string('teachers', 'local_crswizard'));
             $labels = $myconfig->role_teachers;
             foreach ($allusers as $role => $users) {
-                if (array_key_exists($role, $labels)) {
-                    $label = $labels[$role];
-                    $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
                 }
+                $first = true;
                 foreach ($users as $id => $user) {
-                    $identite = $user->firstname . ' ' . $user->lastname;
-                    $mform->addElement('html', html_writer::tag('div', $identite, array('class' => 'fitem')));
+                    $mform->addElement('text', 'teacher' . $role . $id, ($first ? $label : ''));
+                    $mform->setConstant('teacher' . $role . $id, fullname($user));
+                    $first = false;
                 }
             }
         }
@@ -89,12 +91,15 @@ class course_wizard_step_confirm extends moodleform {
             $mform->addElement('header', 'groups', get_string('cohorts', 'local_crswizard'));
             $labels = $myconfig->role_cohort;
             foreach ($groupsbyrole as $role => $groups) {
-                if (array_key_exists($role, $labels)) {
-                    $label = $labels[$role];
-                    $mform->addElement('html', html_writer::tag('h4', get_string($label, 'local_crswizard')));
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
                 }
+                $first = true;
                 foreach ($groups as $id => $group) {
-                    $mform->addElement('html', html_writer::tag('div', $group->name, array('class' => 'fitem')));
+                    $mform->addElement('text', 'cohort' . $id, ($first ? $label : ''));
+                    $mform->setConstant('cohort' . $id, $group->name . " ({$group->size})");
+                    $first = false;
                 }
             }
         }
