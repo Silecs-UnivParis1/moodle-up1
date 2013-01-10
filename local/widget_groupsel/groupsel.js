@@ -20,6 +20,7 @@
         urlUserToGroups: 'http://wsgroups.univ-paris1.fr/userGroupsId',
         minLength: 4,
         wsParams: { maxRows : 9 }, // default parameters for the web service
+        dataType: "jsonp",
         labelMaker: function(item) { return item.label; }, // will build the label from the selected item
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
@@ -99,7 +100,7 @@
             var $this = this;
             $.ajax({
                 url: $this.settings.urlUserToGroups,
-                dataType: "jsonp",
+                dataType: $this.settings.dataType,
                 data: {
                     uid: uid
                 },
@@ -127,7 +128,7 @@
                 wsParams.maxRows++;
                 $.ajax({
                     url: $this.settings.urlGroups,
-                    dataType: "jsonp",
+                    dataType: $this.settings.dataType,
                     data: wsParams,
                     success: function (data) {
                         var groups = sortByCategory(data.groups);
