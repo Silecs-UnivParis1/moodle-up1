@@ -24,7 +24,7 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
     if ($filtergroupcat == '') {
         $groups = mws_search_groups($token, $groupmaxrows);
     } else {
-        $groups = mws_search_groups_category($token, $filtergroupcat, 50);
+        $groups = mws_search_groups_category($token, $filtergroupcat, $groupmaxrows);
     }
     return array('users' => $users, 'groups' => $groups);
 }
