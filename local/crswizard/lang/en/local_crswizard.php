@@ -81,4 +81,4 @@ $string['up1specialite'] = 'Spécialité(s) : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login';
 $string['username'] = 'Username';
-$string['wizardcourse'] = 'Wizard CourseMoolde';
+$string['wizardcourse'] = 'Course Wizard';
