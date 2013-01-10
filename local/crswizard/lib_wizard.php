@@ -80,35 +80,6 @@ function send_course_request($message, $messagehtml) {
     }
 }
 
-/**
- * Convertit les champs custom_info_field de type datetime en timestamp
- * @param object $data
- * @return object $data
- */
-function customfields_wash($data) {
-    global $DB;
-
-    $fields = $DB->get_records('custom_info_field', array('objectname' => 'course', 'datatype' => 'datetime'));
-    if ($fields) {
-        foreach ($fields as $field) {
-            $nomc = 'profile_field_' . $field->shortname;
-            if (isset($data->$nomc) && is_array($data->$nomc)) {
-                $tab = $data->$nomc;
-                $hour = 0;
-                $minute = 0;
-                if (isset($tab['hour'])) {
-                    $hour = $tab['hour'];
-                }
-                if (isset($tab['minute'])) {
-                    $minute = $tab['minute'];
-                }
-                $data->$nomc = mktime($hour, $minute, 0, $tab['month'], $tab['day'], $tab['year']);
-            }
-        }
-    }
-    return $data;
-}
-
 function myenrol_cohort($idcourse, $tabGroup) {
     global $DB, $CFG;
     if ($idcourse == SITEID) {
@@ -366,57 +337,6 @@ function wizard_list_clef() {
     return $list;
 }
 
-function myenrol_clef($idcourse, $tabClefs) {
-    global $DB;
-    if ($idcourse == SITEID) {
-        throw new coding_exception('Invalid request to add enrol instance to frontpage.');
-    }
-    // traitement des données
-    foreach ($tabClefs as $type => $tabClef) {
-        $name = 'clef ' . $type;
-
-        if ($type == 'Etudiante') {
-            $enrol = 'self';
-            $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
-        } elseif ($type == 'Visiteur') {
-            $enrol = 'guest';
-            $roleid = 0;
-        }
-        $status = 0;   //0 pour auto-inscription
-        if (isset($tabClef['enrolstartdate'])) {
-            $date = $tabClef['enrolstartdate'];
-            $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-        } else {
-            $startdate = 0;
-        }
-        if (isset($tabClef['enrolenddate'])) {
-            $date = $tabClef['enrolenddate'];
-            $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
-        } else {
-            $enddate = 0;
-        }
-
-        $instance = new stdClass();
-        $instance->enrol = $enrol;
-        $instance->status = $status;
-        $instance->courseid = $idcourse;
-        $instance->roleid = $roleid;
-        $instance->name = $name;
-        $instance->password = $tabClef['password'];
-        $instance->customint1 = 0; // clef d'inscription groupe ?
-        $instance->customint2 = 0;
-        $instance->customint3 = 0;
-        $instance->customint4 = 0; // envoie d'un message
-
-        $instance->enrolstartdate = $startdate;
-        $instance->enrolenddate = $enddate;
-        $instance->timemodified = time();
-        $instance->timecreated = $instance->timemodified;
-        $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $idcourse));
-        $DB->insert_record('enrol', $instance);
-    }
-}
-
 /**
  * Renvoie le nom du Course custom fields de nom abrégé $shortname
  * @param string $shortname nom abrégé du champ
@@ -428,8 +348,8 @@ function get_custom_info_field_label($shortname) {
 }
 
 class core_wizard {
-    function create_course_to_validate() {
-        global $SESSION, $CFG;
+    public function create_course_to_validate() {
+        global $SESSION;
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
@@ -438,10 +358,9 @@ class core_wizard {
         // save custom fields data
         $mydata->id = $course->id;
         $custominfo_data = custominfo_data::type('course');
+        $cleandata = $this->customfields_wash($mydata);
+        $custominfo_data->save_data($cleandata);
 
-        $mydata = customfields_wash($mydata);
-
-        $custominfo_data->save_data($mydata);
         $SESSION->wizard['idcourse'] = $course->id;
         $SESSION->wizard['idenrolment'] = 'manual';
         //! @todo tester si le cours existe bien ?
@@ -464,13 +383,13 @@ class core_wizard {
             // inscrire des clefs
             $clefs = wizard_list_clef();
             if (count($clefs)) {
-                myenrol_clef($course->id, $clefs);
+                $this->myenrol_clef($course->id, $clefs);
             }
         }
         return '';
     }
 
-    function prepare_course_to_validate() {
+    private function prepare_course_to_validate() {
         global $SESSION, $USER;
         $date = $SESSION->wizard['form_step2']['startdate'];
         $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
@@ -507,13 +426,92 @@ class core_wizard {
         return $mydata;
     }
 
-    // methode ad hoc : supprime les méthodes d'inscriptions guest et self
-    function delete_default_enrol_course($courseid) {
+    // supprime les méthodes d'inscriptions guest et self
+    private function delete_default_enrol_course($courseid) {
         global $DB;
         $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'self'));
         $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
     }
 
+    private function myenrol_clef($courseid, $tabClefs) {
+        global $DB;
+        if ($courseid == SITEID) {
+            throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+        }
+        // traitement des données
+        foreach ($tabClefs as $type => $tabClef) {
+            $name = 'clef ' . $type;
+
+            if ($type == 'Etudiante') {
+                $enrol = 'self';
+                $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'));
+            } elseif ($type == 'Visiteur') {
+                $enrol = 'guest';
+                $roleid = 0;
+            }
+            $status = 0;   //0 pour auto-inscription
+            if (isset($tabClef['enrolstartdate'])) {
+                $date = $tabClef['enrolstartdate'];
+                $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+            } else {
+                $startdate = 0;
+            }
+            if (isset($tabClef['enrolenddate'])) {
+                $date = $tabClef['enrolenddate'];
+                $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+            } else {
+                $enddate = 0;
+            }
+
+            $instance = new stdClass();
+            $instance->enrol = $enrol;
+            $instance->status = $status;
+            $instance->courseid = $courseid;
+            $instance->roleid = $roleid;
+            $instance->name = $name;
+            $instance->password = $tabClef['password'];
+            $instance->customint1 = 0; // clef d'inscription groupe ?
+            $instance->customint2 = 0;
+            $instance->customint3 = 0;
+            $instance->customint4 = 0; // envoie d'un message
+
+            $instance->enrolstartdate = $startdate;
+            $instance->enrolenddate = $enddate;
+            $instance->timemodified = time();
+            $instance->timecreated = $instance->timemodified;
+            $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $courseid));
+            $DB->insert_record('enrol', $instance);
+        }
+    }
+
+    /**
+     * Convertit les champs custom_info_field de type datetime en timestamp
+     * @param object $data
+     * @return object $data
+     */
+    private function customfields_wash($data) {
+        global $DB;
+
+        $fields = $DB->get_records('custom_info_field', array('objectname' => 'course', 'datatype' => 'datetime'));
+        if ($fields) {
+            foreach ($fields as $field) {
+                $nomc = 'profile_field_' . $field->shortname;
+                if (isset($data->$nomc) && is_array($data->$nomc)) {
+                    $tab = $data->$nomc;
+                    $hour = 0;
+                    $minute = 0;
+                    if (isset($tab['hour'])) {
+                        $hour = $tab['hour'];
+                    }
+                    if (isset($tab['minute'])) {
+                        $minute = $tab['minute'];
+                    }
+                    $data->$nomc = mktime($hour, $minute, 0, $tab['month'], $tab['day'], $tab['year']);
+                }
+            }
+        }
+        return $data;
+    }
 }
 
 class my_elements_config {
