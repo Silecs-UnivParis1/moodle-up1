@@ -61,27 +61,6 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
     return array('users' => $users, 'groups' => $groups);
 }
 
-// fonction abandonnée, remplacée par mws_userGroupsId_fast
-// lenteur dûe sans doute à la 2e jointure sur user.id
-function mws_userGroupsId($uid) {
-    global $DB;
-
-    $groups = array();
-    $sql = "SELECT c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
-        . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
-        . "JOIN {user} u ON (u.id = cm.userid) "
-        . "WHERE username=?";
-
-    $records = $DB->get_records_sql($sql, array($uid));
-        foreach ($records as $record) {
-        $groups[] = array(
-            'key' => $record->idnumber,
-            'name' => $record->name,
-            'description' => format_text($record->description, $record->descriptionformat),
-        );
-    }
-    return $groups;
-}
 
 /**
  * emulates wsgroups "userGroupsId" action from Moodle data
@@ -89,23 +68,27 @@ function mws_userGroupsId($uid) {
  * @param string $uid (sens ldap) Moodle username
  * @return $groups as wsgroups structure
  */
-function mws_userGroupsId_fast($uid) {
+function mws_userGroupsId($uid) {
     global $DB;
 
     $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
+    // on évite une 2e jointure dans la requête suivante, qui ralentit considérablement
     $groups = array();
-    $sql = "SELECT c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
+    $sql = "SELECT c.id, c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
         . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
         . "WHERE userid=?";
 
     $records = $DB->get_records_sql($sql, array($user->id));
-        foreach ($records as $record) {
+    foreach ($records as $record) {
+        $size = $DB->count_records('cohort_members', array('cohortid' => $record->id));
         $groups[] = array(
             'key' => $record->idnumber,
             'name' => $record->name,
             'description' => format_text($record->description, $record->descriptionformat),
+            'category' => groupKeyToCategory($record->idnumber),
+            'size' => $size
         );
-    }
+     }
     return $groups;
 }
 
