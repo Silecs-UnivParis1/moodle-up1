@@ -118,8 +118,6 @@ switch ($stepin) {
         }
         break;
     case 7:
-        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
-        $PAGE->requires->js(new moodle_url('/local/crswizard/js/jquery_crswizard.js'), true);
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
         $editform = new course_wizard_step_confirm();
         $corewizard = new core_wizard($SESSION->wizard, $USER);
@@ -130,6 +128,8 @@ switch ($stepin) {
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         }
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+        $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-confirm.js'));
         break;
     case 8:
         $corewizard = new core_wizard($SESSION->wizard, $USER);
