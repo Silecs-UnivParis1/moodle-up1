@@ -5,13 +5,23 @@ require('../../config.php');
 require_once('./lib.php');
 
 $token = required_param('token', PARAM_RAW);
-$maxrows = optional_param('maxRows', 10, PARAM_INT);
+$maxrows = optional_param('maxRows', 0, PARAM_INT);
+$usermaxrows = optional_param('userMaxRows', 0, PARAM_INT);
+$groupmaxrows = optional_param('groupMaxRows', 0, PARAM_INT);
+
+if ( $usermaxrows == 0 && $maxrows > 0) {
+    $usermaxrows = $maxrows;
+}
+if ( $groupmaxrows == 0 && $maxrows > 0) {
+    $groupmaxrows = $maxrows;
+}
+
 $filterstudent = optional_param('filter_student', 'both', PARAM_ALPHANUMEXT);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
 $PAGE->set_context(get_system_context());
 
-$res = mws_search($token, $maxrows, $filterstudent);
+$res = mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent);
 // echo "$token";
 // die();
 

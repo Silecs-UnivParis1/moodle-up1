@@ -12,14 +12,15 @@
  * emulates wsgroups "search" action from Moodle data
  * @global type $DB
  * @param string $token to search in user and cohort tables
- * @param int $maxrows (default 10)
+ * @param int $usermaxrows
+ * @param int $groupmaxrows
  * @param string $filterstudent = 'no' | 'only' | 'both'
  * @return array('users' => $users, 'groups' => $groups)
  */
-function mws_search($token, $maxrows=10, $filterstudent='both') {
+function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both') {
 
-    $users  = mws_search_users($token, $maxrows, $filterstudent);
-    $groups = mws_search_groups($token, $maxrows);
+    $users  = mws_search_users($token, $usermaxrows, $filterstudent);
+    $groups = mws_search_groups($token, $groupmaxrows);
     return array('users' => $users, 'groups' => $groups);
 }
 
