@@ -17,10 +17,25 @@
  * @return array('users' => $users, 'groups' => $groups)
  */
 function mws_search($token, $maxrows=10, $filterstudent='both') {
-    global $DB;
-    $ptoken = '%' . $token . '%';
 
-    // search on users
+    $users  = mws_search_users($token, $maxrows, $filterstudent);
+    $groups = mws_search_groups($token, $maxrows);
+    return array('users' => $users, 'groups' => $groups);
+}
+
+
+/**
+ * search users according to filters
+ * @global type $DB
+ * @param string $token to search in user table
+ * @param int $maxrows (default 10)
+ * @param string $filterstudent = 'no' | 'only' | 'both'
+ * @return array
+ */
+function mws_search_users($token, $maxrows, $filterstudent) {
+    global $DB;
+    $ptoken = $token . '%';
+
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
         . "( username = ? OR firstname LIKE ? OR lastname LIKE ? ) " ;
     if ($filterstudent == 'no') {
@@ -42,8 +57,20 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
             'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
         );
     }
+    return $users;
+}
 
-    // search on cohorts
+/**
+ * search groups according to filters
+ * @global type $DB
+ * @param string $token to search in cohort table
+ * @param int $maxrows
+ * @return array
+ */
+function mws_search_groups($token, $maxrows) {
+    global $DB;
+    $ptoken = $token . '%';
+
     $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
         . "name LIKE ? OR idnumber LIKE ?" ;
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken), 0, $maxrows);
@@ -58,7 +85,7 @@ function mws_search($token, $maxrows=10, $filterstudent='both') {
             'size' => $size
         );
     }
-    return array('users' => $users, 'groups' => $groups);
+    return $groups;
 }
 
 
