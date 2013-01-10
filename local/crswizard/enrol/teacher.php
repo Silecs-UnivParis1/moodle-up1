@@ -43,7 +43,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
             if (array_key_exists($r['shortname'], $labels)) {
                 $label = $labels[$r['shortname']];
             }
-            echo '<option value="' . $r['shortname'] . '">' . get_string($label, 'local_crswizard') . '</option>';
+            echo '<option value="' . s($r['shortname']) . '">' . format_string(get_string($label, 'local_crswizard')) . '</option>';
         }
         ?>
 	</select>
@@ -53,7 +53,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
     <div class="widgetselect-panel-left">
         <h3><?php echo get_string('findteacher', 'local_crswizard'); ?></h3>
         <input type="text" class="user-selector" name="something" data-inputname="teacher" size="50"
-               placeholder="<?php echo get_string('teachername', 'local_crswizard');?>" />
+               placeholder="<?php echo s(get_string('teachername', 'local_crswizard')); ?>" />
     </div>
     <div class="widgetselect-panel-right">
         <h3><?php echo get_string('selectedteacher', 'local_crswizard'); ?></h3>
