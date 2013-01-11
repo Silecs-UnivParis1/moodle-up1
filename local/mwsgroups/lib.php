@@ -8,9 +8,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/* @var $DB moodle_database */
+
 /**
  * emulates wsgroups "search" action from Moodle data
- * @global type $DB
  * @param string $token to search in user and cohort tables
  * @param int $usermaxrows
  * @param int $groupmaxrows
@@ -18,8 +19,7 @@
  * @param string $filtergroupcat = '' | 'structures' | 'affiliation' | ...
  * @return array('users' => $users, 'groups' => $groups)
  */
-function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', $filtergroupcat) {
-
+function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', $filtergroupcat='') {
     $users  = mws_search_users($token, $usermaxrows, $filterstudent);
     if ($filtergroupcat == '') {
         $groups = mws_search_groups($token, $groupmaxrows);
@@ -31,7 +31,8 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
 
 
 /**
- * search users according to filters
+ * search users according to filters.
+ * ** MySQL ONLY **
  * @global type $DB
  * @param string $token to search in user table
  * @param int $maxrows (default 10)
@@ -40,7 +41,7 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
  */
 function mws_search_users($token, $maxrows, $filterstudent) {
     global $DB;
-    $ptoken = $token . '%';
+    $ptoken = $DB->sql_like_escape($token) . '%';
 
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
         . "( username = ?  OR  firstname LIKE ? OR lastname LIKE ? "
@@ -69,7 +70,6 @@ function mws_search_users($token, $maxrows, $filterstudent) {
 
 /**
  * search groups according to filters
- * @global type $DB
  * @param string $token to search in cohort table
  * @param int $maxrows
  * @return array
@@ -78,7 +78,7 @@ function mws_search_groups($token, $maxrows) {
     $wherecat = categoryToWhere();
 
     $res = array();
-    foreach ($wherecat as $cat => $where) {
+    foreach (array_keys($wherecat) as $cat) {
         $groups = mws_search_groups_category($token, $cat, $maxrows);
         // echo "<b> $cat -> $where : " . count($groups) . " results</b><br />\n" ; //DEBUG
         $res = array_merge($res, $groups);
@@ -96,7 +96,7 @@ function mws_search_groups($token, $maxrows) {
  */
 function mws_search_groups_category($token, $category, $maxrows) {
     global $DB;
-    $ptoken = '%' . $token . '%';
+    $ptoken = '%' . $DB->sql_like_escape($token) . '%';
 
     $wherecat = categoryToWhere();
     if ( ! isset($wherecat[$category]) ) {
@@ -136,9 +136,9 @@ function mws_userGroupsId($uid) {
     $user = $DB->get_record('user', array('username' => $uid), 'id', MUST_EXIST);
     // on évite une 2e jointure dans la requête suivante, qui ralentit considérablement
     $groups = array();
-    $sql = "SELECT c.id, c.name, c.idnumber, c.description, c.descriptionformat FROM {cohort} c "
-        . "JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
-        . "WHERE userid=?";
+    $sql = "SELECT c.id, c.name, c.idnumber, c.description, c.descriptionformat "
+        . "FROM {cohort} c JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
+        . "WHERE userid = ?";
 
     $records = $DB->get_records_sql($sql, array($user->id));
     foreach ($records as $record) {
@@ -167,16 +167,19 @@ function groupNameToShortname($name) {
     else
       return $name;
 }
+
 /**
  * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5089)
  * @param string $key group key == cohort idnumber
  * @return string category, among (structures, affiliation, diploma, elp, gpelp, gpetp)
  */
 function groupKeyToCategory($key) {
-    if ( preg_match('/^(structures|affiliation|diploma)-/', $key, $matches) ||
-         preg_match('/^groups-(gpelp|gpetp)\./', $key, $matches))
-    return $matches[1];
-    else if (startsWith($key, 'groups-mati'))
+    if (
+            preg_match('/^(structures|affiliation|diploma)-/', $key, $matches)
+            || preg_match('/^groups-(gpelp|gpetp)\./', $key, $matches)
+    ) {
+        return $matches[1];
+    } else if (startsWith($key, 'groups-mati'))
         return 'elp';
     else if (startsWith($key, 'groups-'))
         return 'local';
@@ -186,7 +189,7 @@ function groupKeyToCategory($key) {
 
 /**
  * sort of reciprocal from groupKeyToCategory
- * return assoc. array of WHERE conditions in the SQL syntax
+ * return array assoc. array of WHERE conditions in the SQL syntax
  */
 function categoryToWhere() {
     $patterns = array(
@@ -207,6 +210,11 @@ function categoryToWhere() {
     return $res;
 }
 
+/**
+ * @param string $haystack
+ * @param string $needle
+ * @return boolean
+ */
 function startsWith($haystack, $needle)
 {
     return strncmp($haystack, $needle, strlen($needle)) === 0;
