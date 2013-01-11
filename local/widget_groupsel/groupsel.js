@@ -142,7 +142,7 @@
                             source: 'groups',
                             pre: item.pre
                        };
-                    }, settings.wsParams.groupMaxRows);
+                    }, 0);
                     ac.data("autocomplete")._suggest(items);
                 }
             });
@@ -192,7 +192,7 @@
             return $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
                 $.map(list, function(item, index) {
-                    if (item.num > maxRows) {
+                    if (maxRows && item.num > maxRows) {
                         item = itemToResponse.apply(this, [item]);
                         item.label = '…';
                         return item;
