@@ -87,6 +87,7 @@
                             };
                             var localSettings = JSON.parse(JSON.stringify($this.settings));
                             localSettings.wsParams.groupMaxRows = $this.settings.moreRows;
+                            delete localSettings.wsParams.maxRows;
                             delete localSettings.wsParams.userMaxRows;
                             var ajaxCall = $this.mainSource(localSettings);
                             ajaxCall(
@@ -155,7 +156,9 @@
                 if ('filter_group_category' in request) {
                     wsParams['filter_group_category'] = request['filter_group_category'];
                 }
-                wsParams.maxRows++;
+                if ('maxRows' in wsParams) {
+                    wsParams.maxRows++;
+                }
                 if ('userMaxRows' in wsParams) {
                     wsParams.userMaxRows++;
                 }
@@ -212,7 +215,7 @@
 
     function transformGroupItems(items) {
         var category;
-        var num;
+        var num = 0;
         var category2text = {
             structures: 'établissement',
             affiliation: 'établissement',
@@ -226,7 +229,7 @@
             if (item.category in category2text) {
                 item.category = category2text[item.category];
             }
-            if (category != item.category) {
+            if (category !== item.category) {
                 category = item.category;
                 item.pre = category || "";
                 num = 1;
