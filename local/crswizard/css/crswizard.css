@@ -5,7 +5,7 @@
 div.previousstage {
     margin-bottom: -6ex;
 }
-.previousstage a {
+.previousstage a, a.previousstage {
     color: inherit;
     text-transform: none;
     padding: 1px 6px;
@@ -14,7 +14,7 @@ div.previousstage {
     background-color: buttonface;
     box-sizing: border-box;
 }
-.previousstage a:hover {
+.previousstage a:hover, a.previousstage:hover {
     text-decoration: none;
 }
 
