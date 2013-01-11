@@ -34,6 +34,7 @@ jQuery(document).ready(function () {
         urlGroups: '../mwsgroups/service-search.php',
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
+        dataType: "json",
         wsParams: { maxRows: 10, filter: 'none' }
     });
 });

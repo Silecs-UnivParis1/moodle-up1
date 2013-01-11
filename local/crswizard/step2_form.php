@@ -27,7 +27,13 @@ class course_wizard_step2_form extends moodleform {
 /// form definition with new course defaults
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'categoryheader', get_string('categoryblock', 'local_crswizard'));
-        $mform->addElement('select', 'category', '', wizard_get_mydisplaylist(), array('class' => 'transformIntoSubselects cache'));
+        $mform->addElement(
+                'select', 'category', '', wizard_get_mydisplaylist(),
+                array(
+                    'class' => 'transformIntoSubselects cache',
+                    'data-labels' => '["Période :", "Établissement :", "Composante :", "Niveau :"]'
+                )
+        );
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 

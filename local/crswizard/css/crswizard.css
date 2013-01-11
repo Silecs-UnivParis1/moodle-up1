@@ -2,12 +2,32 @@
 	display: none;
 }
 
-div.subselects > select{
-     display: block;
-     padding-bottom: 2px;
-     margin-bottom: 4px;
-}
-
 div.previousstage {
     margin-bottom: -6ex;
+}
+.previousstage a {
+    color: inherit;
+    text-transform: none;
+    padding: 1px 6px;
+    text-align: center;
+    border: 2px outset buttonface;
+    background-color: buttonface;
+    box-sizing: border-box;
+}
+.previousstage a:hover {
+    text-decoration: none;
+}
+
+.widgetselect-panel-left,
+.widgetselect-panel-right {
+    float: left;
+    width: 45%;
+    height: 60ex;
+    border: 2px solid black;
+    padding: 3px;
+    margin: 2px;
+}
+
+#request-details-toggle {
+    margin-bottom: 10px;
 }

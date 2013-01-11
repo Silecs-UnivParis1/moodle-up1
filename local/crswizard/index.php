@@ -120,30 +120,33 @@ switch ($stepin) {
     case 7:
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
         $editform = new course_wizard_step_confirm();
+        $corewizard = new core_wizard($SESSION->wizard, $USER);
+        $editform->set_data($corewizard->prepare_course_to_validate());
 
         $data = $editform->get_data();
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         }
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+        $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-confirm.js'));
         break;
     case 8:
-        $corewizard = new core_wizard();
+        $corewizard = new core_wizard($SESSION->wizard, $USER);
         $errorMsg = $corewizard->create_course_to_validate();
         // envoi message
-        $messagehtml = $SESSION->wizard['form_step7']['messagehtml'];
-        $message = $SESSION->wizard['form_step7']['message'];
+        $messages = $corewizard->get_messages();
         if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-            $messagehtml .= '<p>La demande est accompagnée de la remarque suivante : <div>'
-                    . $SESSION->wizard['form_step7']['remarques'] . '</div></p>';
-            $message .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
-                    . $SESSION->wizard['form_step7']['remarques'];
+            $messages['html'] .= '<p>La demande est accompagnée de la remarque suivante : <div>'
+                    . strip_tags($SESSION->wizard['form_step7']['remarques']) . '</div></p>';
+            $messages['text'] .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
+                    . strip_tags($SESSION->wizard['form_step7']['remarques']);
         }
         if (isset($errorMsg)) {
-            $message .= "\n\nErreur lors de la demande :\n" . $errorMsg;
-            $messagehtml .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
+            $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
+            $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }
-        send_course_request($message, $messagehtml);
+        send_course_request($messages['text'], $messages['html']);
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));
         break;

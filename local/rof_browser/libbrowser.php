@@ -330,7 +330,7 @@ class rof_browser {
             $idElem = $id . '-elem';
             $intitule = htmlentities( $this->elemPere->name, ENT_QUOTES, 'UTF-8');
 
-			$listeTitle = ', type:'.$this->elemPere->typedip.', domaine:'.$this->elemPere->domainedip
+			$listeTitle = 'type:'.$this->elemPere->typedip.', domaine:'.$this->elemPere->domainedip
 			.', nature:'.$this->elemPere->naturedip.', cycle:'.$this->elemPere->cycledip.', rythme: '
             .$this->elemPere->rythmedip.', langue:'.$this->elemPere->languedip;
 
@@ -431,11 +431,11 @@ class rof_browser {
 	 */
 	function createItem($sp, $niveau) {
 		$element = '';
-
 		$listeTitle = '';
+        $titleElem = '';
 		// table rof_program
 		if (isset($sp->typedip)) {
-			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
+			$listeTitle .= 'type:'.$sp->typedip.', domaine:'.$sp->domainedip
 			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
 		}
 		$nbSub = nbSub($sp->sub);
@@ -447,7 +447,17 @@ class rof_browser {
 		$coden = trim('deep'.$niveau);
 		$id = $coden.'_'.$sp->rofid;
 		$idElem = $id . '-elem';
-		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+
+		if (isset($sp->code)) {
+            $titleElem .= 'code apogée : ' . $sp->code;
+            if ($listeTitle != '') {
+                 $titleElem .= ', ';
+            }
+        }
+        if ($listeTitle != '') {
+            $titleElem .= $listeTitle;
+        }
+
 		$data_path = $this->path . '_' . $sp->rofid;
 		$intitule = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
 
@@ -479,11 +489,11 @@ class rof_browser {
 	 */
 	function print_option($sp, $niveau) {
 		$element = '';
-
 		$listeTitle = '';
+        $titleElem = '';
 		// table rof_program
 		if (isset($sp->typedip)) {
-			$listeTitle .= ', type:'.$sp->typedip.', domaine:'.$sp->domainedip
+			$listeTitle .= 'type:'.$sp->typedip.', domaine:'.$sp->domainedip
 			.', nature:'.$sp->naturedip.', cycle:'.$sp->cycledip.', rythme: '.$sp->rythmedip.', langue:'.$sp->languedip;
 		}
 		$nbSub = nbSub($sp->sub);
@@ -496,7 +506,17 @@ class rof_browser {
 		$id = $coden.'_'.$sp->rofid;
 		$idElem = $id . '-elem';
 		$labelelem = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
-		$titleElem = 'rof:' . $sp->rofid . $listeTitle;
+
+		if (isset($sp->code)) {
+            $titleElem .= 'code apogée : ' . $sp->code;
+            if ($listeTitle != '') {
+                 $titleElem .= ', ';
+            }
+        }
+        if ($listeTitle != '') {
+            $titleElem .= $listeTitle;
+        }
+
 		$data_path = $this->path . '_' . $sp->rofid;
 
 		$nbEnf = $nbSub + $nbCourses;
