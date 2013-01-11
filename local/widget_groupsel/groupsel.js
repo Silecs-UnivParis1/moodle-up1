@@ -189,7 +189,7 @@
             return $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
                 $.map(list, function(item, index) {
-                    if (len > maxRows && index == len - 1) {
+                    if (item.num > maxRows) {
                         item = itemToResponse.apply(this, [item]);
                         item.label = '…';
                         return item;
@@ -212,6 +212,7 @@
 
     function transformGroupItems(items) {
         var category;
+        var num;
         var category2text = {
             structures: 'établissement',
             affiliation: 'établissement',
@@ -228,7 +229,11 @@
             if (category != item.category) {
                 category = item.category;
                 item.pre = category || "";
+                num = 1;
+            } else {
+                num++;
             }
+            item.num = num;
         });
     }
 
