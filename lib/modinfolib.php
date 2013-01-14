@@ -202,9 +202,17 @@ class course_modinfo extends stdClass {
     /**
      * Gets data about specific numbered section.
      * @param int $sectionnumber Number (not id) of section
-     * @return section_info Information for numbered section
+     * @param int $strictness Use MUST_EXIST to throw exception if it doesn't
+     * @return section_info Information for numbered section or null if not found
      */
-    public function get_section_info($sectionnumber) {
+    public function get_section_info($sectionnumber, $strictness = IGNORE_MISSING) {
+        if (!array_key_exists($sectionnumber, $this->sectioninfo)) {
+            if ($strictness === MUST_EXIST) {
+                throw new moodle_exception('sectionnotexist');
+            } else {
+                return null;
+            }
+        }
         return $this->sectioninfo[$sectionnumber];
     }
 
@@ -1069,8 +1077,12 @@ class cm_info extends stdClass {
     }
 
     /**
-     * Works out whether activity is visible *for current user* - if this is false, they
-     * aren't allowed to access it.
+     * Works out whether activity is available to the current user
+     *
+     * If the activity is unavailable, additional checks are required to determine if its hidden or greyed out
+     *
+     * @see is_user_access_restricted_by_group()
+     * @see is_user_access_restricted_by_conditional_access()
      * @return void
      */
     private function update_user_visible() {
@@ -1078,20 +1090,77 @@ class cm_info extends stdClass {
         $modcontext = get_context_instance(CONTEXT_MODULE, $this->id);
         $userid = $this->modinfo->get_user_id();
         $this->uservisible = true;
+
+        // If the user cannot access the activity set the uservisible flag to false.
+        // Additional checks are required to determine whether the activity is entirely hidden or just greyed out.
         if ((!$this->visible or !$this->available) and
                 !has_capability('moodle/course:viewhiddenactivities', $modcontext, $userid)) {
-            // If the activity is hidden or unavailable, and you don't have viewhiddenactivities,
-            // set it so that user can't see or access it
+
             $this->uservisible = false;
-        } else if (!empty($CFG->enablegroupmembersonly) and !empty($this->groupmembersonly)
-                and !has_capability('moodle/site:accessallgroups', $modcontext, $userid)) {
-            // If the activity has 'group members only' and you don't have accessallgroups...
-            $groups = $this->modinfo->get_groups($this->groupingid);
-            if (empty($groups)) {
-                // ...and you don't belong to a group, then set it so you can't see/access it
-                $this->uservisible = false;
+        }
+
+        // Check group membership.
+        if ($this->is_user_access_restricted_by_group()) {
+
+             $this->uservisible = false;
+            // Ensure activity is completely hidden from the user.
+            $this->showavailability = 0;
+        }
+    }
+
+    /**
+     * Checks whether the module's group settings restrict the current user's access
+     *
+     * @return bool True if the user access is restricted
+     */
+    public function is_user_access_restricted_by_group() {
+        global $CFG;
+
+        if (!empty($CFG->enablegroupmembersonly) and !empty($this->groupmembersonly)) {
+            $modcontext = context_module::instance($this->id);
+            $userid = $this->modinfo->get_user_id();
+            if (!has_capability('moodle/site:accessallgroups', $modcontext, $userid)) {
+                // If the activity has 'group members only' and you don't have accessallgroups...
+                $groups = $this->modinfo->get_groups($this->groupingid);
+                if (empty($groups)) {
+                    // ...and you don't belong to a group, then set it so you can't see/access it
+                    return true;
+                }
             }
         }
+        return false;
+    }
+
+    /**
+     * Checks whether the module's conditional access settings mean that the user cannot see the activity at all
+     *
+     * @return bool True if the user cannot see the module. False if the activity is either available or should be greyed out.
+     */
+    public function is_user_access_restricted_by_conditional_access() {
+        global $CFG, $USER;
+
+        if (empty($CFG->enableavailability)) {
+            return false;
+        }
+
+        // If module will always be visible anyway (but greyed out), don't bother checking anything else
+        if ($this->showavailability == CONDITION_STUDENTVIEW_SHOW) {
+            return false;
+        }
+
+        // Can the user see hidden modules?
+        $modcontext = context_module::instance($this->id);
+        $userid = $this->modinfo->get_user_id();
+        if (has_capability('moodle/course:viewhiddenactivities', $modcontext, $userid)) {
+            return false;
+        }
+
+        // Is the module hidden due to unmet conditions?
+        if (!$this->available) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1180,6 +1249,10 @@ function get_fast_modinfo(&$course, $userid=0) {
 
     if (!property_exists($course, 'modinfo')) {
         debugging('Coding problem - missing course modinfo property in get_fast_modinfo() call');
+    }
+
+    if (!property_exists($course, 'sectioncache')) {
+        debugging('Coding problem - missing course sectioncache property in get_fast_modinfo() call');
     }
 
     unset($cache[$course->id]); // prevent potential reference problems when switching users

@@ -56,11 +56,29 @@ foreach ($assignments as $assignment) {
     $cm = get_coursemodule_from_instance('assign', $assignment->id, 0, false, MUST_EXIST);
 
     $link = html_writer::link(new moodle_url('/mod/assign/view.php', array('id' => $cm->id)), $assignment->name);
-    $date = userdate($assignment->duedate);
-    $submissions = $DB->count_records('assign_submission', array('assignment'=>$cm->instance));
-    $row = array($link, $date, $submissions);
-    $table->data[] = $row;
+    $date = '-';
+    if (!empty($assignment->duedate)) {
+        $date = userdate($assignment->duedate);
+    }
 
+    $context = context_module::instance($cm->id);
+    $instance = new assign($context, $cm, $course);
+
+    $submitted = '';
+    if (has_capability('mod/assign:grade', $context)) {
+        $submitted = $instance->count_submissions_with_status(ASSIGN_SUBMISSION_STATUS_SUBMITTED);
+    } else if (has_capability('mod/assign:submit', $context)) {
+        $submission = $DB->get_record('assign_submission', array('assignment'=>$assignment->id, 'userid'=>$USER->id));
+
+        if (!empty($submission->status)) {
+            $submitted = get_string('submissionstatus_' . $submission->status, 'assign');
+        } else {
+            $submitted = get_string('submissionstatus_', 'assign');
+        }
+    }
+
+    $row = array($link, $date, $submitted);
+    $table->data[] = $row;
 }
 echo html_writer::table($table);
 echo $OUTPUT->footer();

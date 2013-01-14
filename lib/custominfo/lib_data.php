@@ -161,8 +161,9 @@ class custominfo_form_extension extends custominfo_data_abstract {
      * Declare the customisable categories and fields on a form
      * @param object $mform     instance of the moodleform class
      * @param bool $canviewall  (opt) if true, force the visibility of all fields
+     * @param integer $objectid (opt)
      */
-    public function definition($mform, $canviewall=false) {
+    public function definition($mform, $canviewall=false, $objectid=0) {
         global $DB;
 
         $categories = $this->getCategories();
@@ -185,7 +186,7 @@ class custominfo_form_extension extends custominfo_data_abstract {
                     if ($display or $canviewall) {
                         $mform->addElement('header', 'category_'.$category->id, format_string($category->name));
                         foreach ($fields as $field) {
-                            $formfield = custominfo_field_factory($this->objectname, $field->datatype, $field->id);
+                            $formfield = custominfo_field_factory($this->objectname, $field->datatype, $field->id, $objectid);
                             $formfield->edit_field($mform);
                         }
                     }

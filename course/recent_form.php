@@ -99,9 +99,10 @@ class recent_form extends moodleform {
 
             $mform->addElement('select', 'user', get_string('participants'), $options);
             $mform->setAdvanced('user');
+        } else {
+            // Default to no user.
+            $mform->addElement('hidden', 'user', 0);
         }
-
-        $sectiontitle = get_string('sectionname', 'format_'.$COURSE->format);
 
         $options = array(''=>get_string('allactivities'));
         $modsused = array();

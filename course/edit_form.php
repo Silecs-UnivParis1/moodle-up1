@@ -129,9 +129,13 @@ class course_edit_form extends moodleform {
             array(COURSE_DISPLAY_SINGLEPAGE => get_string('coursedisplay_single'),
                 COURSE_DISPLAY_MULTIPAGE => get_string('coursedisplay_multi')));
         $mform->addHelpButton('coursedisplay', 'coursedisplay');
-        $mform->setDefault('coursedisplay', COURSE_DISPLAY_SINGLEPAGE);
+        $mform->setDefault('coursedisplay', $courseconfig->coursedisplay);
 
-        for ($i = 0; $i <= $courseconfig->maxsections; $i++) {
+        $max = $courseconfig->maxsections;
+        if (!isset($max) || !is_numeric($max)) {
+            $max = 52;
+        }
+        for ($i = 0; $i <= $max; $i++) {
             $sectionmenu[$i] = "$i";
         }
         $mform->addElement('select', 'numsections', get_string('numberweeks'), $sectionmenu);
@@ -161,7 +165,11 @@ class course_edit_form extends moodleform {
         $mform->addHelpButton('showreports', 'showreports');
         $mform->setDefault('showreports', $courseconfig->showreports);
 
-        $choices = get_max_upload_sizes($CFG->maxbytes);
+        // Handle non-existing $course->maxbytes on course creation.
+        $coursemaxbytes = !isset($course->maxbytes) ? null : $course->maxbytes;
+
+        // Let's prepare the maxbytes popup.
+        $choices = get_max_upload_sizes($CFG->maxbytes, 0, 0, $coursemaxbytes);
         $mform->addElement('select', 'maxbytes', get_string('maximumupload'), $choices);
         $mform->addHelpButton('maxbytes', 'maximumupload');
         $mform->setDefault('maxbytes', $courseconfig->maxbytes);
@@ -234,7 +242,7 @@ class course_edit_form extends moodleform {
             if (!empty($course->id)) {
                 $mform->setConstant('visible', $course->visible);
             } else {
-                $mform->setConstant('visible', $category->visible);
+                $mform->setConstant('visible', $courseconfig->visible);
             }
         }
 

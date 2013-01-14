@@ -273,6 +273,7 @@ class core_enrol_external extends external_api {
                     'msn'         => new external_value(PARAM_NOTAGS, 'msn number', VALUE_OPTIONAL),
                     'department'  => new external_value(PARAM_TEXT, 'department', VALUE_OPTIONAL),
                     'institution' => new external_value(PARAM_TEXT, 'institution', VALUE_OPTIONAL),
+                    'idnumber'    => new external_value(PARAM_RAW, 'An arbitrary ID code number perhaps from the institution', VALUE_OPTIONAL),
                     'interests'   => new external_value(PARAM_TEXT, 'user interests (separated by commas)', VALUE_OPTIONAL),
                     'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
                     'lastaccess'  => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
@@ -387,7 +388,7 @@ class core_role_external extends external_api {
             // throw an exception if user is not able to assign the role in this context
             $roles = get_assignable_roles($context, ROLENAME_SHORT);
 
-            if (!key_exists($assignment['roleid'], $roles)) {
+            if (!array_key_exists($assignment['roleid'], $roles)) {
                 throw new invalid_parameter_exception('Can not assign roleid='.$assignment['roleid'].' in contextid='.$assignment['contextid']);
             }
 
@@ -450,7 +451,7 @@ class core_role_external extends external_api {
 
             // throw an exception if user is not able to unassign the role in this context
             $roles = get_assignable_roles($context, ROLENAME_SHORT);
-            if (!key_exists($unassignment['roleid'], $roles)) {
+            if (!array_key_exists($unassignment['roleid'], $roles)) {
                 throw new invalid_parameter_exception('Can not unassign roleid='.$unassignment['roleid'].' in contextid='.$unassignment['contextid']);
             }
 

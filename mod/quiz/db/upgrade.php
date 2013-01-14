@@ -330,6 +330,67 @@ function xmldb_quiz_upgrade($oldversion) {
     // Moodle v2.3.0 release upgrade line
     // Put any upgrade step following this
 
+    if ($oldversion < 2012061702) {
+
+        // MDL-32791 somebody reported having nonsense rows in their
+        // quiz_question_instances which caused various problems. These rows
+        // are meaningless, hence this upgrade step to clean them up.
+        $DB->delete_records('quiz_question_instances', array('question' => 0));
+
+        // Quiz savepoint reached.
+        upgrade_mod_savepoint(true, 2012061702, 'quiz');
+    }
+
+    if ($oldversion < 2012061703) {
+
+        // MDL-34702 the questiondecimalpoints column was created with default -2
+        // when it should have been -1, and no-one has noticed in the last 2+ years!
+
+        // Changing the default of field questiondecimalpoints on table quiz to -1.
+        $table = new xmldb_table('quiz');
+        $field = new xmldb_field('questiondecimalpoints', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '-1', 'decimalpoints');
+
+        // Launch change of default for field questiondecimalpoints.
+        $dbman->change_field_default($table, $field);
+
+        // Correct any wrong values.
+        $DB->set_field('quiz', 'questiondecimalpoints', -1, array('questiondecimalpoints' => -2));
+
+        // Quiz savepoint reached.
+        upgrade_mod_savepoint(true, 2012061703, 'quiz');
+    }
+
+    if ($oldversion < 2012061704) {
+
+        // Define field timecheckstate to be added to quiz_attempts
+        $table = new xmldb_table('quiz_attempts');
+        $field = new xmldb_field('timecheckstate', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'timemodified');
+
+        // Conditionally launch add field timecheckstate
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define index state-timecheckstate (not unique) to be added to quiz_attempts
+        $table = new xmldb_table('quiz_attempts');
+        $index = new xmldb_index('state-timecheckstate', XMLDB_INDEX_NOTUNIQUE, array('state', 'timecheckstate'));
+
+        // Conditionally launch add index state-timecheckstate
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Overdue cron no longer needs these
+        unset_config('overduelastrun', 'quiz');
+        unset_config('overduedoneto', 'quiz');
+
+        // Update timecheckstate on all open attempts
+        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+        quiz_update_open_attempts(array());
+
+        // quiz savepoint reached
+        upgrade_mod_savepoint(true, 2012061704, 'quiz');
+    }
 
     return true;
 }

@@ -412,7 +412,7 @@ class core_wizard {
 
     private function update_session($courseid) {
         global $SESSION;
-        $SESSION->wizard['idcourse'] = $course->id;
+        $SESSION->wizard['idcourse'] = $courseid;
         $SESSION->wizard['idenrolment'] = 'manual';
     }
 

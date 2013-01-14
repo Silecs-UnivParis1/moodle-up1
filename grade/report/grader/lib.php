@@ -225,7 +225,7 @@ class grade_report_grader extends grade_report {
                 $changedgrades = true;
 
             } else if ($datatype === 'feedback') {
-                if ($oldvalue->feedback === $postedvalue) {
+                if (($oldvalue->feedback === $postedvalue) or ($oldvalue->feedback === NULL and empty($postedvalue))) {
                     continue;
                 }
             }
@@ -410,6 +410,9 @@ class grade_report_grader extends grade_report {
                     break;
                 case 'firstname':
                     $sort = "u.firstname $this->sortorder, u.lastname $this->sortorder";
+                    break;
+                case 'email':
+                    $sort = "u.email $this->sortorder";
                     break;
                 case 'idnumber':
                 default:
@@ -1013,7 +1016,8 @@ class grade_report_grader extends grade_report {
                                 $nogradestr = $this->get_lang_string('nooutcome', 'grades');
                             }
                             $attributes = array('tabindex' => $tabindices[$item->id]['grade'], 'id'=>'grade_'.$userid.'_'.$item->id);
-                            $itemcell->text .= html_writer::select($scaleopt, 'grade_'.$userid.'_'.$item->id, $gradeval, array(-1=>$nogradestr), $attributes);;
+                            $itemcell->text .= html_writer::label(get_string('typescale', 'grades'), $attributes['id'], false, array('class' => 'accesshide'));
+                            $itemcell->text .= html_writer::select($scaleopt, 'grade_'.$userid.'_'.$item->id, $gradeval, array(-1=>$nogradestr), $attributes);
                         } elseif(!empty($scale)) {
                             $scales = explode(",", $scale->scale);
 
@@ -1576,13 +1580,17 @@ class grade_report_grader extends grade_report {
         return $icon;
     }
 
+    public function process_action($target, $action) {
+        return self::do_process_action($target, $action);
+    }
+
     /**
      * Processes a single action against a category, grade_item or grade.
      * @param string $target eid ({type}{id}, e.g. c4 for category4)
      * @param string $action Which action to take (edit, delete etc...)
      * @return
      */
-    public function process_action($target, $action) {
+    public static function do_process_action($target, $action) {
         // TODO: this code should be in some grade_tree static method
         $targettype = substr($target, 0, 1);
         $targetid = substr($target, 1);

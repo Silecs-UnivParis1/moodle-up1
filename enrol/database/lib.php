@@ -445,8 +445,9 @@ class enrol_database_plugin extends enrol_plugin {
             $sql = $this->db_get_sql($table, array($coursefield=>$course->mapping), $sqlfields);
             if ($rs = $extdb->Execute($sql)) {
                 if (!$rs->EOF) {
+                    $usersearch = array('deleted' => 0);
                     if ($localuserfield === 'username') {
-                        $usersearch = array('mnethostid'=>$CFG->mnet_localhost_id, 'deleted' =>0);
+                        $usersearch['mnethostid'] = $CFG->mnet_localhost_id;
                     }
                     while ($fields = $rs->FetchRow()) {
                         $fields = array_change_key_case($fields, CASE_LOWER);
@@ -480,9 +481,8 @@ class enrol_database_plugin extends enrol_plugin {
                 }
                 $rs->Close();
             } else {
-                mtrace('Error while communicating with external enrolment database');
-                $extdb->Close();
-                return;
+                mtrace("  error: skipping course '$course->mapping' - could not match with external database");
+                continue;
             }
             unset($user_mapping);
 
@@ -629,7 +629,7 @@ class enrol_database_plugin extends enrol_plugin {
         if ($idnumber) {
             $sqlfields[] = $idnumber;
         }
-        $sql = $this->db_get_sql($table, array(), $sqlfields);
+        $sql = $this->db_get_sql($table, array(), $sqlfields, true);
         $createcourses = array();
         if ($rs = $extdb->Execute($sql)) {
             if (!$rs->EOF) {

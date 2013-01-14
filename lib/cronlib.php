@@ -208,11 +208,11 @@ function cron_run() {
     if ($DB->count_records('user_preferences', array('name'=>'create_password', 'value'=>'1'))) {
         mtrace('Creating passwords for new users...');
         $newusers = $DB->get_recordset_sql("SELECT u.id as id, u.email, u.firstname,
-                                                 u.lastname, u.username,
+                                                 u.lastname, u.username, u.lang,
                                                  p.id as prefid
                                             FROM {user} u
                                             JOIN {user_preferences} p ON u.id=p.userid
-                                           WHERE p.name='create_password' AND p.value='1' AND u.email !='' AND u.suspended = 0 AND u.auth != 'nologin'");
+                                           WHERE p.name='create_password' AND p.value='1' AND u.email !='' AND u.suspended = 0 AND u.auth != 'nologin' AND u.deleted = 0");
 
         // note: we can not send emails to suspended accounts
         foreach ($newusers as $newuser) {
@@ -373,6 +373,13 @@ function cron_run() {
     }
 
 
+    // Run question bank clean-up.
+    mtrace("Starting the question bank cron...", '');
+    require_once($CFG->libdir . '/questionlib.php');
+    question_bank::cron();
+    mtrace('done.');
+
+
     //Run registration updated cron
     mtrace(get_string('siteupdatesstart', 'hub'));
     require_once($CFG->dirroot . '/' . $CFG->admin . '/registration/lib.php');
@@ -458,10 +465,6 @@ function cron_run() {
     // cleanup file trash - not very important
     $fs = get_file_storage();
     $fs->cron();
-
-    mtrace("Clean up cached external files");
-    // 1 week
-    cache_file::cleanup(array(), 60 * 60 * 24 * 7);
 
     mtrace("Cron script completed correctly");
 
@@ -709,7 +712,7 @@ function notify_login_failures() {
         mtrace('Emailing admins about '. $count .' failed login attempts');
         foreach ($recip as $admin) {
             //emailing the admins directly rather than putting these through the messaging system
-            email_to_user($admin,get_admin(), $subject, $body);
+            email_to_user($admin, generate_email_supportuser(), $subject, $body);
         }
     }
 

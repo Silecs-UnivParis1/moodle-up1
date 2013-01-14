@@ -384,12 +384,26 @@ class user_picture implements renderable {
             // Hash the users email address
             $md5 = md5(strtolower(trim($this->user->email)));
             // Build a gravatar URL with what we know.
+
+            // Find the best default image URL we can (MDL-35669)
+            if (empty($CFG->gravatardefaulturl)) {
+                $absoluteimagepath = $page->theme->resolve_image_location('u/'.$filename, 'core');
+                if (strpos($absoluteimagepath, $CFG->dirroot) === 0) {
+                    $gravatardefault = $CFG->wwwroot . substr($absoluteimagepath, strlen($CFG->dirroot));
+                } else {
+                    $gravatardefault = $CFG->wwwroot . '/pix/u/' . $filename . '.png';
+                }
+            } else {
+                $gravatardefault = $CFG->gravatardefaulturl;
+            }
+
             // If the currently requested page is https then we'll return an
             // https gravatar page.
             if (strpos($CFG->httpswwwroot, 'https:') === 0) {
-                return new moodle_url("https://secure.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $defaulturl->out(false)));
+                $gravatardefault = str_replace($CFG->wwwroot, $CFG->httpswwwroot, $gravatardefault); // Replace by secure url.
+                return new moodle_url("https://secure.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $gravatardefault));
             } else {
-                return new moodle_url("http://www.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $defaulturl->out(false)));
+                return new moodle_url("http://www.gravatar.com/avatar/{$md5}", array('s' => $size, 'd' => $gravatardefault));
             }
         }
 
@@ -550,6 +564,10 @@ class pix_icon implements renderable {
         }
         if (!isset($this->attributes['title'])) {
             $this->attributes['title'] = $this->attributes['alt'];
+        } else if (empty($this->attributes['title'])) {
+            // Remove the title attribute if empty, we probably want to use the parent node's title
+            // and some browsers might overwrite it with an empty title.
+            unset($this->attributes['title']);
         }
     }
 }
@@ -715,6 +733,11 @@ class single_select implements renderable {
     var $label = '';
 
     /**
+     * @var array Button label's attributes
+     */
+    var $labelattributes = array();
+
+    /**
      * @var string Form submit method post or get
      */
     var $method = 'get';
@@ -806,9 +829,12 @@ class single_select implements renderable {
      * Sets select's label
      *
      * @param string $label
+     * @param array $attributes (optional)
      */
-    public function set_label($label) {
+    public function set_label($label, $attributes = array()) {
         $this->label = $label;
+        $this->labelattributes = $attributes;
+
     }
 }
 
@@ -849,6 +875,11 @@ class url_select implements renderable {
      * @var string Button label
      */
     var $label = '';
+
+    /**
+     * @var array Button label's attributes
+     */
+    var $labelattributes = array();
 
     /**
      * @var string Wrapping div class
@@ -922,9 +953,11 @@ class url_select implements renderable {
      * Sets select's label
      *
      * @param string $label
+     * @param array $attributes (optional)
      */
-    public function set_label($label) {
+    public function set_label($label, $attributes = array()) {
         $this->label = $label;
+        $this->labelattributes = $attributes;
     }
 }
 
@@ -1577,9 +1610,10 @@ class html_writer {
                     if (!($row instanceof html_table_row)) {
                         $newrow = new html_table_row();
 
-                        foreach ($row as $item) {
-                            $cell = new html_table_cell();
-                            $cell->text = $item;
+                        foreach ($row as $cell) {
+                            if (!($cell instanceof html_table_cell)) {
+                                $cell = new html_table_cell($cell);
+                            }
                             $newrow->cells[] = $cell;
                         }
                         $row = $newrow;

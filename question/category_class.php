@@ -100,11 +100,14 @@ class question_category_list_item extends list_item {
         $editqestions = get_string('editquestions', 'question');
 
         /// Each section adds html to be displayed as part of this list item
-        $questionbankurl = new moodle_url("/question/edit.php", ($this->parentlist->pageurl->params() + array('category'=>"$category->id,$category->contextid")));
+        $questionbankurl = new moodle_url("/question/edit.php", ($this->parentlist->pageurl->params() + array('cat'=>"$category->id,$category->contextid")));
         $catediturl = $this->parentlist->pageurl->out(true, array('edit' => $this->id));
-        $item = "<b><a title=\"{$str->edit}\" href=\"$catediturl\">".$category->name ."</a></b> <a title=\"$editqestions\" href=\"$questionbankurl\">".'('.$category->questioncount.')</a>';
+        $item = "<b><a title=\"{$str->edit}\" href=\"$catediturl\">" .
+                format_string($category->name, true, array('context' => $this->parentlist->context)) .
+                "</a></b> <a title=\"$editqestions\" href=\"$questionbankurl\">".'('.$category->questioncount.')</a>';
 
-        $item .= '&nbsp;'. $category->info;
+        $item .= '&nbsp;' . format_text($category->info, $category->infoformat,
+                array('context' => $this->parentlist->context, 'noclean' => true));
 
         // don't allow delete if this is the last category in this context.
         if (count($this->parentlist->records) != 1) {
@@ -453,6 +456,8 @@ class question_category_object {
             question_move_category_to_context($cat->id, $oldcat->contextid, $tocontextid);
         }
 
+        // Cat param depends on the context id, so update it.
+        $this->pageurl->param('cat', $updateid . ',' . $tocontextid);
         redirect($this->pageurl);
     }
 }

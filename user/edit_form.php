@@ -14,18 +14,23 @@ class user_edit_form extends moodleform {
 
     // Define the form
     function definition () {
-        global $CFG, $COURSE;
+        global $CFG, $COURSE, $USER;
 
         $mform =& $this->_form;
-        if (is_array($this->_customdata) && array_key_exists('editoroptions', $this->_customdata)) {
-            $editoroptions = $this->_customdata['editoroptions'];
-        } else {
-            $editoroptions = null;
-        }
-        if (is_array($this->_customdata) && array_key_exists('filemanageroptions', $this->_customdata)) {
-            $filemanageroptions = $this->_customdata['filemanageroptions'];
-        } else {
-            $filemanageroptions = null;
+        $editoroptions = null;
+        $filemanageroptions = null;
+        $userid = $USER->id;
+
+        if (is_array($this->_customdata)) {
+            if (array_key_exists('editoroptions', $this->_customdata)) {
+                $editoroptions = $this->_customdata['editoroptions'];
+            }
+            if (array_key_exists('filemanageroptions', $this->_customdata)) {
+                $filemanageroptions = $this->_customdata['filemanageroptions'];
+            }
+            if (array_key_exists('userid', $this->_customdata)) {
+                $userid = $this->_customdata['userid'];
+            }
         }
         //Accessibility: "Required" is bad legend text.
         $strgeneral  = get_string('general');
