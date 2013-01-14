@@ -124,7 +124,14 @@ class mod_scorm_mod_form extends moodleform_mod {
         $mform->setAdvanced('winoptgrp', $cfg_scorm->winoptgrp_adv);
 
         // Skip view page
-        $mform->addElement('select', 'skipview', get_string('skipview', 'scorm'), scorm_get_skip_view_array());
+        $skipviewoptions = scorm_get_skip_view_array();
+        if ($COURSE->format == 'scorm') { // Remove option that would cause a constant redirect.
+            unset($skipviewoptions[SCORM_SKIPVIEW_ALWAYS]);
+            if ($cfg_scorm->skipview == SCORM_SKIPVIEW_ALWAYS) {
+                $cfg_scorm->skipview = SCORM_SKIPVIEW_FIRST;
+            }
+        }
+        $mform->addElement('select', 'skipview', get_string('skipview', 'scorm'), $skipviewoptions);
         $mform->addHelpButton('skipview', 'skipview', 'scorm');
         $mform->setDefault('skipview', $cfg_scorm->skipview);
         $mform->setAdvanced('skipview', $cfg_scorm->skipview_adv);
@@ -177,8 +184,8 @@ class mod_scorm_mod_form extends moodleform_mod {
         // Max Attempts
         $mform->addElement('select', 'maxattempt', get_string('maximumattempts', 'scorm'), scorm_get_attempts_array());
         $mform->addHelpButton('maxattempt', 'maximumattempts', 'scorm');
-        $mform->setDefault('maxattempt', $cfg_scorm->maxattempts);
-        $mform->setAdvanced('maxattempt', $cfg_scorm->maxattempts_adv);
+        $mform->setDefault('maxattempt', $cfg_scorm->maxattempt);
+        $mform->setAdvanced('maxattempt', $cfg_scorm->maxattempt_adv);
 
         // What Grade
         $mform->addElement('select', 'whatgrade', get_string('whatgrade', 'scorm'),  scorm_get_what_grade_array());
@@ -492,7 +499,7 @@ class mod_scorm_mod_form extends moodleform_mod {
         }
 
         // Turn off completion settings if the checkboxes aren't ticked
-        $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
+        $autocompletion = isset($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
 
         if (isset($data->completionstatusrequired) && is_array($data->completionstatusrequired)) {
             $total = 0;

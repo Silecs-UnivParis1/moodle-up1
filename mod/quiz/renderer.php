@@ -229,7 +229,19 @@ class mod_quiz_renderer extends plugin_renderer_base {
      * @param $url contains a url for the review link
      */
     public function finish_review_link($url) {
-        if ($this->page->pagelayout == 'popup') {
+
+        // This is an ugly hack to fix MDL-34733 without changing the renderer API.
+        global $attemptobj;
+        if (!empty($attemptobj)) {
+            // I think that every page in standard Moodle that ends up calling
+            // this method will actually end up coming down this branch.
+            $inpopup = $attemptobj->get_access_manager(time())->attempt_must_be_in_popup();
+        } else {
+            // Else fall back to old (not very good) heuristic.
+            $inpopup = $this->page->pagelayout == 'popup';
+        }
+
+        if ($inpopup) {
             // In a 'secure' popup window.
             $this->page->requires->js_init_call('M.mod_quiz.secure_window.init_close_button',
                     array($url), quiz_get_js_module());
@@ -263,17 +275,22 @@ class mod_quiz_renderer extends plugin_renderer_base {
      */
     public function countdown_timer(quiz_attempt $attemptobj, $timenow) {
 
-        $timeleft = $attemptobj->get_time_left($timenow);
+        $timeleft = $attemptobj->get_time_left_display($timenow);
         if ($timeleft !== false) {
-            // Make sure the timer starts just above zero. If $timeleft was <= 0, then
-            // this will just have the effect of causing the quiz to be submitted immediately.
-            $timerstartvalue = max($timeleft, 1);
-            $this->initialise_timer($timerstartvalue);
+            $ispreview = $attemptobj->is_preview();
+            $timerstartvalue = $timeleft;
+            if (!$ispreview) {
+                // Make sure the timer starts just above zero. If $timeleft was <= 0, then
+                // this will just have the effect of causing the quiz to be submitted immediately.
+                $timerstartvalue = max($timerstartvalue, 1);
+            }
+            $this->initialise_timer($timerstartvalue, $ispreview);
         }
 
         return html_writer::tag('div', get_string('timeleft', 'quiz') . ' ' .
                 html_writer::tag('span', '', array('id' => 'quiz-time-left')),
-                array('id' => 'quiz-timer'));
+                array('id' => 'quiz-timer', 'role' => 'timer',
+                    'aria-atomic' => 'true', 'aria-relevant' => 'text'));
     }
 
     /**
@@ -484,9 +501,9 @@ class mod_quiz_renderer extends plugin_renderer_base {
      * Output the JavaScript required to initialise the countdown timer.
      * @param int $timerstartvalue time remaining, in seconds.
      */
-    public function initialise_timer($timerstartvalue) {
-        $this->page->requires->js_init_call('M.mod_quiz.timer.init',
-                array($timerstartvalue), false, quiz_get_js_module());
+    public function initialise_timer($timerstartvalue, $ispreview) {
+        $options = array($timerstartvalue, (bool)$ispreview);
+        $this->page->requires->js_init_call('M.mod_quiz.timer.init', $options, false, quiz_get_js_module());
     }
 
     /**
@@ -509,8 +526,8 @@ class mod_quiz_renderer extends plugin_renderer_base {
             $output .= html_writer::tag('p', get_string('pleaseclose', 'quiz'));
             $delay = 0;
         }
-        $this->page->requires->js_function_call('M.mod_quiz.secure_window.close',
-                array($url, $delay));
+        $this->page->requires->js_init_call('M.mod_quiz.secure_window.close',
+                array($url, $delay), false, quiz_get_js_module());
 
         $output .= $this->box_end();
         $output .= $this->footer();
@@ -1148,6 +1165,24 @@ class mod_quiz_renderer extends plugin_renderer_base {
         $url = new moodle_url('/mod/quiz/report.php', array(
                 'id' => $cm->id, 'mode' => quiz_report_default_report($context)));
         return html_writer::link($url, $summary);
+    }
+
+    /**
+     * Output a graph, or a message saying that GD is required.
+     * @param moodle_url $url the URL of the graph.
+     * @param string $title the title to display above the graph.
+     * @return string HTML fragment for the graph.
+     */
+    public function graph(moodle_url $url, $title) {
+        global $CFG;
+
+        if (empty($CFG->gdversion)) {
+            $graph = get_string('gdneed');
+        } else {
+            $graph = html_writer::empty_tag('img', array('src' => $url, 'alt' => $title));
+        }
+
+        return $this->heading($title) . html_writer::tag('div', $graph, array('class' => 'graph'));
     }
 }
 

@@ -364,9 +364,6 @@ class mod_lesson_renderer extends plugin_renderer_base {
         $importquestionsurl = new moodle_url('/mod/lesson/import.php',array('id'=>$this->page->cm->id, 'pageid'=>$prevpageid));
         $links[] = html_writer::link($importquestionsurl, get_string('importquestions', 'lesson'));
 
-        $importppturl = new moodle_url('/mod/lesson/importppt.php',array('id'=>$this->page->cm->id, 'pageid'=>$prevpageid));
-        $links[] = html_writer::link($importppturl, get_string('importppt', 'lesson'));
-
         $manager = lesson_page_type_manager::get($lesson);
         foreach ($manager->get_add_page_type_links($prevpageid) as $link) {
             $link['addurl']->param('firstpage', 1);
@@ -510,15 +507,20 @@ class mod_lesson_renderer extends plugin_renderer_base {
                 $ntries = 0;  // may not be necessary
             }
 
-
             $viewedpageids = array();
-            if ($attempts = $lesson->get_attempts($ntries, true)) {
-                $viewedpageids = array_merge($viewedpageids, array_keys($attempts));
+            if ($attempts = $lesson->get_attempts($ntries, false)) {
+                foreach($attempts as $attempt) {
+                    $viewedpageids[$attempt->pageid] = $attempt;
+                }
             }
 
+            $viewedbranches = array();
             // collect all of the branch tables viewed
-            if ($viewedbranches = $DB->get_records("lesson_branch", array ("lessonid"=>$lesson->id, "userid"=>$USER->id, "retry"=>$ntries), 'timeseen DESC', 'id, pageid')) {
-                $viewedpageids = array_merge($viewedpageids, array_keys($viewedbranches));
+            if ($branches = $DB->get_records("lesson_branch", array ("lessonid"=>$lesson->id, "userid"=>$USER->id, "retry"=>$ntries), 'timeseen ASC', 'id, pageid')) {
+                foreach($branches as $branch) {
+                    $viewedbranches[$branch->pageid] = $branch;
+                }
+                $viewedpageids = array_merge($viewedpageids, $viewedbranches);
             }
 
             // Filter out the following pages:

@@ -544,6 +544,9 @@ class phpunit_util {
     public static function reset_all_data($logchanges = false) {
         global $DB, $CFG, $USER, $SITE, $COURSE, $PAGE, $OUTPUT, $SESSION, $GROUPLIB_CACHE;
 
+        // Release memory and indirectly call destroy() methods to release resource handles, etc.
+        gc_collect_cycles();
+
         // reset global $DB in case somebody mocked it
         $DB = self::get_global_backup('DB');
 
@@ -617,6 +620,18 @@ class phpunit_util {
         }
         $GROUPLIB_CACHE = null;
         //TODO MDL-25290: add more resets here and probably refactor them to new core function
+
+        // Reset course and module caches.
+        $reset = 'reset';
+        get_fast_modinfo($reset);
+
+        // Reset other singletons.
+        if (class_exists('plugin_manager')) {
+            plugin_manager::reset_caches(true);
+        }
+        if (class_exists('available_update_checker')) {
+            available_update_checker::reset_caches(true);
+        }
 
         // purge dataroot directory
         self::reset_dataroot();
@@ -762,16 +777,20 @@ class phpunit_util {
      * Note: To be used from CLI scripts only.
      *
      * @static
+     * @param bool $displayprogress if true, this method will echo progress information.
      * @return void may terminate execution with exit code
      */
-    public static function drop_site() {
+    public static function drop_site($displayprogress = false) {
         global $DB, $CFG;
 
         if (!self::is_test_site()) {
             phpunit_bootstrap_error(PHPUNIT_EXITCODE_CONFIGERROR, 'Can not drop non-test site!!');
         }
 
-        // purge dataroot
+        // Purge dataroot
+        if ($displayprogress) {
+            echo "Purging dataroot:\n";
+        }
         self::reset_dataroot();
         phpunit_bootstrap_initdataroot($CFG->dataroot);
         $keep = array('.', '..', 'lock', 'webrunner.xml');
@@ -795,9 +814,28 @@ class phpunit_util {
             unset($tables['config']);
             $tables['config'] = 'config';
         }
+
+        if ($displayprogress) {
+            echo "Dropping tables:\n";
+        }
+        $dotsonline = 0;
         foreach ($tables as $tablename) {
             $table = new xmldb_table($tablename);
             $DB->get_manager()->drop_table($table);
+
+            if ($dotsonline == 60) {
+                if ($displayprogress) {
+                    echo "\n";
+                }
+                $dotsonline = 0;
+            }
+            if ($displayprogress) {
+                echo '.';
+            }
+            $dotsonline += 1;
+        }
+        if ($displayprogress) {
+            echo "\n";
         }
     }
 
@@ -925,7 +963,7 @@ class phpunit_util {
         global $CFG;
 
         $template = '
-        <testsuite name="@component@">
+        <testsuite name="@component@ test suite">
             <directory suffix="_test.php">@dir@</directory>
         </testsuite>';
         $data = file_get_contents("$CFG->dirroot/phpunit.xml.dist");

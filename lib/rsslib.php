@@ -207,10 +207,21 @@ function rss_get_file_full_name($componentname, $filename) {
  *
  * @param stdClass $instance the instance of the source of the RSS feed
  * @param string $sql the SQL used to produce the RSS feed
+ * @param array $params the parameters used in the SQL query
  * @return string the name of the RSS file
  */
-function rss_get_file_name($instance, $sql) {
-    return $instance->id.'_'.md5($sql);
+function rss_get_file_name($instance, $sql, $params = array()) {
+    if ($params) {
+        // If a parameters array is passed, then we want to
+        // serialize it and then concatenate it with the sql.
+        // The reason for this is to generate a unique filename
+        // for queries using the same sql but different parameters.
+        asort($parms);
+        $serializearray = serialize($params);
+        return $instance->id.'_'.md5($sql . $serializearray);
+    } else {
+        return $instance->id.'_'.md5($sql);
+    }
 }
 
 /**
@@ -405,11 +416,12 @@ function rss_geterrorxmlfile($errortype = 'rsserror') {
  */
 function rss_get_userid_from_token($token) {
     global $DB;
-    $record = $DB->get_record('user_private_key', array('script'=>'rss','value' => $token), 'userid', IGNORE_MISSING);
-    if ($record) {
-        return $record->userid;
-    }
-    return null;
+
+    $sql = 'SELECT u.id FROM {user} u
+            JOIN {user_private_key} k ON u.id = k.userid
+            WHERE u.deleted = 0 AND u.confirmed = 1
+            AND u.suspended = 0 AND k.value = ?';
+    return $DB->get_field_sql($sql, array($token), IGNORE_MISSING);
 }
 
 /**

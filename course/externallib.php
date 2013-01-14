@@ -212,7 +212,7 @@ class core_course_external extends external_api {
                                 array(
                                     'id' => new external_value(PARAM_INT, 'activity id'),
                                     'url' => new external_value(PARAM_URL, 'activity url', VALUE_OPTIONAL),
-                                    'name' => new external_value(PARAM_TEXT, 'activity module name'),
+                                    'name' => new external_value(PARAM_RAW, 'activity module name'),
                                     'description' => new external_value(PARAM_RAW, 'activity description', VALUE_OPTIONAL),
                                     'visible' => new external_value(PARAM_INT, 'is the module visible', VALUE_OPTIONAL),
                                     'modicon' => new external_value(PARAM_URL, 'activity icon url'),
@@ -285,7 +285,7 @@ class core_course_external extends external_api {
                         array('options' => $options));
 
         //retrieve courses
-        if (!key_exists('ids', $params['options'])
+        if (!array_key_exists('ids', $params['options'])
                 or empty($params['options']['ids'])) {
             $courses = $DB->get_records('course');
         } else {
@@ -523,12 +523,12 @@ class core_course_external extends external_api {
             require_capability('moodle/course:create', $context);
 
             // Make sure lang is valid
-            if (key_exists('lang', $course) and empty($availablelangs[$course['lang']])) {
+            if (array_key_exists('lang', $course) and empty($availablelangs[$course['lang']])) {
                 throw new moodle_exception('errorinvalidparam', 'webservice', '', 'lang');
             }
 
             // Make sure theme is valid
-            if (key_exists('forcetheme', $course)) {
+            if (array_key_exists('forcetheme', $course)) {
                 if (!empty($CFG->allowcoursethemes)) {
                     if (empty($availablethemes[$course['forcetheme']])) {
                         throw new moodle_exception('errorinvalidparam', 'webservice', '', 'forcetheme');
@@ -547,10 +547,10 @@ class core_course_external extends external_api {
             //set default value for completion
             $courseconfig = get_config('moodlecourse');
             if (completion_info::is_enabled_for_site()) {
-                if (!key_exists('enablecompletion', $course)) {
+                if (!array_key_exists('enablecompletion', $course)) {
                     $course['enablecompletion'] = $courseconfig->enablecompletion;
                 }
-                if (!key_exists('completionstartonenrol', $course)) {
+                if (!array_key_exists('completionstartonenrol', $course)) {
                     $course['completionstartonenrol'] = $courseconfig->completionstartonenrol;
                 }
             } else {
@@ -668,13 +668,12 @@ class core_course_external extends external_api {
                 'options' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                                'name' => new external_value(PARAM_ALPHA, 'The backup option name:
+                                'name' => new external_value(PARAM_ALPHAEXT, 'The backup option name:
                                             "activities" (int) Include course activites (default to 1 that is equal to yes),
                                             "blocks" (int) Include course blocks (default to 1 that is equal to yes),
                                             "filters" (int) Include course filters  (default to 1 that is equal to yes),
                                             "users" (int) Include users (default to 0 that is equal to no),
                                             "role_assignments" (int) Include role assignments  (default to 0 that is equal to no),
-                                            "user_files" (int) Include user files  (default to 0 that is equal to no),
                                             "comments" (int) Include user comments  (default to 0 that is equal to no),
                                             "completion_information" (int) Include user course completion information  (default to 0 that is equal to no),
                                             "logs" (int) Include course logs  (default to 0 that is equal to no),
@@ -722,7 +721,7 @@ class core_course_external extends external_api {
         // Context validation.
 
         if (! ($course = $DB->get_record('course', array('id'=>$params['courseid'])))) {
-            throw new moodle_exception('invalidcourseid', 'error', '', $params['courseid']);
+            throw new moodle_exception('invalidcourseid', 'error');
         }
 
         // Category where duplicated course is going to be created.
@@ -739,7 +738,6 @@ class core_course_external extends external_api {
             'filters' => 1,
             'users' => 0,
             'role_assignments' => 0,
-            'user_files' => 0,
             'comments' => 0,
             'completion_information' => 0,
             'logs' => 0,
@@ -904,9 +902,10 @@ class core_course_external extends external_api {
                                          '"parent" (int) the parent category id,'.
                                          '"idnumber" (string) category idnumber'.
                                          ' - user must have \'moodle/category:manage\' to search on idnumber,'.
-                                         '"visible" (int) whether the category is visible or not'.
+                                         '"visible" (int) whether the returned categories must be visible or hidden. If the key is not passed,
+                                             then the function return all categories that the user can see.'.
                                          ' - user must have \'moodle/category:manage\' or \'moodle/category:viewhiddencategories\' to search on visible,'.
-                                         '"theme" (string) category theme'.
+                                         '"theme" (string) only return the categories having this theme'.
                                          ' - user must have \'moodle/category:manage\' to search on theme'),
                             'value' => new external_value(PARAM_RAW, 'the value to match')
                         )
@@ -1017,10 +1016,22 @@ class core_course_external extends external_api {
                 if ($categories and !empty($params['addsubcategories'])) {
                     $newcategories = array();
 
+                    // Check if we required visible/theme checks.
+                    $additionalselect = '';
+                    $additionalparams = array();
+                    if (isset($conditions['visible'])) {
+                        $additionalselect .= ' AND visible = :visible';
+                        $additionalparams['visible'] = $conditions['visible'];
+                    }
+                    if (isset($conditions['theme'])) {
+                        $additionalselect .= ' AND theme= :theme';
+                        $additionalparams['theme'] = $conditions['theme'];
+                    }
+
                     foreach ($categories as $category) {
-                        $sqllike = $DB->sql_like('path', ':path');
-                        $sqlparams = array('path' => $category->path.'/%'); // It will NOT include the specified category.
-                        $subcategories = $DB->get_records_select('course_categories', $sqllike, $sqlparams);
+                        $sqlselect = $DB->sql_like('path', ':path') . $additionalselect;
+                        $sqlparams = array('path' => $category->path.'/%') + $additionalparams; // It will NOT include the specified category.
+                        $subcategories = $DB->get_records_select('course_categories', $sqlselect, $sqlparams);
                         $newcategories = $newcategories + $subcategories;   // Both arrays have integer as keys.
                     }
                     $categories = $categories + $newcategories;

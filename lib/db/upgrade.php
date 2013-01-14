@@ -85,7 +85,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool always true
  */
 function xmldb_main_upgrade($oldversion) {
-    global $CFG, $USER, $DB, $OUTPUT;
+    global $CFG, $USER, $DB, $OUTPUT, $SITE;
 
     require_once($CFG->libdir.'/db/upgradelib.php'); // Core Upgrade-related functions
 
@@ -227,17 +227,10 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2012030100.01);
     }
 
-    if ($oldversion < 2012030100.02) {
-        // migrate all numbers to signed - it should be safe to interrupt this and continue later
-        upgrade_mysql_fix_unsigned_columns();
-
-        // Main savepoint reached
-        upgrade_main_savepoint(true, 2012030100.02);
-    }
-
     if ($oldversion < 2012030900.01) {
-        // migrate all texts and binaries to big size - it should be safe to interrupt this and continue later
-        upgrade_mysql_fix_lob_columns();
+        // Migrate all numbers to signed & all texts and binaries to big size.
+        // It should be safe to interrupt this and continue later.
+        upgrade_mysql_fix_unsigned_and_lob_columns();
 
         // Main savepoint reached
         upgrade_main_savepoint(true, 2012030900.01);
@@ -248,7 +241,7 @@ function xmldb_main_upgrade($oldversion) {
         if ($CFG->restrictmodulesfor === 'all') {
             $courses = $DB->get_records_menu('course', array(), 'id', 'id, 1');
         } else if ($CFG->restrictmodulesfor === 'requested') {
-            $courses = $DB->get_records_menu('course', array('retrictmodules' => 1), 'id', 'id, 1');
+            $courses = $DB->get_records_menu('course', array('restrictmodules' => 1), 'id', 'id, 1');
         } else {
             $courses = array();
         }
@@ -314,7 +307,7 @@ function xmldb_main_upgrade($oldversion) {
 
     if ($oldversion < 2012031500.02) {
 
-        // Define field retrictmodules to be dropped from course
+        // Define field restrictmodules to be dropped from course
         $table = new xmldb_table('course');
         $field = new xmldb_field('restrictmodules');
 
@@ -925,6 +918,129 @@ function xmldb_main_upgrade($oldversion) {
 
         // Main savepoint reached
         upgrade_main_savepoint(true, 2012062500.02);
+    }
+
+    if ($oldversion < 2012062500.02) {
+        // Drop some old backup tables, not used anymore
+
+        // Define table backup_files to be dropped
+        $table = new xmldb_table('backup_files');
+
+        // Conditionally launch drop table for backup_files
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Define table backup_ids to be dropped
+        $table = new xmldb_table('backup_ids');
+
+        // Conditionally launch drop table for backup_ids
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Main savepoint reached
+        upgrade_main_savepoint(true, 2012062500.02);
+    }
+
+    if ($oldversion < 2012062501.01) {
+
+        // Define index component-itemid-userid (not unique) to be added to role_assignments
+        $table = new xmldb_table('role_assignments');
+        $index = new xmldb_index('component-itemid-userid', XMLDB_INDEX_NOTUNIQUE, array('component', 'itemid', 'userid'));
+
+        // Conditionally launch add index component-itemid-userid
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Main savepoint reached
+        upgrade_main_savepoint(true, 2012062501.01);
+    }
+
+    if ($oldversion < 2012062501.04) {
+
+        // Saves orphaned questions from the Dark Side
+        upgrade_save_orphaned_questions();
+
+        // Main savepoint reached
+        upgrade_main_savepoint(true, 2012062501.04);
+    }
+
+    if ($oldversion < 2012062501.06) {
+
+        // Handle events with empty eventtype MDL-32827
+
+        $DB->set_field('event', 'eventtype', 'site', array('eventtype' => '', 'courseid' => $SITE->id));
+        $DB->set_field_select('event', 'eventtype', 'due', "eventtype = '' AND courseid != 0 AND groupid = 0 AND (modulename = 'assignment' OR modulename = 'assign')");
+        $DB->set_field_select('event', 'eventtype', 'course', "eventtype = '' AND courseid != 0 AND groupid = 0");
+        $DB->set_field_select('event', 'eventtype', 'group', "eventtype = '' AND groupid != 0");
+        $DB->set_field_select('event', 'eventtype', 'user', "eventtype = '' AND userid != 0");
+
+        // Main savepoint reached
+        upgrade_main_savepoint(true, 2012062501.06);
+    }
+
+    if ($oldversion < 2012062501.08) {
+        // Drop obsolete question upgrade field that should have been added to the install.xml.
+        $table = new xmldb_table('question');
+        $field = new xmldb_field('oldquestiontextformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_main_savepoint(true, 2012062501.08);
+    }
+
+    if ($oldversion < 2012062501.14) {
+        $subquery = 'SELECT b.id FROM {blog_external} b where b.id = ' . $DB->sql_cast_char2int('{post}.content', true);
+        $sql = 'DELETE FROM {post}
+                      WHERE {post}.module = \'blog_external\'
+                            AND NOT EXISTS (' . $subquery . ')
+                            AND ' . $DB->sql_isnotempty('post', 'uniquehash', false, false);
+        $DB->execute($sql);
+        upgrade_main_savepoint(true, 2012062501.14);
+    }
+
+    if ($oldversion < 2012062502.03) {
+        // Some folders still have a sortorder set, which is used for main files but is not
+        // supported by the folder resource. We reset the value here.
+        $sql = 'UPDATE {files} SET sortorder = ? WHERE component = ? AND filearea = ? AND sortorder <> ?';
+        $DB->execute($sql, array(0, 'mod_folder', 'content', 0));
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2012062502.03);
+    }
+
+    if ($oldversion < 2012062502.07) {
+        // Find all orphaned blog associations that might exist.
+        $sql = "SELECT ba.id
+                  FROM {blog_association} ba
+             LEFT JOIN {post} p
+                    ON p.id = ba.blogid
+                 WHERE p.id IS NULL";
+        $orphanedrecordids = $DB->get_records_sql($sql);
+        // Now delete these associations.
+        foreach ($orphanedrecordids as $orphanedrecord) {
+            $DB->delete_records('blog_association', array('id' => $orphanedrecord->id));
+        }
+
+        upgrade_main_savepoint(true, 2012062502.07);
+    }
+
+    if ($oldversion < 2012062503.07) {
+        // Remove "_utf8" suffix from all langs in course table.
+        $langs = $DB->get_records_sql("SELECT DISTINCT lang FROM {course} WHERE lang LIKE ?", array('%_utf8'));
+
+        foreach ($langs as $lang=>$unused) {
+            $newlang = str_replace('_utf8', '', $lang);
+            $sql = "UPDATE {course} SET lang = :newlang WHERE lang = :lang";
+            $DB->execute($sql, array('newlang'=>$newlang, 'lang'=>$lang));
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2012062503.07);
     }
 
     return true;

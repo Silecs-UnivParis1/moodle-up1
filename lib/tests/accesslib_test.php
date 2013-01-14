@@ -148,6 +148,59 @@ class accesslib_testcase extends advanced_testcase {
     }
 
     /**
+     * Test if user is enrolled in a course
+     * @return void
+     */
+    public function test_is_enrolled() {
+        global $DB;
+
+        // Generate data
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $coursecontext = context_course::instance($course->id);
+        $role = $DB->get_record('role', array('shortname'=>'student'));
+
+        // There should be a manual enrolment as part of the default install
+        $plugin = enrol_get_plugin('manual');
+        $instance = $DB->get_record('enrol', array(
+            'courseid' => $course->id,
+            'enrol' => 'manual',
+        ));
+        $this->assertNotEquals($instance, false);
+
+        // Enrol the user in the course
+        $plugin->enrol_user($instance, $user->id, $role->id);
+
+        // We'll test with the mod/assign:submit capability
+        $capability= 'mod/assign:submit';
+        $this->assertTrue($DB->record_exists('capabilities', array('name' => $capability)));
+
+        // Switch to our user
+        $this->setUser($user);
+
+        // Ensure that the user has the capability first
+        $this->assertTrue(has_capability($capability, $coursecontext, $user->id));
+
+        // We first test whether the user is enrolled on the course as this
+        // seeds the cache, then we test for the capability
+        $this->assertTrue(is_enrolled($coursecontext, $user, '', true));
+        $this->assertTrue(is_enrolled($coursecontext, $user, $capability));
+
+        // Prevent the capability for this user role
+        assign_capability($capability, CAP_PROHIBIT, $role->id, $coursecontext);
+        $coursecontext->mark_dirty();
+        $this->assertFalse(has_capability($capability, $coursecontext, $user->id));
+
+        // Again, we seed the cache first by checking initial enrolment,
+        // and then we test the actual capability
+        $this->assertTrue(is_enrolled($coursecontext, $user, '', true));
+        $this->assertFalse(is_enrolled($coursecontext, $user, $capability));
+
+        // We need variable states to be reset for the next test
+        $this->resetAfterTest(true);
+    }
+
+    /**
      * Test logged in test.
      * @return void
      */
@@ -1633,7 +1686,8 @@ class accesslib_testcase extends advanced_testcase {
 
         context_helper::reset_caches();
         context_helper::preload_course($SITE->id);
-        $this->assertEquals(7, context_inspection::test_context_cache_size()); // depends on number of default blocks
+        $numfrontpagemodules = $DB->count_records('course_modules', array('course' => $SITE->id));
+        $this->assertEquals(6 + $numfrontpagemodules, context_inspection::test_context_cache_size()); // depends on number of default blocks
 
         // ====== assign_capability(), unassign_capability() ====================
 
@@ -1938,7 +1992,8 @@ class accesslib_testcase extends advanced_testcase {
         load_all_capabilities();
         $context = context_course::instance($testcourses[2]);
         $page = $DB->get_record('page', array('course'=>$testcourses[2]));
-        $pagecontext = context_module::instance($page->id);
+        $pagecm = get_coursemodule_from_instance('page', $page->id);
+        $pagecontext = context_module::instance($pagecm->id);
 
         $context->mark_dirty();
         $this->assertTrue(isset($ACCESSLIB_PRIVATE->dirtycontexts[$context->path]));
@@ -2177,7 +2232,8 @@ class accesslib_testcase extends advanced_testcase {
 
         context_helper::reset_caches();
         preload_course_contexts($SITE->id);
-        $this->assertEquals(context_inspection::test_context_cache_size(), 1);
+        $this->assertEquals(1 + $DB->count_records('course_modules', array('course' => $SITE->id)),
+                context_inspection::test_context_cache_size());
 
         context_helper::reset_caches();
         list($select, $join) = context_instance_preload_sql('c.id', CONTEXT_COURSECAT, 'ctx');
@@ -2223,11 +2279,11 @@ class accesslib_testcase extends advanced_testcase {
         $url = get_context_url($coursecontext);
         $this->assertFalse($url instanceof modole_url);
 
-        $page = $DB->get_record('page', array('id'=>$testpages[7]));
-        $context = get_context_instance(CONTEXT_MODULE, $page->id);
+        $pagecm = get_coursemodule_from_instance('page', $testpages[7]);
+        $context = get_context_instance(CONTEXT_MODULE, $pagecm->id);
         $coursecontext = get_course_context($context);
         $this->assertEquals($coursecontext->contextlevel, CONTEXT_COURSE);
-        $this->assertEquals(get_courseid_from_context($context), $page->course);
+        $this->assertEquals(get_courseid_from_context($context), $pagecm->course);
 
         $caps = fetch_context_capabilities($systemcontext);
         $this->assertTrue(is_array($caps));

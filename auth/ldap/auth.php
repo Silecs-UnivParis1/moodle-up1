@@ -546,7 +546,9 @@ class auth_plugin_ldap extends auth_plugin_base {
                     return AUTH_CONFIRM_FAIL;
                 }
                 $DB->set_field('user', 'confirmed', 1, array('id'=>$user->id));
-                $DB->set_field('user', 'firstaccess', time(), array('id'=>$user->id));
+                if ($user->firstaccess == 0) {
+                    $DB->set_field('user', 'firstaccess', time(), array('id'=>$user->id));
+                }
                 return AUTH_CONFIRM_OK;
             }
         } else {
@@ -683,7 +685,7 @@ class auth_plugin_ldap extends auth_plugin_base {
 /// User removal
         // Find users in DB that aren't in ldap -- to be removed!
         // this is still not as scalable (but how often do we mass delete?)
-        if ($this->config->removeuser !== AUTH_REMOVEUSER_KEEP) {
+        if ($this->config->removeuser != AUTH_REMOVEUSER_KEEP) {
             $sql = 'SELECT u.*
                       FROM {user} u
                       LEFT JOIN {tmp_extuser} e ON (u.username = e.username AND u.mnethostid = e.mnethostid)

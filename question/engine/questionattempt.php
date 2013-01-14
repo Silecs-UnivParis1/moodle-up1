@@ -882,13 +882,8 @@ class question_attempt {
     public function get_submitted_var($name, $type, $postdata = null) {
         switch ($type) {
             case self::PARAM_MARK:
-                // Special case to work around PARAM_NUMBER converting '' to 0.
-                $mark = $this->get_submitted_var($name, PARAM_RAW_TRIMMED, $postdata);
-                if ($mark === '' || is_null($mark)) {
-                    return $mark;
-                } else {
-                    return clean_param(str_replace(',', '.', $mark), PARAM_NUMBER);
-                }
+                // Special case to work around PARAM_FLOAT converting '' to 0.
+                return question_utils::clean_param_mark($this->get_submitted_var($name, PARAM_RAW_TRIMMED, $postdata));
 
             case self::PARAM_FILES:
                 return $this->process_response_files($name, $name, $postdata);
@@ -1086,15 +1081,32 @@ class question_attempt {
         $first = true;
         foreach ($oldqa->get_step_iterator() as $step) {
             $this->observer->notify_step_deleted($step, $this);
+
             if ($first) {
+                // First step of the attempt.
                 $first = false;
                 $this->start($oldqa->behaviour, $oldqa->get_variant(), $step->get_all_data(),
                         $step->get_timecreated(), $step->get_user_id(), $step->get_id());
+
+            } else if ($step->has_behaviour_var('finish') && count($step->get_submitted_data()) > 1) {
+                // This case relates to MDL-32062. The upgrade code from 2.0
+                // generates attempts where the final submit of the question
+                // data, and the finish action, are in the same step. The system
+                // cannot cope with that, so convert the single old step into
+                // two new steps.
+                $submitteddata = $step->get_submitted_data();
+                unset($submitteddata['-finish']);
+                $this->process_action($submitteddata,
+                        $step->get_timecreated(), $step->get_user_id(), $step->get_id());
+                $this->finish($step->get_timecreated(), $step->get_user_id());
+
             } else {
+                // This is the normal case. Replay the next step of the attempt.
                 $this->process_action($step->get_submitted_data(),
                         $step->get_timecreated(), $step->get_user_id(), $step->get_id());
             }
         }
+
         if ($finished) {
             $this->finish();
         }
@@ -1195,6 +1207,15 @@ class question_attempt {
 
         $qa->behaviour = question_engine::make_behaviour(
                 $record->behaviour, $qa, $preferredbehaviour);
+
+        // If attemptstepid is null (which should not happen, but has happened
+        // due to corrupt data, see MDL-34251) then the current pointer in $records
+        // will not be advanced in the while loop below, and we get stuck in an
+        // infinite loop, since this method is supposed to always consume at
+        // least one record. Therefore, in this case, advance the record here.
+        if (is_null($record->attemptstepid)) {
+            $records->next();
+        }
 
         $i = 0;
         while ($record && $record->questionattemptid == $questionattemptid && !is_null($record->attemptstepid)) {

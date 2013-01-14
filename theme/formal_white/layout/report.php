@@ -26,6 +26,9 @@ if ($hascustommenu) {
 /************************************************************************************************/
 if (!empty($PAGE->theme->settings->customlogourl)) {
     $logourl = $PAGE->theme->settings->customlogourl;
+    if (strtolower(substr($logourl, 0, 4)) != 'http') {
+        $logourl = $CFG->wwwroot.'/'.$logourl;
+    }
 } else {
     $logourl = $OUTPUT->pix_url('logo_small', 'theme');
 }
@@ -102,7 +105,7 @@ echo $OUTPUT->doctype() ?>
                                 <!-- main mandatory content of the moodle page  -->
                                 <div id="report-main-content">
                                     <div class="region-content">
-                                        <?php echo core_renderer::MAIN_CONTENT_TOKEN ?>
+                                        <?php echo $OUTPUT->main_content() ?>
                                     </div>
                                 </div>
                                 <!-- end of main mandatory content of the moodle page -->

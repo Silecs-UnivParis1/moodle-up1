@@ -68,7 +68,7 @@ class core_admin_renderer extends plugin_renderer_base {
         $output .= $this->header();
         $output .= $this->heading(get_string('upgradestalefiles', 'admin'));
         $output .= $this->box_start('generalbox', 'notice');
-        $output .= get_string('upgradestalefilesinfo', 'admin', get_docs_url('Upgrading'));
+        $output .= format_text(get_string('upgradestalefilesinfo', 'admin', get_docs_url('Upgrading')), FORMAT_MARKDOWN);
         $output .= html_writer::empty_tag('br');
         $output .= html_writer::tag('div', $this->single_button($this->page->url, get_string('reload'), 'get'), array('class' => 'buttons'));
         $output .= $this->box_end();
@@ -470,7 +470,7 @@ class core_admin_renderer extends plugin_renderer_base {
         $copyrighttext = '<a href="http://moodle.org/">Moodle</a> '.
                          '<a href="http://docs.moodle.org/dev/Releases" title="'.$CFG->version.'">'.$CFG->release.'</a><br />'.
                          'Copyright &copy; 1999 onwards, Martin Dougiamas<br />'.
-                         'and <a href="http://docs.moodle.org/dev/Credits">many other contributors</a>.<br />'.
+                         'and <a href="http://moodle.org/dev">many other contributors</a>.<br />'.
                          '<a href="http://docs.moodle.org/dev/License">GNU Public License</a>';
         //////////////////////////////////////////////////////////////////////////////////////////////////
 

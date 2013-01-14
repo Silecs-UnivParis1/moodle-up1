@@ -278,7 +278,7 @@ class course_enrolment_manager {
         global $DB, $CFG;
 
         // Add some additional sensible conditions
-        $tests = array("id <> :guestid", 'u.deleted = 0', 'u.confirmed = 1');
+        $tests = array("u.id <> :guestid", 'u.deleted = 0', 'u.confirmed = 1');
         $params = array('guestid' => $CFG->siteguest);
         if (!empty($search)) {
             $conditions = get_extra_user_fields($this->get_context());
@@ -306,10 +306,9 @@ class course_enrolment_manager {
         $fields      = 'SELECT '.$ufields;
         $countfields = 'SELECT COUNT(1)';
         $sql = " FROM {user} u
+            LEFT JOIN {user_enrolments} ue ON (ue.userid = u.id AND ue.enrolid = :enrolid)
                 WHERE $wherecondition
-                      AND u.id NOT IN (SELECT ue.userid
-                                         FROM {user_enrolments} ue
-                                         JOIN {enrol} e ON (e.id = ue.enrolid AND e.id = :enrolid))";
+                      AND ue.id IS NULL";
         $order = ' ORDER BY u.lastname ASC, u.firstname ASC';
         $params['enrolid'] = $enrolid;
         $totalusers = $DB->count_records_sql($countfields . $sql, $params);
@@ -353,12 +352,9 @@ class course_enrolment_manager {
         $fields      = 'SELECT '.user_picture::fields('u', array('username','lastaccess'));
         $countfields = 'SELECT COUNT(u.id)';
         $sql   = " FROM {user} u
+              LEFT JOIN {role_assignments} ra ON (ra.userid = u.id AND ra.contextid = :contextid)
                   WHERE $wherecondition
-                    AND u.id NOT IN (
-                           SELECT u.id
-                             FROM {role_assignments} r, {user} u
-                            WHERE r.contextid = :contextid AND
-                                  u.id = r.userid)";
+                    AND ra.id IS NULL";
         $order = ' ORDER BY lastname ASC, firstname ASC';
 
         $params['contextid'] = $this->context->id;
@@ -770,13 +766,15 @@ class course_enrolment_manager {
 
         $users = array();
         foreach ($userroles as $userrole) {
+            $contextid = $userrole->contextid;
+            unset($userrole->contextid); // This would collide with user avatar.
             if (!array_key_exists($userrole->id, $users)) {
                 $users[$userrole->id] = $this->prepare_user_for_display($userrole, $extrafields, $now);
             }
             $a = new stdClass;
             $a->role = $roles[$userrole->roleid]->localname;
             $changeable = ($userrole->component == '');
-            if ($userrole->contextid == $this->context->id) {
+            if ($contextid == $this->context->id) {
                 $roletext = get_string('rolefromthiscourse', 'enrol', $a);
             } else {
                 $changeable = false;

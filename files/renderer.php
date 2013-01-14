@@ -188,7 +188,7 @@ class core_files_renderer extends plugin_renderer_base {
         $strdroptoupload = get_string('droptoupload', 'moodle');
         $icon_progress = $OUTPUT->pix_icon('i/loading_small', $strloading).'';
         $restrictions = $this->fm_print_restrictions($fm);
-        $strdndenabled = get_string('dndenabled_insentence', 'moodle').$OUTPUT->help_icon('dndenabled');
+        $strdndnotsupported = get_string('dndnotsupported_insentence', 'moodle').$OUTPUT->help_icon('dndnotsupported');
         $strdndenabledinbox = get_string('dndenabled_inbox', 'moodle');
         $loading = get_string('loading', 'repository');
 
@@ -196,7 +196,7 @@ class core_files_renderer extends plugin_renderer_base {
 <div id="filemanager-'.$client_id.'" class="filemanager fm-loading">
     <div class="fp-restrictions">
         '.$restrictions.'
-        <span class="dndupload-message"> - '.$strdndenabled.' </span>
+        <span class="dnduploadnotsupported-message"> - '.$strdndnotsupported.' </span>
     </div>
     <div class="fp-navbar">
         <div class="filemanager-toolbar">
@@ -219,10 +219,10 @@ class core_files_renderer extends plugin_renderer_base {
     <div class="filemanager-container" >
         <div class="fm-content-wrapper">
             <div class="fp-content"></div>
-            <div class="fm-empty-container <!--mdl-align-->">
-                <span class="dndupload-message">'.$strdndenabledinbox.'<br/><span class="dndupload-arrow"></span></span>
+            <div class="fm-empty-container">
+                <div class="dndupload-message">'.$strdndenabledinbox.'<br/><div class="dndupload-arrow"></div></div>
             </div>
-            <div class="dndupload-target">'.$strdroptoupload.'<br/><span class="dndupload-arrow"></span></div>
+            <div class="dndupload-target">'.$strdroptoupload.'<br/><div class="dndupload-arrow"></div></div>
             <div class="dndupload-uploadinprogress">'.$icon_progress.'</div>
         </div>
         <div class="filemanager-updating">'.$icon_progress.'</div>
@@ -368,8 +368,7 @@ class core_files_renderer extends plugin_renderer_base {
         $rv = '
 <div class="filemanager fp-select">
     <div class="fp-select-loading">
-        <img src="'.$this->pix_url('i/loading').'" />
-        <p>'.get_string('loading', 'repository').'</p>
+        <img src="'.$this->pix_url('i/loading_small').'" />
     </div>
     <form>
         <button class="{!}fp-file-download">'.get_string('download').'</button>
@@ -455,10 +454,10 @@ class core_files_renderer extends plugin_renderer_base {
      */
     private function fm_print_restrictions($fm) {
         $maxbytes = display_size($fm->options->maxbytes);
-        if (empty($options->maxfiles) || $options->maxfiles == -1) {
+        if (empty($fm->options->maxfiles) || $fm->options->maxfiles == -1) {
             $maxsize = get_string('maxfilesize', 'moodle', $maxbytes);
         } else {
-            $strparam = (object)array('size' => $maxbytes, 'attachments' => $options->maxfiles);
+            $strparam = (object)array('size' => $maxbytes, 'attachments' => $fm->options->maxfiles);
             $maxsize = get_string('maxsizeandattachments', 'moodle', $strparam);
         }
         // TODO MDL-32020 also should say about 'File types accepted'
@@ -527,6 +526,7 @@ class core_files_renderer extends plugin_renderer_base {
                     <div class="{!}fp-tb-logout"><img src="'.$this->pix_url('a/logout').'" /><a href="#"></a></div>
                     <div class="{!}fp-tb-manage"><a href="#"><img src="'.$this->pix_url('a/setting').'" /> '.get_string('manageurl', 'repository').'</a></div>
                     <div class="{!}fp-tb-help"><a href="#"><img src="'.$this->pix_url('a/help').'" /> '.get_string('help').'</a></div>
+                    <div class="{!}fp-tb-message"></div>
                 </div>
                 <div class="{!}fp-viewbar">
                     <a class="{!}fp-vb-icons" href="#"></a>
@@ -622,8 +622,7 @@ class core_files_renderer extends plugin_renderer_base {
 <div class="{!}fp-nextpage">
     <div class="fp-nextpage-link"><a href="#">'.get_string('more').'</a></div>
     <div class="fp-nextpage-loading">
-        <img src="'.$this->pix_url('i/loading').'" />
-        <p>'.get_string('loading', 'repository').'</p>
+        <img src="'.$this->pix_url('i/loading_small').'" />
     </div>
 </div>';
         return preg_replace('/\{\!\}/', '', $rv);
@@ -661,19 +660,18 @@ class core_files_renderer extends plugin_renderer_base {
         $rv = '
 <div class="file-picker fp-select">
     <div class="fp-select-loading">
-        <img src="'.$this->pix_url('i/loading').'" />
-        <p>'.get_string('loading', 'repository').'</p>
+        <img src="'.$this->pix_url('i/loading_small').'" />
     </div>
     <form>
         <table>
             <tr class="{!}fp-linktype-2">
-                <td></td>
+                <td class="mdl-right"></td>
                 <td class="mdl-left"><input type="radio"/><label>&nbsp;'.get_string('makefileinternal', 'repository').'</label></td></tr>
             <tr class="{!}fp-linktype-1">
-                <td></td>
+                <td class="mdl-right"></td>
                 <td class="mdl-left"><input type="radio"/><label>&nbsp;'.get_string('makefilelink', 'repository').'</label></td></tr>
             <tr class="{!}fp-linktype-4">
-                <td></td>
+                <td class="mdl-right"></td>
                 <td class="mdl-left"><input type="radio"/><label>&nbsp;'.get_string('makefilereference', 'repository').'</label></td></tr>
             <tr class="{!}fp-saveas">
                 <td class="mdl-right"><label>'.get_string('saveas', 'repository').'</label>:</td>
@@ -759,8 +757,7 @@ class core_files_renderer extends plugin_renderer_base {
         return '
 <div class="fp-content-loading">
     <div class="fp-content-center">
-        <img src="'.$this->pix_url('i/loading').'" />
-        <p>'.get_string('loading', 'repository').'</p>
+        <img src="'.$this->pix_url('i/loading_small').'" />
     </div>
 </div>';
     }

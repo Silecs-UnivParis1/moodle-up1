@@ -156,9 +156,11 @@ EOD;
         }
 
         if (!isset($record['username'])) {
-            $record['username'] = textlib::strtolower($record['firstname']).textlib::strtolower($record['lastname']);
+            $record['username'] = 'username'.$i;
+            $j = 2;
             while ($DB->record_exists('user', array('username'=>$record['username'], 'mnethostid'=>$record['mnethostid']))) {
-                $record['username'] = $record['username'].'_'.$i;
+                $record['username'] = 'username'.$i.'_'.$j;
+                $j++;
             }
         }
 
@@ -240,11 +242,11 @@ EOD;
         }
 
         if (!isset($record['descriptionformat'])) {
-            $record['description'] = FORMAT_MOODLE;
+            $record['descriptionformat'] = FORMAT_MOODLE;
         }
 
         if (!isset($record['parent'])) {
-            $record['descriptionformat'] = 0;
+            $record['parent'] = 0;
         }
 
         if (empty($record['parent'])) {
@@ -310,12 +312,12 @@ EOD;
             $record['numsections'] = 5;
         }
 
-        if (!isset($record['description'])) {
-            $record['description'] = "Test course $i\n$this->loremipsum";
+        if (!isset($record['summary'])) {
+            $record['summary'] = "Test course $i\n$this->loremipsum";
         }
 
-        if (!isset($record['descriptionformat'])) {
-            $record['description'] = FORMAT_MOODLE;
+        if (!isset($record['summaryformat'])) {
+            $record['summaryformat'] = FORMAT_MOODLE;
         }
 
         if (!isset($record['category'])) {

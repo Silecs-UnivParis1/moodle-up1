@@ -77,17 +77,6 @@ define('MESSAGE_PERMITTED_MASK', 0x0c); // 1100
  */
 define('MESSAGE_DEFAULT_PERMITTED', 'permitted');
 
-//TODO: defaults must be initialised via settings - this is a bad hack! (skodak)
-if (!isset($CFG->message_contacts_refresh)) {  // Refresh the contacts list every 60 seconds
-    $CFG->message_contacts_refresh = 60;
-}
-if (!isset($CFG->message_chat_refresh)) {      // Look for new comments every 5 seconds
-    $CFG->message_chat_refresh = 5;
-}
-if (!isset($CFG->message_offline_time)) {
-    $CFG->message_offline_time = 300;
-}
-
 /**
  * Print the selector that allows the user to view their contacts, course participants, their recent
  * conversations etc
@@ -185,7 +174,18 @@ function message_print_participants($context, $courseid, $contactselecturl=null,
     }
 
     $countparticipants = count_enrolled_users($context);
-    $participants = get_enrolled_users($context, '', 0, 'u.*', '', $page*MESSAGE_CONTACTS_PER_PAGE, MESSAGE_CONTACTS_PER_PAGE);
+
+    list($esql, $params) = get_enrolled_sql($context);
+    $params['mcuserid'] = $USER->id;
+    $ufields = user_picture::fields('u');
+
+    $sql = "SELECT $ufields, mc.id as contactlistid, mc.blocked
+              FROM {user} u
+              JOIN ($esql) je ON je.id = u.id
+              LEFT JOIN {message_contacts} mc ON mc.contactid = u.id AND mc.userid = :mcuserid
+             WHERE u.deleted = 0";
+
+    $participants = $DB->get_records_sql($sql, $params, $page * MESSAGE_CONTACTS_PER_PAGE, MESSAGE_CONTACTS_PER_PAGE);
 
     $pagingbar = new paging_bar($countparticipants, $page, MESSAGE_CONTACTS_PER_PAGE, $PAGE->url, 'page');
     echo $OUTPUT->render($pagingbar);
@@ -196,11 +196,23 @@ function message_print_participants($context, $courseid, $contactselecturl=null,
     echo html_writer::tag('td', $titletodisplay, array('colspan' => 3, 'class' => 'heading'));
     echo html_writer::end_tag('tr');
 
-    //todo these need to come from somewhere if the course participants list is to show users with unread messages
-    $iscontact = true;
-    $isblocked = false;
     foreach ($participants as $participant) {
         if ($participant->id != $USER->id) {
+
+            $iscontact = false;
+            $isblocked = false;
+            if ( $participant->contactlistid )  {
+                if ($participant->blocked == 0) {
+                    // Is contact. Is not blocked.
+                    $iscontact = true;
+                    $isblocked = false;
+                } else {
+                    // Is blocked.
+                    $iscontact = false;
+                    $isblocked = true;
+                }
+            }
+
             $participant->messagecount = 0;//todo it would be nice if the course participant could report new messages
             message_print_contactlist_user($participant, $iscontact, $isblocked, $contactselecturl, $showactionlinks, $user2);
         }
@@ -507,9 +519,10 @@ function message_print_usergroup_selector($viewing, $courses, $coursecontexts, $
     }
 
     echo html_writer::start_tag('form', array('id' => 'usergroupform','method' => 'get','action' => ''));
-        echo html_writer::start_tag('fieldset');
-            echo html_writer::select($options, 'viewing', $viewing, false, array('id' => 'viewing','onchange' => 'this.form.submit()'));
-        echo html_writer::end_tag('fieldset');
+    echo html_writer::start_tag('fieldset');
+    echo html_writer::label(get_string('messagenavigation', 'message'), 'viewing');
+    echo html_writer::select($options, 'viewing', $viewing, false, array('id' => 'viewing','onchange' => 'this.form.submit()'));
+    echo html_writer::end_tag('fieldset');
     echo html_writer::end_tag('form');
 }
 
@@ -748,27 +761,13 @@ function message_get_recent_conversations($user, $limitfrom=0, $limitto=100) {
         }
     }
 
-    //Sort the conversations. This is a bit complicated as we need to sort by $conversation->timecreated
-    //and there may be multiple conversations with the same timecreated value.
-    //The conversations array contains both read and unread messages (different tables) so sorting by ID won't work
-    usort($conversations, "conversationsort");
+    // Sort the conversations by $conversation->timecreated, newest to oldest
+    // There may be multiple conversations with the same timecreated
+    // The conversations array contains both read and unread messages (different tables) so sorting by ID won't work
+    $result = collatorlib::asort_objects_by_property($conversations, 'timecreated', collatorlib::SORT_NUMERIC);
+    $conversations = array_reverse($conversations);
 
     return $conversations;
-}
-
-/**
- * Sort function used to order conversations
- *
- * @param object $a A conversation object
- * @param object $b A conversation object
- * @return integer
- */
-function conversationsort($a, $b)
-{
-    if ($a->timecreated == $b->timecreated) {
-        return 0;
-    }
-    return ($a->timecreated > $b->timecreated) ? -1 : 1;
 }
 
 /**
@@ -1228,7 +1227,7 @@ function message_print_search_results($frm, $showicontext=false, $currentuser=nu
                 echo html_writer::end_tag('td');
 
                 echo html_writer::start_tag('td', array('class' => 'summary'));
-                echo message_get_fragment($message->fullmessage, $keywords);
+                echo message_get_fragment($message->smallmessage, $keywords);
                 echo html_writer::start_tag('div', array('class' => 'link'));
 
                 //If the user clicks the context link display message sender on the left
@@ -1613,10 +1612,10 @@ function message_search($searchterms, $fromme=true, $tome=true, $courseid='none'
     ///    c.  Messages to and from user
 
     if ($courseid == SITEID) { /// admin is searching all messages
-        $m_read   = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.fullmessage, m.timecreated
+        $m_read   = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.smallmessage, m.fullmessage, m.timecreated
                                             FROM {message_read} m
                                            WHERE $searchcond", $params, 0, MESSAGE_SEARCH_MAX_RESULTS);
-        $m_unread = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.fullmessage, m.timecreated
+        $m_unread = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.smallmessage, m.fullmessage, m.timecreated
                                             FROM {message} m
                                            WHERE $searchcond", $params, 0, MESSAGE_SEARCH_MAX_RESULTS);
 
@@ -1641,10 +1640,10 @@ function message_search($searchterms, $fromme=true, $tome=true, $courseid='none'
             $params['userid'] = $userid;
         }
 
-        $m_read   = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.fullmessage, m.timecreated
+        $m_read   = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.smallmessage, m.fullmessage, m.timecreated
                                             FROM {message_read} m
                                            WHERE $searchcond", $params, 0, MESSAGE_SEARCH_MAX_RESULTS);
-        $m_unread = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.fullmessage, m.timecreated
+        $m_unread = $DB->get_records_sql("SELECT m.id, m.useridto, m.useridfrom, m.smallmessage, m.fullmessage, m.timecreated
                                             FROM {message} m
                                            WHERE $searchcond", $params, 0, MESSAGE_SEARCH_MAX_RESULTS);
 
@@ -1803,7 +1802,7 @@ function message_get_history($user1, $user2, $limitnum=0, $viewingnewmessages=fa
                                                     array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id),
                                                     "timecreated $sort", '*', 0, $limitnum)) {
         foreach ($messages_read as $message) {
-            $messages[$message->timecreated] = $message;
+            $messages[] = $message;
         }
     }
     if ($messages_new =  $DB->get_records_select('message', "((useridto = ? AND useridfrom = ?) OR
@@ -1811,15 +1810,16 @@ function message_get_history($user1, $user2, $limitnum=0, $viewingnewmessages=fa
                                                     array($user1->id, $user2->id, $user2->id, $user1->id, $user1->id),
                                                     "timecreated $sort", '*', 0, $limitnum)) {
         foreach ($messages_new as $message) {
-            $messages[$message->timecreated] = $message;
+            $messages[] = $message;
         }
     }
 
+    $result = collatorlib::asort_objects_by_property($messages, 'timecreated', collatorlib::SORT_NUMERIC);
+
     //if we only want the last $limitnum messages
-    ksort($messages);
     $messagecount = count($messages);
-    if ($limitnum>0 && $messagecount>$limitnum) {
-        $messages = array_slice($messages, $messagecount-$limitnum, $limitnum, true);
+    if ($limitnum > 0 && $messagecount > $limitnum) {
+        $messages = array_slice($messages, $messagecount - $limitnum, $limitnum, true);
     }
 
     return $messages;

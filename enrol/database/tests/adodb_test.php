@@ -67,10 +67,18 @@ class core_adodb_testcase extends advanced_testcase {
 
             case 'pgsql_native_moodle_database':
                 set_config('dbtype', 'postgres7', 'enrol_database');
-                set_config('dbsetupsql', 'SET NAMES \'UTF-8\'', 'enrol_database');
+                $setupsql = "SET NAMES 'UTF-8'";
+                if (!empty($CFG->dboptions['dbschema'])) {
+                    $setupsql .= "; SET search_path = '".$CFG->dboptions['dbschema']."'";
+                }
+                set_config('dbsetupsql', $setupsql, 'enrol_database');
                 set_config('dbsybasequoting', '0', 'enrol_database');
                 if (!empty($CFG->dboptions['dbsocket']) and ($CFG->dbhost === 'localhost' or $CFG->dbhost === '127.0.0.1')) {
-                    set_config('dbhost', $CFG->dboptions['dbsocket'], 'enrol_database');
+                    if (strpos($CFG->dboptions['dbsocket'], '/') !== false) {
+                      set_config('dbhost', $CFG->dboptions['dbsocket'], 'enrol_database');
+                    } else {
+                      set_config('dbhost', '', 'enrol_database');
+                    }
                 }
                 break;
 

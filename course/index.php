@@ -258,7 +258,7 @@ $parentlist = array();
 $displaylist[0] = get_string('top');
 make_categories_list($displaylist, $parentlist);
 
-echo '<table class="generalbox editcourse boxaligncenter"><tr class="header">';
+echo '<table class="generaltable editcourse boxaligncenter"><tr class="header">';
 echo '<th class="header" scope="col">'.$strcategories.'</th>';
 echo '<th class="header" scope="col">'.$strcourses.'</th>';
 echo '<th class="header" scope="col">'.$stredit.'</th>';
@@ -373,6 +373,7 @@ function print_category_edit($category, $displaylist, $parentslist, $depth=-1, $
             }
             $popupurl = new moodle_url("index.php?move=$category->id&sesskey=".sesskey());
             $select = new single_select($popupurl, 'moveto', $tempdisplaylist, $category->parent, null, "moveform$category->id");
+            $select->set_label(get_string('frontpagecategorynames'), array('class' => 'accesshide'));
             echo $OUTPUT->render($select);
         }
         echo '</td>';

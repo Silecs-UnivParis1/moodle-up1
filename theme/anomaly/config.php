@@ -7,7 +7,7 @@
 
 $THEME->name = 'anomaly';
 
-$THEME->sheets = array('base', 'general', 'browser','dock');
+$THEME->sheets = array('base', 'general', 'browser', 'dock', 'menu');
 /// This variable is an array containing the names of all the
 /// stylesheet files you want included in this theme, and in what order
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,8 +20,6 @@ $THEME->parents = array('base');  // TODO: new themes can not be based on standa
 /// If this variable is empty or false then a parent theme
 /// is not used.
 ////////////////////////////////////////////////////////////////////////////////
-
-$THEME->parents_exclude_sheets = array('base'=>array('styles_moz'));
 
 $THEME->layouts = array(
     // Most pages - if we encounter an unknown or a missing page type, this one is used.
