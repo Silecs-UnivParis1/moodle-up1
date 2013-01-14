@@ -136,3 +136,7 @@ div.select-elem {
 div.item-select > div:first-child {
     margin-bottom: 6px;
 }
+
+select.selectmenu {
+    width:20em;
+}
