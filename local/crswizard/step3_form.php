@@ -100,15 +100,12 @@ class course_wizard_step3_form extends moodleform {
 
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(
-                'html',
-                '<div class="previousstage">' . $OUTPUT->action_link(
-                    new moodle_url('/local/crswizard/index.php', array('stepin' => 2)),
-                    get_string('previousstage', 'local_crswizard')
-                ) . '</div>'
-        );
+            'link', 'previousstage', null,
+            new moodle_url('/local/crswizard/index.php', array('stepin' => 2)),
+            get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
         $buttonarray[] = $mform->createElement(
                 'submit', 'stepgo_4', get_string('nextstage', 'local_crswizard'));
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->addGroup($buttonarray, 'buttonar', '', null, false);
         $mform->closeHeaderBefore('buttonar');
     }
 
