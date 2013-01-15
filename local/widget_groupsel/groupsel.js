@@ -76,14 +76,13 @@
                 source: $this.mainSource($this.settings),
                 select: function (event, ui) {
                     if (ui.item.source == 'groups') {
-                        if (ui.item.label === '…') {
+                        if (ui.item.label === "Afficher plus de réponses") {
                             var category2filters = {
-                                'établissement': 'structures|affiliation',
-                                'étapes': 'diploma',
-                                'matières': 'elp',
-                                'TD': 'gpelp',
-                                'Groupe étape': 'gpetp',
-                                'autre': ''
+                                'Groupes Établissement': 'affiliation|structures',
+                                'Groupes Étapes': 'diploma|gpetp',
+                                'Groupes Matières': 'elp',
+                                'Groupes TD': 'gpelp',
+                                'Autres types de groupes': 'other'
                             };
                             var localSettings = JSON.parse(JSON.stringify($this.settings));
                             localSettings.wsParams.groupMaxRows = $this.settings.moreRows;
@@ -194,7 +193,7 @@
                 $.map(list, function(item, index) {
                     if (maxRows && item.num > maxRows) {
                         item = itemToResponse.apply(this, [item]);
-                        item.label = '…';
+                        item.label = 'Afficher plus de réponses';
                         return item;
                     } else if ('source' in item && item.source == 'title') {
                         return item;
@@ -217,13 +216,13 @@
         var category;
         var num = 0;
         var category2text = {
-            structures: 'établissement',
-            affiliation: 'établissement',
-            diploma: 'étapes',
-            elp: 'matières',
-            gpelp: 'TD',
-            gpetp: 'Groupe étape',
-            '': 'autre'
+            structures: 'Groupes Établissement',
+            affiliation: 'Groupes Établissement',
+            diploma: 'Groupes Étapes',
+            gpetp: 'Groupes Étapes',
+            elp: 'Groupes Matières',
+            gpelp: 'Groupes TD',
+            '': 'Autres types de groupes'
         };
         $.each(items, function ( i, item ) {
             if (item.category in category2text) {
@@ -300,10 +299,10 @@
         if (item.source == 'title') {
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
-        if (item.label == '…') {
+        if (item.label == 'Afficher plus de réponses') {
              return $("<li></li>")
                 .data("item.autocomplete", item)
-                .append("<a>…</a>")
+                .append("<a>Afficher plus de réponses</a>")
                 .appendTo(ul);
         }
         if (item.pre) {
