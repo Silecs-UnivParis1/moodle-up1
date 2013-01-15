@@ -213,7 +213,7 @@ function categoryToWhere() {
         $res[$cat] = "idnumber LIKE '$pattern' ";
         $other = $other . "idnumber NOT LIKE '$pattern' AND ";
     }
-    $res['other'] = substr($pattern, 0, -4); //drop the last AND
+    $res['other'] = substr($other, 0, -4); //drop the last AND
     return $res;
 }
 
