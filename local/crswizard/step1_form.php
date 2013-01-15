@@ -23,7 +23,8 @@ class course_wizard_step1_form {
     <div style="margin:5px;">
         <?php
         echo $OUTPUT->single_button(
-                new moodle_url($url, array('stepin' => 2, 'wizardcase' => 1)), "Un élément pédagogique dans lequel j'enseigne", 'get'
+                new moodle_url($url, array('stepin' => 2, 'wizardcase' => 1)), "Un élément pédagogique dans lequel j'enseigne",
+                    'get', array('disabled' => 'disabled')
         );
         ?>
     </div>
