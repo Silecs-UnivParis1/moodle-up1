@@ -208,12 +208,12 @@ function categoryToWhere() {
         'elp' => 'groups-mati%'
     );
     $res = array();
-    $local = '';
+    $other = '';
     foreach ($patterns as $cat=>$pattern) {
         $res[$cat] = "idnumber LIKE '$pattern' ";
-        $local = $local . "idnumber NOT LIKE '$pattern' AND ";
+        $other = $other . "idnumber NOT LIKE '$pattern' AND ";
     }
-    $res['local'] = substr($local, 0, -4); //drop the last AND
+    $res['other'] = substr($local, 0, -4); //drop the last AND
     return $res;
 }
 
