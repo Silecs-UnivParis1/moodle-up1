@@ -99,11 +99,18 @@ function mws_search_groups_category($token, $category, $maxrows) {
     $ptoken = '%' . $DB->sql_like_escape($token) . '%';
 
     $wherecat = categoryToWhere();
-    if ( ! isset($wherecat[$category]) ) {
+    $cterms = explode('|', $category);
+    $cwhere = array();
+    foreach ($cterms as $term) {
+        if (isset($wherecat[$term])) {
+            $cwhere[] = $wherecat[$term];
+        }
+    }
+    if (!$cwhere) {
         return array();
     }
     $sql = "SELECT id, name, idnumber, description, descriptionformat FROM {cohort} WHERE "
-        . "( name LIKE ? OR idnumber LIKE ? ) AND " . $wherecat[$category] ;
+        . "( name LIKE ? OR idnumber LIKE ? ) AND (" . join(' OR ', $cwhere) . ')' ;
     // echo $sql . " <br />\n" ; //DEBUG
     $records = $DB->get_records_sql($sql, array($ptoken, $ptoken), 0, $maxrows);
     $groups = array();
@@ -182,7 +189,7 @@ function groupKeyToCategory($key) {
     } else if (startsWith($key, 'groups-mati'))
         return 'elp';
     else if (startsWith($key, 'groups-'))
-        return 'local';
+        return 'other';
     else
         return null;
 }
