@@ -73,10 +73,10 @@ jQuery(function () {
 		else {
 			if (niv==2) {
 				var ulEnf = '.cont-deep'+niv;
-				$(this).siblings(ulEnf).toggleClass('hidden');
+				$(this).siblings(ulEnf).toggleClass('rof-hidden');
 			} else {
 				var ulEnf = '.per'+rofid;
-				$(ulEnf).toggleClass('hidden');
+				$(ulEnf).toggleClass('rof-hidden');
 			}
 
 		}

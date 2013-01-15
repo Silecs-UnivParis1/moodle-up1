@@ -9,16 +9,16 @@ jQuery(function () {
 
 		var fr = $(this).siblings().size();
 		if (fr == 0) {
-			$(cf).addClass('hidden');
+			$(cf).addClass('rof-hidden');
 			$.get('roffinal.php', {niveau: niv, rofid: rofid, path: path},  function(data){
 				$("#"+codeid).after(data);
 			}, 'html');
 		}
 		else {
-			var ch = $("#"+codeid).siblings(cf).hasClass('hidden');
-			$(cf).addClass('hidden');
+			var ch = $("#"+codeid).siblings(cf).hasClass('rof-hidden');
+			$(cf).addClass('rof-hidden');
 			if (ch) {
-				$("#"+codeid).siblings(cf).removeClass('hidden');
+				$("#"+codeid).siblings(cf).removeClass('rof-hidden');
 			}
 		}
 	});
@@ -57,7 +57,7 @@ jQuery(function () {
 			}, 'html');
 		} else {
 			var cf = '.per'+rofid;
-			$("#"+codeid).siblings(cf).toggleClass('hidden');
+			$("#"+codeid).siblings(cf).toggleClass('rof-hidden');
 		}
     });
 
