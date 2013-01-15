@@ -209,11 +209,11 @@ function categoryToWhere() {
     );
     $res = array();
     $other = '';
-    foreach ($patterns as $cat=>$pattern) {
+    foreach ($patterns as $cat => $pattern) {
         $res[$cat] = "idnumber LIKE '$pattern' ";
         $other = $other . "idnumber NOT LIKE '$pattern' AND ";
     }
-    $res['other'] = substr($local, 0, -4); //drop the last AND
+    $res['other'] = substr($pattern, 0, -4); //drop the last AND
     return $res;
 }
 
