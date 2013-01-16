@@ -204,7 +204,7 @@ function categoryToWhere() {
         'affiliation' => 'affiliation-%',
         'diploma' => 'diploma-%',
         'gpelp' => 'groups-gpelp.%',
-        'gpetp' => 'groups-gpetp.%',
+        //'gpetp' => 'groups-gpetp.%',
         'elp' => 'groups-mati%'
     );
     $res = array();

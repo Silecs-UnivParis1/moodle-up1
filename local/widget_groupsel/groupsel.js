@@ -79,7 +79,7 @@
                         if (ui.item.label === "Afficher plus de réponses") {
                             var category2filters = {
                                 'Groupes Établissement': 'affiliation|structures',
-                                'Groupes Étapes': 'diploma|gpetp',
+                                'Groupes Étapes': 'diploma',
                                 'Groupes Matières': 'elp',
                                 'Groupes TD': 'gpelp',
                                 'Autres types de groupes': 'other'
@@ -219,14 +219,15 @@
             structures: 'Groupes Établissement',
             affiliation: 'Groupes Établissement',
             diploma: 'Groupes Étapes',
-            gpetp: 'Groupes Étapes',
+            //gpetp: 'Groupes Étapes',
             elp: 'Groupes Matières',
-            gpelp: 'Groupes TD',
-            '': 'Autres types de groupes'
+            gpelp: 'Groupes TD'
         };
         $.each(items, function ( i, item ) {
             if (item.category in category2text) {
                 item.category = category2text[item.category];
+            } else {
+                item.category = 'Autres types de groupes';
             }
             if (category !== item.category) {
                 category = item.category;

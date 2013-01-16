@@ -26,7 +26,7 @@ jQuery(function () {
                 visited[rofid] = select.text();
             }
 
-			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1,
+			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1,
 				path: path, format: format, typedip: typedip},
 				function(data){
 				$('#'+id).after(data);
@@ -66,17 +66,17 @@ jQuery(function () {
 		var fr = $(this).parent('.elem-li').siblings('ul').size();
 		if (fr == 0) {
 		// creation liste ul
-			$.get('roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
+			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
 				$("#"+codeid+'-elem').parent('.elem-li').after(data);
 			}, 'html');
 		}
 		else {
 			if (niv==2) {
 				var ulEnf = '.cont-deep'+niv;
-				$(this).siblings(ulEnf).toggleClass('hidden');
+				$(this).siblings(ulEnf).toggleClass('rof-hidden');
 			} else {
 				var ulEnf = '.per'+rofid;
-				$(ulEnf).toggleClass('hidden');
+				$(ulEnf).toggleClass('rof-hidden');
 			}
 
 		}
