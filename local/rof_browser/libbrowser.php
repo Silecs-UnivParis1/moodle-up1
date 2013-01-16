@@ -132,7 +132,7 @@ class rof_browser {
 
     public $constant_diplome = array(
         'licence' => 'Licence',
-        'master1aa' => 'Master 1',
+        'master1' => 'Master 1',
         'master2' => 'Master 2',
         'dipU' => 'Diplôme d\'université',
         'magistere' => 'Magistère'
@@ -400,7 +400,7 @@ class rof_browser {
 
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
-			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Diplôme</option>';
+			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Type de diplôme</option>';
             foreach ($this->constant_diplome as $code => $label) {
                 if (array_key_exists($code, $listdipint)) {
                     $list .= '<option data_deep="' . $nivEnf . '" data_path="'
