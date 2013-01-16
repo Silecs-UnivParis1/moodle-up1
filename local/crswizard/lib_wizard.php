@@ -244,6 +244,28 @@ function wizard_get_enrolement_users() {
     return $list;
 }
 
+/**
+ * Construit le tableau des validateurs sélectionnés
+ * @return array
+ */
+function wizard_get_validators() {
+    global $DB, $SESSION;
+
+    if (!isset($SESSION->wizard['form_step3']['user'])) {
+        return false;
+    }
+
+    $list = array();
+    $form3v = $SESSION->wizard['form_step3']['user'];
+    foreach ($form3v as $u) {
+        $user = $DB->get_record('user', array('username' => $u));
+        if ($user) {
+            $list[$user->username] = $user;
+        }
+    }
+    return $list;
+}
+
 /*
  * construit la liste des groupes sélectionnés encodée en json
  * @return string
@@ -302,6 +324,27 @@ function wizard_preselected_users() {
                     "fieldName" => "user[$role]",
                 );
             }
+        }
+    }
+    return json_encode($liste);
+}
+
+/*
+ * construit la liste des validateurs sélectionnés encodée en json
+ * @return string
+ */
+function wizard_preselected_validators() {
+    global $SESSION;
+    if (!isset($SESSION->wizard['form_step3']['all-validators'])) {
+        return '[]';
+    }
+    $liste = array();
+    if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
+        foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
+            $liste[] = array(
+                "label" => fullname($user),
+                "value" => $id,
+            );
         }
     }
     return json_encode($liste);

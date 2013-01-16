@@ -28,6 +28,7 @@ require_once('../../course/lib.php');
 require_once(__DIR__ . '/lib_wizard.php');
 require_once(__DIR__ . '/step1_form.php');
 require_once(__DIR__ . '/step2_form.php');
+require_once(__DIR__ . '/step2_rof_form.php');
 require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
@@ -56,6 +57,13 @@ if (!$stepin) {
 }
 wizard_navigation($stepin);
 
+$wizardcase = optional_param('wizardcase', 0, PARAM_INT);
+if ($wizardcase) {
+    $SESSION->wizard['wizardcase'] = $wizardcase;
+} elseif(isset($SESSION->wizard['wizardcase'])) {
+    $wizardcase = $SESSION->wizard['wizardcase'];
+}
+
 switch ($stepin) {
     case 1:
         $steptitle = get_string('selectcourse', 'local_crswizard');
@@ -67,7 +75,14 @@ switch ($stepin) {
             'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
         );
         //$submission = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
-        $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
+        if ($wizardcase == 3) {
+            $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
+        } elseif ($wizardcase == 2) {
+            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+            $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
+            $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
+            $editform = new course_wizard_step2_rof_form(NULL, array('editoroptions' => $editoroptions));
+        }
 
         $data = $editform->get_data();
         if ($data){
@@ -80,13 +95,22 @@ switch ($stepin) {
         }
         break;
     case 3:
-        $steptitle = get_string('coursedescription', 'local_crswizard');
-        $editform = new course_wizard_step3_form();
+        if ($wizardcase == 3) {
+            $steptitle = get_string('coursedescription', 'local_crswizard');
+            $editform = new course_wizard_step3_form();
 
-        $data = $editform->get_data();
-        if ($data){
-            $SESSION->wizard['form_step' . $stepin] = (array) $data;
-            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+            $data = $editform->get_data();
+            if ($data){
+                $SESSION->wizard['form_step' . $stepin] = (array) $data;
+                redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+            }
+        } elseif ($wizardcase == 2) {
+            if (isset($_POST['step'])) {
+                $SESSION->wizard['form_step' . $stepin] = $_POST;
+                $SESSION->wizard['form_step3']['all-validators'] = wizard_get_validators();
+                redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+            }
+            redirect(new moodle_url('/local/crswizard/select_validator.php'));
         }
         break;
     case 4:
