@@ -9,6 +9,10 @@ $maxrows = optional_param('maxRows', 10, PARAM_INT);
 $filterstudent = optional_param('filter_student', 'both', PARAM_ALPHA);
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
+if (!$maxrows || $maxrows > MWS_SEARCH_MAXROWS) {
+    $maxrows = MWS_SEARCH_MAXROWS;
+}
+
 $res = mws_search_users($token, $maxrows, $filterstudent, false);
 
 if (empty($callback)) {

@@ -10,6 +10,8 @@
 
 /* @var $DB moodle_database */
 
+define('MWS_SEARCH_MAXROWS', 100);
+
 /**
  * emulates wsgroups "search" action from Moodle data
  * @param string $token to search in user and cohort tables
@@ -35,7 +37,7 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
  * ** MySQL ONLY **
  * @global moodle_database $DB
  * @param string $token to search in user table
- * @param int $maxrows (default 10)
+ * @param int $maxrows
  * @param string $filterstudent = 'no' (no students) | 'only' | 'both' (default)
  * @return array
  */
