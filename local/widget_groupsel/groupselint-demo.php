@@ -31,7 +31,7 @@ echo $OUTPUT->heading('Démo du sélecteur de cohortes Moodle (interne)');
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#group-select').autocompleteGroup({
-        urlGroups: '../mwsgroups/service-search.php',
+        urlGroups: '../mwsgroups/service-groups.php',
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
         dataType: "json",
