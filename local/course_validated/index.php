@@ -12,6 +12,19 @@ admin_externalpage_setup('coursestovalidate');
 $page = optional_param('page', 0, PARAM_INT);
 
 require_login();
+// action parameters (value = course id)
+$hide = optional_param('hide', 0, PARAM_INT);
+$show = optional_param('show', 0, PARAM_INT);
+$validate = optional_param('validate', 0, PARAM_INT);
+
+// Hide or show a course
+if (!empty($hide) or !empty($show)) {
+   show_or_hide($show, $hide);
+}
+
+if (!empty($validate)) {
+   validate_course($validate);
+}
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);

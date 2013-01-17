@@ -137,3 +137,52 @@ function get_table_course_header() {
     }
     return array($row);
 }
+
+
+// ACTION functions
+
+/**
+ * Set a course visible or invisible
+ * copied from course/category.php l. 132-150
+ * @param int $show course id to become visible
+ * @param int $hide course id
+ */
+
+function show_or_hide($show, $hide) {
+	global $DB;
+	if (!empty($hide)) {
+		$course = $DB->get_record('course', array('id' => $hide));
+        $visible = 0;
+    } else {
+		$course = $DB->get_record('course', array('id' => $show));
+        $visible = 1;
+	}
+
+    if ($course) {
+		$coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+        require_capability('moodle/course:visibility', $coursecontext);
+        // Set the visibility of the course. we set the old flag when user manually changes visibility of course.
+        $DB->update_record('course', array('id' => $course->id, 'visible' => $visible, 'visibleold' => $visible, 'timemodified' => time()));
+    }
+}
+
+
+/**
+ * validate a course (set the custom data up1validatedate to time()
+ * @param int $crsid identifiant du cours à valider
+ */
+function validate_course ($crsid) {
+	global $DB, $USER;
+
+	$iddate = up1_meta_get_id($crsid, 'datevalid');
+    $idwho = up1_meta_get_id($crsid, 'approbateureffid');
+
+	if ( ! ($iddate && $idwho)) {
+        throw new coding_exception('Erreur ! manque up1datevalid ou up1approbateureffid pour le cours ' . $crsid);
+        return false;
+    }
+    $DB->update_record('custom_info_data', array('id' => $iddate, 'data' => time()));
+    $DB->update_record('custom_info_data', array('id' => $idwho, 'data' => $USER->id));
+    return true;
+}
+
