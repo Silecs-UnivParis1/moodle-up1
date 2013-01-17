@@ -56,3 +56,48 @@ function get_id_courses_to_validate($approbateurid, $validated) {
 }
 
 
+function get_table_course_to_validate($approbateurid, $validated) {
+    global $DB;
+
+    $courseids = get_id_courses_to_validate($approbateurid, $validated);
+    if ($courseids == '') return array();
+
+    $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible FROM {course} c WHERE id IN ($courseids) ORDER BY id DESC";
+    $dbcourses = $DB->get_records_sql($sql);
+    $res = array();
+    foreach ($dbcourses as $dbcourse) {
+        $row = array();
+        $row[0]['disp'] = '';
+        $row[0]['title'] = '';
+        $row[1]['disp'] = $dbcourse->fullname;
+        $row[1]['title'] = $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname;
+        $row[2]['disp'] = up1_meta_get_text($dbcourse->id, 'avalider');
+        $row[2]['title'] = '';
+        $approbateurprop = up1_meta_get_user($dbcourse->id, 'approbateurpropid');
+        $row[3]['disp'] = $approbateurprop['name'];
+        $row[3]['title'] = '';
+        $res[] = $row;
+    }
+
+    return $res;
+}
+
+
+function draft_display_table_course_to_validate($rows) {
+    echo "<table>\n";
+    foreach ($rows as $row) {
+        echo "<tr>\n";
+        foreach ($row as $column) {
+            echo "<td>";
+            if ( isset($column['title']) && ! empty($column['title']) ) {
+                echo "<span title='" . $column['title'] . "'>";
+            } else {
+                echo "<span>";
+            }
+            echo $column['disp'] . "</span></td> ";
+        }
+        echo "</tr>\n";
+    }
+    echo "</table>\n";
+}
+
