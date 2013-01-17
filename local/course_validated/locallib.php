@@ -74,6 +74,7 @@ function get_table_course_to_validate($approbateurid) {
     $count = 0;
 
     $courseids0 = get_id_courses_to_validate($approbateurid, 0);
+    $dbcourses = array();
     if ($courseids0 != '') {
         $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
              . " FROM {course} c WHERE id IN ($courseids0) ";
@@ -241,6 +242,7 @@ function validate_course ($crsid) {
     }
     $DB->update_record('custom_info_data', array('id' => $iddate, 'data' => time()));
     $DB->update_record('custom_info_data', array('id' => $idwho, 'data' => $USER->id));
+    add_to_log($crsid, 'course_validated', 'validate', '/local/course_validated/index.php', 'course validated');
     return true;
 }
 
