@@ -48,9 +48,14 @@ function up1_meta_get_user($courseid, $field) {
     global $DB;
 
     $userid = up1_meta_get_text($courseid, $field);
-    $dbuser = $DB->get_record('user', array('id' => $userid));
-    return array(
-        'id' => $userid,
-        'name' => $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username
-        );
+    if ($userid) {
+        $dbuser = $DB->get_record('user', array('id' => $userid));
+        return array(
+            'id' => $userid,
+            'name' => $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username
+            );
+    }
+    else {
+        return array('id' => false, 'name' => '');
+    }
 }
