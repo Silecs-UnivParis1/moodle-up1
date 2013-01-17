@@ -13,7 +13,11 @@ if (!$maxrows || $maxrows > MWS_SEARCH_MAXROWS) {
     $maxrows = MWS_SEARCH_MAXROWS;
 }
 
-$res = mws_search_users($token, $maxrows, $filterstudent, false);
+$search_u = new mws_search_users();
+$search_u->maxrows = $maxrows;
+$search_u->filterstudent = $filterstudent;
+$search_u->supann = false;
+$res  = $search_u->search($token);
 
 if (empty($callback)) {
     header('Content-Type: application/json; charset="UTF-8"');
