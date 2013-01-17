@@ -1,6 +1,7 @@
 jQuery(function () {
     var selected = new Array();
     var visited = new Array();
+    var reference = new Array();
 	var rootUrl = $('script[src$="/selected.js"]').attr('src').replace('/selected.js', '/');
     $('div.item-select').load(rootUrl + 'ajax.php');
 
@@ -111,11 +112,22 @@ jQuery(function () {
         if (typeof selected[name] != 'undefined' && selected[name] == 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
+            /** rattachement de reference **/
+            var rattachement = '';
+            var tabItem = '';
+            if (reference.length) {
+                tabItem = 'item[s][]';
+            } else {
+                tabItem = 'item[p][]';
+                var rattachement = ' - [rattachement primaire]';
+                reference[0] = name;
+            }
+
             selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
 				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
-				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
-				+'<input type="hidden" name="item[]" value="'+rofid+'"/>'
+				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+rattachement+'</div>'
+				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
 				+'</div>';
 			$("#items-selected").append(elem);
 		}
@@ -126,8 +138,10 @@ jQuery(function () {
 		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
             var rofid = $(this).siblings('input[type=hidden]').val();
             selected['select_'+rofid] = 0;
+            if (reference[0]=='select_'+rofid) {
+                reference.splice(0, 1);
+            }
 			$(this).parent('div.item-selected').remove();
 		}
 	});
-
 });
