@@ -2,7 +2,7 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 require('../../config.php');
-require_once('./lib.php');
+require_once('./lib-users.php');
 
 $token = required_param('token', PARAM_RAW);
 $maxrows = optional_param('maxRows', 10, PARAM_INT);

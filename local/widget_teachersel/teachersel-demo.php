@@ -41,8 +41,7 @@ echo $OUTPUT->heading('Démo du sélecteur d\'utilisateurs');
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
-        urlUsers: '../mwsteachers/service-search.php',
-        minLength: 4,
+        minLength: 4
     });
 
     $('#roleteacher').on('change', function() {

@@ -48,7 +48,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
-        urlUsers: '../mwsteachers/service-search.php',
+        urlUsers: '../mwsgroups/service-users.php',
         preSelected: <?php echo wizard_preselected_validators();?>
     });
 });

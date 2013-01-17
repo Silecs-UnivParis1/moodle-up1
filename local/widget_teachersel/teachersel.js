@@ -17,7 +17,7 @@
     $('head').append($('<link rel="stylesheet" type="text/css" href=' + cssUrl + '>'));
 
     var defaultSettings = {
-            urlUsers: '../mwsteachers/service-search.php',
+            urlUsers: '../mwsgroups/service-users.php',
             minLength: 4,
             labelDetails: '', // will be printed after the selected label
             wsParams: { maxRows : 10 }, // default parameters for the web service
