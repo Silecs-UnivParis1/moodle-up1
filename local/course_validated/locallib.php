@@ -130,13 +130,57 @@ function get_table_course_to_validate($approbateurid) {
             $row[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
         }
 
-        $row[9] = new html_table_cell('');
+        $row[9] = new html_table_cell(action_icons($dbcourse->id));
         $row[9]->attributes = array('title' => '', 'class' => '');
         $res->data[] = $row;
     }
 
     return $res;
 }
+
+
+function action_icons($crsid) {
+    global $OUTPUT;
+    $res = '';
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $crsid);
+    $baseurl = new moodle_url('/local/course_validated/index.php');
+
+    //$res .= html_writer::start_tag('div', array('class'=>'action'));
+    if (has_capability('moodle/course:update', $coursecontext)) {
+		$url = new moodle_url('/course/edit.php', array('id' => $crsid));
+		$res .= $OUTPUT->action_icon($url, new pix_icon('t/edit', get_string('settings')));
+		$res .= '&nbsp;';
+    }
+
+    if (can_delete_course($crsid)) {
+		$url = new moodle_url('/course/delete.php', array('id' => $crsid));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('t/delete', get_string('delete')));
+        $res .= '&nbsp;';
+    }
+
+    if (has_capability('moodle/course:visibility', $coursecontext)) {
+		if (!empty($course->visible)) {
+			$url = new moodle_url($baseurl, array('hide' => $crsid));
+            $res .= $OUTPUT->action_icon($url, new pix_icon('t/hide', get_string('hide')));
+        } else {
+			$url = new moodle_url($baseurl, array('show' => $crsid));
+            $res .= $OUTPUT->action_icon($url, new pix_icon('t/show', get_string('show')));
+        }
+        $res .= '&nbsp;';
+    }
+
+	$url = new moodle_url('/local/courseboard/view.php', array('id' => $crsid));
+	$res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'tableau de bord'));
+
+    // si capability : valider un cours : validatedate
+	$url = new moodle_url($baseurl, array('validate' => $crsid));
+	$res .= $OUTPUT->action_icon($url, new pix_icon('i/tick_green_small', 'valider'));
+
+	//$res .= html_writer::end_tag('div');
+    return $res;
+}
+
+
 
 function get_table_course_header() {
     $headings = array('', get_string('fullnamecourse'), 'État', 'Demandeur', 'Date demande',
