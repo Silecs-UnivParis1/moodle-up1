@@ -95,8 +95,8 @@ function get_table_course_to_validate($approbateurid) {
         $url = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $row[1] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
         $row[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
-        $valid = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
-        $row[2] = new html_table_cell($etat[$valid]);
+        $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
+        $row[2] = new html_table_cell($etat[$validated]);
         $row[2]->attributes = array('title' => '', 'class' => '');
         $demandeur = up1_meta_get_user($dbcourse->id, 'demandeurid');
         $row[3] = new html_table_cell($demandeur['name']);
@@ -107,7 +107,7 @@ function get_table_course_to_validate($approbateurid) {
 
         $approbateurprop = up1_meta_get_user($dbcourse->id, 'approbateurpropid');
         $approbateureff = up1_meta_get_user($dbcourse->id, 'approbateureffid');
-        if ($valid) { // si la validation a déjà eu lieu
+        if ($validated) { // si la validation a déjà eu lieu
             $approbateur = $approbateureff;
         } else {
             $approbateur = $approbateurprop;
@@ -130,7 +130,7 @@ function get_table_course_to_validate($approbateurid) {
             $row[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
         }
 
-        $row[9] = new html_table_cell(action_icons($dbcourse->id));
+        $row[9] = new html_table_cell(action_icons($dbcourse->id, $validated));
         $row[9]->attributes = array('title' => '', 'class' => '');
         $res->data[] = $row;
     }
@@ -139,7 +139,7 @@ function get_table_course_to_validate($approbateurid) {
 }
 
 
-function action_icons($crsid) {
+function action_icons($crsid, $validated) {
     global $OUTPUT;
     $res = '';
     $coursecontext = get_context_instance(CONTEXT_COURSE, $crsid);
@@ -148,33 +148,35 @@ function action_icons($crsid) {
     //$res .= html_writer::start_tag('div', array('class'=>'action'));
     if (has_capability('moodle/course:update', $coursecontext)) {
 		$url = new moodle_url('/course/edit.php', array('id' => $crsid));
-		$res .= $OUTPUT->action_icon($url, new pix_icon('t/edit', get_string('settings')));
+		$res .= $OUTPUT->action_icon($url, new pix_icon('t/edit', 'Modifier paramètres de l\'espace de cours'));
 		$res .= '&nbsp;';
     }
 
     if (can_delete_course($crsid)) {
 		$url = new moodle_url('/course/delete.php', array('id' => $crsid));
-        $res .= $OUTPUT->action_icon($url, new pix_icon('t/delete', get_string('delete')));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('t/delete', 'Supprimer l\'espace de cours'));
         $res .= '&nbsp;';
     }
 
     if (has_capability('moodle/course:visibility', $coursecontext)) {
 		if (!empty($course->visible)) {
 			$url = new moodle_url($baseurl, array('hide' => $crsid));
-            $res .= $OUTPUT->action_icon($url, new pix_icon('t/hide', get_string('hide')));
+            $res .= $OUTPUT->action_icon($url, new pix_icon('t/hide', 'Ne pas ouvrir l\'espace de cours aux étudiants'));
         } else {
 			$url = new moodle_url($baseurl, array('show' => $crsid));
-            $res .= $OUTPUT->action_icon($url, new pix_icon('t/show', get_string('show')));
+            $res .= $OUTPUT->action_icon($url, new pix_icon('t/show', 'Ouvrir l\'espace de cours aux étudiants'));
         }
         $res .= '&nbsp;';
     }
 
 	$url = new moodle_url('/local/courseboard/view.php', array('id' => $crsid));
-	$res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'tableau de bord'));
+	$res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le tableau de bord'));
 
     // si capability : valider un cours : validatedate
-	$url = new moodle_url($baseurl, array('validate' => $crsid));
-	$res .= $OUTPUT->action_icon($url, new pix_icon('i/tick_green_small', 'valider'));
+    if ( ! $validated ) {
+        $url = new moodle_url($baseurl, array('validate' => $crsid));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('i/tick_green_small', 'Approuver la demande d\'ouverture'));
+    }
 
 	//$res .= html_writer::end_tag('div');
     return $res;
