@@ -65,3 +65,26 @@ function up1_meta_get_user($courseid, $field) {
         return array('id' => false, 'name' => '');
     }
 }
+
+/**
+ * get the id in table custom_info_data for a given (course id, field shortname)
+ * @global type $DB
+ * @param in $courseid
+ * @param string $field (shortname)
+ * @return type
+ */
+function up1_meta_get_id($courseid, $field) {
+    global $DB;
+
+    $prefix = 'up1';
+    if ( substr($field, 0, 3) !== 'up1' ) {
+        $field = $prefix . $field;
+    }
+    $sql = "SELECT cd.id FROM {custom_info_data} cd "
+         . " JOIN {custom_info_field} cf ON (cd.fieldid = cf.id AND cd.objectname='course' AND cf.objectname='course') "
+         . " WHERE cf.shortname=? AND cd.objectid=?";
+	$id = $DB->get_field_sql($sql, array($field, $courseid), MUST_EXIST);
+
+    //echo $sql ."\n -> $id\n";
+    return $id;
+}
