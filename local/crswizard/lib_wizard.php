@@ -29,6 +29,26 @@ function wizard_get_mydisplaylist() {
 }
 
 /**
+ * Reconstruit le tableau de chemins (période/établissement) pour le plugin jquery select-into-subselects.js
+ * hack de la fonction wizard_get_mydisplaylist()
+ * @todo limiter établissement à Paris 1
+ * @return array
+ * */
+function wizard_get_catlevel2() {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
+    $mydisplaylist = array(' - / - ');
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 1) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+/**
  * Returns the list of the names of the ancestor categories, including the target.
  * @global moodle_database $DB
  * @param integer $idcategory

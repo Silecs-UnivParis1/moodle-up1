@@ -28,10 +28,10 @@ class course_wizard_step2_rof_form extends moodleform {
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'categoryheader', get_string('categoryblock', 'local_crswizard'));
         $mform->addElement(
-                'select', 'category', '', wizard_get_mydisplaylist(),
+                'select', 'category', '', wizard_get_catlevel2(),
                 array(
                     'class' => 'transformIntoSubselects cache',
-                    'data-labels' => '["Période :", "Établissement :", "Composante :", "Niveau :"]'
+                    'data-labels' => '["Période :", "Établissement :"]'
                 )
         );
 
@@ -178,7 +178,7 @@ class course_wizard_step2_rof_form extends moodleform {
 
         $category = $DB->get_record('course_categories', array('id' => $idcategory));
         if ($category) {
-            if ($category->depth < 4) {
+            if ($category->depth < 1) {
                 $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
             }
         } else {
