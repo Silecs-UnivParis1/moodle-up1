@@ -36,10 +36,10 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
  * @global type $DB
  * @param string $token to search in user table
  * @param int $maxrows (default 10)
- * @param string $filterstudent = 'no' | 'only' | 'both'
+ * @param string $filterstudent = 'no' | 'only' | 'both' (default)
  * @return array
  */
-function mws_search_users($token, $maxrows, $filterstudent) {
+function mws_search_users($token, $maxrows, $filterstudent='both') {
     global $DB;
     $ptoken = $DB->sql_like_escape($token) . '%';
 
