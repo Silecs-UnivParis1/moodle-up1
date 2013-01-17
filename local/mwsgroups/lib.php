@@ -33,18 +33,18 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
 /**
  * search users according to filters.
  * ** MySQL ONLY **
- * @global type $DB
+ * @global moodle_database $DB
  * @param string $token to search in user table
  * @param int $maxrows (default 10)
- * @param string $filterstudent = 'no' | 'only' | 'both' (default)
+ * @param string $filterstudent = 'no' (no students) | 'only' | 'both' (default)
  * @return array
  */
-function mws_search_users($token, $maxrows, $filterstudent='both') {
+function mws_search_users($token, $maxrows, $filterstudent='both', $supann=true) {
     global $DB;
     $ptoken = $DB->sql_like_escape($token) . '%';
 
     $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
-        . "( username = ?  OR  firstname LIKE ? OR lastname LIKE ? "
+        . "( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
         . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )" ;
     if ($filterstudent == 'no') {
         $sql .= " AND idnumber = '' ";
@@ -56,14 +56,21 @@ function mws_search_users($token, $maxrows, $filterstudent='both') {
     $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $maxrows);
     $users = array();
     foreach ($records as $record) {
-        $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
-             . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
-        $res = $DB->get_records_sql_menu($sql, array($record->id));
-        $users[] = array(
-            'uid' => $record->username,
-            'displayName' => $record->firstname .' '. $record->lastname,
-            'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
-        );
+        if ($supann) {
+            $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
+                 . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
+            $res = $DB->get_records_sql_menu($sql, array($record->id));
+            $users[] = array(
+                'uid' => $record->username,
+                'displayName' => $record->firstname .' '. $record->lastname,
+                'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
+            );
+        } else {
+            $users[] = array(
+                'uid' => $record->username,
+                'displayName' => $record->firstname .' '. $record->lastname,
+            );
+        }
     }
     return $users;
 }
