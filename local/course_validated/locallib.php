@@ -128,7 +128,8 @@ function get_table_course_to_validate($approbateurid, $validated) {
 }
 
 function get_table_course_header() {
-    $headings = array('', get_string('fullnamecourse'), '', 'Approbateur');
+    $headings = array('', get_string('fullnamecourse'), 'État', 'Demandeur', 'Date demande',
+        'Approbateur', 'Date approbation', 'Date ouverture', 'Élément pédagogique', 'Modifier');
     $row = array();
     foreach ($headings as $h) {
         $cell = new html_table_cell($h);
