@@ -10,10 +10,6 @@ $filterstudent = optional_param('filter_student', 'both', PARAM_ALPHA);
 $exclude = optional_param('exclude', '', PARAM_TAGLIST); // usernames to exclude, separated by ","
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
-if (!$maxrows || $maxrows > MWS_SEARCH_MAXROWS) {
-    $maxrows = MWS_SEARCH_MAXROWS;
-}
-
 $search_u = new mws_search_users();
 $search_u->maxrows = $maxrows;
 $search_u->filterstudent = $filterstudent;

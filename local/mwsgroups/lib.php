@@ -54,8 +54,18 @@ class mws_search_users {
 
     private $exclude_map = array();
 
+    /**
+     * Checks that the parameters are valid, and ints some helper properties.
+     */
     private function init() {
-        //! @todo validate types
+        if (!is_array($this->exclude) || is_string($this->filterstudent)) {
+            throw new Exception('Invalid arg type for mws_search_users');
+        }
+
+        $this->maxrows = (int) $this->maxrows;
+        if (!$this->maxrows || $this->maxrows > MWS_SEARCH_MAXROWS) {
+            $this->maxrows = MWS_SEARCH_MAXROWS;
+        }
 
         $this->exclude_map = array();
         foreach ($this->exclude as $name) {
@@ -86,14 +96,14 @@ class mws_search_users {
         $sql .= "ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
+        $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
+             . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
         foreach ($records as $record) {
             if (isset($this->exclude_map[$record->username])) {
                 continue;
             }
             if ($this->supann) {
-                $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
-                     . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
-                $res = $DB->get_records_sql_menu($sql, array($record->id));
+                $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
                 $users[] = array(
                     'uid' => $record->username,
                     'displayName' => $record->firstname .' '. $record->lastname,
