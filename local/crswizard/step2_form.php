@@ -31,7 +31,7 @@ class course_wizard_step2_form extends moodleform {
                 'select', 'category', '', wizard_get_mydisplaylist(),
                 array(
                     'class' => 'transformIntoSubselects cache',
-                    'data-labels' => '["Période :", "Établissement :", "Composante :", "Niveau :"]'
+                    'data-labels' => '["Période :", "Établissement :", "Composante :", "Type de diplôme :"]'
                 )
         );
 

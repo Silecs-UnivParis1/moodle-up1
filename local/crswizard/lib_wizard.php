@@ -18,7 +18,7 @@ function wizard_get_mydisplaylist() {
     $parentlist = array();
     make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
     $myconfig = new my_elements_config();
-    $mydisplaylist = array(' - / - / - / -');
+    $mydisplaylist = array(" Sélectionner la période / Sélectionner l'établissement / Sélectionner la composante / Sélectionner le type de diplôme");
 
     foreach ($displaylist as $id => $label) {
         if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {

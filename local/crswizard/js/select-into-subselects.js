@@ -7,25 +7,37 @@ var labels;
 
 var getTree = function (options, separator) {
     var root = {};
+    var first_option = true;
+    var emptyChoices = [];
     options.each(function () {
 	    var option = $(this);
 	    var val = option.val();
 	    var pathElems = option.text().split(separator);
 	    var lastElem = pathElems.pop();
+        if (first_option) {
+            emptyChoices = option.text().split(separator);
+        }
 
-	    var current = root;
+
+        var current = root;
 	    $.each(pathElems, function (i, e) {
 	        if (is_string(current[e])) {
 		        // the tree has nodes that can be selected.
 		        // move the node into subselect
 		        current[e] = { "Tout": current[e] };
 	        }
-	        current = current[e] || (current[e] = {'-': ''})
+            //current = current[e] || (current[e] = {'-': ''})
+            if (!current[e]) {
+                current[e] = {};
+                current[e][emptyChoices[i+1]] = '';
+            }
+            current = current[e];
 	    });
 	    // handle conflict on leaves text
 	    while (current[lastElem]) lastElem += '_';
 
 	    current[lastElem] = val;
+        first_option = false;
     });
     //if (console && console.log) console.log($.toJSON(root)); // jquery-json plugin
     return root;
@@ -35,6 +47,7 @@ var createOneSubselect = function (onchange, tree, depth) {
     var subselect = $('<select>').change(onchange).data(
         { depth: depth, tree: tree }
     );
+    console.log(tree);
     $.each(tree, function (pathElem, subtree) {
         var option = $('<option>').text(pathElem);
         subselect.append(option);
