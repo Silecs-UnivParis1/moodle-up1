@@ -42,7 +42,7 @@ $table = get_table_course_to_validate(0, 2);
 if (empty($table->data)) {
     echo $OUTPUT->box("Aucune demande de création de cours n'est en attente de validation.");
 } else {
-    $n = count(get_id_courses_to_validate(0, 0));
+    $n = count(explode(',', get_id_courses_to_validate(0, 0)));
     echo "<p>Il y a <b>" . $n . "</b> espaces de cours en attente d'approbation.</p>\n";
     $perpage = 20;
     $baseurl = new moodle_url('/local/course_validated/index.php');;

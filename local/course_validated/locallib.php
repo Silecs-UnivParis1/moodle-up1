@@ -40,11 +40,12 @@ function get_id_courses_to_validate($approbateurid, $validated) {
         $sql .= "AND cdq.fieldid=$approbateurpropidId AND cdq.data=$approbateurid " ;
     }
     if ($validated == 0) {
-        $sql .= "AND cd2.data=0";
+        $sql .= " AND cd2.data=0 ";
     }
     if ($validated == 1) {
-        $sql .= "AND cd2.data>0";
+        $sql .= " AND cd2.data>0 ";
     }
+    $sql .= "ORDER BY objectid DESC ";
     //echo "\n\n  $sql";
 
     $listeId='';
@@ -59,10 +60,9 @@ function get_id_courses_to_validate($approbateurid, $validated) {
  *
  * @global moodle_database $DB
  * @param integer $approbateurid
- * @param boolean $validated
  * @return \html_table
  */
-function get_table_course_to_validate($approbateurid, $validated) {
+function get_table_course_to_validate($approbateurid) {
     global $DB;
     $etat = array(
         false => "En attente",
@@ -71,18 +71,29 @@ function get_table_course_to_validate($approbateurid, $validated) {
 
     $res = new html_table();
     $res->data = array();
+    $count = 0;
 
-    $courseids = get_id_courses_to_validate($approbateurid, $validated);
-    if ($courseids == '') {
-        return $res;
+    $courseids0 = get_id_courses_to_validate($approbateurid, 0);
+    if ($courseids0 != '') {
+        $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
+             . " FROM {course} c WHERE id IN ($courseids0) ";
+        $dbcourses = $DB->get_records_sql($sql);
     }
-    $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible FROM {course} c WHERE id IN ($courseids) ORDER BY id DESC";
-    $dbcourses = $DB->get_records_sql($sql);
+    $courseids1 = get_id_courses_to_validate($approbateurid, 1);
+    if ($courseids1 != '') {
+        $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
+             . " FROM {course} c WHERE id IN ($courseids1) ";
+        $dbcourses1 = $DB->get_records_sql($sql);
+        $dbcourses = array_merge($dbcourses, $dbcourses1);
+    }
+
     foreach ($dbcourses as $dbcourse) {
+        $count++;
         $row = array();
-        $row[0] = new html_table_cell('');
+        $row[0] = new html_table_cell($count);
         $row[0]->attributes = array('title' => '', 'class' => '');
-        $row[1] = new html_table_cell($dbcourse->fullname);
+        $url = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
+        $row[1] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
         $row[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
         $valid = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
         $row[2] = new html_table_cell($etat[$valid]);
