@@ -49,6 +49,20 @@ class mws_search_users {
     /** @var boolean */
     public $supann = true;
 
+    /** @var array */
+    public $exclude = array();
+
+    private $exclude_map = array();
+
+    private function init() {
+        //! @todo validate types
+
+        $this->exclude_map = array();
+        foreach ($this->exclude as $name) {
+            $this->exclude_map[$name] = 1;
+        }
+    }
+
     /**
      * search users according to filters.
      * ** MySQL ONLY **
@@ -58,6 +72,7 @@ class mws_search_users {
      */
     function search($token) {
         global $DB;
+        $this->init();
         $ptoken = $DB->sql_like_escape($token) . '%';
 
         $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
@@ -72,6 +87,9 @@ class mws_search_users {
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
         foreach ($records as $record) {
+            if (isset($this->exclude_map[$record->username])) {
+                continue;
+            }
             if ($this->supann) {
                 $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
                      . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
