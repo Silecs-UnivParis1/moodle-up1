@@ -55,44 +55,50 @@ function get_id_courses_to_validate($approbateurid, $validated) {
     return $listeId;
 }
 
-
+/**
+ *
+ * @global moodle_database $DB
+ * @param integer $approbateurid
+ * @param boolean $validated
+ * @return \html_table
+ */
 function get_table_course_to_validate($approbateurid, $validated) {
     global $DB;
 
+    $res = new html_table();
+    $res->data = array();
+
     $courseids = get_id_courses_to_validate($approbateurid, $validated);
-    if ($courseids == '') return array();
+    if ($courseids == '') {
+        return $res;
+    }
 
     $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible FROM {course} c WHERE id IN ($courseids) ORDER BY id DESC";
     $dbcourses = $DB->get_records_sql($sql);
-    $res = array();
     foreach ($dbcourses as $dbcourse) {
         $row = array();
         $row[0] = new html_table_cell('');
-        $row[0]->attributes = array('title' => '');
+        $row[0]->attributes = array('title' => '', 'class' => '');
         $row[1] = new html_table_cell($dbcourse->fullname);
-        $row[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname);
+        $row[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
         $row[2] = new html_table_cell(up1_meta_get_text($dbcourse->id, 'avalider'));
-        $row[2]->attributes = array('title' => '');
+        $row[2]->attributes = array('title' => '', 'class' => '');
         $approbateurprop = up1_meta_get_user($dbcourse->id, 'approbateurpropid');
         $row[3] = new html_table_cell($approbateurprop['name']);
-        $row[3]->attributes = array('title' => '');
-        $res[] = $row;
+        $row[3]->attributes = array('title' => '', 'class' => '');
+        $res->data[] = $row;
     }
 
     return $res;
 }
 
-
-function draft_display_table_course_to_validate($rows) {
-    echo "<table>\n";
-    foreach ($rows as $row) {
-        echo "<tr>\n";
-        foreach ($row as $cell) {
-            echo '<td title="'. $cell->attributes['title'] .'">';
-            echo $cell->text . "</td> ";
-        }
-        echo "</tr>\n";
+function get_table_course_header() {
+    $headings = array('', get_string('fullnamecourse'), '', 'Approbateur');
+    $row = array();
+    foreach ($headings as $h) {
+        $cell = new html_table_cell($h);
+        $cell->header = true;
+        $row[] = $cell;
     }
-    echo "</table>\n";
+    return array($row);
 }
-
