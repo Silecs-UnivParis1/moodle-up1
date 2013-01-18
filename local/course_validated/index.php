@@ -2,11 +2,12 @@
 require_once('../../config.php');
 require_once('locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
-admin_externalpage_setup('coursestovalidate');
+/** @todo keep or drop the following ? normally, should be kept but needs admin rights */
+// admin_externalpage_setup('coursestovalidate');
 
 /**
  * @todo delete/show/hide/validate : GET->POST
- * @todo manage capabilities
+ * @todo manage localsupervalidator capability
  */
 
 /* @var $OUTPUT core_renderer */
@@ -36,16 +37,22 @@ $PAGE->set_context($systemcontext);
 $PAGE->set_url('/local/course_validated/index.php');
 $PAGE->set_title("Espaces de cours en attente d'approbation");
 $PAGE->set_heading("Espaces de cours en attente d'approbation");
+$PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 
-// si l'utilisateur a la capacité supervalidator
-$table = get_table_course_to_validate(0, 2);
-// sinon
-// $table = get_table_course_to_validate($USER->id, 2);
+if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
+    $table = get_table_course_to_validate(0, 2);
+} else {
+    $table = get_table_course_to_validate($USER->id, 2);
+}
 
 if (empty($table->data)) {
-    echo $OUTPUT->box("Aucune demande de création de cours n'est en attente de validation.");
+    if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
+        echo $OUTPUT->box("Aucune demande de création de cours n'est en attente d'approbation.");
+    } else {
+        echo $OUTPUT->box("Aucune demande de création de cours n'est en attente de votre approbation.");
+    }
 } else {
     $courselist = get_id_courses_to_validate(0, 0);
     $n = ($courselist == '' ? 0 : count(explode(',', $courselist)));
