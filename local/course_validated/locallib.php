@@ -136,7 +136,7 @@ function get_table_course_to_validate($approbateurid) {
             $row->cells[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
         }
 
-        $row->cells[9] = new html_table_cell(action_icons($dbcourse->id, $validated));
+        $row->cells[9] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible));
         $row->cells[9]->attributes = array('title' => '', 'class' => '');
         if ( ! $validated ) {
             $row->attributes = array('class' => 'highlight');
@@ -148,7 +148,7 @@ function get_table_course_to_validate($approbateurid) {
 }
 
 
-function action_icons($crsid, $validated) {
+function action_icons($crsid, $validated, $visible) {
     global $OUTPUT;
     $res = '';
     $coursecontext = get_context_instance(CONTEXT_COURSE, $crsid);
@@ -168,7 +168,7 @@ function action_icons($crsid, $validated) {
     }
 
     if (has_capability('moodle/course:visibility', $coursecontext)) {
-		if (!empty($course->visible)) {
+		if ($visible) {
 			$url = new moodle_url($baseurl, array('hide' => $crsid));
             $res .= $OUTPUT->action_icon($url, new pix_icon('t/hide', 'Ne pas ouvrir l\'espace de cours aux étudiants'));
         } else {
@@ -220,9 +220,11 @@ function show_or_hide($show, $hide) {
 	if (!empty($hide)) {
 		$course = $DB->get_record('course', array('id' => $hide));
         $visible = 0;
+        $action = 'hide';
     } else {
 		$course = $DB->get_record('course', array('id' => $show));
         $visible = 1;
+        $action = 'show';
 	}
 
     if ($course) {
@@ -230,6 +232,7 @@ function show_or_hide($show, $hide) {
         require_capability('moodle/course:visibility', $coursecontext);
         // Set the visibility of the course. we set the old flag when user manually changes visibility of course.
         $DB->update_record('course', array('id' => $course->id, 'visible' => $visible, 'visibleold' => $visible, 'timemodified' => time()));
+        add_to_log($course->id, 'course_validated', $action, '/local/course_validated/index.php', '');
     }
 }
 
