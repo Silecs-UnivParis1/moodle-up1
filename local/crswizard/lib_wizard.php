@@ -265,6 +265,19 @@ function wizard_get_enrolement_users() {
 }
 
 /**
+ * Enrole par défaut l'utilisateur comme teacher à son cours
+ * @return array
+ */
+function wizard_enrolement_user() {
+    global $DB, $SESSION, $USER;
+    $list = array();
+    $code = 'editingteacher';
+    $user = $DB->get_record('user', array('username' => $USER->username));
+    $list[$code][$user->username] = $user;
+    return $list;
+}
+
+/**
  * Construit le tableau des validateurs sélectionnés
  * @return array
  */
