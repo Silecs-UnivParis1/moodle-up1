@@ -1,9 +1,13 @@
 <?php
 require_once('../../config.php');
 require_once('locallib.php');
-
 require_once($CFG->libdir.'/adminlib.php');
 admin_externalpage_setup('coursestovalidate');
+
+/**
+ * @todo delete/show/hide/validate : redirection + GET->POST
+ * @todo manage capabilities
+ */
 
 /* @var $OUTPUT core_renderer */
 /* @var $PAGE page_base */

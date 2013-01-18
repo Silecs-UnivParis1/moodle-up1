@@ -10,6 +10,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * @todo checkboxes multiple selections + dropdown menu
+ * @todo master checkbox : all/none
+ * @todo sort by clicking on column header ???
+ */
 
 /**
  *
