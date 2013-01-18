@@ -487,6 +487,7 @@ class core_wizard {
      */
     public function prepare_course_to_validate() {
         $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        $tabcategories = get_list_category($this->formdata['form_step2']['category']);
         //$mydata->startdate = $this->formdata['form_step2']['startdate'];
 
         //step3 custominfo_field
@@ -495,14 +496,14 @@ class core_wizard {
         if ($up1composante != '' && substr($up1composante, -1) != ';') {
             $mydata->profile_field_up1composante .= ';';
         }
-        $mydata->profile_field_up1composante .= $this->formdata['form_step3']['composante'];
+        $mydata->profile_field_up1composante .= trim($tabcategories[2]);
 
         // niveau
         $up1niveau = trim($mydata->profile_field_up1niveau);
         if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
             $mydata->profile_field_up1niveau .= ';';
         }
-        $mydata->profile_field_up1niveau .= $this->formdata['form_step3']['niveau'];
+        $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
 
         // cours doit être validé
         $mydata->profile_field_up1avalider = 1;
