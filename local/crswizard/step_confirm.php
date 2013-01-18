@@ -99,7 +99,7 @@ class course_wizard_step_confirm extends moodleform {
             foreach ($clefs as $type => $clef) {
                 $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                 $c = $clef['code'];
-                $mform->addElement('text', 'valeur' . $c, 'valeur cachée');
+                $mform->addElement('text', 'valeur' . $c, $clef['password']);
                 if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
                     $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
                     $mform->setConstant('enrolstartdate' . $c, $clef['enrolstartdate']);
