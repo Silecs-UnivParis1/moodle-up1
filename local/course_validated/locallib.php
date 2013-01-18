@@ -90,21 +90,21 @@ function get_table_course_to_validate($approbateurid) {
 
     foreach ($dbcourses as $dbcourse) {
         $count++;
-        $row = array();
-        $row[0] = new html_table_cell($count);
-        $row[0]->attributes = array('title' => '', 'class' => '');
+        $row = new html_table_row();
+        $row->cells[0] = new html_table_cell($count);
+        $row->cells[0]->attributes = array('title' => '', 'class' => '');
         $url = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
-        $row[1] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
-        $row[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
+        $row->cells[1] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
+        $row->cells[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
         $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
-        $row[2] = new html_table_cell($etat[$validated]);
-        $row[2]->attributes = array('title' => '', 'class' => '');
+        $row->cells[2] = new html_table_cell($etat[$validated]);
+        $row->cells[2]->attributes = array('title' => '', 'class' => '');
         $demandeur = up1_meta_get_user($dbcourse->id, 'demandeurid');
-        $row[3] = new html_table_cell($demandeur['name']);
-        $row[3]->attributes = array('title' => '', 'class' => '');
+        $row->cells[3] = new html_table_cell($demandeur['name']);
+        $row->cells[3]->attributes = array('title' => '', 'class' => '');
         $adate = up1_meta_get_date($dbcourse->id, 'datedemande');
-        $row[4] = new html_table_cell($adate['date']);
-        $row[4]->attributes = array('title' => $adate['datetime'], 'class' => '');
+        $row->cells[4] = new html_table_cell($adate['date']);
+        $row->cells[4]->attributes = array('title' => $adate['datetime'], 'class' => '');
 
         $approbateurprop = up1_meta_get_user($dbcourse->id, 'approbateurpropid');
         $approbateureff = up1_meta_get_user($dbcourse->id, 'approbateureffid');
@@ -113,26 +113,29 @@ function get_table_course_to_validate($approbateurid) {
         } else {
             $approbateur = $approbateurprop;
         }
-        $row[5] = new html_table_cell($approbateur['name']);
-        $row[5]->attributes = array('title' => 'Proposé='.$approbateurprop['name'].' ; effectif='.$approbateureff['name'], 'class' => '');
+        $row->cells[5] = new html_table_cell($approbateur['name']);
+        $row->cells[5]->attributes = array('title' => 'Proposé='.$approbateurprop['name'].' ; effectif='.$approbateureff['name'], 'class' => '');
         $adate = up1_meta_get_date($dbcourse->id, 'datevalid');
-        $row[6] = new html_table_cell($adate['date']);
-        $row[6]->attributes = array('title' => $adate['datetime'], 'class' => '');
-        $row[7] = new html_table_cell(userdate($dbcourse->startdate, '%Y-%m-%d'));
-        $row[7]->attributes = array('title' => '', 'class' => '');
+        $row->cells[6] = new html_table_cell($adate['date']);
+        $row->cells[6]->attributes = array('title' => $adate['datetime'], 'class' => '');
+        $row->cells[7] = new html_table_cell(userdate($dbcourse->startdate, '%Y-%m-%d'));
+        $row->cells[7]->attributes = array('title' => '', 'class' => '');
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) {
-            $row[8] = new html_table_cell('Hors ROF');
-            $row[8]->attributes = array('title' => 'UP1 > ' . up1_meta_get_text($dbcourse->id, 'composante') . ' > ' .
+            $row->cells[8] = new html_table_cell('Hors ROF');
+            $row->cells[8]->attributes = array('title' => 'UP1 > ' . up1_meta_get_text($dbcourse->id, 'composante') . ' > ' .
                 up1_meta_get_text($dbcourse->id, 'niveaulmda') . ' > ' .up1_meta_get_text($dbcourse->id, 'diplome'),
                 'class' => '' );
         } else {
-            $row[8] = new html_table_cell($rofname);
-            $row[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
+            $row->cells[8] = new html_table_cell($rofname);
+            $row->cells[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
         }
 
-        $row[9] = new html_table_cell(action_icons($dbcourse->id, $validated));
-        $row[9]->attributes = array('title' => '', 'class' => '');
+        $row->cells[9] = new html_table_cell(action_icons($dbcourse->id, $validated));
+        $row->cells[9]->attributes = array('title' => '', 'class' => '');
+        if ( ! $validated ) {
+            $row->attributes = array('class' => 'highlight');
+        }
         $res->data[] = $row;
     }
 
