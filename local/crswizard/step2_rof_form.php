@@ -11,7 +11,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
-class course_wizard_step2_form extends moodleform {
+class course_wizard_step2_rof_form extends moodleform {
 
     function definition() {
         global $OUTPUT;
@@ -28,24 +28,32 @@ class course_wizard_step2_form extends moodleform {
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'categoryheader', get_string('categoryblock', 'local_crswizard'));
         $mform->addElement(
-                'select', 'category', '', wizard_get_mydisplaylist(),
+                'select', 'category', '', wizard_get_catlevel2(),
                 array(
                     'class' => 'transformIntoSubselects cache',
-                    'data-labels' => '["Période :", "Établissement :", "Composante :", "Type de diplôme :"]'
+                    'data-labels' => '["Période :", "Établissement :"]'
                 )
         );
 
+        // ajout du selecteur ROF
+        $rofseleted = '<div class="by-widget"><h3>Rechercher un élément pédagogique</h3>'
+            . '<div class="item-select"></div>'
+            . '</div>'
+            . '<div class="block-item-selected">'
+            . '<h3>Éléments pédagogiques sélectionnés</h3>'
+            . '<div id="items-selected"></div>'
+            . '</div>';
+        $mform->addElement('html', $rofseleted);
+
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 
-        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50" readonly="readonly"');
         //$mform->addHelpButton('fullname', 'fullnamecourse');
-        $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');
         $mform->setType('fullname', PARAM_MULTILANG);
 
-        $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
+        $mform->addElement('text', 'complement', 'Complément', 'maxlength="100" size="20"');
         //$mform->addHelpButton('shortname', 'shortnamecourse');
-        $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
-        $mform->setType('shortname', PARAM_MULTILANG);
+        $mform->setType('complement', PARAM_MULTILANG);
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');
@@ -143,7 +151,7 @@ class course_wizard_step2_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         if (empty($errors)) {
-            $this->validation_shortname($data['shortname'], $errors);
+            //$this->validation_shortname($data['shortname'], $errors);
             $this->validation_category($data['category'], $errors);
         }
         return $errors;
@@ -168,7 +176,7 @@ class course_wizard_step2_form extends moodleform {
 
         $category = $DB->get_record('course_categories', array('id' => $idcategory));
         if ($category) {
-            if ($category->depth < 4) {
+            if ($category->depth < 1) {
                 $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
             }
         } else {

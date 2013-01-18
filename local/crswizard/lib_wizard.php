@@ -18,10 +18,30 @@ function wizard_get_mydisplaylist() {
     $parentlist = array();
     make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
     $myconfig = new my_elements_config();
-    $mydisplaylist = array(' - / - / - / -');
+    $mydisplaylist = array(" Sélectionner la période / Sélectionner l'établissement / Sélectionner la composante / Sélectionner le type de diplôme");
 
     foreach ($displaylist as $id => $label) {
         if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+/**
+ * Reconstruit le tableau de chemins (période/établissement) pour le plugin jquery select-into-subselects.js
+ * hack de la fonction wizard_get_mydisplaylist()
+ * @todo limiter établissement à Paris 1
+ * @return array
+ * */
+function wizard_get_catlevel2() {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
+    $mydisplaylist = array(' - / - ');
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 1) {
             $mydisplaylist[$id] = $label;
         }
     }
@@ -244,6 +264,28 @@ function wizard_get_enrolement_users() {
     return $list;
 }
 
+/**
+ * Construit le tableau des validateurs sélectionnés
+ * @return array
+ */
+function wizard_get_validators() {
+    global $DB, $SESSION;
+
+    if (!isset($SESSION->wizard['form_step3']['user'])) {
+        return false;
+    }
+
+    $list = array();
+    $form3v = $SESSION->wizard['form_step3']['user'];
+    foreach ($form3v as $u) {
+        $user = $DB->get_record('user', array('username' => $u));
+        if ($user) {
+            $list[$user->username] = $user;
+        }
+    }
+    return $list;
+}
+
 /*
  * construit la liste des groupes sélectionnés encodée en json
  * @return string
@@ -307,6 +349,27 @@ function wizard_preselected_users() {
     return json_encode($liste);
 }
 
+/*
+ * construit la liste des validateurs sélectionnés encodée en json
+ * @return string
+ */
+function wizard_preselected_validators() {
+    global $SESSION;
+    if (!isset($SESSION->wizard['form_step3']['all-validators'])) {
+        return '[]';
+    }
+    $liste = array();
+    if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
+        foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
+            $liste[] = array(
+                "label" => fullname($user),
+                "value" => $id,
+            );
+        }
+    }
+    return json_encode($liste);
+}
+
 function wizard_list_clef() {
     global $SESSION;
     $list = array();
@@ -361,7 +424,9 @@ class core_wizard {
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
+        add_to_log($course->id, 'crswizard', 'create', 'view.php?id='.$course->id, 'previous (ID '.$course->id.')');
         $this->course = $course;
+
         // on supprime les enrols par défaut
         $this->delete_default_enrol_course($course->id);
         // save custom fields data
@@ -539,7 +604,7 @@ class core_wizard {
 
 class my_elements_config {
     public $categorie_cours = array(
-        'Période', 'Etablissement', 'Composante', 'Niveau'
+        'Période', 'Etablissement', 'Composante : ', 'Type de diplôme : '
     );
     public $role_teachers = array(
         'editingteacher' => 'editingteacher',

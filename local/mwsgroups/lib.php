@@ -10,6 +10,8 @@
 
 /* @var $DB moodle_database */
 
+define('MWS_SEARCH_MAXROWS', 100);
+
 /**
  * emulates wsgroups "search" action from Moodle data
  * @param string $token to search in user and cohort tables
@@ -20,7 +22,11 @@
  * @return array('users' => $users, 'groups' => $groups)
  */
 function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', $filtergroupcat='') {
-    $users  = mws_search_users($token, $usermaxrows, $filterstudent);
+    $search_u = new mws_search_users();
+    $search_u->maxrows = $usermaxrows;
+    $search_u->filterstudent = $filterstudent;
+    $users  = $search_u->search($token);
+
     if ($filtergroupcat == '') {
         $groups = mws_search_groups($token, $groupmaxrows);
     } else {
@@ -29,43 +35,89 @@ function mws_search($token, $usermaxrows, $groupmaxrows, $filterstudent='both', 
     return array('users' => $users, 'groups' => $groups);
 }
 
-
 /**
  * search users according to filters.
  * ** MySQL ONLY **
- * @global type $DB
- * @param string $token to search in user table
- * @param int $maxrows (default 10)
- * @param string $filterstudent = 'no' | 'only' | 'both'
- * @return array
  */
-function mws_search_users($token, $maxrows, $filterstudent) {
-    global $DB;
-    $ptoken = $DB->sql_like_escape($token) . '%';
+class mws_search_users {
+    /** @var int */
+    public $maxrows = MWS_SEARCH_MAXROWS;
 
-    $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
-        . "( username = ?  OR  firstname LIKE ? OR lastname LIKE ? "
-        . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )" ;
-    if ($filterstudent == 'no') {
-        $sql .= " AND idnumber = '' ";
+    /** @var string 'no' (no students) | 'only' | 'both' (default) */
+    public $filterstudent = 'both';
+
+    /** @var boolean */
+    public $supann = true;
+
+    /** @var array */
+    public $exclude = array();
+
+    private $exclude_map = array();
+
+    /**
+     * Checks that the parameters are valid, and ints some helper properties.
+     */
+    private function init() {
+        if (!is_array($this->exclude) || is_string($this->filterstudent)) {
+            throw new Exception('Invalid arg type for mws_search_users');
+        }
+
+        $this->maxrows = (int) $this->maxrows;
+        if (!$this->maxrows || $this->maxrows > MWS_SEARCH_MAXROWS) {
+            $this->maxrows = MWS_SEARCH_MAXROWS;
+        }
+
+        $this->exclude_map = array();
+        foreach ($this->exclude as $name) {
+            $this->exclude_map[$name] = 1;
+        }
     }
-    if ($filterstudent == 'only') {
-        $sql .= " AND idnumber != '' ";
-    }
-    $sql .= "ORDER BY lastname ASC, firstname ASC";
-    $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $maxrows);
-    $users = array();
-    foreach ($records as $record) {
-        $sql = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
+
+    /**
+     * search users according to filters.
+     * ** MySQL ONLY **
+     * @global moodle_database $DB
+     * @param string $token to search in user table
+     * @return array
+     */
+    function search($token) {
+        global $DB;
+        $this->init();
+        $ptoken = $DB->sql_like_escape($token) . '%';
+
+        $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
+            . "( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
+            . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )" ;
+        if ($this->filterstudent == 'no') {
+            $sql .= " AND idnumber = '' ";
+        } else if ($this->filterstudent == 'only') {
+            $sql .= " AND idnumber != '' ";
+        }
+        $sql .= "ORDER BY lastname ASC, firstname ASC";
+        $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
+        $users = array();
+        $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
              . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
-        $res = $DB->get_records_sql_menu($sql, array($record->id));
-        $users[] = array(
-            'uid' => $record->username,
-            'displayName' => $record->firstname .' '. $record->lastname,
-            'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
-        );
+        foreach ($records as $record) {
+            if (isset($this->exclude_map[$record->username])) {
+                continue;
+            }
+            if ($this->supann) {
+                $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
+                $users[] = array(
+                    'uid' => $record->username,
+                    'displayName' => $record->firstname .' '. $record->lastname,
+                    'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
+                );
+            } else {
+                $users[] = array(
+                    'uid' => $record->username,
+                    'displayName' => $record->firstname .' '. $record->lastname,
+                );
+            }
+        }
+        return $users;
     }
-    return $users;
 }
 
 /**

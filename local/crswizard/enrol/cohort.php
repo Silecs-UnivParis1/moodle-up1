@@ -64,7 +64,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#group-select').autocompleteGroup({
-        urlGroups: '<?php echo new moodle_url('/local/mwsgroups/service-search.php'); ?>',
+        urlGroups: '<?php echo new moodle_url('/local/mwsgroups/service-groups.php'); ?>',
         urlUserToGroups: '<?php echo new moodle_url('/local/mwsgroups/service-userGroups.php'); ?>',
         minLength: 4,
         wsParams: { maxRows: 10 },
