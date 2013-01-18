@@ -81,6 +81,8 @@ switch ($stepin) {
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
             $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rofform.js'));
+
             $editform = new course_wizard_step2_rof_form(NULL, array('editoroptions' => $editoroptions));
         }
 

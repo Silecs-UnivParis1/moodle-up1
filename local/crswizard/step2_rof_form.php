@@ -47,15 +47,13 @@ class course_wizard_step2_rof_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 
-        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50" readonly="readonly"');
         //$mform->addHelpButton('fullname', 'fullnamecourse');
-        $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');
         $mform->setType('fullname', PARAM_MULTILANG);
 
-        $mform->addElement('text', 'shortname', 'Le nom court doit être caché', 'maxlength="100" size="20"');
+        $mform->addElement('text', 'complement', 'Complément', 'maxlength="100" size="20"');
         //$mform->addHelpButton('shortname', 'shortnamecourse');
-        $mform->addRule('shortname', get_string('missingshortname'), 'required', null, 'client');
-        $mform->setType('shortname', PARAM_MULTILANG);
+        $mform->setType('complement', PARAM_MULTILANG);
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');
@@ -153,7 +151,7 @@ class course_wizard_step2_rof_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         if (empty($errors)) {
-            $this->validation_shortname($data['shortname'], $errors);
+            //$this->validation_shortname($data['shortname'], $errors);
             $this->validation_category($data['category'], $errors);
         }
         return $errors;
