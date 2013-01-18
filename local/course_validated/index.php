@@ -5,7 +5,7 @@ require_once($CFG->libdir.'/adminlib.php');
 admin_externalpage_setup('coursestovalidate');
 
 /**
- * @todo delete/show/hide/validate : redirection + GET->POST
+ * @todo delete/show/hide/validate : GET->POST
  * @todo manage capabilities
  */
 
@@ -23,11 +23,12 @@ $validate = optional_param('validate', 0, PARAM_INT);
 // Hide or show a course
 if (!empty($hide) or !empty($show)) {
    show_or_hide($show, $hide);
-   moodle_redirect();
+   redirect(new moodle_url('/local/course_validated/index.php'));
 }
 
 if (!empty($validate)) {
    validate_course($validate);
+   redirect(new moodle_url('/local/course_validated/index.php'));
 }
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
