@@ -1,6 +1,5 @@
 <?php
 require_once('../../config.php');
-require_once('libcoursevalidated.php');
 require_once('locallib.php');
 
 require_once($CFG->libdir.'/adminlib.php');
@@ -20,6 +19,7 @@ $validate = optional_param('validate', 0, PARAM_INT);
 // Hide or show a course
 if (!empty($hide) or !empty($show)) {
    show_or_hide($show, $hide);
+   moodle_redirect();
 }
 
 if (!empty($validate)) {
