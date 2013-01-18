@@ -16,16 +16,36 @@ $string['crswizard:supervalidator'] = 'Validate ANY course created with the wiza
 $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the wizard, local context';
 
 $string['anotherneed'] = 'Un autre besoin';
+$string['blocHelloS1'] = 'Hello';
 $string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
-$string['bockhelpE3'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
+$string['bockhelpE3'] = '<p>Vous avez défini à l\'étape précédente le rattachement principal de votre espace '
+    . 'de cours.<br/>Si ce dernier s\'adresse aux étudiants d\'une autre composante et/ou inscrits '
+    . 'à un autre niveau de diplôme, il vous est possible de le spécifier ci-dessous.</p>';
 $string['bockhelpE3validator'] = 'Texte d\'aide et de conseil concernant la désignation d\'un approbateur.';
-$string['bockhelpE4'] = 'Texte d\'aide et de conseil sur les rôles "Enseignant" et "Enseignant non éditeur".';
-$string['bockhelpE4s'] = 'Texte d\'aide et de conseil sur les rôles "Etudiants" et "Visiteur".';
+$string['bockhelpE4'] = '<p>Cette étape vous permet d\'attribuer à des enseignants des droits de '
+    . 'contribution sur cet espace de cours. Il vous sera possible d\'inscrire les groupes d\'étudiants à '
+    . 'l\'étape suivante.</p><ol><li>Sélectionnez en premier lieu le rôle à attribuer à l’utilisateur :'
+    . '<ul><li>« Enseignant » : ajout d\'activités et de ressources, notation des devoirs ;</li>'
+    . '<li>« Enseignant non éditeur » : consultation des ressources, notation des devoirs.</li></ul></li>'
+    . '<li>Recherchez ensuite cet utilisateur dans l\'annuaire de l\'université, en saisissant, par exemple, '
+    . 'son nom ou son identifiant Paris 1 ou le couple Prénom Nom</li>'
+    . '<li>Cliquez sur le symbole « + » pour ajouter cet utilisateur comme contributeur de cet espace.</li></ol></p>'
+    . '<p>Notez qu\'il vous est par défaut attribué le rôle « Enseignant ». Si vous n\'êtes pas destiné à '
+    . 'être contributeur de cet espace, veillez à supprimer votre nom de la liste des utilisateurs sélectionnés (symbole X).</p>';
+$string['bockhelpE5'] = '<p>Cette étape vous permet de sélectionner les groupes d\'utilisateurs qui auront le '
+    . 'droit d\'accéder à cet espace de cours. Si vous ne trouvez pas le groupe d\'utilisateurs '
+    . 'recherché, notez que vous avez la possibilité de définir une clé d\'inscription à l\'étape suivante.</p>'
+    . '<ol><li>Sélectionnez en premier lieu le rôle à attribuer au(x) groupe(s) d\'utilisateurs :'
+    . '<ul><li>« Etudiant » : consultation des ressources, participation aux activités ;</li>'
+    . '<li>« Visiteur anonyme » : consultation des ressources uniquement.</li></ul></li>'
+    . '<li>Recherchez ensuite le groupe d\'utilisateurs dans l\'annuaire de l\'université, en saisissant, '
+    . 'par exemple, son intitulé ou une partie de son intitulé ou le nom d\'un étudiant appartenant à ce groupe.</li>'
+    . '<li>Cliquez sur le symbole « + » pour inscrire ce groupe d\'utilisateurs à cet espace.</li></ol>';
 $string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
-$string['blocktitleE4s'] = 'Étudiants : inscriptions par cohortes';
+$string['blocktitleE5'] = 'Étudiants : inscriptions par cohortes';
 $string['categoryblock'] = 'Category';
-$string['categoryblockE3'] = 'Rattachement principal de l\'espace à l\'offre de formation';
-$string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace à l\'offre de formation';
+$string['categoryblockE3'] = 'Rattachement principal de l\'espace';
+$string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace (optionnel)';
 $string['categoryblockE3s2'] = 'xxx';
 $string['categoryerrormsg1'] = 'Vous devez sélectionner un Niveau.';
 $string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
@@ -37,6 +57,11 @@ $string['confirmationtitle'] = 'Confirmation';
 $string['confirmationblock'] = 'Your course ...';
 $string['coursedefinition'] = 'Step 2 - Course definition';
 $string['coursedescription'] = 'Step 3 - Course description';
+$string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en haut de chacune des pages du cours et sur la '
+    . 'liste des cours.<br/>Le nom abrégé de l\'espace est affiché dans le menu de navigation (en haut à gauche de '
+    . 'l\'écran), dans le fil d\'Ariane et dans l\'objet de certains courriels. Le texte de présentation '
+    . 'est en accès public : il est affiché sur la fiche signalétique de l\'espace accessible à partir '
+    . 'de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
 $string['courserequestdate'] = 'Course request date';
 $string['coursesettingsblock'] = 'Course settings';
 $string['coursesettingshelp'] = 'Texte d’aide et de conseil. Suite du texte d’aide et de conseil. Suite du texte d’aide et de conseil.';

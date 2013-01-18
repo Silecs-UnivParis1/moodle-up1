@@ -14,11 +14,9 @@ class course_wizard_step1_form {
         $url = '/local/crswizard/index.php';
 
         ?>
-<p style="margin:20px;">
-    Bienvenue dans l'assistant d'ouverture l'espace de cours.
-    Suite du texte d'aide et de conseil. Suite du texte d'aide et de conseil. Suite du texte d'aide et de conseil.
-    Suite du texte d'aide et de conseil. Suite du texte d'aide et de conseil. Suite du texte d'aide et de conseil.
-</p>
+<div style="margin:20px;">
+    <?php echo get_string('blocHelloS1', 'local_crswizard');?>
+</div>
 <div align="center" style="margin:50px;">
     <div style="margin:5px;">
         <?php
