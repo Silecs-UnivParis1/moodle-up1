@@ -58,7 +58,7 @@ class mws_search_users {
      * Checks that the parameters are valid, and ints some helper properties.
      */
     private function init() {
-        if (!is_array($this->exclude) || is_string($this->filterstudent)) {
+        if (!is_array($this->exclude) || !is_string($this->filterstudent)) {
             throw new Exception('Invalid arg type for mws_search_users');
         }
 
