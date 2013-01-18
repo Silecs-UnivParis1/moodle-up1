@@ -424,7 +424,9 @@ class core_wizard {
         // créer cours
         $mydata = $this->prepare_course_to_validate();
         $course = create_course($mydata);
+        add_to_log($course->id, 'crswizard', 'create', 'view.php?id='.$course->id, 'previous (ID '.$course->id.')');
         $this->course = $course;
+
         // on supprime les enrols par défaut
         $this->delete_default_enrol_course($course->id);
         // save custom fields data
