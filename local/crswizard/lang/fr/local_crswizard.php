@@ -52,7 +52,7 @@ $string['finish'] = 'Terminer';
 $string['fullnamecourse'] = 'Nom complet de l\'espace : ';
 $string['generalinfoblock'] = 'Informations générales de l\'espace de cours';
 $string['guest'] = 'Visiteur';
-$string['guestkey'] = 'Clé d\'inscription pour le rôle "visiteurs"';
+$string['guestkey'] = 'Clé d\'inscription pour le rôle "visiteur anonyme"';
 $string['managecourseblock'] = 'Gestion de l\'espace de cours';
 $string['messagekeyblock1'] = 'Si vous n\'avez trouvé aucun groupe d\'utilisateurs '
 			. 'étudiants correspondant à la permission d\'acces que vous souhaitez '
@@ -60,7 +60,7 @@ $string['messagekeyblock1'] = 'Si vous n\'avez trouvé aucun groupe d\'utilisate
 			. 'à vos étudiants un code (appelé "clé d\'inscription") leur permettant de '
 			. 's\'inscrire aux-mêmes à l\'espace de cours lors de leur premier accès';
 $string['messagekeyblock2'] = '<b>Attention : </b>Il faut renseigner le champ "<b>clé d\'inscription'
-			. '</b>" pour que la clé soit crée.';
+			. '</b>" pour que la clé soit créée.';
 $string['nextstage'] = 'Étape suivante';
 $string['noeditingteacher'] = 'Enseignant non éditeur';
 $string['noticeconfirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
@@ -75,7 +75,7 @@ $string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
 $string['summaryof'] = 'Récapitulatif de la demande';
 $string['student'] = 'Étudiant';
 $string['stepkey'] = 'Étape 6 - Clé d\'inscription';
-$string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiants"';
+$string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiant"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
