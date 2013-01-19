@@ -56,7 +56,6 @@ $string['blocktitleE5'] = 'Étudiants : inscriptions par cohortes';
 $string['categoryblock'] = 'Category';
 $string['categoryblockE3'] = 'Rattachement principal de l\'espace';
 $string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace (optionnel)';
-$string['categoryblockE3s2'] = 'xxx';
 $string['categoryerrormsg1'] = 'Vous devez sélectionner un Niveau.';
 $string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
 $string['cohort'] = 'Cohort';
@@ -111,12 +110,14 @@ $string['teachername'] = 'Teacher name';
 $string['teachers'] = 'Enseignants';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
 $string['up1datefermeture'] = 'Date de fermeture aux étudiants : ';
-$string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
-$string['up1mention'] = 'Mention(s) : ';
-$string['up1parcours'] = 'Parcours(s) : ';
-$string['up1specialite'] = 'Spécialité(s) : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login';
 $string['username'] = 'Username';
 $string['validatorname'] = 'Nom de l\'approbateur';
 $string['wizardcourse'] = 'Course Wizard';
+
+/** old **/
+$string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
+$string['up1mention'] = 'Mention(s) : ';
+$string['up1parcours'] = 'Parcours(s) : ';
+$string['up1specialite'] = 'Spécialité(s) : ';

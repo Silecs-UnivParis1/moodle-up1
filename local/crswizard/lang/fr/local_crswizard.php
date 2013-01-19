@@ -65,7 +65,6 @@ $string['blocktitleE5'] = 'Étudiants : inscriptions par cohorte(s)';
 $string['categoryblock'] = 'Catégorie (rattachement principal de l\'espace de cours)';
 $string['categoryblockE3'] = 'Rattachement principal de l\'espace';
 $string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace (optionnel)';
-$string['categoryblockE3s2'] = 'xxx';
 $string['categoryerrormsg1'] = 'Le niveau sélectionné est invalide.';
 $string['categoryerrormsg2'] = 'Aucun niveau n\'a été sélectionné, alors que le champ est requis.';
 $string['cohort'] = 'Cohorte';
@@ -123,13 +122,15 @@ $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
 $string['up1datefermeture'] = 'Date de fermeture : ';
-$string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
-$string['up1mention'] = 'Mention(s) : ';
-$string['up1parcours'] = 'Parcours(s) : ';
-$string['up1specialite'] = 'Spécialité(s) : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login du demandeur : ';
 $string['username'] = 'Nom du demandeur : ';
 $string['teachers'] = 'Enseignants';
 $string['validatorname'] = 'Nom de l\'approbateur';
 $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
+
+/** old **/
+$string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
+$string['up1mention'] = 'Mention(s) : ';
+$string['up1parcours'] = 'Parcours(s) : ';
+$string['up1specialite'] = 'Spécialité(s) : ';
