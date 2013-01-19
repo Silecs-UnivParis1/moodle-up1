@@ -500,6 +500,8 @@ class core_wizard {
      */
     public function prepare_course_to_validate() {
         $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
+        $mydata->summaryformat = $this->formdata['form_step2']['summary_editor']['format'];
         $tabcategories = get_list_category($this->formdata['form_step2']['category']);
         //$mydata->startdate = $this->formdata['form_step2']['startdate'];
 
