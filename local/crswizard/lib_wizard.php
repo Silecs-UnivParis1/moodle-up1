@@ -523,6 +523,8 @@ class core_wizard {
         $mydata->profile_field_up1datevalid = 0;
         $mydata->profile_field_up1datedemande = time();
         $mydata->profile_field_up1demandeurid = $this->user->id;
+        // up1approbateurpropid à 0 si cas 3. @todo cas 2
+        $mydata->profile_field_up1approbateurpropid = '';
         //$mydata->profile_field_up1datefermeture = $this->formdata['form_step2']['up1datefermeture'];
 
         return $mydata;
