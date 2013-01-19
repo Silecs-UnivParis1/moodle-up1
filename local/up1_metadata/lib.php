@@ -11,8 +11,9 @@
  * @global type $DB
  * @param int $courseid
  * @param string $field UP1 metadata text, ex. complement
+ * @param bool $error : if set, throw an exception if $field isn't found
  */
-function up1_meta_get_text($courseid, $field) {
+function up1_meta_get_text($courseid, $field, $error=false) {
     global $DB;
 
     $prefix = 'up1';
@@ -22,7 +23,15 @@ function up1_meta_get_text($courseid, $field) {
     $sql = "SELECT data FROM {custom_info_field} cf "
          . "JOIN {custom_info_data} cd ON (cf.id = cd.fieldid) "
          . "WHERE cf.objectname='course' AND cd.objectname='course' AND cf.shortname=? AND cd.objectid=?";
-    return $DB->get_field_sql($sql, array($field, $courseid), MUST_EXIST);
+    $res = $DB->get_field_sql($sql, array($field, $courseid));
+    if ( $error && ! $res ) {
+        throw new coding_exception('Erreur ! champ "' . $field . '" absent');
+        return '';
+    }
+    if ( ! $res ) {
+        return '';
+    }
+    return $res;
 }
 
 /**
