@@ -261,9 +261,10 @@ function rof_view_record($rofid) {
 
 function rof_get_metadata($rofobject) {
     global $DB;
-    $res = array('identification' => array(),
-                 'indexation' => array(),
-                 'diplome' => array(),
+    $res = array('Identification' => array(),
+                 'Indexation' => array(),
+                 'Diplome' => array(),
+                 'Cycle de vie - création' => array()
         );
     if (is_array($rofobject) ) {
         $path = $rofobject;
@@ -275,32 +276,34 @@ function rof_get_metadata($rofobject) {
     $rofpath = array_keys($path);
 
     $program = $DB->get_record('rof_program', array('rofid' => $rofpath[1])); //diplome (en général)
-    $res['diplome']['diplome'] = $program->name;
-    $res['diplome']['acronyme'] = $program->acronyme;
-    $res['diplome']['mention'] = $program->mention;
-    $res['diplome']['specialite'] = $program->specialite;
+    $res['Diplome']['diplome'] = $program->name;
+    $res['Diplome']['acronyme'] = $program->acronyme;
+    $res['Diplome']['mention'] = $program->mention;
+    $res['Diplome']['specialite'] = $program->specialite;
     if ( preg_match('/^.* parcours (.*)$/', $program->name, $matches) ) {
-        $res['diplome']['parcours'] = $matches[1];
+        $res['Diplome']['parcours'] = $matches[1];
     }
-    $res['diplome']['type']    = constant_metadata('typeDiplome', $program->typedip);
-    $res['diplome']['domaine'] = constant_metadata('domaineDiplome', $program->domainedip);
-    $res['diplome']['nature']  = constant_metadata('natureDiplome', $program->naturedip);
-    $res['diplome']['cycle']   = constant_metadata('cycleDiplome', $program->cycledip);
-    $res['diplome']['rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
-    $res['diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
+    $res['Diplome']['type']    = constant_metadata('typeDiplome', $program->typedip);
+    $res['Diplome']['domaine'] = constant_metadata('domaineDiplome', $program->domainedip);
+    $res['Diplome']['nature']  = constant_metadata('natureDiplome', $program->naturedip);
+    $res['Diplome']['cycle']   = constant_metadata('cycleDiplome', $program->cycledip);
+    $res['Diplome']['rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
+    $res['Diplome']['langue']  = constant_metadata('langueDiplome', $program->languedip);
 
-    $res['indexation']['subprogram'] = $namepath[2]; //valeur de subprogram
-    $res['indexation']['semestre'] = rof_guess_semester($namepath[2]);
-    $res['indexation']['annee'] = rof_guess_year($res['indexation']['semestre'], $program->typedip);
+    $res['Indexation']['subprogram'] = $namepath[2]; //valeur de subprogram
+    $res['Indexation']['semestre'] = rof_guess_semester($namepath[2]);
+    $res['Indexation']['niveauannee'] = rof_guess_year($res['Indexation']['semestre'], $program->typedip);
 
     $elp = array_pop($rofpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
-    $res['indexation']['composition'] = $course->composition;
-    $res['identification']['nom'] = $course->name;
-    $res['identification']['rofid'] = $course->rofid;
-    $res['identification']['code'] = $course->code;
-    $res['identification']['nom-norme'] = $course->code .' - '. $course->name .' - '. $course->composition;
-    $res['identification']['abrege-norme'] = $course->code .' - '. $course->composition;
+    $res['Indexation']['composition'] = $course->composition;
+    $res['Identification']['complement'] = $course->composition;
+    $res['Identification']['nom'] = $course->name;
+    $res['Identification']['rofid'] = $course->rofid;
+    $res['Identification']['code'] = $course->code;
+    $res['Identification']['nom-norme'] = $course->code .' - '. $course->name .' - '. $course->composition;
+    $res['Identification']['abrege-norme'] = $course->code .' - '. $course->composition;
+    $res['Cycle de vie - création']['responsable'] = $course->refperson;
 
     return $res;
 }
