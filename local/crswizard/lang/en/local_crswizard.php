@@ -41,6 +41,16 @@ $string['bockhelpE5'] = '<p>Cette étape vous permet de sélectionner les groupe
     . '<li>Recherchez ensuite le groupe d\'utilisateurs dans l\'annuaire de l\'université, en saisissant, '
     . 'par exemple, son intitulé ou une partie de son intitulé ou le nom d\'un étudiant appartenant à ce groupe.</li>'
     . '<li>Cliquez sur le symbole « + » pour inscrire ce groupe d\'utilisateurs à cet espace.</li></ol>';
+$string['bockhelpE7'] = '<p>Votre demande de création d\'espace de cours est arrivée à son terme.<br/>'
+    . 'Conseil : affichez le récapitulatif de cette dernière de manière à vérifier les éléments que vous '
+    . 'avez saisis. En cas d\'erreur ou d\'omission, il vous est possible revenir en arrière en cliquant '
+    . 'sur le bouton « Etape précédente ».</p>'
+    . '<p>En cliquant sur le bouton « Terminer », vous déclencherez :<ul>'
+    . '<li>la création de cet espace, qui sera pour l\'instant masqué à vos utilisateurs, mais que vous '
+    . 'pourrez vous-même rendre visible lors de sa première utilisation,</li>'
+    . '<li>a transmission de cette demande -pour approbation- aux modérateurs de la plateforme</li>'
+    . '<li>et l’envoi d’un courriel récapitulatif de cette demande à l’adresse :';
+$string['bockhelpE7s'] = '</li></ul></p>';
 $string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
 $string['blocktitleE5'] = 'Étudiants : inscriptions par cohortes';
 $string['categoryblock'] = 'Category';
@@ -52,9 +62,8 @@ $string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
 $string['cohort'] = 'Cohort';
 $string['cohortname'] = 'Cohort name or student name';
 $string['cohorts'] = 'Cohorts';
-$string['confirmation'] = 'Confirmation';
+$string['confirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
 $string['confirmationtitle'] = 'Confirmation';
-$string['confirmationblock'] = 'Your course ...';
 $string['coursedefinition'] = 'Step 2 - Course definition';
 $string['coursedescription'] = 'Step 3 - Course description';
 $string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en haut de chacune des pages du cours et sur la '
@@ -83,7 +92,6 @@ $string['managecourseblock'] = 'Manage course';
 $string['messagekeyblock1'] = 'message';
 $string['messagekeyblock2'] = '<b>Attention : </b>';
 $string['nextstage'] = 'Next';
-$string['noticeconfirmation'] = 'Notice';
 $string['noeditingteacher'] = 'Non-editing teacher';
 $string['pluginname'] = 'Course Wizard';
 $string['previousstage'] = 'Previous';
