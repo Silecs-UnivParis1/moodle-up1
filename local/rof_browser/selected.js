@@ -94,20 +94,10 @@ jQuery(function () {
             visited[rofid] = intitule;
         }
 
-        var regtab=new RegExp("[ ,_]+", "g");
-        var tableau=path.split(regtab);
         var chemin = new String();
-        for (var i=0; i<tableau.length; i++) {
-            var c = tableau[i];
-            if (typeof visited[c] != 'undefined') {
-                chemin = chemin+' > '+visited[c];
-            }
-        }
+        chemin = createChemin(path, visited);
         chemin = chemin.substr(3);
-        /**
-		var reg=new RegExp("_", "gi");
-		path = path.replace(reg, "/");
-        **/
+
         var name = 'select_'+rofid;
         if (typeof selected[name] != 'undefined' && selected[name] == 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
@@ -124,12 +114,7 @@ jQuery(function () {
             }
 
             selected[name] = 1;
-			var elem = '<div class="item-selected" id="select_'+rofid+'">'
-				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
-				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
-				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
-				+'</div>';
-			$(rattachement).append(elem);
+			$(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
 		}
 
 	});
@@ -144,4 +129,28 @@ jQuery(function () {
 			$(this).parent('div.item-selected').remove();
 		}
 	});
+
+    function addElem(rofid, chemin, intitule, tabItem, path) {
+        var elem = '<div class="item-selected" id="select_'+rofid+'">'
+				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
+				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
+				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
+                +'<input type="hidden" name="path['+rofid+']" value="'+path+'"/>';
+				+'</div>';
+        return elem;
+    };
+
+    function createChemin(path, visited) {
+        var chemin = new String();
+        var regtab=new RegExp("[ ,_]+", "g");
+        var tableau=path.split(regtab);
+        for (var i=0; i<tableau.length; i++) {
+            var c = tableau[i];
+            if (typeof visited[c] != 'undefined') {
+                chemin = chemin+' > '+visited[c];
+            }
+        }
+        return chemin;
+    };
+
 });
