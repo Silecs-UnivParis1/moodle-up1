@@ -23,7 +23,10 @@ echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
 </div>
 <div class="block-item-selected">
 	<h3>Éléments pédagogiques sélectionnés</h3>
-	<div id="items-selected"></div>
+	<div id="items-selected">
+        <div id="items-selected1"><span>Rattachement de référence</span></div>
+        <div id="items-selected2"><span>Rattachement(s) secondaire(s)</span></div>
+    </div>
 </div>
 
 </div>

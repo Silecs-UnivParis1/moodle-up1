@@ -113,23 +113,23 @@ jQuery(function () {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
             /** rattachement de reference **/
-            var rattachement = '';
+            var rattachement = '#items-selected2';
             var tabItem = '';
             if (reference.length) {
                 tabItem = 'item[s][]';
             } else {
                 tabItem = 'item[p][]';
-                var rattachement = ' - [rattachement primaire]';
+                var rattachement = '#items-selected1';
                 reference[0] = name;
             }
 
             selected[name] = 1;
 			var elem = '<div class="item-selected" id="select_'+rofid+'">'
 				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
-				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+rattachement+'</div>'
+				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
 				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
 				+'</div>';
-			$("#items-selected").append(elem);
+			$(rattachement).append(elem);
 		}
 
 	});
