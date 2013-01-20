@@ -30,12 +30,13 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading('Tableau de bord ' . $course->shortname );
 
 // $url = "$CFG->wwwroot/local/courseboard/view.php";
-// $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
+$browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
 
 echo "<h2>Description</h2>\n";
 echo "<ul>\n";
-echo "<li>Abrégé : ". $course->shortname ."</li>\n";
-echo "<li>Code Apogée : ". ( ! empty($course->idnumber) ? $course->idnumber : '<b>NON renseigné</b>') ."</li>\n";
+echo "<li>Nom complet : ". $course->fullname ."</li>\n";
+echo "<li>Nom abrégé : ". $course->shortname ."</li>\n";
+echo "<li>No identification : ". ( ! empty($course->idnumber) ? $course->idnumber : '<b>NON renseigné</b>') ."</li>\n";
 echo "</ul>\n";
 
     // ROF data
@@ -52,7 +53,7 @@ echo "</ul>\n";
 
     if ( $rofcourse ) {
         echo "<h3>Tous les chemins : </h3>\n";
-        $allPaths = getCourseAllPaths($rofid);
+        $allPaths = getCourseAllPaths($rofcourse->rofid);
         $allPathnames = getCourseAllPathnames($allPaths);
         echo '<ol>';
         foreach ($allPathnames as $pathname) {
@@ -64,5 +65,5 @@ echo "</ul>\n";
     }
 
 
-// echo '<p><a href="' . $browserurl. '">Navigateur ROF</a></p>';
+echo '<p><a href="' . $browserurl. '">Navigateur ROF</a></p>';
 echo $OUTPUT->footer();
