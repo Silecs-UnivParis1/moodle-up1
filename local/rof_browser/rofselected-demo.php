@@ -37,7 +37,7 @@ echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
     //<![CDATA[
     jQuery(document).ready(function () {
         $('#items-selected').autocompleteRof({
-            preSelected: [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "UP1-PROG35376", "nature": "p"}]
+         //preSelected: [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "UP1-PROG35376", "nature": "p"}]
         });
     });
     //]]>
