@@ -1,25 +1,30 @@
 <?php
+/**
+ * @package    local
+ * @subpackage courseboard
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 define('NO_OUTPUT_BUFFERING', false);
 global $DB;
 require('../../config.php');
-require_once($CFG->dirroot.'/report/rofstats/locallib.php');
+require_once($CFG->dirroot.'/report/rofstats/locallib.php'); // to get ROF data
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
+require_once('locallib.php');
 
 require_login();
-// $idnumber = required_param('idnumber', PARAM_ALPHANUMEXT); //code Apogée
-$id = required_param('id', PARAM_INT);  // course id
+$crsid = required_param('id', PARAM_INT);  // course id
 
-$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $crsid), '*', MUST_EXIST);
 $context_sys = get_context_instance(CONTEXT_SYSTEM);
 require_capability('moodle/site:approvecourse', $context_sys); //** @todo trouver une meilleure capacité
 
 $PAGE->set_context($context_sys);
-$PAGE->set_url('/local/courseboard/view.php', array('id' => $id));
+$PAGE->set_url('/local/courseboard/view.php', array('id' => $crsid));
 $PAGE->set_pagelayout('course'); //** @todo nécessaire ici ?
 $PAGE->set_title($course->shortname .': '. "tableau de bord");
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading($course->fullname .' : '. "tableau de bord");
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Tableau de bord ' . $course->shortname );
@@ -33,21 +38,19 @@ echo "<li>Abrégé : ". $course->shortname ."</li>\n";
 echo "<li>Code Apogée : ". ( ! empty($course->idnumber) ? $course->idnumber : '<b>NON renseigné</b>') ."</li>\n";
 echo "</ul>\n";
 
-// custom info data
-html_custom_data($course);
-
-// ROF data
+    // ROF data
     if ( ! empty($course->idnumber) ) {
         $rofcourse = $DB->get_record('rof_course', array('code' => $course->idnumber));
     } else {
         $rofcourse = FALSE;
+        echo "<h3>Pas de ROF</h3>\n";
+        echo "<p>Aucun cours correspondant n'existe dans le ROF avec ce code <b>$course->idnumber</b>.</p>\n";
     }
 
-    if ( $rofcourse ) {
-        $rofid = $rofcourse->rofid;
-        echo "<h3>Métadonnées ROF</h3>\n";
-        echo fmt_rof_metadata(rof_get_metadata($rofid));
+    $rofdata = rof_get_metadata($rofcourse->rofid);
+    $table = table_course_vs_rof($crsid, $rofdata);
 
+    if ( $rofcourse ) {
         echo "<h3>Tous les chemins : </h3>\n";
         $allPaths = getCourseAllPaths($rofid);
         $allPathnames = getCourseAllPathnames($allPaths);
@@ -57,8 +60,7 @@ html_custom_data($course);
         }
         echo '</ol>';
     } else {
-        echo "<h3>Pas de ROF</h3>\n";
-        echo "<p>Aucun cours correspondant n'existe dans le ROF avec ce code <b>$course->idnumber</b>.</p>\n";
+
     }
 
 
