@@ -51,9 +51,10 @@ class course_wizard_step2_rof_form extends moodleform {
         //$mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->setType('fullname', PARAM_MULTILANG);
 
-        $mform->addElement('text', 'complement', 'Complément', 'maxlength="100" size="20"');
+        $mform->addElement('text', 'complement', get_string('complementlabel', 'local_crswizard'), 'maxlength="100" size="20"');
         //$mform->addHelpButton('shortname', 'shortnamecourse');
         $mform->setType('complement', PARAM_MULTILANG);
+        $mform->setDefault('complement', get_string('complementdefault', 'local_crswizard'));
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');
