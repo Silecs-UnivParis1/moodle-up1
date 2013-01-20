@@ -112,7 +112,6 @@ jQuery(function () {
                 var rattachement = '#items-selected1';
                 reference[0] = name;
             }
-
             selected[name] = 1;
 			$(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
 		}
@@ -152,5 +151,61 @@ jQuery(function () {
         }
         return chemin;
     };
+
+    var defaultSettings = {
+        preSelected: [] // [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "03_UP1-PROG35376", "nature": "p"}, ]
+    };
+
+     $.fn.autocompleteRof = function (options) {
+        var settings = $.extend(true, {}, defaultSettings, options || {});
+        return this.each(function() {
+            var $elem = $(this);
+            var acg = new autocompleteRof(settings, $elem);
+            if (settings.preSelected.length) {
+                acg.fillSelection(settings.preSelected);
+            }
+        });
+     }
+
+    function autocompleteRof(settings, elem) {
+        this.settings = settings;
+        this.elem = elem;
+        return this;
+    }
+
+    autocompleteRof.prototype =
+    {
+        fillSelection: function(items) {
+            var $this = this;
+            for (var i=0; i < items.length; i++) {
+                var my = items[i];
+                buildSelectedBlock(items[i]);
+            }
+        }
+    }
+
+    function buildSelectedBlock(item) {
+
+        var rofid = item.value;
+		var path =  item.path;
+		var intitule = item.label;
+
+        var chemin = '';
+        var name = 'select_'+rofid;
+        selected[name] = 1;
+
+        var rattachement = '#items-selected2';
+        var tabItem = '';
+
+        if (item.nature=='s') {
+            tabItem = 'item[s][]';
+        } else {
+            tabItem = 'item[p][]';
+            var rattachement = '#items-selected1';
+            reference[0] = name;
+        }
+        selected[name] = 1;
+        $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
+    }
 
 });

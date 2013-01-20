@@ -9,12 +9,13 @@ $PAGE->set_url('/local/rof_browser/rofselected-demo.php');
 $PAGE->set_title('Démo sélection d\'élément(s) pédagogique(s)');
 $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
 
-$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
-$PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
+$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+$PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'), true);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
 ?>
+
 <div>
 <div class="by-widget">
 	<h3>Rechercher un élément pédagogique</h3>
@@ -25,10 +26,22 @@ echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
 	<h3>Éléments pédagogiques sélectionnés</h3>
 	<div id="items-selected">
         <div id="items-selected1"><span>Rattachement de référence</span></div>
-        <div id="items-selected2"><span>Rattachement(s) secondaire(s)</span></div>
+        <div id="items-selected2"><span>Rattachement(s) secondaire(s)</span>
+        </div>
     </div>
 </div>
 
 </div>
+
+<script type="text/javascript">
+    //<![CDATA[
+    jQuery(document).ready(function () {
+        $('#items-selected').autocompleteRof({
+            preSelected: [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "UP1-PROG35376", "nature": "p"}]
+        });
+    });
+    //]]>
+</script>
+
 <?php
 echo $OUTPUT->footer();
