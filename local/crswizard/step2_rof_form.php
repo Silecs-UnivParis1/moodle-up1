@@ -41,7 +41,10 @@ class course_wizard_step2_rof_form extends moodleform {
             . '</div>'
             . '<div class="block-item-selected">'
             . '<h3>Éléments pédagogiques sélectionnés</h3>'
-            . '<div id="items-selected"></div>'
+            . '<div id="items-selected">'
+            . '<div id="items-selected1"><span>' . get_string('rofselected1', 'local_crswizard') . '</span></div>'
+            . '<div id="items-selected2"><span>' . get_string('rofselected2', 'local_crswizard') . '</span></div>'
+            . '</div>'
             . '</div>';
         $mform->addElement('html', $rofseleted);
 
