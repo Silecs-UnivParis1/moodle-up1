@@ -112,6 +112,36 @@ class custominfo_data extends custominfo_data_abstract {
     }
 
     /**
+     * Returns a structured list (array(array(array))) of categories, fields shortnames, names and values
+     * @global object $DB
+     * @param integer $objectid
+     * @param integer $allfields : if set, all fields are returned; otherwise only not empty ones
+     */
+    public function get_structured_fields_short($objectid, $allfields=false) {
+        global $DB;
+
+        $res = array();
+        $categories = $this->getCategories();
+        if ($categories) {
+            foreach ($categories as $category) {
+                $res[$category->name] = array();
+                $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
+                if ($fields) {
+                    foreach ($fields as $field) {
+                        $formfield = custominfo_field_factory($this->objectname, $field->datatype, $field->id, $objectid);
+                        if ($formfield->is_visible() && ($allfields || ! $formfield->is_empty()) )  {
+                            $res[$category->name][$formfield->field->shortname]['name'] = $formfield->field->name;
+                            $res[$category->name][$formfield->field->shortname]['data'] = $formfield->display_data();
+                        }
+                    }
+                }
+            }
+        }
+        return $res;
+    }
+
+
+    /**
      * Returns an object with the custom fields set for the given object
      * @param  integer  $objectid
      * @return  object
