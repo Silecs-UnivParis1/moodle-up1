@@ -79,8 +79,6 @@ function get_list_category($idcategory) {
 function send_course_request($message, $messagehtml) {
     global $DB, $USER;
 
-    $result = $DB->get_records('user', array('username' => 'admin')); //** @todo on envoie à qui ? plusieurs ?
-    //** @todo maybe replace all this by a call to course/lib.php course_request::notify +4394
     $eventdata = new object();
     $eventdata->component = 'moodle';
     $eventdata->name = 'courserequested';
@@ -91,13 +89,20 @@ function send_course_request($message, $messagehtml) {
     $eventdata->fullmessagehtml = '';   //$messagehtml;
     $eventdata->smallmessage = $message; // USED BY DEFAULT !
     // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
-    foreach ($result as $userto) {
+    /** envoi aux supervalidateurs
+    $systemcontext = get_context_instance(CONTEXT_SYSTEM);
+    $supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator');
+    foreach ($supervalidators as $userto) {
         $eventdata->userto = $userto;
         $res = message_send($eventdata);
         if (!$res) {
-            /** @todo Handle messaging errors */
+            // @todo Handle messaging errors
         }
     }
+    **/
+    // copie au demandeur
+    $eventdata->userto = $USER;
+    $res = message_send($eventdata);
 }
 
 function myenrol_cohort($courseid, $tabGroup) {
