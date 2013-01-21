@@ -23,12 +23,11 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform = $this->_form;
 
-        $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
-
-        $mform->addElement('html', html_writer::tag('p', get_string('confirmationblock', 'local_crswizard') . ' :'));
-        $mform->addElement('html', html_writer::tag('p', '[Prénom Nom du modérateur et/ou membres du service TICE]'));
-        $mform->addElement('textarea', 'remarques', get_string('noticeconfirmation', 'local_crswizard'), array('rows' => 15, 'cols' => 80));
-        $mform->setType('content', PARAM_RAW);
+        $mgConf1 = get_string('bockhelpE7', 'local_crswizard');
+        $mgConf2 = get_string('bockhelpE7s', 'local_crswizard');
+        $identifValidateurs = '[Prénom Nom du modérateur et/ou membres du service TICE]';
+        $mform->addElement('html', html_writer::tag('div',
+            $mgConf1 . $identifValidateurs . $mgConf2, array('class' => 'fitem', 'id' => 'bockhelpE7')));
 
         $mform->addElement('header', 'resume', get_string('summaryof', 'local_crswizard'));
         $user_name = fullname($USER);
@@ -99,7 +98,7 @@ class course_wizard_step_confirm extends moodleform {
             foreach ($clefs as $type => $clef) {
                 $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                 $c = $clef['code'];
-                $mform->addElement('text', 'valeur' . $c, 'valeur cachée');
+                $mform->addElement('text', 'valeur' . $c, $clef['password']);
                 if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
                     $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
                     $mform->setConstant('enrolstartdate' . $c, $clef['enrolstartdate']);
@@ -125,6 +124,9 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 //--------------------------------------------------------------------------------
+        $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
+        $mform->addElement('textarea', 'remarques', null, array('rows' => 15, 'cols' => 80));
+        $mform->setType('content', PARAM_RAW);
 
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);

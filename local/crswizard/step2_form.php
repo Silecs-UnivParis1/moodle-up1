@@ -37,6 +37,9 @@ class course_wizard_step2_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 
+        $coursegeneralhelp = get_string('coursegeneralhelp', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $coursegeneralhelp, array('class' => 'fitem')));
+
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
         //$mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->addRule('fullname', get_string('missingfullname'), 'required', null, 'client');

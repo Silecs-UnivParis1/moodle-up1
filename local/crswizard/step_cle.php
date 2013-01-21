@@ -36,7 +36,7 @@ class course_wizard_step_cle extends moodleform {
 
             $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'), array('optional' => true));
             $mform->addHelpButton('enrolstartdate' . $c, 'enrolstartdate', 'enrol_self');
-            $mform->setDefault('enrolstartdate' . $c, time() + 3600 * 24);
+            $mform->setDefault('enrolstartdate' . $c, 0);
 
             $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'), array('optional' => true));
             $mform->addHelpButton('enrolenddate' . $c, 'enrolenddate', 'enrol_self');

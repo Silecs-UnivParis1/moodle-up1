@@ -140,3 +140,7 @@ div.item-select > div:first-child {
 select.selectmenu {
     width:20em;
 }
+
+div#items-selected1 span, div#items-selected2 span{
+    font-size: 18px;
+}

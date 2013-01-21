@@ -41,7 +41,10 @@ class course_wizard_step2_rof_form extends moodleform {
             . '</div>'
             . '<div class="block-item-selected">'
             . '<h3>Éléments pédagogiques sélectionnés</h3>'
-            . '<div id="items-selected"></div>'
+            . '<div id="items-selected">'
+            . '<div id="items-selected1"><span>' . get_string('rofselected1', 'local_crswizard') . '</span></div>'
+            . '<div id="items-selected2"><span>' . get_string('rofselected2', 'local_crswizard') . '</span></div>'
+            . '</div>'
             . '</div>';
         $mform->addElement('html', $rofseleted);
 
@@ -51,9 +54,10 @@ class course_wizard_step2_rof_form extends moodleform {
         //$mform->addHelpButton('fullname', 'fullnamecourse');
         $mform->setType('fullname', PARAM_MULTILANG);
 
-        $mform->addElement('text', 'complement', 'Complément', 'maxlength="100" size="20"');
+        $mform->addElement('text', 'complement', get_string('complementlabel', 'local_crswizard'), 'maxlength="254" size="50"');
         //$mform->addHelpButton('shortname', 'shortnamecourse');
         $mform->setType('complement', PARAM_MULTILANG);
+        $mform->setDefault('complement', get_string('complementdefault', 'local_crswizard'));
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');

@@ -63,16 +63,6 @@ class course_wizard_step3_form extends moodleform {
             $mform->setType($field, PARAM_TEXT);
         }
 
-        $mform->addElement('header','identification', get_string('categoryblockE3s2', 'local_crswizard'));
-        // champs de la catégorie "Identification"
-        $custominfo_fields = array('up1domaine', 'up1mention', 'up1parcours', 'up1specialite');
-        foreach ($custominfo_fields as $field) {
-            $label = $field;
-            $field = 'profile_field_' . $field;
-            $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_TEXT);
-        }
-
         //*********************************************
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
