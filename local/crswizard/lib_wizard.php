@@ -88,7 +88,7 @@ function send_course_request($message, $messagehtml) {
     $eventdata->subject = '[CourseWizardRequest]'; //** @todo get_string()
     $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
     $eventdata->fullmessage = $message;
-    $eventdata->fullmessagehtml = $messagehtml;
+    $eventdata->fullmessagehtml = '';   //$messagehtml;
     $eventdata->smallmessage = $message; // USED BY DEFAULT !
     // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
     foreach ($result as $userto) {
@@ -472,6 +472,97 @@ function wizard_list_clef() {
     return $list;
 }
 
+function get_recapitulatif_demande() {
+    global $SESSION, $USER, $DB;
+    $myconfig = new my_elements_config();
+
+    $mg = '';
+    $mg .= "\n" . '---------------------' . "\n";
+    $mg .= 'Récapitulatif de la demande';
+    $mg .= "\n" . '---------------------' . "\n";
+    $mg .= get_string('username', 'local_crswizard') . fullname($USER) . "\n";
+    $mg .= get_string('userlogin', 'local_crswizard') . $USER->username . "\n";
+    $mg .= get_string('courserequestdate', 'local_crswizard') . date('d-m-Y') . "\n";
+
+    // categorie
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
+
+    $idcat = $SESSION->wizard['form_step2']['category'];
+    $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
+    $mg .= get_string('fullnamecourse', 'local_crswizard') . $SESSION->wizard['form_step2']['fullname'] . "\n";
+    $mg .= get_string('shortnamecourse', 'local_crswizard') . $SESSION->wizard['form_step2']['shortname'] . "\n";
+    $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['startdate']) . "\n";
+    $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['up1datefermeture']) . "\n";
+
+    // liste des enseigants :
+    $mg .= get_string('teachers', 'local_crswizard'). "\n";
+    if (isset($SESSION->wizard['form_step4']['all-users']) && is_array($SESSION->wizard['form_step4']['all-users'])) {
+            $allusers = $SESSION->wizard['form_step4']['all-users'];
+            $labels = $myconfig->role_teachers;
+            foreach ($allusers as $role => $users) {
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
+                }
+                $first = true;
+                foreach ($users as $id => $user) {
+                    $mg .= '    ' . ($first ? $label . ' : ': '') . fullname($user) . "\n";
+                    $first = false;
+                }
+            }
+        } else {
+            $mg .= '    Aucun' . "\n";
+        }
+
+        // liste des groupes
+        $mg .= get_string('cohorts', 'local_crswizard'). "\n";
+        if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
+            $groupsbyrole = $SESSION->wizard['form_step5']['all-cohorts'];
+            $labels = $myconfig->role_cohort;
+            foreach ($groupsbyrole as $role => $groups) {
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
+                }
+                $first = true;
+                foreach ($groups as $id => $group) {
+                    $mg .= '    ' . ($first ? $label . ' : ' : '') . $group->name . " ({$group->size})" . "\n";
+                    $first = false;
+                }
+            }
+        } else {
+            $mg .= '    Aucun' . "\n";
+        }
+
+        // clefs
+        $mg .= get_string('enrolkey', 'local_crswizard') . "\n";
+        $clefs = wizard_list_clef();
+        if (count($clefs)) {
+            foreach ($clefs as $type => $clef) {
+                $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
+                $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
+                if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
+                    $mg .= date('d-m-Y', $clef['enrolstartdate']);
+                } else {
+                    $mg .= 'incative';
+                }
+                $mg .= "\n";
+                $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
+                if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
+                    $mg .= date('d-m-Y', $clef['enrolenddate']);
+                } else {
+                    $mg .= 'incative';
+                }
+                $mg .= "\n";
+            }
+        } else {
+            $mg .= '    Aucune' . "\n";
+        }
+    return $mg;
+}
+
 /**
  * Renvoie le nom du Course custom fields de nom abrégé $shortname
  * @param string $shortname nom abrégé du champ
@@ -541,9 +632,9 @@ class core_wizard {
                 . ' faite par ' . fullname($this->user) . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
                 . html_writer::link($urlCategory, $urlCategory)
                 . '</div>';
-        $message = 'Ce message concerne la demande de création de cours ' . $this->course->fullname
-                . ' ( ' . $this->course->shortname . ' )'
-                . ' faite par ' . fullname($this->user) . '. Vous pouvez valider ou supprimer ce cours : ' . $urlCategory;
+        $message = 'Ce message concerne la demande de création de cours "' . $this->course->fullname
+                . ' ( ' . $this->course->shortname . ' )"'
+                . ' faite par ' . fullname($this->user) . '.';
         return array("text" => $message, "html" => $messagehtml);
     }
 

@@ -174,7 +174,12 @@ switch ($stepin) {
             $messages['text'] .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
                     . strip_tags($SESSION->wizard['form_step7']['remarques']);
         }
-        if (isset($errorMsg)) {
+
+        $recap = get_recapitulatif_demande();
+        $messages['text'] .= $recap;
+        $messages['html'] .= $recap;
+
+        if (isset($errorMsg) && $errorMsg!='') {
             $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
             $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }
