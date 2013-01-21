@@ -67,6 +67,6 @@ echo "</ul>\n";
     }
 echo '<p><a href="' . $browserurl. '">Navigateur ROF</a></p>';
 
-
+print_admin_log($crsid);
 
 echo $OUTPUT->footer();
