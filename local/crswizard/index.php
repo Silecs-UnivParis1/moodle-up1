@@ -74,24 +74,27 @@ switch ($stepin) {
         $editoroptions = array(
             'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
         );
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
         //$submission = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
         if ($wizardcase == 3) {
             $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
         } elseif ($wizardcase == 2) {
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
-            $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
-            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rofform.js'));
-
+            $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rofform.js'), true);
             $editform = new course_wizard_step2_rof_form(NULL, array('editoroptions' => $editoroptions));
         }
 
         $data = $editform->get_data();
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            if ($wizardcase == 2) {
+                 $SESSION->wizard['form_step2']['item'] = $_POST['item'];
+                 $SESSION->wizard['form_step2']['path'] = $_POST['path'];
+                 $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
+            }
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         } else {
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselects.js'));
         }

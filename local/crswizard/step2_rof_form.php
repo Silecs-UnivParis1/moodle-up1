@@ -35,6 +35,17 @@ class course_wizard_step2_rof_form extends moodleform {
                 )
         );
 
+        $preselected = wizard_preselected_rof();
+        $codeJ = '<script type="text/javascript">' . "\n"
+            . '//<![CDATA['."\n"
+            . 'jQuery(document).ready(function () {'
+            . '$(\'#items-selected\').autocompleteRof({'
+            . 'preSelected: '.$preselected
+            .'});'
+            . '});'
+            . '//]]>'. "\n"
+            . '</script>';
+
         // ajout du selecteur ROF
         $rofseleted = '<div class="by-widget"><h3>Rechercher un élément pédagogique</h3>'
             . '<div class="item-select"></div>'
@@ -45,7 +56,9 @@ class course_wizard_step2_rof_form extends moodleform {
             . '<div id="items-selected1"><span>' . get_string('rofselected1', 'local_crswizard') . '</span></div>'
             . '<div id="items-selected2"><span>' . get_string('rofselected2', 'local_crswizard') . '</span></div>'
             . '</div>'
-            . '</div>';
+            . '</div>'
+            . $codeJ;
+
         $mform->addElement('html', $rofseleted);
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));

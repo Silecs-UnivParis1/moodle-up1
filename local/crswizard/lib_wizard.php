@@ -299,6 +299,41 @@ function wizard_get_validators() {
     return $list;
 }
 
+/**
+ * Construit le tableau des objets pédagogiques du rof sélectionnés
+ * @return array
+ */
+function wizard_get_rof() {
+    global $DB, $SESSION;
+    if (!isset($SESSION->wizard['form_step2']['item'])) {
+        return false;
+    }
+    $list = array();
+    $formRof = array();
+    $rofPath = array();
+    $formRof = $SESSION->wizard['form_step2']['item'];
+    $rofPath = $SESSION->wizard['form_step2']['path'];
+    foreach ($formRof as $key => $rof) {
+        foreach ($rof as $r) {
+            $list[$r]['nature'] = $key;
+            if (array_key_exists($r, $rofPath)) {
+                $list[$r]['path'] = $rofPath[$r];
+            }
+            $tabSource = '';
+            if (substr($r, 0, 5) == 'UP1-P') {
+                $tabSource = 'rof_program';
+            } else {
+                $tabSource = 'rof_course';
+            }
+            $object = $DB->get_record($tabSource, array('rofid' => $r));
+            if ($object) {
+                $list[$r]['object'] = $object;
+            }
+        }
+    }
+    return $list;
+}
+
 /*
  * construit la liste des groupes sélectionnés encodée en json
  * @return string
@@ -357,6 +392,30 @@ function wizard_preselected_users() {
                     "fieldName" => "user[$role]",
                 );
             }
+        }
+    }
+    return json_encode($liste);
+}
+
+/*
+ * construit la liste des objets pédagogiques du rof sélectionnés encodée en json
+ * @return string
+ */
+function wizard_preselected_rof() {
+    global $SESSION;
+    if (!isset($SESSION->wizard['form_step2']['all-rof'])) {
+        return '[]';
+    }
+    $liste = array();
+    if (!empty($SESSION->wizard['form_step2']['all-rof'])) {
+        foreach ($SESSION->wizard['form_step2']['all-rof'] as $rofid => $rof) {
+            $object = $rof['object'];
+            $liste[] = array(
+                    "label" => $object->name,
+                    "value" => $rofid,
+                    "path" => $rof['path'],
+                    "nature" => $rof['nature'],
+                );
         }
     }
     return json_encode($liste);
