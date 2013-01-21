@@ -42,13 +42,15 @@ echo "</ul>\n";
     // ROF data
     if ( ! empty($course->idnumber) ) {
         $rofcourse = $DB->get_record('rof_course', array('code' => $course->idnumber));
+        $rofid = $rofcourse->rofid;
     } else {
         $rofcourse = FALSE;
+        $rofid = FALSE;
         echo "<h3>Pas de ROF</h3>\n";
         echo "<p>Aucun cours correspondant n'existe dans le ROF avec ce code <b>$course->idnumber</b>.</p>\n";
     }
 
-    $rofdata = rof_get_metadata($rofcourse->rofid);
+    $rofdata = rof_get_metadata($rofid);
     $table = table_course_vs_rof($crsid, $rofdata);
 
     if ( $rofcourse ) {
@@ -63,7 +65,8 @@ echo "</ul>\n";
     } else {
 
     }
-
-
 echo '<p><a href="' . $browserurl. '">Navigateur ROF</a></p>';
+
+
+
 echo $OUTPUT->footer();

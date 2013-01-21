@@ -266,6 +266,9 @@ function rof_get_metadata($rofobject) {
                  'Diplome' => array(),
                  'Cycle de vie - création' => array()
         );
+    if ($rofobject === FALSE) {
+        return $res;
+    }
     if (is_array($rofobject) ) {
         $path = $rofobject;
     } else {
