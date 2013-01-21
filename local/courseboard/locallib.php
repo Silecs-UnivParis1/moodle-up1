@@ -48,3 +48,42 @@ function get_table_course_header() {
     }
     return array($row);
 }
+
+/**
+ * print html table of administration logs for a course (creation, validation...)
+ * @global type $DB
+ * @param int $crsid
+ */
+function print_admin_log($crsid) {
+    global $DB;
+
+    $table = new html_table();
+    $table->classes = array('logtable','generalbox');
+    $table->align = array('right', 'left', 'left');
+    $table->head = array(
+        get_string('time'),
+        get_string('fullnameuser'),
+        get_string('action'),
+        get_string('info')
+    );
+    $table->data = array();
+
+    $sql = "SELECT l.id, time, userid, ip, module, action, l.url, info, u.firstname, u.lastname "
+         . "FROM {log} l JOIN {user} u  ON (l.userid = u.id)"
+         . "WHERE ( ( module = 'course' AND action = 'new' AND info LIKE '%ID ".$crsid."%' ) "
+         . " OR ( module = 'course' AND action != 'view' AND action != 'login' AND course = ? ) "
+         . " OR (module IN ('course_validate', 'crswizard') AND course = ?)  ) "
+         . " ORDER BY time ASC ";
+    $logs = $DB->get_records_sql($sql, array($crsid, $crsid));
+
+    foreach($logs as $log) {
+        $row = new html_table_row();
+
+        $row->cells[0] = new html_table_cell(userdate($log->time, '%Y-%m-%d %H:%M:%S'));
+        $row->cells[1] = new html_table_cell($log->firstname . ' ' . $log->lastname);
+        $row->cells[2] = new html_table_cell($log->module .' '. $log->action);
+        $row->cells[3] = new html_table_cell($log->info);
+        $table->data[] = $row;
+    }
+    echo html_writer::table($table);
+}
