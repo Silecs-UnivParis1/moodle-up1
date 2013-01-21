@@ -14,7 +14,7 @@ function table_course_vs_rof($crsid, $rofdata) {
 
     $crsfields = custominfo_data::type('course')->get_structured_fields_short($crsid, true);
     foreach ($crsfields as $category => $fields) {
-        if ($category == 'Other fields') continue;
+        if ($category == 'Other fields' || $category == 'Autres champs') continue;
             $catid = $DB->get_field('custom_info_category', 'id', array('name' => $category));
             $editurl = new moodle_url('/course/edit.php', array('id' => $crsid));
             $editurl->set_anchor('category_' . $catid);
@@ -23,6 +23,7 @@ function table_course_vs_rof($crsid, $rofdata) {
                 . " </h4>\n";
 
             $table = new html_table();
+            $table->data=array();
             foreach ($fields as $shortname => $field ) {
                 $row = new html_table_row();
                 $row->cells[0] = new html_table_cell($field['name']);
