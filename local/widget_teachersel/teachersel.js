@@ -139,7 +139,7 @@
             }
 			return $('<div class="teacher-item-block"></div>')
 				.html('<div class="teacher-item-selected">' + item.label + labeldetails + '</div>')
-				.prepend('<div class="selected-remove">&#10799;</div>')
+				.prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
 				.append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
         }
     }
