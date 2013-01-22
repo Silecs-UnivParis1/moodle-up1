@@ -21,7 +21,9 @@ class course_wizard_step2_rof_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $courseconfig = get_config('moodlecourse');
 
-        $bockhelpE2 = get_string('bockhelpE2', 'local_crswizard');
+        $bockhelpE2 = get_string('bockhelpE2Rof1', 'local_crswizard');
+        $bockhelpE2 .= '&nbsp;«&nbsp;<span class="collapsed">&nbsp;+&nbsp;</span>&nbsp;»&nbsp;et&nbsp;«&nbsp;<span class="expanded">&nbsp;-&nbsp;&nbsp;</span>&nbsp;»&nbsp;';
+        $bockhelpE2 .= get_string('bockhelpE2Rof2', 'local_crswizard');
         $mform->addElement('html', html_writer::tag('div', $bockhelpE2, array('class' => 'fitem')));
 
 /// form definition with new course defaults
@@ -62,6 +64,8 @@ class course_wizard_step2_rof_form extends moodleform {
         $mform->addElement('html', $rofseleted);
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
+        $coursegeneralhelp = get_string('coursegeneralhelpRof', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $coursegeneralhelp, array('class' => 'fitem')));
 
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50" readonly="readonly"');
         //$mform->addHelpButton('fullname', 'fullnamecourse');

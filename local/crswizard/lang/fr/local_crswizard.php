@@ -26,6 +26,15 @@ $string['bockhelpE2'] = '<p>Cette étape fondamentale vous permet de situer votr
     . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.<br/>'
     . 'Notez que si votre espace doit être rattaché à plusieurs composantes / services, il vous sera '
     . 'possible de le spécifier à l\'étape suivante.</p>';
+$string['bockhelpE2Rof1'] = '<p>Cette étape fondamentale vous permet de situer votre espace dans l\'organisation générale des EPI.<br/>'
+    . 'Il est important de bien réfléchir aux informations que vous allez compléter ci-dessous, car '
+    . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.</p>'
+    . '<ol><li>Sélectionnez en premier lieu la période concernée et l\'établissement.</li>'
+    .'<li>Recherchez l\'élément pédagogique pour lequel vous souhaitez créer l\'espace en parcourant '
+    . 'l\'offre de formation (composante, type de diplôme, diplôme, semestre, UE, enseignement, etc.). Les symboles';
+$string['bockhelpE2Rof2'] = 'vous permettent de développer / réduire les niveaux de l\'arborescence.</li>'
+    . '<li>Cliquez sur le symbole « + » pour définir l\'élément pédagogique comme rattachement de référence.</li></ol>'
+    . '<p>Renouvelez cette opération (phases 1 à 3) si vous souhaitez rattacher l\'espace à d\'autres éléments pédagogiques.</p>';
 $string['bockhelpE3'] = '<p>Vous avez défini à l\'étape précédente le rattachement principal de votre espace '
     . 'de cours.<br/>Si ce dernier s\'adresse aux étudiants d\'une autre composante et/ou inscrits '
     . 'à un autre niveau de diplôme, il vous est possible de le spécifier ci-dessous.</p>';
@@ -80,6 +89,11 @@ $string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en h
     . 'l\'écran), dans le fil d\'Ariane et dans l\'objet de certains courriels. Le texte de présentation '
     . 'est en accès public : il est affiché sur la fiche signalétique de l\'espace accessible à partir '
     . 'de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
+$string['coursegeneralhelpRof'] = '<p>Le nom complet de l\'espace est affiché en haut de '
+    . 'chacune des pages du cours et sur la liste des cours.  Il vous est possible, si '
+    . 'vous le jugez nécessaire, de modifier le texte figurant dans la zone « Complément ».<br/>'
+    . 'Le texte de présentation est en accès public : il est affiché sur la fiche signalétique de '
+    . 'l\'espace accessible à partir de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
 $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
 $string['coursesettingshelp'] = 'Les dates ci-dessous sont purement informatives et correspondent au début '
