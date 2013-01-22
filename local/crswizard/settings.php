@@ -10,19 +10,20 @@ defined('MOODLE_INTERNAL') || die;
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-
-if ($ADMIN->fulltree) {
+if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+    $settings = new admin_settingpage('local_crswizard', 'Assistant de création de cours');
+    $ADMIN->add('localplugins', $settings);
     $settings->add(new admin_setting_configtext(
-            'local_crswizard_cohorts_cap_creator',
+            'crswizard_cohorts_cap_creator',
             'Cohortes autorisées en création',
             'Liste des cohortes autorisées à utiliser l\'assistant : identifiants séparés par des espaces.',
-            80,
+            '',
             PARAM_NOTAGS));
 
     $settings->add(new admin_setting_configtext(
-            'local_crswizard_cohorts_cap_validator',
+            'crswizard_cohorts_cap_validator',
             'Cohortes autorisées en approbation',
             'Liste des cohortes autorisées à approuver les cours soumis via l\'assistant : identifiants séparés par des espaces.',
-            80,
+            '',
             PARAM_NOTAGS));
 }
