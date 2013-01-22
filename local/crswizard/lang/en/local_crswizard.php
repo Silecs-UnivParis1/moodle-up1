@@ -15,7 +15,6 @@ $string['crswizard:validator'] = 'Validate a course created with the wizard';
 $string['crswizard:supervalidator'] = 'Validate ANY course created with the wizard';
 $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the wizard, local context';
 
-$string['anotherneed'] = 'Un autre besoin';
 $string['blocHelloS1'] = 'Hello';
 $string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
 $string['bockhelpE3'] = '<p>Vous avez défini à l\'étape précédente le rattachement principal de votre espace '
@@ -113,11 +112,14 @@ $string['teacher'] = 'Teacher';
 $string['teachername'] = 'Teacher name';
 $string['teachers'] = 'Enseignants';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
-$string['up1datefermeture'] = 'Date de fermeture aux étudiants : ';
+$string['up1datefermeture'] = 'Date de fin : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login';
 $string['username'] = 'Username';
 $string['validatorname'] = 'Nom de l\'approbateur';
+$string['wizardcase1'] = 'Un élément pédagogique dans lequel j\'enseigne';
+$string['wizardcase2'] = 'Un autre élément pédagogique de l\'offre de formation';
+$string['wizardcase3'] = 'Un autre besoin en dehors de l\'offre de formation';
 $string['wizardcourse'] = 'Course Wizard';
 
 /** old **/

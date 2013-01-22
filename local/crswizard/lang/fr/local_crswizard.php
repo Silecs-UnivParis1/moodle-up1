@@ -15,7 +15,6 @@ $string['crswizard:validator'] = 'Approuver un cours créé avec l\'assistant';
 $string['crswizard:supervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant';
 $string['crswizard:localsupervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant, contexte local';
 
-$string['anotherneed'] = 'Un autre besoin';
 $string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
     . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
     . 'et le public visé de votre EPI (Espace Pédagogique Interactif).</p>'
@@ -85,7 +84,7 @@ $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
 $string['coursesettingshelp'] = 'Les dates ci-dessous sont purement informatives et correspondent au début '
     . 'et à la fin de la période d\'enseignement.';
-$string['coursestartdate'] = 'Date d\'ouverture : ';
+$string['coursestartdate'] = 'Date de début : ';
 $string['coursesummary'] = 'Texte de présentation : ';
 $string['editingteacher'] = 'Enseignant';
 $string['enrolcohorts'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
@@ -125,12 +124,15 @@ $string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiant"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
-$string['up1datefermeture'] = 'Date de fermeture : ';
+$string['up1datefermeture'] = 'Date de fin : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login du demandeur : ';
 $string['username'] = 'Nom du demandeur : ';
 $string['teachers'] = 'Enseignants';
 $string['validatorname'] = 'Nom de l\'approbateur';
+$string['wizardcase1'] = 'Un élément pédagogique dans lequel j\'enseigne';
+$string['wizardcase2'] = 'Un autre élément pédagogique de l\'offre de formation';
+$string['wizardcase3'] = 'Un autre besoin en dehors de l\'offre de formation';
 $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
 
 /** old **/
