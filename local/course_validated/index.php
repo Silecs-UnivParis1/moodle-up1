@@ -41,10 +41,15 @@ $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 
+//$supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator', 'u.id, u.firstname, u.lastname');
+//var_dump ($supervalidators);
+
 if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
     $table = get_table_course_to_validate(0, 2);
+    echo "<p>Vous êtes super-approbateur.</p>";
 } else {
     $table = get_table_course_to_validate($USER->id, 2);
+    echo "<p>Vous n'êtes pas super-approbateur.</p>";
 }
 
 if (empty($table->data)) {
