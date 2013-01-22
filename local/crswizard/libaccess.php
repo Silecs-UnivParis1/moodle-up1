@@ -98,6 +98,6 @@ function __get_id($a) {
  */
 function wizard_require_permission($permission, $userid) {
     if (! wizard_has_permission($permission, $userid) ) {
-        throw new coding_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
+        throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
     }
 }
