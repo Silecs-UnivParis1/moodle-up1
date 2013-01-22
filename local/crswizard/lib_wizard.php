@@ -1,13 +1,6 @@
 <?php
 /* @var $DB moodle_database */
 
-/**
- * Stop process if current user does not have the right permissions.
- * @param $context (system)context
- */
-function require_capabilities($context) {
-    require_capability('local/crswizard:creator', $context);
-}
 
 /**
  * Reconstruit le tableau de chemins (période/é/c/niveau) pour le plugin jquery select-into-subselects.js

@@ -20,12 +20,13 @@
  *
  * @package    local
  * @subpackage crswizard
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or laters
  */
 require_once('../../config.php');
 require_once('../../course/lib.php');
 require_once(__DIR__ . '/lib_wizard.php');
+require_once(__DIR__ . '/libaccess.php');
 require_once(__DIR__ . '/step1_form.php');
 require_once(__DIR__ . '/step2_form.php');
 require_once(__DIR__ . '/step2_rof_form.php');
@@ -33,7 +34,7 @@ require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
 
-global $CFG, $PAGE, $OUTPUT, $SESSION;
+global $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
 
@@ -42,7 +43,7 @@ $PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
-require_capabilities($systemcontext);
+wizard_require_permission('creator', $USER->id);
 
 $stepin = optional_param('stepin', 0, PARAM_INT);
 if (!$stepin) {
