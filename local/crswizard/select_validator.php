@@ -28,20 +28,54 @@ echo $OUTPUT->heading(get_string('selectvalidator', 'local_crswizard'));
 echo $OUTPUT->box(get_string('bockhelpE3validator', 'local_crswizard'), '');
 
 
-echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
+echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post" class="mform">';
 ?>
 
-<br/>
-<div id="user-select">
-    <div class="widgetselect-panel-left">
-        <h3><?php echo get_string('findvalidator', 'local_crswizard'); ?></h3>
-        <input type="text" class="user-selector" name="something" data-inputname="teacher" size="50"
-               placeholder="<?php echo s(get_string('validatorname', 'local_crswizard')); ?>" />
+<div class="fitem">
+<fieldset class="clearfix" id="categoryheader">
+    <legend class="ftoggler" ><?php echo get_string('selectedvalidator', 'local_crswizard');?></legend>
+    <div class="fcontainer clearfix">
+        <br/>
+        <div id="user-select">
+            <div class="widgetselect-panel-left">
+                <h3><?php echo get_string('findvalidator', 'local_crswizard'); ?></h3>
+                <input type="text" class="user-selector" name="something" data-inputname="teacher" size="50"
+                    placeholder="<?php echo s(get_string('validatorname', 'local_crswizard')); ?>" />
+            </div>
+            <div class="widgetselect-panel-right">
+                <h3><?php echo get_string('selectedvalidator', 'local_crswizard'); ?></h3>
+                <div class="users-selected"></div>
+            </div>
+        </div>
     </div>
-    <div class="widgetselect-panel-right">
-        <h3><?php echo get_string('selectedvalidator', 'local_crswizard'); ?></h3>
-        <div class="users-selected"></div>
+</fieldset>
+</div>
+
+<?php
+$tabinfo = array();
+$tabinfo['managecourseblock'] = fullname($USER);
+$tabinfo['userlogin'] = $USER->username;
+$tabinfo['courserequestdate'] = date('d-m-Y');
+?>
+
+<div class="fitem">
+<fieldset class="clearfix" id="categoryheader">
+    <legend class="ftoggler" ><?php echo get_string('managecourseblock', 'local_crswizard');?></legend>
+    <div class="fcontainer clearfix">
+        <?php
+            foreach ($tabinfo as $key => $value) {
+                echo '<div class="fitem">';
+                echo '<div class="fitemtitle">';
+                echo '<div class="fstaticlabel">';
+                echo '<label>' . get_string($key, 'local_crswizard') . '</label>';
+                echo '</div>';
+                echo '</div>';
+                echo '<div class="felement fstatic">'.$value.'</div>';
+                echo '</div>';
+            }
+        ?>
     </div>
+</fieldset>
 </div>
 
 <script type="text/javascript">
