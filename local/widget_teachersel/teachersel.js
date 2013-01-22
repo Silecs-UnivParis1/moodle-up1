@@ -5,6 +5,7 @@
 (function($){
 
     var selected = new Array();
+    var nbsel = 0;
 
     $("<link/>", {
         rel: "stylesheet",
@@ -24,7 +25,8 @@
             inputSelector: 'input.user-selector', // class of the input field where completion takes place
             outputSelector: '.users-selected',
             fieldName: 'user', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
-            preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {label: "T2", value: "4", fieldName: "myGroup"} ... ]
+            preSelected: [], // [ {"label": "Titre1", "value": "1234"}, {label: "T2", value: "4", fieldName: "myGroup"} ... ]
+            maxSelected: 100
     };
 
     $.fn.autocompleteUser = function (options) {
@@ -60,6 +62,7 @@
             $(this.settings.outputSelector, this.elem).on("click", ".selected-remove", function(event) {
                 var item = $(this).closest(".teacher-item-block").find('input[type="hidden"]').first();
                 selected[item.val()] = 0;
+                nbsel = nbsel - 1;
                 $(this).closest(".teacher-item-block").remove();
             });
         },
@@ -71,7 +74,8 @@
                 select: function (event, ui) {
                     if (ui.item.source == 'users') {
                         $($this.settings.outputSelector, $this.elem)
-                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelDetails));
+                            .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName,
+                                $this.settings.labelDetails, $this.settings.maxSelected));
                     }
                     return false;
                 },
@@ -89,7 +93,7 @@
                     fieldName = items[i].fieldName;
                 }
                 $($this.settings.outputSelector, $this.elem)
-                    .append(buildSelectedBlock(items[i], fieldName, ''));
+                    .append(buildSelectedBlock(items[i], fieldName, '', $this.settings.maxSelected));
             }
         },
 
@@ -128,19 +132,24 @@
             .appendTo(ul);
     };
 
-    function buildSelectedBlock(item, inputName, details) {
+    function buildSelectedBlock(item, inputName, details, maxSelected) {
 		if (typeof selected[item.value] != 'undefined' && selected[item.value] == 1) {
 			alert(item.label+' fait déjà partie de la sélection.');
 		} else {
-            selected[item.value] = 1;
-            var labeldetails = '';
-            if (details) {
-                labeldetails = ' (' + details + ') ';
+            if (maxSelected > nbsel) {
+                selected[item.value] = 1;
+                nbsel = nbsel +1;
+                var labeldetails = '';
+                if (details) {
+                    labeldetails = ' (' + details + ') ';
+                }
+                return $('<div class="teacher-item-block"></div>')
+                    .html('<div class="teacher-item-selected">' + item.label + labeldetails + '</div>')
+                    .prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
+                    .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
+            } else {
+                alert('Vous avez sélectionné le nombre maximum d\'élement autorisé ('+maxSelected+').');
             }
-			return $('<div class="teacher-item-block"></div>')
-				.html('<div class="teacher-item-selected">' + item.label + labeldetails + '</div>')
-				.prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
-				.append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
         }
     }
 
