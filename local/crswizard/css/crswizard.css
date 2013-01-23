@@ -31,3 +31,13 @@ div.previousstage {
 #request-details-toggle {
     margin-bottom: 10px;
 }
+
+span.collapsed {
+    background-image: url(pix/collapsed.png); color: transparent;
+    background-repeat: no-repeat;
+}
+
+span.expanded {
+    background-image: url(pix/expanded.png); color: transparent;
+    background-repeat: no-repeat;
+}

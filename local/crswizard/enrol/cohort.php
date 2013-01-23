@@ -7,12 +7,13 @@
  */
 require_once('../../../config.php');
 require_once('../lib_wizard.php');
+require_once('../libaccess.php');
 
 require_login();
 
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 
-require_capabilities($systemcontext);
+wizard_require_permission('creator', $USER->id);
 
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/local/crswizard/enrol/cohort.php');

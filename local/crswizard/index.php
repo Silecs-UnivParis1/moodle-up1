@@ -20,12 +20,13 @@
  *
  * @package    local
  * @subpackage crswizard
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or laters
  */
 require_once('../../config.php');
 require_once('../../course/lib.php');
 require_once(__DIR__ . '/lib_wizard.php');
+require_once(__DIR__ . '/libaccess.php');
 require_once(__DIR__ . '/step1_form.php');
 require_once(__DIR__ . '/step2_form.php');
 require_once(__DIR__ . '/step2_rof_form.php');
@@ -33,7 +34,7 @@ require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
 
-global $CFG, $PAGE, $OUTPUT, $SESSION;
+global $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
 
@@ -42,7 +43,7 @@ $PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_context($systemcontext);
 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
-require_capabilities($systemcontext);
+wizard_require_permission('creator', $USER->id);
 
 $stepin = optional_param('stepin', 0, PARAM_INT);
 if (!$stepin) {
@@ -74,24 +75,27 @@ switch ($stepin) {
         $editoroptions = array(
             'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
         );
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
         //$submission = file_prepare_standard_editor(null, 'summary', $editoroptions, null, 'course', 'summary', null);
         if ($wizardcase == 3) {
             $editform = new course_wizard_step2_form(NULL, array('editoroptions' => $editoroptions));
         } elseif ($wizardcase == 2) {
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
-            $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'));
-            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rofform.js'));
-
+            $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rofform.js'), true);
             $editform = new course_wizard_step2_rof_form(NULL, array('editoroptions' => $editoroptions));
         }
 
         $data = $editform->get_data();
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            if ($wizardcase == 2) {
+                 $SESSION->wizard['form_step2']['item'] = $_POST['item'];
+                 $SESSION->wizard['form_step2']['path'] = $_POST['path'];
+                 $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
+            }
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         } else {
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselects.js'));
         }
@@ -171,7 +175,12 @@ switch ($stepin) {
             $messages['text'] .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
                     . strip_tags($SESSION->wizard['form_step7']['remarques']);
         }
-        if (isset($errorMsg)) {
+
+        $recap = $corewizard->get_recapitulatif_demande();
+        $messages['text'] .= $recap;
+        $messages['html'] .= $recap;
+
+        if (isset($errorMsg) && $errorMsg!='') {
             $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
             $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }

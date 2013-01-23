@@ -55,6 +55,16 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
+        // validateur pour le cas 2
+        if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
+            $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
+            $mform->addElement('header', 'validators', get_string('selectedvalidator', 'local_crswizard'));
+            foreach ($allvalidators as $id => $validator) {
+                $mform->addElement('text', 'validator', '');
+                $mform->setConstant('validator' , fullname($validator));
+            }
+        }
+
         if (isset($SESSION->wizard['form_step4']['all-users']) && is_array($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
             $mform->addElement('header', 'teachers', get_string('teachers', 'local_crswizard'));

@@ -15,7 +15,6 @@ $string['crswizard:validator'] = 'Approuver un cours créé avec l\'assistant';
 $string['crswizard:supervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant';
 $string['crswizard:localsupervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant, contexte local';
 
-$string['anotherneed'] = 'Un autre besoin';
 $string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
     . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
     . 'et le public visé de votre EPI (Espace Pédagogique Interactif).</p>'
@@ -27,10 +26,30 @@ $string['bockhelpE2'] = '<p>Cette étape fondamentale vous permet de situer votr
     . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.<br/>'
     . 'Notez que si votre espace doit être rattaché à plusieurs composantes / services, il vous sera '
     . 'possible de le spécifier à l\'étape suivante.</p>';
+$string['bockhelpE2Rof1'] = '<p>Cette étape fondamentale vous permet de situer votre espace dans l\'organisation générale des EPI.<br/>'
+    . 'Il est important de bien réfléchir aux informations que vous allez compléter ci-dessous, car '
+    . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.</p>'
+    . '<ol><li>Sélectionnez en premier lieu la période concernée et l\'établissement.</li>'
+    .'<li>Recherchez l\'élément pédagogique pour lequel vous souhaitez créer l\'espace en parcourant '
+    . 'l\'offre de formation (composante, type de diplôme, diplôme, semestre, UE, enseignement, etc.). Les symboles';
+$string['bockhelpE2Rof2'] = 'vous permettent de développer / réduire les niveaux de l\'arborescence.</li>'
+    . '<li>Cliquez sur le symbole « + » pour définir l\'élément pédagogique comme rattachement de référence.</li></ol>'
+    . '<p>Renouvelez cette opération (phases 1 à 3) si vous souhaitez rattacher l\'espace à d\'autres éléments pédagogiques.</p>';
 $string['bockhelpE3'] = '<p>Vous avez défini à l\'étape précédente le rattachement principal de votre espace '
     . 'de cours.<br/>Si ce dernier s\'adresse aux étudiants d\'une autre composante et/ou inscrits '
     . 'à un autre niveau de diplôme, il vous est possible de le spécifier ci-dessous.</p>';
-$string['bockhelpE3validator'] = 'Texte d\'aide et de conseil concernant la désignation d\'un approbateur.';
+$string['bockhelpE3validator'] = '<p>Toute demande de création d\'espace de cours fait l\'objet d’une modération. '
+    . 'Notez qu\'il vous sera possible de désigner les enseignants contributeurs et d\'inscrire les '
+    . 'groupes d\'étudiants aux étapes suivantes.</p>'
+    .'<p><b>Cas 1</b> : Si vous êtes l\'enseignant responsable du diplôme, de l\'UE ou de l\'élément '
+    . 'pédagogique pour lequel vous créez cet espace, ne renseignez pas d\'approbateur et passez à l\'étape suivante.<br/>'
+    . '<b>Cas 2</b> : Si vous n\'êtes pas responsable de l\'élément pédagogique concerné (chargé de TD par '
+    . 'exemple), désignez un enseignant chargé d\'approuver la création de l\'espace (en général le '
+    . 'responsable du diplôme, de l\'UE ou de l\'enseignement pour lequel cet espace est créé).</p>'
+    . '<ol><li>Recherchez l\'utilisateur dans l\'annuaire de l\'université, en saisissant, par exemple, son nom '
+    . 'ou son identifiant Paris 1 ou le couple Prénom Nom. Notez que vous ne pouvez pas vous '
+    . 'désigner comme approbateur de l\'espace que vous êtes entrain de créer.</li>'
+    . '<li>Cliquez sur le symbole « + » pour désigner cet utilisateur comme approbateur de cet espace.</li></ol>';
 $string['bockhelpE4'] = '<p>Cette étape vous permet d\'attribuer à des enseignants des droits de '
     . 'contribution sur cet espace de cours. Il vous sera possible d\'inscrire les groupes d\'étudiants à '
     . 'l\'étape suivante.</p><ol><li>Sélectionnez en premier lieu le rôle à attribuer à l’utilisateur :'
@@ -60,6 +79,7 @@ $string['bockhelpE7'] = '<p>Votre demande de création d\'espace de cours est ar
     . '<li>a transmission de cette demande -pour approbation- aux modérateurs de la plateforme</li>'
     . '<li>et l’envoi d’un courriel récapitulatif de cette demande à l’adresse :';
 $string['bockhelpE7s'] = '</li></ul></p>';
+$string['blocktitleE3Rof1'] = 'Enseignant non responsable de l\'élément pédagogique : désignation d\'un approbateur';
 $string['blocktitleE4'] = 'Enseignant(s) contributeur(s) de l\'espace de cours';
 $string['blocktitleE5'] = 'Étudiants : inscriptions par cohorte(s)';
 $string['categoryblock'] = 'Catégorie (rattachement principal de l\'espace de cours)';
@@ -81,11 +101,16 @@ $string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en h
     . 'l\'écran), dans le fil d\'Ariane et dans l\'objet de certains courriels. Le texte de présentation '
     . 'est en accès public : il est affiché sur la fiche signalétique de l\'espace accessible à partir '
     . 'de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
+$string['coursegeneralhelpRof'] = '<p>Le nom complet de l\'espace est affiché en haut de '
+    . 'chacune des pages du cours et sur la liste des cours.  Il vous est possible, si '
+    . 'vous le jugez nécessaire, de modifier le texte figurant dans la zone « Complément ».<br/>'
+    . 'Le texte de présentation est en accès public : il est affiché sur la fiche signalétique de '
+    . 'l\'espace accessible à partir de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
 $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
 $string['coursesettingshelp'] = 'Les dates ci-dessous sont purement informatives et correspondent au début '
     . 'et à la fin de la période d\'enseignement.';
-$string['coursestartdate'] = 'Date d\'ouverture : ';
+$string['coursestartdate'] = 'Date de début : ';
 $string['coursesummary'] = 'Texte de présentation : ';
 $string['editingteacher'] = 'Enseignant';
 $string['enrolcohorts'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
@@ -116,21 +141,24 @@ $string['selectcourse'] = 'Étape 1 - Pour quel enseignement souhaitez-vous ouvr
 $string['selectedcohort'] = 'Groupes sélectionnés';
 $string['selectedteacher'] = 'Enseignants sélectionnés';
 $string['selectedvalidator'] = 'Approbateur sélectionné';
-$string['selectvalidator'] = 'Étape 3 : Désignation d\'un approbateur';
+$string['selectvalidator'] = 'Étape 3 : Gestion de la demande de création d\'espace de cours';
 $string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
 $string['summaryof'] = 'Récapitulatif de la demande';
 $string['student'] = 'Étudiant';
-$string['stepkey'] = 'Étape 6 - Clé d\'inscription';
+$string['stepkey'] = 'Étape 6 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
 $string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiant"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
-$string['up1datefermeture'] = 'Date de fermeture : ';
+$string['up1datefermeture'] = 'Date de fin : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
 $string['userlogin'] = 'Login du demandeur : ';
 $string['username'] = 'Nom du demandeur : ';
 $string['teachers'] = 'Enseignants';
 $string['validatorname'] = 'Nom de l\'approbateur';
+$string['wizardcase1'] = 'Un élément pédagogique dans lequel j\'enseigne';
+$string['wizardcase2'] = 'Un autre élément pédagogique de l\'offre de formation';
+$string['wizardcase3'] = 'Un autre besoin en dehors de l\'offre de formation';
 $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
 
 /** old **/

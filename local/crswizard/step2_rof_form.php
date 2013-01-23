@@ -21,7 +21,9 @@ class course_wizard_step2_rof_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $courseconfig = get_config('moodlecourse');
 
-        $bockhelpE2 = get_string('bockhelpE2', 'local_crswizard');
+        $bockhelpE2 = get_string('bockhelpE2Rof1', 'local_crswizard');
+        $bockhelpE2 .= '&nbsp;«&nbsp;<span class="collapsed">&nbsp;+&nbsp;</span>&nbsp;»&nbsp;et&nbsp;«&nbsp;<span class="expanded">&nbsp;-&nbsp;&nbsp;</span>&nbsp;»&nbsp;';
+        $bockhelpE2 .= get_string('bockhelpE2Rof2', 'local_crswizard');
         $mform->addElement('html', html_writer::tag('div', $bockhelpE2, array('class' => 'fitem')));
 
 /// form definition with new course defaults
@@ -35,6 +37,17 @@ class course_wizard_step2_rof_form extends moodleform {
                 )
         );
 
+        $preselected = wizard_preselected_rof();
+        $codeJ = '<script type="text/javascript">' . "\n"
+            . '//<![CDATA['."\n"
+            . 'jQuery(document).ready(function () {'
+            . '$(\'#items-selected\').autocompleteRof({'
+            . 'preSelected: '.$preselected
+            .'});'
+            . '});'
+            . '//]]>'. "\n"
+            . '</script>';
+
         // ajout du selecteur ROF
         $rofseleted = '<div class="by-widget"><h3>Rechercher un élément pédagogique</h3>'
             . '<div class="item-select"></div>'
@@ -45,10 +58,14 @@ class course_wizard_step2_rof_form extends moodleform {
             . '<div id="items-selected1"><span>' . get_string('rofselected1', 'local_crswizard') . '</span></div>'
             . '<div id="items-selected2"><span>' . get_string('rofselected2', 'local_crswizard') . '</span></div>'
             . '</div>'
-            . '</div>';
+            . '</div>'
+            . $codeJ;
+
         $mform->addElement('html', $rofseleted);
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
+        $coursegeneralhelp = get_string('coursegeneralhelpRof', 'local_crswizard');
+        $mform->addElement('html', html_writer::tag('div', $coursegeneralhelp, array('class' => 'fitem')));
 
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50" readonly="readonly"');
         //$mform->addHelpButton('fullname', 'fullnamecourse');
