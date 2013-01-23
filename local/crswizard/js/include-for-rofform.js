@@ -16,7 +16,9 @@ $(document).ready(function() {
         var select = $("#items-selected1").children('div[class=item-selected]');
         if (select.size()==0) {
             ret = false;
-            $('#categoryheader').after('<div class="felement fselect error"><span class="error">Il manque le rattachement de référence</span></div>');
+            var textm = 'Vous devez sélectionner un élément pédagogique comme rattachement de référence de votre espace de cours avant de passer à l\'étape suivante.';
+            $('#mgerrorrof').empty();
+            $('#mgerrorrof').append('<div class="felement fselect error"><span class="error">'+textm+'</span></div>');
         }
         return ret;
     });
