@@ -644,6 +644,18 @@ class core_wizard {
             $mydata->shortname = $rof1['apogee'] . ' - '
                 . $this->formdata['form_step2']['complement'];
             $mydata->idnumber = $rof1['idnumber'];
+
+            // metadonnee de rof1
+            $mdrof1 = rof_get_metadata($rof1['rofid']);
+            foreach ($mdrof1 as $category => $data) {
+                if (count($data)) {
+                    foreach($data as $label => $value) {
+                        $champ = 'profile_field_'.$label;
+                        $mydata->$champ = $value;
+                    }
+                }
+            }
+
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
         }
