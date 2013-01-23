@@ -10,7 +10,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-
+require_once(__DIR__ . '/../../local/rof_categories/locallib.php');
 
 /**
  * Get the first path for a course or a program
@@ -395,4 +395,35 @@ function rof_insert_paths_statistics($verb=0) {
         $dbcourse->pathsnb = $paths;
         $DB->update_record('rof_course', $dbcourse, true); //bulk=true
     }
+}
+
+
+/**
+ * WARNING ONLY for 2012-2013 / UP1 /... categories
+ * Prerequisite: standard categories have been created from ROF by local/rof_categories
+ * @global type $DB
+ * @param array $rofpath ROF path as usual ('02', 'UP1-PROG12345', 'UP1-PROG45678', 'UP1-C98765' ...)
+ * @return boolean
+ * @throws coding_exception
+ */
+function rofpath_to_category($rofpath) {
+    global $DB;
+
+    if ( count($rofpath) < 2 || ! is_array($rofpath) ) {
+        throw new coding_exception('rofpath trop court : 2 niveaux minimum');
+        return false;
+    }
+    if ( ! preg_match('/^\d\d/', $rofpath[0]) ) { //composante = code numérique, 2 chiffres
+        throw new coding_exception('composante non conforme' . $rofpath[0]);
+        return false;
+    }
+    $typedip = $DB->get_field('rof_program', 'typedip', array('rofid' => $rofpath[1]), MUST_EXIST);
+    if ($typedip) {
+        $eqvDiplomas = equivalentDiplomas();
+        $catcode = '4:' . $rofpath[0] .'/'. $eqvDiplomas[$typedip];
+
+        $res = $DB->get_field('course_categories', 'id', array('idnumber' => $catcode));
+        return $res;
+    }
+    return false;
 }
