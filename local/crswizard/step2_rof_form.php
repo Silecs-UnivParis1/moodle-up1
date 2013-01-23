@@ -37,6 +37,8 @@ class course_wizard_step2_rof_form extends moodleform {
                 )
         );
 
+        $mform->addElement('html', '<div id="mgerrorrof"></div>');
+
         $preselected = wizard_preselected_rof();
         $codeJ = '<script type="text/javascript">' . "\n"
             . '//<![CDATA['."\n"

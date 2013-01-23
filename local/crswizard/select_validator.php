@@ -54,7 +54,7 @@ echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="pos
 
 <?php
 $tabinfo = array();
-$tabinfo['managecourseblock'] = fullname($USER);
+$tabinfo['username'] = fullname($USER);
 $tabinfo['userlogin'] = $USER->username;
 $tabinfo['courserequestdate'] = date('d-m-Y');
 ?>

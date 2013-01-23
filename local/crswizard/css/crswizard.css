@@ -41,3 +41,8 @@ span.expanded {
     background-image: url(pix/expanded.png); color: transparent;
     background-repeat: no-repeat;
 }
+
+div#mgerrorrof {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
