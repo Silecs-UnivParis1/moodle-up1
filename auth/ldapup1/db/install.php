@@ -5,14 +5,22 @@
  *
  * @package    auth
  * @subpackage ldapup1
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once(__DIR__ . '/../locallib.php');
+
 function xmldb_auth_ldapup1_install() {
     global $CFG, $DB;
+
+    echo "Création des catégories :\n";
+    insert_user_metadata_categories();
+
+    echo "\nCréation des champs :\n";
+    insert_user_metadata_fields();
 
 }
 

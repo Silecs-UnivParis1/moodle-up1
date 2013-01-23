@@ -3,7 +3,7 @@
 /**
  * @package    auth
  * @subpackage ldapup1
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * derived from official auth_ldap
  */
@@ -140,6 +140,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         }
 
         $user_entry = ldap_get_entries_moodle($ldapconnection, $user_info_result);
+//echo "user_entry : \n"; var_dump($user_entry); die();
+
         if (empty($user_entry)) {
             return false; // entry not found
         }
@@ -157,6 +159,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     continue;
                 }
                 if (!array_key_exists($value, $entry)) {
+                    //echo "\n\nWRONG data mapping: $value $entry \n\n";
                     continue; // wrong data mapping!
                 }
                 if (is_array($entry[$value])) {
@@ -423,7 +426,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 foreach ($users as $user) {
                     $this->do_log($output, get_string('auth_dbupdatinguser', 'auth_db', array('name'=>$user->username, 'id' =>$user->id)) . "\n");
-                    if ($this->update_user_record($user->username, $updatekeys)) {
+                    if ($this->update_user_record($user->username, $updatekeys, $verb)) {
                         //** @todo incorporer ceci à la table user
                         $usersync = $DB->get_record('user_sync', array('userid' => $user->id));
                         if ($usersync) {
@@ -476,6 +479,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 $id = $DB->insert_record('user', $user);
                 $this->do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
+
                 //** @todo incorporer ceci à la table user
                 $usersync = new stdClass;
                 $usersync->userid = $id; // same userid as new user
@@ -483,6 +487,22 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 $usersync->ref_param = '';
                 $usersync->timemodified = time();
                 $DB->insert_record('user_sync', $usersync);
+
+                // BEGIN UP1 SILECS custom user data from Ldap
+                //** @todo faire une boucle sur toutes les propriétés qui commencent par up1 au lieu de ce code adhoc
+                $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname'=>'user', 'shortname'=>'up1edupersonprimaryaffiliation'), MUST_EXIST);
+                $record = new stdClass;
+                $record->fieldid = $fieldid;
+                $record->objectname = 'user';
+                $record->objectid = $id;
+                $record->data = $user->up1edupersonprimaryaffiliation;
+                $record->dataformat = 0;
+                if ($verb >=3) {
+                    echo "\n" . $user->username ." -> ". $record->data;
+                }
+                $DB->insert_record('custom_info_data', $record);
+                // END UP1 SILECS
+
             }
             $transaction->allow_commit();
             unset($add_users); // free mem
@@ -577,7 +597,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
      * @param boolean $updatekeys true to update the local record with the external LDAP values.
      */
 
-    function update_user_record($username, $updatekeys = false) {
+    function update_user_record($username, $updatekeys = false, $verb=1) {
         global $CFG, $DB;
 
         // Just in case check text case
@@ -614,6 +634,17 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                     }
                 }
             }
+            // UP1 SILECS : Add custom info from LDAP
+            foreach ($newinfo as $attr => $value) {
+                if ( substr($attr, 0, 3) == 'up1' ) {
+                    $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname'=>'user', 'shortname'=>$attr), MUST_EXIST);
+                    $DB->set_field('custom_info_data', 'data', $value, array('objectid'=>$userid, 'fieldid'=>$fieldid) );
+                    if ($verb >= 3) {
+                        echo "    $username -> $value\n";
+                    }
+                }
+            } // END UP1 SILECS
+
         } else {
             return false;
         }
@@ -749,6 +780,15 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             }
         }
         $moodleattributes['username'] = textlib::strtolower(trim($this->config->user_attribute));
+
+        // UP1 - SILECS addition
+        $customattrs = array('eduPersonPrimaryAffiliation');
+        //** @todo if possible, use custom user metadata description instead, where shortname begins with up1
+        foreach ($customattrs as $attr) {
+            $moodleattributes['up1' . strtolower($attr)] = strtolower($attr); // le second strtolower est bien nécessaire !
+        }
+        // END addition
+
         return $moodleattributes;
     }
 
