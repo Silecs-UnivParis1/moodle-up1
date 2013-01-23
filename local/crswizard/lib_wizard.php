@@ -624,6 +624,29 @@ function __get_serialnumber($idnumber) {
     return 0;
 }
 
+/**
+ * Calcule idcat Moodle et identifiant cours partir d'un identifiant rof
+ * @param array() $form2
+ * @return array() $rof1 - idcat, apogee et idnumber
+ */
+function wizard_prepare_rattachement_rof_moodle($form2) {
+    $rof1 = array();
+    if (isset($form2['item']) && count($form2['item'])) {
+        $allrof = $form2['item'];
+        if (isset($allrof['p']) && count($allrof['p'])) {
+            $rofid = $allrof['p'][0];
+            $rof1['rofid'] = $rofid;
+            if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
+                $rofpath = $form2['path'][$rofid];
+                $tabpath = explode('_', $rofpath);
+                $rof1['idcat'] = rofpath_to_category($tabpath);
+            }
+            $rof1['apogee'] = rof_get_code_or_rofid($rofid);
+            $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
+        }
+    }
+    return $rof1;
+}
 
 class core_wizard {
     private $formdata;
@@ -702,37 +725,55 @@ class core_wizard {
      */
     public function prepare_course_to_validate() {
         $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+
+        // profile_field obligatoire pour page course_validate
+        $mydata->profile_field_up1approbateureffid = '';
+        $mydata->profile_field_up1rofname = '';
+        $mydata->profile_field_up1niveaulmda = '';
+        $mydata->profile_field_up1diplome = '';
+
+        // on est dans le cas 2
+        if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
+            $form2 = $this->formdata['form_step2'];
+            $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
+            if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
+                $mydata->category = $rof1['idcat'];
+            }
+            $mydata->shortname = $rof1['apogee'] . ' - '
+                . $this->formdata['form_step2']['complement'];
+            $mydata->idnumber = $rof1['idnumber'];
+        } else { // cas 3
+            $tabcategories = get_list_category($this->formdata['form_step2']['category']);
+        }
+
         $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
         $mydata->summaryformat = $this->formdata['form_step2']['summary_editor']['format'];
-        $tabcategories = get_list_category($this->formdata['form_step2']['category']);
         //$mydata->startdate = $this->formdata['form_step2']['startdate'];
 
         //step3 custominfo_field
         // compoante
-        $up1composante = trim($mydata->profile_field_up1composante);
-        if ($up1composante != '' && substr($up1composante, -1) != ';') {
-            $mydata->profile_field_up1composante .= ';';
+        if (isset($mydata->profile_field_up1composante)) {
+            $up1composante = trim($mydata->profile_field_up1composante);
+            if ($up1composante != '' && substr($up1composante, -1) != ';') {
+                $mydata->profile_field_up1composante .= ';';
+            }
+            $mydata->profile_field_up1composante .= trim($tabcategories[2]);
         }
-        $mydata->profile_field_up1composante .= trim($tabcategories[2]);
-
         // niveau
-        $up1niveau = trim($mydata->profile_field_up1niveau);
-        if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
-            $mydata->profile_field_up1niveau .= ';';
+        if (isset($mydata->profile_field_up1niveau)) {
+            $up1niveau = trim($mydata->profile_field_up1niveau);
+            if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
+                $mydata->profile_field_up1niveau .= ';';
+            }
+            $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
         }
-        $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
 
         // cours doit être validé
         $mydata->profile_field_up1avalider = 1;
         $mydata->profile_field_up1datevalid = 0;
         $mydata->profile_field_up1datedemande = time();
         $mydata->profile_field_up1demandeurid = $this->user->id;
-        // profile_field obligatoire pour page course_validate
         $mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
-        $mydata->profile_field_up1approbateureffid = '';
-        $mydata->profile_field_up1rofname = '';
-        $mydata->profile_field_up1niveaulmda = '';
-        $mydata->profile_field_up1diplome = '';
         //$mydata->profile_field_up1datefermeture = $this->formdata['form_step2']['up1datefermeture'];
 
         return $mydata;
