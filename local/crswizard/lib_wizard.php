@@ -471,106 +471,6 @@ function wizard_list_clef() {
     return $list;
 }
 
-function get_recapitulatif_demande() {
-    global $SESSION, $USER, $DB;
-    $myconfig = new my_elements_config();
-
-    $mg = '';
-    $mg .= "\n" . '---------------------' . "\n";
-    $mg .= 'Récapitulatif de la demande';
-    $mg .= "\n" . '---------------------' . "\n";
-    $mg .= get_string('username', 'local_crswizard') . fullname($USER) . "\n";
-    $mg .= get_string('userlogin', 'local_crswizard') . $USER->username . "\n";
-    $mg .= get_string('courserequestdate', 'local_crswizard') . date('d-m-Y') . "\n";
-
-    // categorie
-    $displaylist = array();
-    $parentlist = array();
-    make_categories_list($displaylist, $parentlist);
-
-    $idcat = $SESSION->wizard['form_step2']['category'];
-    $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
-    $mg .= get_string('fullnamecourse', 'local_crswizard') . $SESSION->wizard['form_step2']['fullname'] . "\n";
-    $mg .= get_string('shortnamecourse', 'local_crswizard') . $SESSION->wizard['form_step2']['shortname'] . "\n";
-    $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['startdate']) . "\n";
-    $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['up1datefermeture']) . "\n";
-
-    // validateur si il y a lieu
-    if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
-        $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
-        $mg .= get_string('selectedvalidator', 'local_crswizard'). "\n";
-        foreach ($allvalidators as $id => $validator) {
-            $mg .= '    ' . fullname($validator) . "\n";
-        }
-    }
-
-    // liste des enseignants :
-    $mg .= get_string('teachers', 'local_crswizard'). "\n";
-    if (isset($SESSION->wizard['form_step4']['all-users']) && is_array($SESSION->wizard['form_step4']['all-users'])) {
-            $allusers = $SESSION->wizard['form_step4']['all-users'];
-            $labels = $myconfig->role_teachers;
-            foreach ($allusers as $role => $users) {
-                $label = $role;
-                if (isset($labels[$role])) {
-                    $label = get_string($labels[$role], 'local_crswizard');
-                }
-                $first = true;
-                foreach ($users as $id => $user) {
-                    $mg .= '    ' . ($first ? $label . ' : ': '') . fullname($user) . "\n";
-                    $first = false;
-                }
-            }
-        } else {
-            $mg .= '    Aucun' . "\n";
-        }
-
-        // liste des groupes
-        $mg .= get_string('cohorts', 'local_crswizard'). "\n";
-        if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
-            $groupsbyrole = $SESSION->wizard['form_step5']['all-cohorts'];
-            $labels = $myconfig->role_cohort;
-            foreach ($groupsbyrole as $role => $groups) {
-                $label = $role;
-                if (isset($labels[$role])) {
-                    $label = get_string($labels[$role], 'local_crswizard');
-                }
-                $first = true;
-                foreach ($groups as $id => $group) {
-                    $mg .= '    ' . ($first ? $label . ' : ' : '') . $group->name . " ({$group->size})" . "\n";
-                    $first = false;
-                }
-            }
-        } else {
-            $mg .= '    Aucun' . "\n";
-        }
-
-        // clefs
-        $mg .= get_string('enrolkey', 'local_crswizard') . "\n";
-        $clefs = wizard_list_clef();
-        if (count($clefs)) {
-            foreach ($clefs as $type => $clef) {
-                $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
-                $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolstartdate']);
-                } else {
-                    $mg .= 'incative';
-                }
-                $mg .= "\n";
-                $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolenddate']);
-                } else {
-                    $mg .= 'incative';
-                }
-                $mg .= "\n";
-            }
-        } else {
-            $mg .= '    Aucune' . "\n";
-        }
-    return $mg;
-}
-
 /**
  * Renvoie le nom du Course custom fields de nom abrégé $shortname
  * @param string $shortname nom abrégé du champ
@@ -651,6 +551,7 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
 class core_wizard {
     private $formdata;
     private $user;
+    private $mydata;
     public $course;
 
     public function __construct($formdata, $user) {
@@ -697,6 +598,7 @@ class core_wizard {
                 $this->myenrol_clef($course->id, $clefs);
             }
         }
+        $this->mydata = $mydata;
         return '';
     }
 
@@ -864,6 +766,113 @@ class core_wizard {
             }
         }
         return $data;
+    }
+
+    public function get_recapitulatif_demande() {
+    $myconfig = new my_elements_config();
+
+    $mg = '';
+    $mg .= "\n" . '---------------------' . "\n";
+    $mg .= 'Récapitulatif de la demande';
+    $mg .= "\n" . '---------------------' . "\n";
+    $mg .= get_string('username', 'local_crswizard') . fullname($this->user) . "\n";
+    $mg .= get_string('userlogin', 'local_crswizard') . $this->user->username . "\n";
+    $mg .= get_string('courserequestdate', 'local_crswizard') . date('d-m-Y') . "\n";
+
+    $wizardcase = $this->formdata['wizardcase'];
+
+    // categorie
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist);
+
+    $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
+  //  $idcat = $form2['category'];
+    $idcat = $this->mydata->category;
+    $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
+    $mg .= get_string('fullnamecourse', 'local_crswizard') . $form2['fullname'] . "\n";
+    $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
+
+    $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
+    $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
+
+    // validateur si il y a lieu
+    $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
+    if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+        $allvalidators = $form3['all-validators'];
+        $mg .= get_string('selectedvalidator', 'local_crswizard'). "\n";
+        foreach ($allvalidators as $id => $validator) {
+            $mg .= '    ' . fullname($validator) . "\n";
+        }
+    }
+
+    // liste des enseignants :
+    $form4 =  $this->formdata['form_step4']; // ou $SESSION->wizard['form_step4']
+    $mg .= get_string('teachers', 'local_crswizard'). "\n";
+    if (isset($form4['all-users']) && is_array($form4['all-users'])) {
+            $allusers = $form4['all-users'];
+            $labels = $myconfig->role_teachers;
+            foreach ($allusers as $role => $users) {
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
+                }
+                $first = true;
+                foreach ($users as $id => $user) {
+                    $mg .= '    ' . ($first ? $label . ' : ': '') . fullname($user) . "\n";
+                    $first = false;
+                }
+            }
+        } else {
+            $mg .= '    Aucun' . "\n";
+        }
+
+        // liste des groupes
+        $form5 =  $this->formdata['form_step5']; // ou $SESSION->wizard['form_step5']
+        $mg .= get_string('cohorts', 'local_crswizard'). "\n";
+        if (!empty($form5['all-cohorts'])) {
+            $groupsbyrole = $form5['all-cohorts'];
+            $labels = $myconfig->role_cohort;
+            foreach ($groupsbyrole as $role => $groups) {
+                $label = $role;
+                if (isset($labels[$role])) {
+                    $label = get_string($labels[$role], 'local_crswizard');
+                }
+                $first = true;
+                foreach ($groups as $id => $group) {
+                    $mg .= '    ' . ($first ? $label . ' : ' : '') . $group->name . " ({$group->size})" . "\n";
+                    $first = false;
+                }
+            }
+        } else {
+            $mg .= '    Aucun' . "\n";
+        }
+
+        // clefs
+        $mg .= get_string('enrolkey', 'local_crswizard') . "\n";
+        $clefs = wizard_list_clef();
+        if (count($clefs)) {
+            foreach ($clefs as $type => $clef) {
+                $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
+                $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
+                if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
+                    $mg .= date('d-m-Y', $clef['enrolstartdate']);
+                } else {
+                    $mg .= 'incative';
+                }
+                $mg .= "\n";
+                $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
+                if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
+                    $mg .= date('d-m-Y', $clef['enrolenddate']);
+                } else {
+                    $mg .= 'incative';
+                }
+                $mg .= "\n";
+            }
+        } else {
+            $mg .= '    Aucune' . "\n";
+        }
+    return $mg;
     }
 }
 

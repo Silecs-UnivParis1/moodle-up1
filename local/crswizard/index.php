@@ -176,7 +176,7 @@ switch ($stepin) {
                     . strip_tags($SESSION->wizard['form_step7']['remarques']);
         }
 
-        $recap = get_recapitulatif_demande();
+        $recap = $corewizard->get_recapitulatif_demande();
         $messages['text'] .= $recap;
         $messages['html'] .= $recap;
 
