@@ -571,6 +571,22 @@ function get_custom_info_field_label($shortname) {
     return $DB->get_field('custom_info_field', 'name', array('objectname' => 'course', 'shortname' => $shortname));
 }
 
+/**
+ * renvoie l'idendifiant d' l'user sélectionné comme validateur ou chaine vide
+ * @return string
+ */
+function wizard_get_approbateurpropid() {
+    global $SESSION;
+    $approbateurpropid = '';
+    if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
+        foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
+            $approbateurpropid = $id . ';';
+        }
+        $approbateurpropid = substr($approbateurpropid, 0, -1);
+    }
+    return $approbateurpropid;
+}
+
 class core_wizard {
     private $formdata;
     private $user;
@@ -674,7 +690,7 @@ class core_wizard {
         $mydata->profile_field_up1datedemande = time();
         $mydata->profile_field_up1demandeurid = $this->user->id;
         // profile_field obligatoire pour page course_validate
-        $mydata->profile_field_up1approbateurpropid = '';
+        $mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
         $mydata->profile_field_up1approbateureffid = '';
         $mydata->profile_field_up1rofname = '';
         $mydata->profile_field_up1niveaulmda = '';
