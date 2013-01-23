@@ -403,7 +403,7 @@ function rof_insert_paths_statistics($verb=0) {
  * Prerequisite: standard categories have been created from ROF by local/rof_categories
  * @global type $DB
  * @param array $rofpath ROF path as usual ('02', 'UP1-PROG12345', 'UP1-PROG45678', 'UP1-C98765' ...)
- * @return boolean
+ * @return int (category id) OR false if an error occurred
  * @throws coding_exception
  */
 function rofpath_to_category($rofpath) {
@@ -426,4 +426,17 @@ function rofpath_to_category($rofpath) {
         return $res;
     }
     return false;
+}
+
+
+function rof_get_code_or_rofid($rofid) {
+    global $DB;
+
+    if ( preg_match('/^UP1-C\d+/', $rofid) ) {
+        $res = $DB->get_field('rof_course', 'code', array('rofid' => $rofid));
+        if ($res) {
+            return $res;
+        }
+    }
+    return $rofid;
 }
