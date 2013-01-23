@@ -590,7 +590,7 @@ function wizard_get_approbateurpropid() {
     $approbateurpropid = '';
     if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
         foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
-            $approbateurpropid = $id . ';';
+            $approbateurpropid = $user->id . ';';
         }
         $approbateurpropid = substr($approbateurpropid, 0, -1);
     }
