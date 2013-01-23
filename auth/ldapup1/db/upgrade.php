@@ -4,11 +4,13 @@
  *
  * @package    auth
  * @subpackage ldapup1
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
+
+require_once(__DIR__ . '/../locallib.php');
 
 function xmldb_auth_ldapup1_upgrade($oldversion) {
     global $CFG, $DB;
@@ -27,6 +29,15 @@ function xmldb_auth_ldapup1_upgrade($oldversion) {
         if ( ! $dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+    }
+
+
+    if ($oldversion < 2013012300) {
+        echo "Création des catégories :<br />\n";
+        insert_user_metadata_categories();
+
+        echo "\nCréation des champs :<br />\n";
+        insert_user_metadata_fields();
     }
 
 
