@@ -494,7 +494,16 @@ function get_recapitulatif_demande() {
     $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['startdate']) . "\n";
     $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $SESSION->wizard['form_step2']['up1datefermeture']) . "\n";
 
-    // liste des enseigants :
+    // validateur si il y a lieu
+    if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
+        $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
+        $mg .= get_string('selectedvalidator', 'local_crswizard'). "\n";
+        foreach ($allvalidators as $id => $validator) {
+            $mg .= '    ' . fullname($validator) . "\n";
+        }
+    }
+
+    // liste des enseignants :
     $mg .= get_string('teachers', 'local_crswizard'). "\n";
     if (isset($SESSION->wizard['form_step4']['all-users']) && is_array($SESSION->wizard['form_step4']['all-users'])) {
             $allusers = $SESSION->wizard['form_step4']['all-users'];
