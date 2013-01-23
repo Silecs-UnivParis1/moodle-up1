@@ -1,5 +1,6 @@
 <?php
 /* @var $DB moodle_database */
+require_once("$CFG->dirroot/report/rofstats/roflib.php");
 
 
 /**
@@ -595,6 +596,34 @@ function wizard_get_approbateurpropid() {
     }
     return $approbateurpropid;
 }
+
+/**
+ * Returns a unique course idnumber, by appending a serialnumber (-01, -02 ...) to code/rofid
+ * takes in account the content of the course table
+ * @global moodle_database $DB
+ * @param string $rofid
+ * @return string new idnumber to be used in course creation
+ */
+function wizard_rofid_to_idnumber($rofid) {
+    global $DB;
+
+    $code = rof_get_code_or_rofid($rofid);
+    $sql = "SELECT idnumber FROM {course} c WHERE idnumber LIKE '" . $code . "%'";
+    $res = $DB->get_fieldset_sql($sql);
+    if ($res ) {
+        $serials = array_map('__get_serialnumber', $res);
+        return $code .'-'. sprintf('%02d', (1 + max($serials)));
+    }
+    return $code . '-01';
+}
+
+function __get_serialnumber($idnumber) {
+    if ( preg_match ('/^.*-(\d+)$/', $idnumber, $match)) {
+        return (integer)$match[1];
+    }
+    return 0;
+}
+
 
 class core_wizard {
     private $formdata;
