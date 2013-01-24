@@ -181,22 +181,23 @@ function rof_get_record($rofid) {
  * @param associative array $pathArray
  * @param enum $format
  * @param bool $roflink : if set, rofid links to view.php
+ * @param string $separator
  * @return string
  */
-function rof_format_path($pathArray, $format='rofid', $roflink=false) {
+function rof_format_path($pathArray, $format='rofid', $roflink=false, $separator=' / ') {
     $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
         $linkrofid = ($roflink ? rof_rofid_link($rofid) : $rofid);
         switch($format) {
             case 'rofid':
-                $ret .= ' / ' . $linkrofid;
+                $ret .= $separator . $linkrofid;
                 break;
             case 'name':
-                $ret .= ' / ' . $name;
+                $ret .= $separator . $name;
                 break;
             case 'combined':
-                $ret .= ' / ' . '[' . $linkrofid . '] ' . $name;
+                $ret .= $separator . '[' . $linkrofid . '] ' . $name;
                 break;
             case 'ul':
                 $ret .= '<ul><li>' . '[' . $linkrofid . '] ' . $name .'</li>';
