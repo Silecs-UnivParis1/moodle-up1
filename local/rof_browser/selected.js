@@ -189,8 +189,10 @@ jQuery(function () {
         var rofid = item.value;
 		var path =  item.path;
 		var intitule = item.label;
-
         var chemin = '';
+        if (typeof item.chemin != 'undefined') {
+            chemin = item.chemin;
+        }
         var name = 'select_'+rofid;
         selected[name] = 1;
 
