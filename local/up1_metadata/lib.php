@@ -65,10 +65,12 @@ function up1_meta_get_user($courseid, $field) {
     $userid = up1_meta_get_text($courseid, $field);
     if ($userid) {
         $dbuser = $DB->get_record('user', array('id' => $userid));
-        return array(
-            'id' => $userid,
-            'name' => $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username
-            );
+        if ($dbuser) {
+            $fullname = $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username;
+            return array('id' => $userid, 'name' => $fullname);
+        } else {
+            return array('id' => $userid, 'name' => '???');
+        }
     }
     else {
         return array('id' => false, 'name' => '');
