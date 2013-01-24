@@ -69,7 +69,7 @@ function up1_meta_get_user($courseid, $field) {
             $fullname = $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username;
             return array('id' => $userid, 'name' => $fullname);
         } else {
-            return array('id' => $userid, 'name' => '???');
+            return array('id' => $userid, 'name' => '(id=' . $userid . ')');
         }
     }
     else {
