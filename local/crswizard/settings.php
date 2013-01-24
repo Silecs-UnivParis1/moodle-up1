@@ -31,4 +31,13 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
             PARAM_NOTAGS);
     $cohorts_cap_validator->plugin = 'local_crswizard';
     $settings->add($cohorts_cap_validator);
+
+    $email_notification_course_creation = new admin_setting_configtext(
+            'email_notification_course_creation',
+            'Email de notification (création cours)',
+            'Adresse Email recevant une notification à la création d\'un cours : une adresse email.',
+            '',
+            PARAM_NOTAGS);
+    $email_notification_course_creation->plugin = 'local_crswizard';
+    $settings->add($email_notification_course_creation);
 }
