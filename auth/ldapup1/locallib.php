@@ -10,12 +10,27 @@ function up1_user_metadata() {
 
     $res = array(
         'Ldap' => array(
-            'edupersonprimaryaffiliation' => array('name' => 'eduPersonPrimaryAffiliation', 'datatype' => 'text', 'locked' => 0),
+            'edupersonprimaryaffiliation' => array(
+                'name' => 'eduPersonPrimaryAffiliation',
+                'datatype' => 'text',
+                'locked' => 0,
+                'init' => '' // can be null ; initial value, not to be confused with the defaultdata field
+                ),
+            'supannentiteaffectationprincipale' => array(
+                'name' => 'supannEntiteAffectationPrincipale',
+                'datatype' => 'text',
+                'locked' => 0,
+                'init' => '' // can be null ; initial value, not to be confused with the defaultdata field
+                ),
         ),
     );
     return $res;
 }
 
+/**
+ * Insert user metadata categories in the custom_info_category table,
+ * @global type $DB
+ */
 function insert_user_metadata_categories() {
     global $DB;
     $metadata = up1_user_metadata();
@@ -38,7 +53,13 @@ function insert_user_metadata_categories() {
     }
 }
 
-function insert_user_metadata_fields() {
+/**
+ * Insert user metadata in the custom_info_field table,
+ *    and optionally values in the custom_info_table (warning, could be greedy)
+ * @global type $DB
+ * @param boolean $initialize if set, initialize all the objects to the value given by the $record->init field
+ */
+function insert_user_metadata_fields($initialize=false) {
     global $DB;
     $metadata = up1_user_metadata();
     $prefix = 'up1';
@@ -48,9 +69,9 @@ function insert_user_metadata_fields() {
         $catdb = $DB->get_record('custom_info_category', array('objectname'=>'user', 'name'=>$cat), 'id', MUST_EXIST);
         if ($catdb->id) {
             $sortorder = 0;
-            foreach ($fields as $shortname => $ofields) {
+            foreach ($fields as $shortname => $cif_fields) {
                 if ( $DB->record_exists('custom_info_field', array('objectname'=>'user', 'shortname'=>$prefix.$shortname)) ) {
-                    echo "$shortname already exists. Keeping it.\n";
+                    echo "$shortname already exists. Keeping it.<br />\n";
                     continue; // next field
                 }
                 $sortorder++;
@@ -59,14 +80,14 @@ function insert_user_metadata_fields() {
                 $record = new StdClass;
                 $record->objectname = 'user';
                 $record->shortname = $prefix . $shortname;
-                $record->name = $ofields['name'];
-                $record->datatype = $ofields['datatype'];
+                $record->name = $cif_fields['name'];
+                $record->datatype = $cif_fields['datatype'];
                 $record->description = '';
                 $record->descriptionformat = 1;
                 $record->categoryid = $catdb->id;
                 $record->sortorder = $sortorder;
                 $record->required = 0;
-                $record->locked = $ofields['locked'];
+                $record->locked = $cif_fields['locked'];
                 $record->visible = 2;
                 $record->forceunique = 0;
                 $record->signup = 0;
@@ -86,10 +107,36 @@ function insert_user_metadata_fields() {
                     $record->defaultdata = 0;
                     $record->defaultdataformat = 0;
                 }
+
                 $id = $DB->insert_record('custom_info_field', $record);
-                echo "OK. id=$id\n";
+                echo "OK. id=$id <br />\n";
+                if ( ! is_null($cif_fields['init']) ) {
+                    initialize_custom_data('user', $id, $cif_fields['init']);
+                }
             } // $shortname
         }
     } // $cat
-    echo "\n$fieldsnb champs créés.\n\n";
+    echo "\n$fieldsnb created fields.\n\n";
+}
+
+
+function initialize_custom_data($objectname, $fieldid, $data) {
+    global $DB;
+
+    $cnt=0;
+    $sql = "SELECT id FROM {".$objectname."} ";
+    $objectids = $DB->get_fieldset_sql($sql);
+    foreach ($objectids as $objectid) {
+        $record = new StdClass;
+        $record->objectname = $objectname;
+        $record->objectid = $objectid;
+        $record->fieldid = $fieldid;
+        $record->data = $data;
+        $record->dataformat = 0;
+        $dataid = $DB->insert_record('custom_info_data', $record, true, true);
+        if ($dataid) {
+            $cnt++;
+        }
+    }
+    echo "    $cnt objects have been initialized to [". $data ."].<br />\n\n";
 }

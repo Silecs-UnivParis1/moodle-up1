@@ -37,7 +37,15 @@ function xmldb_auth_ldapup1_upgrade($oldversion) {
         insert_user_metadata_categories();
 
         echo "\nCréation des champs :<br />\n";
-        insert_user_metadata_fields();
+        insert_user_metadata_fields(true);
+    }
+
+    if ($oldversion < 2013012404) {
+        echo "Création des catégories :<br />\n";
+        insert_user_metadata_categories();
+
+        echo "\nCréation des champs :<br />\n";
+        insert_user_metadata_fields(true);
     }
 
 
