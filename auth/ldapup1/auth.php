@@ -461,8 +461,10 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             print_string('userentriestoadd', 'auth_ldapup1', count($add_users));
             $logmsg .= count($add_users) . ' added.  ';
 
-            //** @todo à supprimer après réécriture lignes 493+
-            $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname'=>'user', 'shortname'=>'up1edupersonprimaryaffiliation'), MUST_EXIST);
+            //** for up1 metadata; cf BEGIN UP1 SILECS
+            $sql = "SELECT shortname, id FROM {custom_info_field} WHERE objectname='user' AND shortname like 'up1%'";
+            $ciffieldid = $DB->get_records_sql_menu($sql);
+
             $transaction = $DB->start_delegated_transaction();
             foreach ($add_users as $user) {
                 $user = $this->get_userinfo_asobj($user->username);
@@ -492,16 +494,19 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 // BEGIN UP1 SILECS custom user data from Ldap
                 //** @todo faire une boucle sur toutes les propriétés qui commencent par up1 au lieu de ce code adhoc
-                $record = new stdClass;
-                $record->fieldid = $fieldid;
-                $record->objectname = 'user';
-                $record->objectid = $id;
-                $record->data = $user->up1edupersonprimaryaffiliation;
-                $record->dataformat = 0;
-                if ($verb >=3) {
-                    echo "\n" . $user->username ." -> ". $record->data;
+                $userprops = get_object_vars($user);
+                foreach ($userprops as $prop => $value) {
+                    if ( preg_match('/^up1/', $prop) ) {
+                        $cidrecord = new stdClass;
+                        $cidrecord->fieldid = $ciffieldid[$prop];
+                        $cidrecord->objectname = 'user';
+                        $cidrecord->objectid = $id;
+                        $cidrecord->data = $value;
+                        $cidrecord->dataformat = 0;
+                        if ($verb >=3) {echo "\n    " . $user->username ." -> ". $cidrecord->data;}
+                        $DB->insert_record('custom_info_data', $cidrecord);
+                    }
                 }
-                $DB->insert_record('custom_info_data', $record);
                 // END UP1 SILECS
 
             }
@@ -783,7 +788,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $moodleattributes['username'] = textlib::strtolower(trim($this->config->user_attribute));
 
         // UP1 - SILECS addition
-        $customattrs = array('eduPersonPrimaryAffiliation');
+        $customattrs = array('eduPersonPrimaryAffiliation', 'supannEntiteAffectationPrincipale');
         //** @todo if possible, use custom user metadata description instead, where shortname begins with up1
         foreach ($customattrs as $attr) {
             $moodleattributes['up1' . strtolower($attr)] = strtolower($attr); // le second strtolower est bien nécessaire !

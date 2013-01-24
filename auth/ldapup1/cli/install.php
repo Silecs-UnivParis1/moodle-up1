@@ -8,5 +8,5 @@ echo "Création des catégories :\n";
 insert_user_metadata_categories();
 
 echo "\nCréation des champs :\n";
-insert_user_metadata_fields();
+insert_user_metadata_fields(true);
 

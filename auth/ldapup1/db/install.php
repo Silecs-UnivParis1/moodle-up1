@@ -16,11 +16,11 @@ require_once(__DIR__ . '/../locallib.php');
 function xmldb_auth_ldapup1_install() {
     global $CFG, $DB;
 
-    echo "Création des catégories :\n";
+    echo "Création des catégories :<br />\n";
     insert_user_metadata_categories();
 
-    echo "\nCréation des champs :\n";
-    insert_user_metadata_fields();
+    echo "\nCréation des champs :<br />\n";
+    insert_user_metadata_fields(true);
 
 }
 
