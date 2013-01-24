@@ -41,7 +41,8 @@ echo $OUTPUT->heading('Démo du sélecteur d\'utilisateurs');
 //<![CDATA[
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
-        minLength: 4
+        minLength: 4,
+        wsParams: { affiliation: 1 }
     });
 
     $('#roleteacher').on('change', function() {

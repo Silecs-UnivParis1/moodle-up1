@@ -15,6 +15,7 @@ $search_u->maxrows = $maxrows;
 $search_u->filterstudent = $filterstudent;
 $search_u->supann = false;
 $search_u->exclude = explode(',', $exclude);
+$search_u->affiliation = optional_param('affiliation', false, PARAM_BOOL); // ask for an "affiliation" field on each user
 $res  = $search_u->search($token);
 
 if (empty($callback)) {

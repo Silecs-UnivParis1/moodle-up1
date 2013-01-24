@@ -108,18 +108,81 @@
                     dataType: "jsonp",
                     data: wsParams,
                     success: function (data) {
-                        response(
-                            $.merge(
-                                [{ label: "Utilisateurs", source: "title" }],
-                                $.map(data, function (item) {
-                                    return { label: item.displayName, value: item.uid, source: 'users' };
-                            }))
-                        );
+                        transformUserItems(data);
+                        if ('affiliation' in wsParams && wsParams.affiliation) {
+                            data.sort(function(a,b){ return a.order - b.order; });
+                        }
+                        response(buildLabelList(data));
                     }
                 });
 
             }
         }
+    }
+
+    function transformUserItems(items) {
+        var h = {
+            '': "Autre",
+            employee: "Autre",
+            faculty: "Autre",
+            researcher: "Autre",
+            staff: "Biatss",
+            student: "Étudiants",
+            teacher: "Enseignants"
+        };
+        var categoryRank = {
+            "Enseignants": 1,
+            "Biatss": 2,
+            "Étudiants": 3,
+            "Autre": 4
+        }
+        var previousUserItemName = '';
+        for (var i=0; i < items.length; i++) {
+            // convert "affiliation" field into "category" field
+            if ('affiliation' in items[i]) {
+                if (items[i].affiliation && h[items[i].affiliation]) {
+                    items[i].category = h[items[i].affiliation];
+                } else {
+                    items[i].category = h[''];
+                }
+                items[i].order = categoryRank[items[i].category];
+            }
+            // mark duplicate fullnames with a "duplicate" field"
+            if (previousUserItemName && previousUserItemName == items[i].displayName) {
+                items[i-1].duplicate = true;
+                items[i].duplicate = true;
+            } else {
+                previousUserItemName = items[i].displayName;
+            }
+        }
+    }
+
+    function userItemToLabel(item) {
+        var $s = item.displayName;
+        if ('duplicate' in item && item.duplicate) {
+            $s += ' (' + item.uid + ' )';
+        }
+        if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
+            $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
+        }
+        return $s;
+    }
+
+    function buildLabelList(items) {
+        var lastCategory = '';
+        return $.map(items, function (item) {
+            if ('source' in item && item.source == 'title') {
+                return item;
+            } else if ('category' in item && item.category !== lastCategory) {
+                lastCategory = item.category;
+                return [
+                    { label: item.category, value: '', source: 'title' },
+                    { label: userItemToLabel(item), value: item.uid, source: 'users' }
+                ];
+            } else {
+                return { label: userItemToLabel(item), value: item.uid, source: 'users' };
+            }
+        });
     }
 
     function customRenderItem(ul, item) {
