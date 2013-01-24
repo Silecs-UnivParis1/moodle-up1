@@ -539,7 +539,8 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
             if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
                 $rofpath = $form2['path'][$rofid];
                 $tabpath = explode('_', $rofpath);
-                $rof1['idcat'] = rofpath_to_category($tabpath);
+                $rof1['tabpath'] = $tabpath;
+                $rof1['idcat'] = rof_rofpath_to_category($tabpath);
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
             $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
@@ -644,6 +645,18 @@ class core_wizard {
             $mydata->shortname = $rof1['apogee'] . ' - '
                 . $this->formdata['form_step2']['complement'];
             $mydata->idnumber = $rof1['idnumber'];
+
+            // metadonnee de rof1
+            $mdrof1 = rof_get_metadata($rof1['tabpath']);
+            foreach ($mdrof1 as $category => $data) {
+                if (count($data)) {
+                    foreach($data as $label => $value) {
+                        $champ = 'profile_field_'.$label;
+                        $mydata->$champ = $value;
+                    }
+                }
+            }
+
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
         }
