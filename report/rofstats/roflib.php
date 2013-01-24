@@ -311,9 +311,11 @@ function rof_get_metadata($rofobject) {
     $res['Diplome']['up1rythme']  = rof_constant_metadata('publicDiplome', $program->rythmedip);
     $res['Diplome']['up1langue']  = rof_constant_metadata('langueDiplome', $program->languedip);
 
-    $res['Indexation']['up1subprogram'] = $rofnamepath[2]; //valeur de subprogram
-    $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
-    $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
+    if (isset($rofnamepath[2])) {
+        $res['Indexation']['up1subprogram'] = $rofnamepath[2]; //valeur de subprogram
+        $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
+        $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
+    }
 
     $elp = array_pop($rofidpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
