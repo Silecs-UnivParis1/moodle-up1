@@ -12,3 +12,5 @@
 .selected-remove { cursor: pointer;}
 
 .teacher-item-block .teacher-item-selected { margin-right: 38px; padding: 3px 5px; background-color: #ededed; border: 1px solid #dad9c7; }
+
+.ui-autocomplete-loading { background: white url('ui-anim_basic_16x16.gif') right center no-repeat !important; }
