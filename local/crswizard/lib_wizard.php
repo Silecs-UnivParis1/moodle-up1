@@ -70,14 +70,14 @@ function get_list_category($idcategory) {
     return $tabcategory;
 }
 
-function send_course_request($message, $messagehtml) {
-    global $DB, $USER;
+function wizard_send_message_notification($subject, $message, $messagehtml) {
+    global $USER;
 
     $eventdata = new object();
     $eventdata->component = 'moodle';
     $eventdata->name = 'courserequested';
     $eventdata->userfrom = $USER;
-    $eventdata->subject = '[CourseWizardRequest]'; //** @todo get_string()
+    $eventdata->subject = $subject; //** @todo get_string()
     $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
     $eventdata->fullmessage = $message;
     $eventdata->fullmessagehtml = '';   //$messagehtml;
@@ -97,6 +97,23 @@ function send_course_request($message, $messagehtml) {
     // copie au demandeur
     $eventdata->userto = $USER;
     $res = message_send($eventdata);
+}
+
+/**
+ * Envoie un email à l'adresse mail spécifiée
+ * @param string $email
+ * @param string $subject,
+ * @param string $message
+ * @return false ou resultat de la fonction email_to_user()
+ **/
+function wizard_send_email($email, $subject, $message) {
+    if (!isset($email) && empty($email)) {
+        return false;
+    }
+    $supportuser = generate_email_supportuser();
+    $user = new stdClass();
+    $user->email = $email;
+    return email_to_user($user, $supportuser, $subject, $message);
 }
 
 function myenrol_cohort($courseid, $tabGroup) {

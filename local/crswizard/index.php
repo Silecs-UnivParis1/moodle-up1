@@ -184,7 +184,13 @@ switch ($stepin) {
             $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
             $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
         }
-        send_course_request($messages['text'], $messages['html']);
+        $mg_subject = '[CourseWizardRequest]';
+        // envoi des notification - messagerie interne
+        wizard_send_message_notification($mg_subject, $messages['text'], $messages['html']);
+        // envoi du mail à l'adresse du paramètre du plugin email_notification_course_creation
+        $config_email = get_config('local_crswizard', 'email_notification_course_creation');
+        wizard_send_email($config_email, $mg_subject, $messages['text']);
+
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));
         break;
