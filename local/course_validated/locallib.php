@@ -133,7 +133,7 @@ function get_table_course_to_validate($approbateurid) {
                 'class' => '' );
         } else {
             $row->cells[8] = new html_table_cell($rofname);
-            $row->cells[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'));
+            $row->cells[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
         }
 
         $row->cells[9] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible));
