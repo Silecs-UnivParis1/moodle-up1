@@ -461,6 +461,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
             print_string('userentriestoadd', 'auth_ldapup1', count($add_users));
             $logmsg .= count($add_users) . ' added.  ';
 
+            //** @todo à supprimer après réécriture lignes 493+
+            $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname'=>'user', 'shortname'=>'up1edupersonprimaryaffiliation'), MUST_EXIST);
             $transaction = $DB->start_delegated_transaction();
             foreach ($add_users as $user) {
                 $user = $this->get_userinfo_asobj($user->username);
@@ -490,7 +492,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
                 // BEGIN UP1 SILECS custom user data from Ldap
                 //** @todo faire une boucle sur toutes les propriétés qui commencent par up1 au lieu de ce code adhoc
-                $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname'=>'user', 'shortname'=>'up1edupersonprimaryaffiliation'), MUST_EXIST);
                 $record = new stdClass;
                 $record->fieldid = $fieldid;
                 $record->objectname = 'user';
