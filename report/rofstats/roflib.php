@@ -16,14 +16,14 @@ require_once(__DIR__ . '/../../local/rof_categories/locallib.php');
  * Get the first path for a course or a program
  * @param string $rofid Course ROFid, ex. UP1-C20867 or Program ROFid, ex. UP1-PROG18336
  */
-function getCourseFirstPath($rofid) {
+function rof_get_course_first_path($rofid) {
     global $DB;
     $currofid = $rofid;
     $rofpath = array();
     $namepath = array();
 
     do {
-        list($record, $stop) = rofGetRecord($currofid);
+        list($record, $stop) = rof_get_record($currofid);
         // $table = rofGetTable($currofid);
         // $record = $DB->get_record($table, array('rofid' => $currofid), '*', IGNORE_MISSING);
         $rofpath[] = $currofid;
@@ -41,9 +41,9 @@ function getCourseFirstPath($rofid) {
 
 /**
  * Get all paths leading to a course or a program
- * @param type $rofid
+ * @param string $rofid
  */
-function getCourseAllPaths($rofid) {
+function rof_get_course_all_paths($rofid) {
     global $DB;
     $prevlist = array(array($rofid));
     $round = 0;
@@ -54,7 +54,7 @@ function getCourseAllPaths($rofid) {
         $newlist = array();
         foreach ($prevlist as $path) {
             $tail = $path[count($path) - 1]; //dernier élément ; pop interdit car effet de bord
-            list($record, $locstop) = rofGetRecord($tail);
+            list($record, $locstop) = rof_get_record($tail);
 
             // $record = $DB->get_record($table, array('rofid' => $tail), '*', IGNORE_MISSING);
             if ($locstop) {
@@ -82,17 +82,17 @@ function getCourseAllPaths($rofid) {
 }
 
 /**
- * take the result from getCourseAllPaths (previous) and turns into a combined (rofid,name) array
+ * take the result from rof_get_course_all_paths (previous) and turns into a combined (rofid =>rofname) array
  * @global type $DB
  * @param array(array(string)) $pathlist
  */
-function getCourseAllPathnames($pathlist) {
+function rof_get_course_all_pathnames($pathlist) {
     global $DB;
     $res = array();
     foreach ($pathlist as $path) {
         $pathname = array();
         foreach ($path as $rofid) {
-            list($record, $stop) = rofGetRecord($rofid);
+            list($record, $stop) = rof_get_record($rofid);
             $pathname[] = $record->name;
         }
         $res[] = array_combine($path, $pathname);
@@ -102,16 +102,16 @@ function getCourseAllPathnames($pathlist) {
 
 
 /**
- * returns detailed path (with names) from rofid path
+ * returns combined path (with names) from rofid path
  * @global type $DB
- * @param array $path
- * @return associative array (rofid => name)
+ * @param array $rofidpath
+ * @return associative array (rofid => rofname)
  */
-function getCompletePath($path) {
+function get_combined_path($rofidpath) {
     global $DB;
     $res = array();
-    foreach ($path as $rofid) {
-        list($record, $ignore) = rofGetRecord($rofid);
+    foreach ($rofidpath as $rofid) {
+        list($record, $ignore) = rof_get_record($rofid);
         $res[$rofid] = $record->name;
     }
     return $res;
@@ -122,7 +122,7 @@ function getCompletePath($path) {
  * @param string $rofid
  * @return string table name
  */
-function rofGetTable($rofid) {
+function rof_get_table($rofid) {
     if (preg_match('/UP1-PROG/', $rofid)) {
         $table = 'rof_program';
     } elseif (preg_match('/UP1-C/', $rofid)) {
@@ -144,7 +144,7 @@ function rofGetTable($rofid) {
  * @param string $rofid
  * @return array(DB $record, bool $top) ; top set on component => stop climbing up the ROF tree
  */
-function rofGetRecord($rofid) {
+function rof_get_record($rofid) {
     global $DB;
     if (preg_match('/^UP1-PROG/', $rofid)) {
         $table = 'rof_program';
@@ -183,11 +183,11 @@ function rofGetRecord($rofid) {
  * @param bool $roflink : if set, rofid links to view.php
  * @return string
  */
-function fmtPath($pathArray, $format='rofid', $roflink=false) {
+function rof_format_path($pathArray, $format='rofid', $roflink=false) {
     $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
-        $linkrofid = ($roflink ? rofid_link($rofid) : $rofid);
+        $linkrofid = ($roflink ? rof_rofid_link($rofid) : $rofid);
         switch($format) {
             case 'rofid':
                 $ret .= ' / ' . $linkrofid;
@@ -213,7 +213,7 @@ function fmtPath($pathArray, $format='rofid', $roflink=false) {
  * @param string $rofid
  * @return string url
  */
-function rofid_link($rofid) {
+function rof_rofid_link($rofid) {
     $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
     return html_writer::link($url, $rofid);
 }
@@ -221,7 +221,7 @@ function rofid_link($rofid) {
 /**
  * returns an ordered list for typedip, to use in SQL FIND_IN_SET()
  */
-function typeDiplomeOrderedList() {
+function rof_typeDiplome_ordered_list() {
     global $DB;
     $sql = "SELECT GROUP_CONCAT(dataimport) AS list FROM {rof_constant} WHERE element LIKE 'typeDiplome' ORDER BY id";
     $res = $DB->get_record_sql($sql)->list;
@@ -237,7 +237,7 @@ function typeDiplomeOrderedList() {
 function rof_view_record($rofid) {
 
     $res = array();
-    list($dbprog, $stop) = rofGetRecord($rofid);
+    list($dbprog, $stop) = rof_get_record($rofid);
     if ( ! $dbprog ) {
         echo "Mauvais identifiant (rofid) : $rofid.";
         return false;
@@ -258,7 +258,12 @@ function rof_view_record($rofid) {
 }
 
 
-
+/**
+ * turn rof information from a rofobject into loosely formatted (up1) course metadata
+ * @global type $DB
+ * @param mixed $rofobject = rofid (string) OR rofidpath (array(rofid)) OR combined path (array(rofid => rofname))
+ * @return array
+ */
 function rof_get_metadata($rofobject) {
     global $DB;
     $res = array('Identification' => array(),
@@ -269,16 +274,26 @@ function rof_get_metadata($rofobject) {
     if ($rofobject === FALSE) {
         return $res;
     }
-    if (is_array($rofobject) ) {
-        $path = $rofobject;
+
+    // $rofobject conversion into $rofnamepath + $rofidpath
+    if ( is_array($rofobject) ) {
+        $keys = array_keys($rofobject);
+        $values = array_values($rofobject);
+        if ($keys[0] == '0') { // simple array
+            $rofidpath = $values;
+            $combinedpath = get_combined_path($values);
+            $rofnamepath = array_values($combinedpath);
+        } else {    //associative array
+            $rofnamepath = array_values($rofobject);
+            $rofidpath = array_keys($rofobject);
+        }
     } else {
-        $path = getCourseFirstPath($rofobject);
+        $combinedpath = rof_get_course_first_path($rofobject);
+        $rofnamepath = array_values($combinedpath);
+        $rofidpath = array_keys($combinedpath);
     }
 
-    $namepath = array_values($path);
-    $rofpath = array_keys($path);
-
-    $program = $DB->get_record('rof_program', array('rofid' => $rofpath[1])); //diplome (en général)
+    $program = $DB->get_record('rof_program', array('rofid' => $rofidpath[1])); //diplome (en général)
     $res['Diplome']['up1diplome'] = $program->name;
     $res['Diplome']['up1acronyme'] = $program->acronyme;
     $res['Diplome']['up1mention'] = $program->mention;
@@ -286,18 +301,18 @@ function rof_get_metadata($rofobject) {
     if ( preg_match('/^.* parcours (.*)$/', $program->name, $matches) ) {
         $res['Diplome']['up1parcours'] = $matches[1];
     }
-    $res['Diplome']['up1type']    = constant_metadata('typeDiplome', $program->typedip);
-    $res['Diplome']['up1domaine'] = constant_metadata('domaineDiplome', $program->domainedip);
-    $res['Diplome']['up1nature']  = constant_metadata('natureDiplome', $program->naturedip);
-    $res['Diplome']['up1cycle']   = constant_metadata('cycleDiplome', $program->cycledip);
-    $res['Diplome']['up1rythme']  = constant_metadata('publicDiplome', $program->rythmedip);
-    $res['Diplome']['up1langue']  = constant_metadata('langueDiplome', $program->languedip);
+    $res['Diplome']['up1type']    = rof_constant_metadata('typeDiplome', $program->typedip);
+    $res['Diplome']['up1domaine'] = rof_constant_metadata('domaineDiplome', $program->domainedip);
+    $res['Diplome']['up1nature']  = rof_constant_metadata('natureDiplome', $program->naturedip);
+    $res['Diplome']['up1cycle']   = rof_constant_metadata('cycleDiplome', $program->cycledip);
+    $res['Diplome']['up1rythme']  = rof_constant_metadata('publicDiplome', $program->rythmedip);
+    $res['Diplome']['up1langue']  = rof_constant_metadata('langueDiplome', $program->languedip);
 
-    $res['Indexation']['up1subprogram'] = $namepath[2]; //valeur de subprogram
-    $res['Indexation']['up1semestre'] = rof_guess_semester($namepath[2]);
+    $res['Indexation']['up1subprogram'] = $rofnamepath[2]; //valeur de subprogram
+    $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
     $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
 
-    $elp = array_pop($rofpath);
+    $elp = array_pop($rofidpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
     $res['Indexation']['up1composition'] = $course->composition;
     $res['Identification']['up1complement'] = $course->composition;
@@ -318,7 +333,7 @@ function rof_get_metadata($rofobject) {
  * @param type $rawdata reference to the rof_constant table, column dataimport
  * @return string
  */
-function constant_metadata($element, $rawdata) {
+function rof_constant_metadata($element, $rawdata) {
     global $DB;
     return '(' . $rawdata. ') '.
             $DB->get_field('rof_constant', 'value', array('element' => $element, 'dataimport' => $rawdata));
@@ -370,7 +385,7 @@ function rof_guess_year($semestreint, $typedip) {
     }
 }
 
-function fmt_rof_metadata($metadata) {
+function rof_format_metadata($metadata) {
     $output = "<ul>\n";
     foreach ($metadata as $cat => $data) {
         $output .= "  <li>" . $cat . "</li>\n  <ul>\n";
@@ -388,7 +403,7 @@ function rof_insert_paths_statistics($verb=0) {
 
     $courses = $DB->get_records('rof_course', array(), '', 'id,rofid');
     foreach ($courses as $course) {
-        $paths = count(getCourseAllPaths($course->rofid));
+        $paths = count(rof_get_course_all_paths($course->rofid));
         if ($verb >=1 ) { echo '.'; }
         $dbcourse = new stdClass();
         $dbcourse->id = $course->id;
@@ -406,7 +421,7 @@ function rof_insert_paths_statistics($verb=0) {
  * @return int (category id) OR false if an error occurred
  * @throws coding_exception
  */
-function rofpath_to_category($rofpath) {
+function rof_rofpath_to_category($rofpath) {
     global $DB;
 
     if ( count($rofpath) < 2 || ! is_array($rofpath) ) {

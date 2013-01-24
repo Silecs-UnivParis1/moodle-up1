@@ -13,7 +13,7 @@ require('../roflib.php');
 
 $path = array('27', 'UP1-PROG37797', 'UP1-PROG25375');
 //27-Mathématiques et Informatique / Licence Informatique (MIAGE classique) /  Semestre 5 L3
-$catid = rofpath_to_category($path);
+$catid = rof_rofpath_to_category($path);
 echo "$catid";
 $categorie = $DB->get_record('course_categories', array('id' => $catid));
 var_dump ($categorie);

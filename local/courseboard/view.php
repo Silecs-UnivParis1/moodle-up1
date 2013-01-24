@@ -55,11 +55,11 @@ echo "</ul>\n";
 
     if ( $rofcourse ) {
         echo "<h3>Tous les chemins : </h3>\n";
-        $allPaths = getCourseAllPaths($rofcourse->rofid);
-        $allPathnames = getCourseAllPathnames($allPaths);
+        $allPaths = rof_get_course_all_paths($rofcourse->rofid);
+        $allPathnames = rof_get_course_all_pathnames($allPaths);
         echo '<ol>';
         foreach ($allPathnames as $pathname) {
-            echo '<li>' . fmtPath($pathname, 'combined', true) . '</li>';
+            echo '<li>' . rof_format_path($pathname, 'combined', true) . '</li>';
         }
         echo '</ol>';
     } else {
