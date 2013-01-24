@@ -35,6 +35,21 @@ function report_up1stats_users() {
     return $res;
 }
 
+function report_up1stats_users_by_affiliation() {
+    global $DB;
+    $res = array();
+
+    $fieldid = $DB->get_field('custom_info_field', 'id',
+            array('objectname'=>'user', 'shortname'=>'up1edupersonprimaryaffiliation'), MUST_EXIST);
+    $sql = "SELECT data, count(id) as cnt FROM {custom_info_data} WHERE fieldid = ? GROUP BY data";
+    $rows = $DB->get_records_sql($sql, array($fieldid));
+    foreach ($rows as $row) {
+        $res[] = array($row->data, $row->cnt);
+    }
+    return $res;
+}
+
+
 function report_up1stats_cohorts_generic() {
     global $DB;
     $res = array();
