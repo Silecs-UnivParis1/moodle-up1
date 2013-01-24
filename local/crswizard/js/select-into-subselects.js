@@ -69,7 +69,7 @@ var buildSelectLine = function(subselect, depth) {
     var line = $('<div class="fitem required fitem_fselect" data-depth="' + depth + '">');
     if (labels && depth in labels) {
         line.append(
-            $('<div class="fitemtitle">').append($('<label>').text(labels[depth]))
+            $('<div class="fitemtitle">').append($('<label>').text(labels[depth]+' *'))
         );
     }
     line.append($('<div class="felement fselect">').append(subselect));

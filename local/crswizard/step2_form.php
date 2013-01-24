@@ -34,6 +34,8 @@ class course_wizard_step2_form extends moodleform {
                     'data-labels' => '["Période :", "Établissement :", "Composante :", "Type de diplôme :"]'
                 )
         );
+        $mform->addRule('category', "Ces 4 champs doivent tous être remplis.", 'required', null, 'client');
+        $mform->addRule('category', "Ces 4 champs doivent tous être remplis.", 'nonzero', null, 'client');
 
         $mform->addElement('header', 'general', get_string('generalinfoblock', 'local_crswizard'));
 
