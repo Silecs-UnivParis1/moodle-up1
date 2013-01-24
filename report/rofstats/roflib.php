@@ -5,7 +5,7 @@
  *
  * @package    report
  * @subpackage rofstats
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -244,7 +244,7 @@ function rof_view_record($rofid) {
     }
     foreach (get_object_vars($dbprog) as $key => $value) {
         if ($key == 'courses' || $key == 'sub') {
-            $links = join(',', array_map('rofid_link', explode(',', $value)));
+            $links = join(',', array_map('rof_rofid_link', explode(',', $value)));
             $res[] = array($key, $links);
         } else {
             $res[] = array($key, $value);
@@ -293,6 +293,9 @@ function rof_get_metadata($rofobject) {
         $rofidpath = array_keys($combinedpath);
     }
 
+    $res['Identification']['up1rofpath'] = '/' . join('/', $rofnamepath);
+    $res['Identification']['up1rofpathid'] = '/' . join('/', $rofidpath);
+
     $program = $DB->get_record('rof_program', array('rofid' => $rofidpath[1])); //diplome (en général)
     $res['Diplome']['up1diplome'] = $program->name;
     $res['Diplome']['up1acronyme'] = $program->acronyme;
@@ -314,15 +317,28 @@ function rof_get_metadata($rofobject) {
 
     $elp = array_pop($rofidpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
-    $res['Indexation']['up1composition'] = $course->composition;
-    $res['Identification']['up1complement'] = $course->composition;
-    $res['Identification']['up1nom'] = $course->name;
-    $res['Identification']['up1rofid'] = $course->rofid;
-    $res['Identification']['up1code'] = $course->code;
-    $res['Identification']['up1nomnorme'] = $course->code .' - '. $course->name .' - '. $course->composition;
-    $res['Identification']['up1abregenorme'] = $course->code .' - '. $course->composition;
-    $res['Cycle de vie - création']['up1responsable'] = $course->refperson;
-
+    if ($course) {
+        $res['Indexation']['up1composition'] = $course->composition;
+        $res['Identification']['up1complement'] = $course->composition;
+        $res['Identification']['up1nom'] = $course->name;
+        $res['Identification']['up1rofid'] = $course->rofid;
+        $res['Identification']['up1rofname'] = $course->name;
+        $res['Identification']['up1code'] = $course->code;
+        $res['Identification']['up1nomnorme'] = $course->code .' - '. $course->name .' - '. $course->composition;
+        $res['Identification']['up1abregenorme'] = $course->code .' - '. $course->composition;
+        $res['Cycle de vie - création']['up1responsable'] = $course->refperson;
+    } else { // Les valeurs du diplôme si pertinent
+        $defaultcourse = '';
+        $res['Indexation']['up1composition'] = $defaultcourse;
+        $res['Identification']['up1complement'] = $defaultcourse;
+        $res['Identification']['up1nom'] = $program->name;
+        $res['Identification']['up1rofid'] = $program->rofid;
+        $res['Identification']['up1rofname'] = $program->name;
+        $res['Identification']['up1code'] = $defaultcourse;
+        $res['Identification']['up1nomnorme'] = $program->rofid .' - '. $program->name;
+        $res['Identification']['up1abregenorme'] = $program->rofid .' - '. $program->name;
+        $res['Cycle de vie - création']['up1responsable'] = $defaultcourse;
+    }
     return $res;
 }
 
