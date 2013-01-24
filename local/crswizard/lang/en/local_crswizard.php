@@ -60,16 +60,17 @@ $string['bockhelpE5'] = '<p>Cette étape vous permet de sélectionner les groupe
     . '<li>Recherchez ensuite le groupe d\'utilisateurs dans l\'annuaire de l\'université, en saisissant, '
     . 'par exemple, son intitulé ou une partie de son intitulé ou le nom d\'un étudiant appartenant à ce groupe.</li>'
     . '<li>Cliquez sur le symbole « + » pour inscrire ce groupe d\'utilisateurs à cet espace.</li></ol>';
-$string['bockhelpE7'] = '<p>Votre demande de création d\'espace de cours est arrivée à son terme.<br/>'
+$string['bockhelpE7p1'] = '<p>Votre demande de création d\'espace de cours est arrivée à son terme.<br/>'
     . 'Conseil : affichez le récapitulatif de cette dernière de manière à vérifier les éléments que vous '
     . 'avez saisis. En cas d\'erreur ou d\'omission, il vous est possible revenir en arrière en cliquant '
-    . 'sur le bouton « Etape précédente ».</p>'
-    . '<p>En cliquant sur le bouton « Terminer », vous déclencherez :<ul>'
+    . 'sur le bouton « Etape précédente ».</p><p>En cliquant sur le bouton « Terminer », vous déclencherez :<ul>'
     . '<li>la création de cet espace, qui sera pour l\'instant masqué à vos utilisateurs, mais que vous '
-    . 'pourrez vous-même rendre visible lors de sa première utilisation,</li>'
-    . '<li>a transmission de cette demande -pour approbation- aux modérateurs de la plateforme</li>'
-    . '<li>et l’envoi d’un courriel récapitulatif de cette demande à l’adresse :';
-$string['bockhelpE7s'] = '</li></ul></p>';
+    . 'pourrez vous-même rendre visible lors de sa première utilisation,</li>';
+$string['bockhelpE7p2c2'] = '<li>la transmission de cette demande -pour approbation- à l\'utilisateur '
+    . 'que vous avez désigné et/ou aux modérateurs de la plateforme</li>';
+$string['bockhelpE7p2c3'] = '<li>la transmission de cette demande -pour approbation- aux modérateurs de la plateforme</li>';
+$string['bockhelpE7p3'] = '<li>et l’envoi d’un courriel récapitulatif de cette demande à l’adresse : ';
+$string['bockhelpE7p4'] = '</li></ul></p>';
 $string['blocktitleE3Rof1'] = 'Enseignant non responsable de l\'élément pédagogique : désignation d\'un approbateur';
 $string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
 $string['blocktitleE5'] = 'Étudiants : inscriptions par cohortes';
