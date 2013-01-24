@@ -46,6 +46,9 @@ class mws_search_users {
     /** @var string 'no' (no students) | 'only' | 'both' (default) */
     public $filterstudent = 'both';
 
+    /** @var boolean Add a field "affiliation" to each user returned */
+    public $affiliation = false;
+
     /** @var boolean */
     public $supann = true;
 
@@ -53,6 +56,8 @@ class mws_search_users {
     public $exclude = array();
 
     private $exclude_map = array();
+
+    const affiliationFieldName = 'up1edupersonprimaryaffiliation';
 
     /**
      * Checks that the parameters are valid, and ints some helper properties.
@@ -85,15 +90,21 @@ class mws_search_users {
         $this->init();
         $ptoken = $DB->sql_like_escape($token) . '%';
 
-        $sql = "SELECT id, username, firstname, lastname FROM {user} WHERE "
-            . "( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
-            . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )" ;
+        $select = "SELECT u.id, u.username, u.firstname, u.lastname";
+        $from =  "FROM {user} u";
+        $where = "WHERE ( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
+                . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )";
         if ($this->filterstudent == 'no') {
-            $sql .= " AND idnumber = '' ";
+            $where = " AND idnumber = '' ";
         } else if ($this->filterstudent == 'only') {
-            $sql .= " AND idnumber != '' ";
+            $where = " AND idnumber != '' ";
         }
-        $sql .= "ORDER BY lastname ASC, firstname ASC";
+        if ($this->affiliation) {
+            $fieldId = $this->getAffiliationFieldId();
+            $select .= ", d.data AS affiliation ";
+            $from .= " LEFT JOIN custom_info_data d ON (d.fieldid = $fieldId AND d.objectid = u.id) ";
+        }
+        $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
         $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
@@ -102,21 +113,39 @@ class mws_search_users {
             if (isset($this->exclude_map[$record->username])) {
                 continue;
             }
+            $user = array(
+                    'uid' => $record->username,
+                    'displayName' => $record->firstname . ' ' . $record->lastname,
+            );
             if ($this->supann) {
                 $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
-                $users[] = array(
-                    'uid' => $record->username,
-                    'displayName' => $record->firstname .' '. $record->lastname,
-                    'supannEntiteAffectation' => array_unique(array_map('groupNameToShortname', array_values($res))),
-                );
-            } else {
-                $users[] = array(
-                    'uid' => $record->username,
-                    'displayName' => $record->firstname .' '. $record->lastname,
-                );
+                $user['supannEntiteAffectation'] = array_unique(array_map('groupNameToShortname', array_values($res)));
             }
+            if ($this->affiliation) {
+                $user['affiliation'] = $record->affiliation;
+            }
+            $users[] = $user;
         }
         return $users;
+    }
+
+    /**
+     * Returns the ID of the custom_info_field used for affiliation.
+     *
+     * @global moodle_database $DB
+     * @return integer ID of the custom_info_field
+     */
+    private function getAffiliationFieldId() {
+        global $DB;
+        static $fieldId = null;
+        if (!isset($fieldId)) {
+            $fieldId = (int) $DB->get_field(
+                    'custom_info_field',
+                    'id',
+                    array('objectname' => 'user', 'shortname' => self::affiliationFieldName)
+            );
+        }
+        return (int) $fieldId;
     }
 }
 
