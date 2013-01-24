@@ -28,13 +28,19 @@ echo $OUTPUT->heading(get_string('pluginname', 'report_up1stats'));
 $url = "$CFG->wwwroot/report/up1stats/index.php";
 
 
-echo "<h3>Connecteurs Annuaire / Groupes</h3>\n";
+echo "<h2>Connecteurs Annuaire / utilisateurs</h2>\n";
 $table = new html_table();
 $table->head = array('Items', 'Nb');
 $table->data = report_up1stats_users();
 echo html_writer::table($table);
 
-echo "<h3>Cohortes</h3>\n";
+$table = new html_table();
+$table->head = array('Affiliation', 'Nb');
+$table->data = report_up1stats_users_by_affiliation();
+echo html_writer::table($table);
+
+
+echo "<h2>Cohortes</h2>\n";
 $table = new html_table();
 $table->head = array('Items', 'Nb');
 $table->data = report_up1stats_cohorts_generic();
@@ -67,7 +73,7 @@ echo html_writer::table($table);
 $linkdetails = html_writer::link(
         new moodle_url('/report/up1stats/lastsync.php', array('number'=>50)),
         'Détails');
-echo "<h3>Last synchronizations ". $linkdetails ." </h3>\n";
+echo "<h2>Dernières synchronisations ". $linkdetails ." </h2>\n";
 $table = new html_table();
 $table->head = array('Reference', 'Begin', 'End');
 $table->data = report_up1stats_last_sync();
