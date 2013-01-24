@@ -22,10 +22,12 @@ class course_wizard_step_confirm extends moodleform {
         $myconfig = new my_elements_config();
 
         $mform = $this->_form;
-
-        $mgConf1 = get_string('bockhelpE7', 'local_crswizard');
-        $mgConf2 = get_string('bockhelpE7s', 'local_crswizard');
-        $identifValidateurs = '[Prénom Nom du modérateur et/ou membres du service TICE]';
+        $case = $SESSION->wizard['wizardcase'];
+        $mgConf1 = get_string('bockhelpE7p1', 'local_crswizard');
+        $mgConf1 .= get_string('bockhelpE7p2c'.$case, 'local_crswizard');
+        $mgConf1 .= get_string('bockhelpE7p3', 'local_crswizard');
+        $mgConf2 = get_string('bockhelpE7p4', 'local_crswizard');
+        $identifValidateurs = $USER->email;
         $mform->addElement('html', html_writer::tag('div',
             $mgConf1 . $identifValidateurs . $mgConf2, array('class' => 'fitem', 'id' => 'bockhelpE7')));
 
