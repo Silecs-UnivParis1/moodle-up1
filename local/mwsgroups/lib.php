@@ -119,7 +119,9 @@ class mws_search_users {
             );
             if ($this->supann) {
                 $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
-                $user['supannEntiteAffectation'] = array_unique(array_map('groupNameToShortname', array_values($res)));
+                $user['supannEntiteAffectation'] = array_unique(
+                        array_map(array('self', 'groupNameToShortname'), array_values($res))
+                );
             }
             if ($this->affiliation) {
                 $user['affiliation'] = $record->affiliation;
@@ -127,6 +129,18 @@ class mws_search_users {
             $users[] = $user;
         }
         return $users;
+    }
+
+    /**
+     * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5082)
+     * @param string $name group/cohort name for a "structures-.*" group/cohort
+     * @return string short name, ex. 'UFR 05'
+     */
+    private static function groupNameToShortname($name) {
+        if (preg_match('/(.*?)\s*:/', $name, $matches))
+          return $matches[1];
+        else
+          return $name;
     }
 
     /**
@@ -243,18 +257,6 @@ function mws_userGroupsId($uid) {
 }
 
 
-
-/**
- * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5082)
- * @param string $name group/cohort name for a "structures-.*" group/cohort
- * @return string short name, ex. 'UFR 05'
- */
-function groupNameToShortname($name) {
-    if (preg_match('/(.*?)\s*:/', $name, $matches))
-      return $matches[1];
-    else
-      return $name;
-}
 
 /**
  * function provided by Pascal Rigaux, cf http://tickets.silecs.info/mantis/view.php?id=1642 (5089)
