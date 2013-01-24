@@ -9,7 +9,8 @@
 define('NO_OUTPUT_BUFFERING', false);
 global $DB;
 require('../../config.php');
-require_once($CFG->dirroot.'/report/rofstats/locallib.php'); // to get ROF data
+require_once($CFG->dirroot.'/report/rofstats/roflib.php'); // to get ROF data
+require_once($CFG->dirroot.'/local/up1_metadata/lib.php'); // to get prepared metadata
 require_once($CFG->libdir.'/adminlib.php');
 require_once('locallib.php');
 
@@ -40,9 +41,8 @@ echo "<li>No identification : ". ( ! empty($course->idnumber) ? $course->idnumbe
 echo "</ul>\n";
 
     // ROF data
-    if ( ! empty($course->idnumber) ) {
-        $rofcourse = $DB->get_record('rof_course', array('code' => $course->idnumber));
-        $rofid = $rofcourse->rofid;
+    if ( $rofid = up1_meta_get_text($crsid, 'up1rofid') ) {
+        $rofcourse = $DB->get_record('rof_course', array('rofid' => $rofid));
     } else {
         $rofcourse = FALSE;
         $rofid = FALSE;
