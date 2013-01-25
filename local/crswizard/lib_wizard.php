@@ -972,7 +972,6 @@ class core_wizard {
         $eventdata->smallmessage = $mgv; // USED BY DEFAULT !
         // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
 
-        /**
         // envoi aux supervalidateurs
         $systemcontext = get_context_instance(CONTEXT_SYSTEM);
         $supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator');
@@ -983,7 +982,6 @@ class core_wizard {
                 // @todo Handle messaging errors
             }
         }
-        **/
 
         // envoi à l'approbateur si besoin
         $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
