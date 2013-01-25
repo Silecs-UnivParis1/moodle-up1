@@ -48,11 +48,9 @@ class mws_search_users {
 
     /** @var boolean Add a field "affiliation" to each user returned */
     public $affiliation = false;
-    /** @var boolean Add a field "affectation" to each user returned */
-    public $affectation = false;
 
     /** @var boolean */
-    public $supann = true;
+    public $affectation = true;
 
     /** @var array */
     public $exclude = array();
@@ -60,7 +58,6 @@ class mws_search_users {
     private $exclude_map = array();
 
     const affiliationFieldName = 'up1edupersonprimaryaffiliation';
-    const affectationFieldName = 'up1supannentiteaffectationprincipale';
 
     /**
      * Checks that the parameters are valid, and ints some helper properties.
@@ -107,12 +104,6 @@ class mws_search_users {
             $select .= ", d1.data AS affiliation ";
             $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
         }
-        if ($this->affectation) {
-            $fieldId = $this->getAffectationFieldId();
-            $select .= ", d2.data AS affectation ";
-            $from .= " LEFT JOIN custom_info_data d2 ON (d2.fieldid = $fieldId AND d2.objectid = u.id) ";
-            $components = $DB->get_records_menu('rof_component', array(), 'import', 'import, name');
-        }
         $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
@@ -126,7 +117,7 @@ class mws_search_users {
                     'uid' => $record->username,
                     'displayName' => $record->firstname . ' ' . $record->lastname,
             );
-            if ($this->supann) {
+            if ($this->affectation) {
                 $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
                 $user['supannEntiteAffectation'] = array_unique(
                         array_map(array('self', 'groupNameToShortname'), array_values($res))
@@ -134,14 +125,6 @@ class mws_search_users {
             }
             if ($this->affiliation) {
                 $user['affiliation'] = $record->affiliation;
-            }
-            if ($this->affectation) {
-                $ufr = substr($record->affectation, 1,2); // U04 -> 04
-                if (isset($components[$ufr])) {
-                    $user['affectation'] = $components[$ufr];
-                } else {
-                    $user['affectation'] = $record->affectation;
-                }
             }
             $users[] = $user;
         }
@@ -178,26 +161,6 @@ class mws_search_users {
         }
         return (int) $fieldId;
     }
-
-    /**
-     * Returns the ID of the custom_info_field used for affectation.
-     *
-     * @global moodle_database $DB
-     * @return integer ID of the custom_info_field
-     */
-    private function getAffectationFieldId() {
-        global $DB;
-        static $fieldId = null;
-        if (!isset($fieldId)) {
-            $fieldId = (int) $DB->get_field(
-                    'custom_info_field',
-                    'id',
-                    array('objectname' => 'user', 'shortname' => self::affectationFieldName)
-            );
-        }
-        return (int) $fieldId;
-    }
-
 
 }
 
