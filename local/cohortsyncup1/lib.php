@@ -4,7 +4,7 @@
 /**
  * @package    local
  * @subpackage cohortsyncup1
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,7 +34,8 @@ function cohorts_cleanall() {
 function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 {
     global $CFG, $DB;
-    $wsallgroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
+    $ws_allGroups = get_config('local_cohortsyncup1', 'ws_allGroups');
+    // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $cnt = array('create' => 0, 'modify' => 0, 'pass' => 0, 'noop' => 0);
     $count = 0;
     $wstimeout = 5;
@@ -44,7 +45,7 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
-    curl_setopt($ch, CURLOPT_URL, $wsallgroups);
+    curl_setopt($ch, CURLOPT_URL, $ws_allGroups);
     $data = json_decode(curl_exec($ch));
     add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:begin', '', "From allGroups since $timelast");
 
@@ -67,23 +68,23 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
                 if ( $newid > 0 ) {
                     $cnt['create']++;
                 }
-                if ($verbose >= 3) echo '+'; // progress bar
+                if ($verbose >= 3) echo '+'; // cohort created -> progress bar
             } else { // cohort exists ; must be modified
                 list($update, $thiscohort) = update_cohort($cohort);
                 if ($update) { // modified => to update
                     cohort_update_cohort($thiscohort);
                     $cnt['modify']++;
-                    if ($verbose >= 3) echo 'M'; // progress bar
+                    if ($verbose >= 3) echo 'M'; // cohort modified -> progress bar
                 } else { // nothing modified since last sync !
                     $cnt['noop']++;
-                    if ($verbose >= 3) echo '='; // progress bar
+                    if ($verbose >= 3) echo '='; // cohort not modified (noop) -> progress bar
                 }
             }
         } // foreach($data)
         $logmsg = "\nAll cohorts : " . $cnt['pass']. " passed, " . $cnt['noop']. " noop, "
                 . $cnt['modify']. " modified, " . $cnt['create']. " created.\n";
     } else {
-        $logmsg = "\nUnable to fetch data from: " . $wsallgroups . "\n" ;
+        $logmsg = "\nUnable to fetch data from: " . $ws_allGroups . "\n" ;
     }
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:end', '', "From users. " . $logmsg);
@@ -102,8 +103,9 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     global $CFG, $DB;
 
     add_to_log(0, 'local_cohortsyncup1', 'sync:begin', '', "From users since $timelast");
-    // $wsgroups = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
-    $wsgroups = 'http://wsgroups.univ-paris1.fr/userGroupsAndRoles';
+    $ws_userGroupsAndRoles = get_config('local_cohortsyncup1', 'ws_userGroupsAndRoles');
+    // $ws_userGroupsAndRoles = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
+    // $ws_userGroupsAndRoles = 'http://wsgroups.univ-paris1.fr/userGroupsAndRoles';
     $wstimeout = 5;
     $ref_plugin = 'auth_ldapup1';
     $param = 'uid';   // ex. parameter '?uid=e0g411g01n6'
@@ -135,7 +137,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     foreach ($users as $userid => $username) {
         $cntUsers++;
         $localusername = strstr($username, '@', true);
-        $requrl = $wsgroups . '?uid=' . $localusername;
+        $requrl = $ws_userGroupsAndRoles . '?uid=' . $localusername;
         $memberof = array(); //to compute memberships to be removed
 
         curl_setopt($ch, CURLOPT_URL, $requrl);
