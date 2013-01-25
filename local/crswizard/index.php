@@ -169,27 +169,28 @@ switch ($stepin) {
         $errorMsg = $corewizard->create_course_to_validate();
         // envoi message
         $messages = $corewizard->get_messages();
+        $remarques = '';
         if (isset($SESSION->wizard['form_step7']['remarques']) && $SESSION->wizard['form_step7']['remarques'] != '') {
-            $messages['html'] .= '<p>La demande est accompagnée de la remarque suivante : <div>'
-                    . strip_tags($SESSION->wizard['form_step7']['remarques']) . '</div></p>';
-            $messages['text'] .= "\n" . 'La demande est accompagnée de la remarque suivante : ' . "\n"
-                    . strip_tags($SESSION->wizard['form_step7']['remarques']);
+            $remarques  .= "\n\n\n---------------\n"
+                . 'La demande est accompagnée de la remarque suivante : ' . "\n\n"
+                . strip_tags($SESSION->wizard['form_step7']['remarques']);
+            $remarques  .= "\n\n---------------\n\n";
         }
 
         $recap = $corewizard->get_recapitulatif_demande();
-        $messages['text'] .= $recap;
-        $messages['html'] .= $recap;
+        $messages['mgvalidator'] .= $remarques . $recap;
+        $messages['mgcreator'] .= $remarques . $recap;
 
         if (isset($errorMsg) && $errorMsg!='') {
-            $messages['text'] .= "\n\nErreur lors de la demande :\n" . $errorMsg;
-            $messages['html'] .= "<div><h3>Erreur lors de la demande</h3>" . $errorMsg . '</div>';
+            $messages['mgvalidator'] .= "\n\n\nErreur lors de la demande :\n" . $errorMsg;
+            $messages['mgcreator'] .= "\n\n\nErreur lors de la demande :\n" . $errorMsg;
         }
-        $mg_subject = '[CourseWizardRequest]';
+
         // envoi des notification - messagerie interne
-        wizard_send_message_notification($mg_subject, $messages['text'], $messages['html']);
+        $corewizard->send_message_notification($messages['mgcreator'], $messages['mgvalidator']);
         // envoi du mail à l'adresse du paramètre du plugin email_notification_course_creation
         $config_email = get_config('local_crswizard', 'email_notification_course_creation');
-        wizard_send_email($config_email, $mg_subject, $messages['text']);
+        wizard_send_email($config_email, $corewizard->get_email_subject('approbation'), $messages['mgvalidator']);
 
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));

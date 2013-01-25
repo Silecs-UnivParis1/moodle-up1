@@ -70,35 +70,6 @@ function get_list_category($idcategory) {
     return $tabcategory;
 }
 
-function wizard_send_message_notification($subject, $message, $messagehtml) {
-    global $USER;
-
-    $eventdata = new object();
-    $eventdata->component = 'moodle';
-    $eventdata->name = 'courserequested';
-    $eventdata->userfrom = $USER;
-    $eventdata->subject = $subject; //** @todo get_string()
-    $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
-    $eventdata->fullmessage = $message;
-    $eventdata->fullmessagehtml = '';   //$messagehtml;
-    $eventdata->smallmessage = $message; // USED BY DEFAULT !
-    // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
-    /** envoi aux supervalidateurs
-    $systemcontext = get_context_instance(CONTEXT_SYSTEM);
-    $supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator');
-    foreach ($supervalidators as $userto) {
-        $eventdata->userto = $userto;
-        $res = message_send($eventdata);
-        if (!$res) {
-            // @todo Handle messaging errors
-        }
-    }
-    **/
-    // copie au demandeur
-    $eventdata->userto = $USER;
-    $res = message_send($eventdata);
-}
-
 /**
  * Envoie un email à l'adresse mail spécifiée
  * @param string $email
@@ -623,17 +594,79 @@ class core_wizard {
         return '';
     }
 
+    /**
+     * créé la partie variable (selon validateur ou créateur du message de
+     * notification envoyé à la création du cours
+     * @return array array("mgvalidator" => $mgv, "mgcreator" => $mgc);
+     */
     public function get_messages() {
-        $urlCategory = new moodle_url('/course/category.php', array('id' => $this->course->category, 'edit' => 'on'));
-        $messagehtml = '<div>Ce message concerne la demande de création de cours ' . $this->course->fullname
-                . ' ( ' . $this->course->shortname . ' )'
-                . ' faite par ' . fullname($this->user) . '.</div><div>Vous pouvez valider ou supprimer ce cours : '
-                . html_writer::link($urlCategory, $urlCategory)
-                . '</div>';
-        $message = 'Ce message concerne la demande de création de cours "' . $this->course->fullname
-                . ' ( ' . $this->course->shortname . ' )"'
-                . ' faite par ' . fullname($this->user) . '.';
-        return array("text" => $message, "html" => $messagehtml);
+        global $CFG;
+        $urlcourse = new moodle_url('/course/view.php', array('id' => $this->course->id));
+        $urlvalidator = $CFG->wwwroot .'/local/course_validated/index.php';
+        $idval = array();
+        $form3 =  $this->formdata['form_step3'];
+        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+            $allvalidators = $form3['all-validators'];
+            foreach ($allvalidators as $id => $validator) {
+                 $idval['fullname'] = fullname($validator);
+                 $idval['username'] = $validator->username;
+            }
+        }
+
+        $nomcours = $this->mydata->fullname;
+
+        $signature = 'Cordialement,' . "\n\n";
+        $signature .= 'L\'assistance EPI' . "\n\n";
+        $signature .= 'Service TICE - Pôle Ingénieries pédagogique et de formation' . "\n";
+        $signature .= 'Université Paris 1 Panthéon-Sorbonne' . "\n";
+        $signature .= 'Courriel : assistance-epi@univ-paris1.fr' . "\n";
+
+        $mgc = 'Bonjour,' . "\n\n";
+        $mgc .= 'Vous venez de créer l\'espace de cours ' . $nomcours . ' sur la plateforme '. $CFG->wwwroot . "\n\n";
+        if (count($idval)) {
+            $mgc .= 'Votre demande a été transmise à ' . $idval['fullname'] . ', ainsi qu\'aux gestionnaires de '
+            . 'la plateforme pour approbation, avant son ouverture aux étudiants';
+        } else {
+            $mgc .=  'votre demande a été transmise aux gestionnaires de '
+            . 'la plateforme pour approbation, avant son ouverture aux étudiants.';
+        }
+        $mgc .= "\n\n";
+        $mgc .= 'Notez cependant que toutes les personnes auxquelles vous avez attribué '
+            . 'des droits de contribution ont d\'ores et déjà la possibilité de s\'approprier ce nouvel espace de cours : '
+            . 'personnaliser le texte de présentation, organiser et nommer à leur convenance '
+            . 'les différentes sections, déposer des documents, etc.' . "\n\n";
+        $mgc .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide un ensemble de ressources '
+            . 'd\'aide et de conseil sur les principales fonctionnalités disponibles.' . "\n\n";
+        $mgc .= 'N\'hésitez pas à contacter l\'un des membres de l\'équipe du service TICE :' . "\n";
+        $mgc .= '- si vous souhaitez participer à l\'une des sessions de prise en mains régulièrement organisées ;' . "\n";
+        $mgc .= '- si vous rencontrez une difficulté ou si vous constatez une anomalie de fonctionnement.' . "\n\n";
+        $mgc .= 'Conservez ce message. Le récapitulatif technique présenté ci-après peut vous être utile, '
+            . 'notamment pour dialoguer avec l\'équipe d\'assistance.' . "\n\n";
+        $mgc .= $signature;
+
+
+        $mgv = 'Bonjour,' . "\n\n";
+        $mgv .= fullname($this->user) . ' ('.$this->user->email.') '
+            . 'vient de créer l\'espace de cours ' . $nomcours . ' sur la plateforme '
+            . $CFG->wwwroot . 'et vous a indiqué comme la personne pouvant valider sa création. ' . "\n\n";
+        $mgv .= 'Pour donner votre accord :' . "\n\n";
+        $mgv .= '1. Cliquez sur le lien suivant '. $urlvalidator . ' ;' . "\n";
+        if (count($idval)) {
+            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1' . $idval['username'] . "\n";
+        } else {
+            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1. ' . "\n";
+        }
+        $mgv .= '3. Cliquez sur l\'icône "coche verte" située dans la colonne "Modifier" ;' . "\n";
+        $mgv .= '4. '.fullname($this->user).' sera automatiquement prévenu-e par courriel de votre approbation.'  . "\n\n";
+        $mgv .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide des informations sur le processus '
+            . 'd\'approbation des espaces nouvellement créés.' . "\n\n";
+        $mgv .= 'Le récapitulatif technique présenté ci-après peut vous apporter des précisions sur cette demande.'  . "\n\n";
+        $mgv .= 'Si cette demande ne vous concerne pas ou si vous ne souhaitez pas y donner suite, '
+            . 'merci d\'en faire part à l\'équipe d\'assistance en lui transférant ce message '
+            . '(assistance-epi@univ-paris1.fr).'  . "\n\n";
+        $mgv .= $signature;
+
+        return array("mgvalidator" => $mgv, "mgcreator" => $mgc);
     }
 
     private function update_session($courseid) {
@@ -906,6 +939,69 @@ class core_wizard {
             $mg .= '    Aucune' . "\n";
         }
     return $mg;
+    }
+
+    public function get_email_subject($type) {
+        $subject = '';
+        $site = get_site();
+        $sitename = format_string($site->shortname);
+        $subject .= '[' . $sitename . '] ' . 'Demande '. $type
+            . ' approbation espace';
+        if (isset($this->mydata->idnumber) && $this->mydata->idnumber != '') {
+            $subject .=' n°' . $this->mydata->idnumber;
+        }
+        $subject .= ' ' . $this->mydata->fullname;
+        return $subject;
+    }
+
+    /**
+    * envoie un message de notification suite à la création du cours
+    * @param string $mgc destiné au demandeur
+    * @param string $mgv destiné à l'approbateur et aux validateurs
+    */
+    public function send_message_notification($mgc, $mgv) {
+        $subject = $this->get_email_subject('approbation');
+        $eventdata = new object();
+        $eventdata->component = 'moodle';
+        $eventdata->name = 'courserequested';
+        $eventdata->userfrom = $this->user;
+        $eventdata->subject = $subject; //** @todo get_string()
+        $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
+        $eventdata->fullmessage = $mgv;
+        $eventdata->fullmessagehtml = '';   //$messagehtml;
+        $eventdata->smallmessage = $mgv; // USED BY DEFAULT !
+        // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
+
+        /**
+        // envoi aux supervalidateurs
+        $systemcontext = get_context_instance(CONTEXT_SYSTEM);
+        $supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator');
+        foreach ($supervalidators as $userto) {
+            $eventdata->userto = $userto;
+            $res = message_send($eventdata);
+            if (!$res) {
+                // @todo Handle messaging errors
+            }
+        }
+        **/
+
+        // envoi à l'approbateur si besoin
+        $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
+        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+            $allvalidators = $form3['all-validators'];
+            foreach ($allvalidators as $id => $validator) {
+                $eventdata->userto = $validator;
+                $res = message_send($eventdata);
+            }
+        }
+
+        // copie au demandeur
+        $eventdata->userto = $this->user;
+        $subject = $this->get_email_subject('creation');
+        $subject = $this->get_email_subject('approbation');
+        $eventdata->fullmessage = $mgc;
+        $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
+        $res = message_send($eventdata);
     }
 }
 
