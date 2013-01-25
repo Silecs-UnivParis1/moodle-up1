@@ -16,6 +16,7 @@ $search_u->filterstudent = $filterstudent;
 $search_u->supann = false;
 $search_u->exclude = explode(',', $exclude);
 $search_u->affiliation = optional_param('affiliation', false, PARAM_BOOL); // ask for an "affiliation" field on each user
+$search_u->affectation = optional_param('affectation', false, PARAM_BOOL); // ask for an "affectation" field on each user
 $res  = $search_u->search($token);
 
 if (empty($callback)) {
