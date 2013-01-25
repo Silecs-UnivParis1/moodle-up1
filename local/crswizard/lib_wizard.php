@@ -374,7 +374,7 @@ function wizard_preselected_users() {
 
             foreach ($users as $id => $user) {
                 $liste[] = array(
-                    "label" => fullname($user) . $labelrole,
+                    "label" => fullname($user) . ' — ' . $user->username . $labelrole,
                     "value" => $id,
                     "fieldName" => "user[$role]",
                 );
@@ -421,10 +421,11 @@ function wizard_preselected_validators() {
         return '[]';
     }
     $liste = array();
+    $labelrole = ' (approbateur)';
     if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
         foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
             $liste[] = array(
-                "label" => fullname($user),
+                "label" => fullname($user) . ' — ' . $user->username . $labelrole,
                 "value" => $id,
             );
         }
