@@ -14,7 +14,7 @@ $search_u->maxrows = optional_param('maxRows', 10, PARAM_INT);
 $search_u->filterstudent = optional_param('filter_student', 'both', PARAM_ALPHA);
 $search_u->exclude = explode(',', $exclude);
 $search_u->affiliation = optional_param('affiliation', false, PARAM_BOOL); // ask for an "affiliation" field on each user
-$search_u->affectation = optional_param('affectation', false, PARAM_BOOL);
+$search_u->affectation = optional_param('affectation', true, PARAM_BOOL);
 $search_u->cohorts = explode(',', $cohorts);
 $res  = $search_u->search($token);
 
