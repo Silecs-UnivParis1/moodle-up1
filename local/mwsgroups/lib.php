@@ -111,6 +111,7 @@ class mws_search_users {
             $fieldId = $this->getAffectationFieldId();
             $select .= ", d2.data AS affectation ";
             $from .= " LEFT JOIN custom_info_data d2 ON (d2.fieldid = $fieldId AND d2.objectid = u.id) ";
+            $components = $DB->get_records_menu('rof_component', array(), 'import', 'import, name');
         }
         $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
@@ -135,8 +136,13 @@ class mws_search_users {
                 $user['affiliation'] = $record->affiliation;
             }
             if ($this->affectation) {
-                $user['affectation'] = $record->affectation;
-            }            
+                $ufr = substr($record->affectation, 1,2); // U04 -> 04
+                if (isset($components[$ufr])) {
+                    $user['affectation'] = $components[$ufr];
+                } else {
+                    $user['affectation'] = $record->affectation;
+                }
+            }
             $users[] = $user;
         }
         return $users;
