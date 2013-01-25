@@ -49,11 +49,14 @@ class mws_search_users {
     /** @var boolean Add a field "affiliation" to each user returned */
     public $affiliation = false;
 
-    /** @var boolean */
+    /** @var boolean Add a field "supannEntiteAffectation" to each user returned */
     public $affectation = true;
 
-    /** @var array */
+    /** @var array Exclude users with these usernames */
     public $exclude = array();
+
+    /** @var array Restrict to the following cohorts names */
+    public $cohorts = array();
 
     private $exclude_map = array();
 
@@ -63,7 +66,7 @@ class mws_search_users {
      * Checks that the parameters are valid, and ints some helper properties.
      */
     private function init() {
-        if (!is_array($this->exclude) || !is_string($this->filterstudent)) {
+        if (!is_array($this->exclude) || !is_string($this->filterstudent) || !is_array($this->cohorts)) {
             throw new Exception('Invalid arg type for mws_search_users');
         }
 
@@ -104,6 +107,14 @@ class mws_search_users {
             $select .= ", d1.data AS affiliation ";
             $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
         }
+        if ($this->cohorts) {
+            $cohortsId = $this->cohortsNamesToId($this->cohorts);
+            if ($cohortsId) {
+                $cohortsId = join(',', $cohortsId);
+                $from .= " JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId))";
+                $where .= ' GROUP BY u.id';
+            }
+        }
         $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
@@ -129,6 +140,16 @@ class mws_search_users {
             $users[] = $user;
         }
         return $users;
+    }
+
+    private function cohortsNamesToId($names) {
+        global $DB;
+        $rs = $DB->get_recordset_list('cohort', 'name', $names, '', 'id');
+        $ids = array();
+        foreach ($rs as $row) {
+            $ids[] = $row->id;
+        }
+        return $ids;
     }
 
     /**

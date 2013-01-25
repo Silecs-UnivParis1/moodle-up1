@@ -5,17 +5,17 @@ require('../../config.php');
 require_once(__DIR__ . '/lib.php');
 
 $token = required_param('token', PARAM_RAW);
-$maxrows = optional_param('maxRows', 10, PARAM_INT);
-$filterstudent = optional_param('filter_student', 'both', PARAM_ALPHA);
 $exclude = optional_param('exclude', '', PARAM_TAGLIST); // usernames to exclude, separated by ","
+$cohorts = optional_param('cohorts', '', PARAM_TAGLIST); // usernames to exclude, separated by ","
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
 $search_u = new mws_search_users();
-$search_u->maxrows = $maxrows;
-$search_u->filterstudent = $filterstudent;
+$search_u->maxrows = optional_param('maxRows', 10, PARAM_INT);
+$search_u->filterstudent = optional_param('filter_student', 'both', PARAM_ALPHA);
 $search_u->exclude = explode(',', $exclude);
 $search_u->affiliation = optional_param('affiliation', false, PARAM_BOOL); // ask for an "affiliation" field on each user
 $search_u->affectation = optional_param('affectation', false, PARAM_BOOL);
+$search_u->cohorts = explode(',', $cohorts);
 $res  = $search_u->search($token);
 
 if (empty($callback)) {
