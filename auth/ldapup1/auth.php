@@ -470,7 +470,8 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 $user = $this->get_userinfo_asobj($user->username);
 
                 // Prep a few params
-                $user->modified   = time();
+                $user->timemodified   = time();
+                $user->timecreated   = time();
                 $user->confirmed  = 1;
                 $user->auth       = 'shibboleth'; // up1 specific
                 $user->mnethostid = $CFG->mnet_localhost_id;
@@ -619,6 +620,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         // Protect the userid from being overwritten
         $userid = $user->id;
+        $updated = false;
 
         if ($newinfo = $this->get_userinfo($username)) {
             $newinfo = truncate_userinfo($newinfo);
@@ -637,8 +639,12 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                 if (!empty($this->config->{'field_updatelocal_' . $key})) {
                     if ($user->{$key} != $value) { // only update if it's changed
                         $DB->set_field('user', $key, $value, array('id'=>$userid));
+                        $updated = true;
                     }
                 }
+            }
+            if ($updated) {
+                $DB->set_field('user', 'timemodified', time(), array('id'=>$userid));
             }
             // UP1 SILECS : Add custom info from LDAP
             foreach ($newinfo as $attr => $value) {

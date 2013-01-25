@@ -50,7 +50,7 @@ class mws_search_users {
     public $affiliation = false;
 
     /** @var boolean */
-    public $supann = true;
+    public $affectation = true;
 
     /** @var array */
     public $exclude = array();
@@ -101,8 +101,8 @@ class mws_search_users {
         }
         if ($this->affiliation) {
             $fieldId = $this->getAffiliationFieldId();
-            $select .= ", d.data AS affiliation ";
-            $from .= " LEFT JOIN custom_info_data d ON (d.fieldid = $fieldId AND d.objectid = u.id) ";
+            $select .= ", d1.data AS affiliation ";
+            $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
         }
         $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
@@ -117,7 +117,7 @@ class mws_search_users {
                     'uid' => $record->username,
                     'displayName' => $record->firstname . ' ' . $record->lastname,
             );
-            if ($this->supann) {
+            if ($this->affectation) {
                 $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
                 $user['supannEntiteAffectation'] = array_unique(
                         array_map(array('self', 'groupNameToShortname'), array_values($res))
@@ -161,7 +161,10 @@ class mws_search_users {
         }
         return (int) $fieldId;
     }
+
 }
+
+
 
 /**
  * search groups according to filters
