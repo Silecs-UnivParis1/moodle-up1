@@ -613,7 +613,7 @@ class core_wizard {
             }
         }
 
-        $nomcours = $this->mydata->fullname;
+        $nomcours = $this->mydata->course_nom_norme;
 
         $signature = 'Cordialement,' . "\n\n";
         $signature .= 'L\'assistance EPI' . "\n\n";
@@ -688,6 +688,8 @@ class core_wizard {
         $mydata->profile_field_up1niveaulmda = '';
         $mydata->profile_field_up1diplome = '';
 
+        $mydata->wizard_nom_norme = '';
+
         // on est dans le cas 2
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
             $form2 = $this->formdata['form_step2'];
@@ -710,8 +712,14 @@ class core_wizard {
                 }
             }
 
+            $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $this->formdata['form_step2']['fullname'];
+            if ($this->formdata['form_step2']['complement'] !='') {
+                $mydata->course_nom_norme .= ' - '. $this->formdata['form_step2']['complement'];
+            }
+
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
+            $mydata->course_nom_norme = $this->formdata['form_step2']['shortname'];
         }
 
         $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
@@ -948,9 +956,9 @@ class core_wizard {
         $subject .= '[' . $sitename . '] ' . 'Demande '. $type
             . ' approbation espace';
         if (isset($this->mydata->idnumber) && $this->mydata->idnumber != '') {
-            $subject .=' n°' . $this->mydata->idnumber;
+            $subject .=' n°';
         }
-        $subject .= ' ' . $this->mydata->fullname;
+        $subject .= ' ' . $this->mydata->course_nom_norme;
         return $subject;
     }
 
