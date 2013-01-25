@@ -19,8 +19,7 @@ class course_wizard_step_cle extends moodleform {
         $mform = $this->_form;
 
 //--------------------------------------------------------------------------------
-        $message = get_string('messagekeyblock1', 'local_crswizard');
-        $messagecle = get_string('messagekeyblock2', 'local_crswizard');
+        $message = get_string('bockhelpE6', 'local_crswizard');
         $mform->addElement('html', html_writer::tag('div', $message, array('class' => 'fitem')));
 
         $tabCle = array('u' => get_string('studentkey', 'local_crswizard'),
@@ -30,7 +29,7 @@ class course_wizard_step_cle extends moodleform {
         foreach ($tabCle as $c => $label) {
 
             $mform->addElement('header', 'general' . $c, $label);
-            $mform->addElement('html', html_writer::tag('div', $messagecle, array('class' => 'fitem')));
+            $mform->addElement('html', html_writer::tag('div', get_string('bockhelpE6cle' . $c, 'local_crswizard'), array('class' => 'fitem')));
             $mform->addElement('passwordunmask', 'password' . $c, get_string('enrolkey', 'local_crswizard'));
             $mform->addHelpButton('password' . $c, 'password', 'enrol_self');
 
