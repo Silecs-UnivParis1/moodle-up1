@@ -202,12 +202,14 @@
             if (maxSelected > nbsel) {
                 selected[item.value] = 1;
                 nbsel = nbsel +1;
+                var label = item.label.replace(/\s+\(\w+\)\s*$/, '');
+                label = label + ' — ' + item.value;
                 var labeldetails = '';
                 if (details) {
                     labeldetails = ' (' + details + ') ';
                 }
                 return $('<div class="teacher-item-block"></div>')
-                    .html('<div class="teacher-item-selected">' + item.label + labeldetails + '</div>')
+                    .html('<div class="teacher-item-selected">' + label + labeldetails + '</div>')
                     .prepend('<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>')
                     .append('<input type="hidden" name="' + inputName + '[]" value="' + item.value + '" />');
             } else {
