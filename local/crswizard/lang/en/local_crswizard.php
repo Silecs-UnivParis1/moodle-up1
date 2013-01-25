@@ -15,8 +15,17 @@ $string['crswizard:validator'] = 'Validate a course created with the wizard';
 $string['crswizard:supervalidator'] = 'Validate ANY course created with the wizard';
 $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the wizard, local context';
 
-$string['blocHelloS1'] = 'Hello';
-$string['bockhelpE2'] = 'Texte d\'aide et de conseil. Suite du texte d\'aide et de conseil.';
+$string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
+    . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
+    . 'et le public visé de votre EPI (Espace Pédagogique Interactif).</p>'
+    . '<p>Pour commencer, choisissez si votre espace :'
+    .'<ul><li>concerne un élément pédagogique de l\'offre de formation (diplôme, enseignement, groupe de TD, etc.)</li>'
+    . '<li>ou répond à un autre besoin (projet particulier, formation pour les personnels, etc.).</li></ul></p>';
+$string['bockhelpE2'] = '<p>Cette étape fondamentale vous permet de situer votre espace dans l\'organisation générale des EPI.<br/>'
+    . 'Il est important de bien réfléchir aux informations que vous allez compléter ci-dessous, car '
+    . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.<br/>'
+    . 'Notez que si votre espace doit être rattaché à plusieurs composantes / services, il vous sera '
+    . 'possible de le spécifier à l\'étape suivante.</p>';
 $string['bockhelpE2Rof1'] = '<p>Cette étape fondamentale vous permet de situer votre espace dans l\'organisation générale des EPI.<br/>'
     . 'Il est important de bien réfléchir aux informations que vous allez compléter ci-dessous, car '
     . 'elles ont une incidence sur la facilité avec laquelle vos étudiants retrouveront votre espace de cours.</p>'
@@ -70,22 +79,22 @@ $string['bockhelpE7p2'] = '</li></ul></p>'
     . 'En cas d\'erreur ou d\'omission, il vous est possible revenir en arrière en cliquant '
     . 'sur le bouton « Etape précédente ».</p>';
 $string['blocktitleE3Rof1'] = 'Enseignant non responsable de l\'élément pédagogique : désignation d\'un approbateur';
-$string['blocktitleE4'] = 'Enseignant(s) contributeurs de l\'espace de cours';
-$string['blocktitleE5'] = 'Étudiants : inscriptions par cohortes';
-$string['categoryblock'] = 'Category';
+$string['blocktitleE4'] = 'Enseignant(s) contributeur(s) de l\'espace de cours';
+$string['blocktitleE5'] = 'Étudiants : inscriptions par cohorte(s)';
+$string['categoryblock'] = 'Catégorie (rattachement principal de l\'espace de cours)';
 $string['categoryblockE3'] = 'Rattachement principal de l\'espace';
 $string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace (optionnel)';
-$string['categoryerrormsg1'] = 'Vous devez sélectionner un Niveau.';
-$string['categoryerrormsg2'] = 'Aucune catégorie n\'a été sélectionnée.';
-$string['cohort'] = 'Cohort';
-$string['cohortname'] = 'Cohort name or student name';
-$string['cohorts'] = 'Cohorts';
+$string['categoryerrormsg1'] = 'Le niveau sélectionné est invalide.';
+$string['categoryerrormsg2'] = 'Aucun niveau n\'a été sélectionné, alors que le champ est requis.';
+$string['cohort'] = 'Cohorte';
+$string['cohortname'] = 'Libellé de groupe ou nom d\'étudiant';
+$string['cohorts'] = 'Groupes';
 $string['complementdefault'] = 'Cours magistral et TD';
 $string['complementlabel'] = 'Complément : ';
 $string['confirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
-$string['confirmationtitle'] = 'Confirmation';
-$string['coursedefinition'] = 'Step 2 - Course definition';
-$string['coursedescription'] = 'Step 3 - Course description';
+$string['confirmationtitle'] = 'Étape 7 - Finalisation de la demande';
+$string['coursedefinition'] = 'Étape 2 - Identification de l\'espace de cours';
+$string['coursedescription'] = 'Étape 3 - Description de l\'espace de cours';
 $string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en haut de chacune des pages du cours et sur la '
     . 'liste des cours.<br/>Le nom abrégé de l\'espace est affiché dans le menu de navigation (en haut à gauche de '
     . 'l\'écran), dans le fil d\'Ariane et dans l\'objet de certains courriels. Le texte de présentation '
@@ -96,56 +105,60 @@ $string['coursegeneralhelpRof'] = '<p>Le nom complet de l\'espace est affiché e
     . 'vous le jugez nécessaire, de modifier le texte figurant dans la zone « Complément ».<br/>'
     . 'Le texte de présentation est en accès public : il est affiché sur la fiche signalétique de '
     . 'l\'espace accessible à partir de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
-$string['courserequestdate'] = 'Course request date';
-$string['coursesettingsblock'] = 'Course settings';
-$string['coursesettingshelp'] = 'Texte d’aide et de conseil. Suite du texte d’aide et de conseil. Suite du texte d’aide et de conseil.';
-$string['coursestartdate'] = 'Start Date : ';
-$string['coursesummary'] = 'Summary : ';
-$string['editingteacher'] = 'Editing teacher';
-$string['enrolcohorts'] = 'Enrol cohorts';
-$string['enrolkey'] = 'Enrolment keys';
-$string['enrolteachers'] = 'Enrol teachers';
-$string['findcohort'] = 'Find a cohort';
-$string['findteacher'] = 'Find a teacher';
-$string['findvalidator'] = 'Find a validator';
-$string['finish'] = 'Finish';
-$string['fullnamecourse'] = 'Fullname : ';
-$string['generalinfoblock'] = 'General info';
-$string['guest'] = 'Guest';
-$string['guestkey'] = 'Guest enrolment keys';
-$string['managecourseblock'] = 'Manage course';
-$string['messagekeyblock1'] = 'message';
-$string['messagekeyblock2'] = '<b>Attention : </b>';
-$string['nextstage'] = 'Next';
-$string['noeditingteacher'] = 'Non-editing teacher';
-$string['pluginname'] = 'Course Wizard';
-$string['previousstage'] = 'Previous';
+$string['courserequestdate'] = 'Date de la demande de création : ';
+$string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
+$string['coursesettingshelp'] = 'Les dates ci-dessous sont purement informatives et correspondent au début '
+    . 'et à la fin de la période d\'enseignement.';
+$string['coursestartdate'] = 'Date de début : ';
+$string['coursesummary'] = 'Texte de présentation : ';
+$string['editingteacher'] = 'Enseignant';
+$string['enrolcohorts'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['enrolkey'] = 'Clé d\'inscription';
+$string['enrolteachers'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (enseignants)';
+$string['findcohort'] = 'Rechercher un groupe d\'étudiants';
+$string['findteacher'] = 'Rechercher un enseignant';
+$string['findvalidator'] = 'Rechercher un approbateur';
+$string['finish'] = 'Terminer';
+$string['fullnamecourse'] = 'Nom complet de l\'espace : ';
+$string['generalinfoblock'] = 'Informations générales de l\'espace de cours';
+$string['guest'] = 'Visiteur';
+$string['guestkey'] = 'Clé d\'inscription pour le rôle "visiteur anonyme"';
+$string['managecourseblock'] = 'Informations concernant la demande';
+$string['messagekeyblock1'] = '<p>Si vous n\'avez trouvé aucun groupe d\'utilisateurs à l\'étape précédente, vous '
+    . 'avez la possibilité de communiquer à vos étudiants un code (appelé « clé d\'inscription ») leur '
+    . 'permettant de s\'inscrire eux-mêmes à l\'espace de cours lors de leur premier accès.<br/>'
+    . 'Conseil : prenez note des clés d\'inscription que vous aurez définies à cette étape et conservez-les précieusement.</p>';
+$string['messagekeyblock2'] = '<b>Attention : </b>Il faut renseigner le champ "<b>clé d\'inscription'
+			. '</b>" pour que la clé soit créée.';
+$string['nextstage'] = 'Étape suivante';
+$string['noeditingteacher'] = 'Enseignant non éditeur';
+$string['previousstage'] = 'Étape précédente';
 $string['rofselected1'] = 'Rattachement de référence';
 $string['rofselected2'] = 'Rattachement(s) secondaire(s)';
-$string['role'] = 'Role';
-$string['selectcourse'] = 'Step 1 - Select course';
-$string['selectedcohort'] = 'Selected cohorts';
-$string['selectedteacher'] = 'Selected teachers';
+$string['role'] = 'Rôle';
+$string['selectcourse'] = 'Étape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
+$string['selectedcohort'] = 'Groupes sélectionnés';
+$string['selectedteacher'] = 'Enseignants sélectionnés';
 $string['selectedvalidator'] = 'Approbateur sélectionné';
 $string['selectvalidator'] = 'Étape 3 : Gestion de la demande de création d\'espace de cours';
-$string['stepkey'] = 'Enrolment keys';
-$string['student'] = 'Student';
-$string['studentkey'] = 'Student enrolment keys';
-$string['shortnamecourse'] = 'Shortname : ';
-$string['summaryof'] = 'Summary';
-$string['teacher'] = 'Teacher';
-$string['teachername'] = 'Teacher name';
-$string['teachers'] = 'Enseignants';
+$string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
+$string['summaryof'] = 'Récapitulatif de la demande';
+$string['student'] = 'Étudiant';
+$string['stepkey'] = 'Étape 6 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
+$string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiant"';
+$string['teachername'] = 'Nom de l\'enseignant';
+$string['teacher'] = 'Enseignant';
 $string['up1composante'] = 'Autre(s) composante(s) : ';
 $string['up1datefermeture'] = 'Date de fin : ';
 $string['up1niveau'] = 'Autre(s) type(s) de diplôme(s) : ';
-$string['userlogin'] = 'Login';
-$string['username'] = 'Username';
+$string['userlogin'] = 'Login du demandeur : ';
+$string['username'] = 'Nom du demandeur : ';
+$string['teachers'] = 'Enseignants';
 $string['validatorname'] = 'Nom de l\'approbateur';
 $string['wizardcase1'] = 'Un élément pédagogique dans lequel j\'enseigne';
 $string['wizardcase2'] = 'Un autre élément pédagogique de l\'offre de formation';
 $string['wizardcase3'] = 'Un autre besoin en dehors de l\'offre de formation';
-$string['wizardcourse'] = 'Course Wizard';
+$string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
 
 /** old **/
 $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
