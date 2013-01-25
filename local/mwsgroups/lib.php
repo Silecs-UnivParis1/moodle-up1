@@ -92,30 +92,8 @@ class mws_search_users {
         global $DB;
         $this->init();
         $ptoken = $DB->sql_like_escape($token) . '%';
+        $sql = $this->buildSql();
 
-        $select = "SELECT u.id, u.username, u.firstname, u.lastname";
-        $from =  "FROM {user} u";
-        $where = "WHERE ( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
-                . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )";
-        if ($this->filterstudent == 'no') {
-            $where = " AND idnumber = '' ";
-        } else if ($this->filterstudent == 'only') {
-            $where = " AND idnumber != '' ";
-        }
-        if ($this->affiliation) {
-            $fieldId = $this->getAffiliationFieldId();
-            $select .= ", d1.data AS affiliation ";
-            $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
-        }
-        if ($this->cohorts) {
-            $cohortsId = $this->cohortsNamesToId($this->cohorts);
-            if ($cohortsId) {
-                $cohortsId = join(',', $cohortsId);
-                $from .= " JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId))";
-                $where .= ' GROUP BY u.id';
-            }
-        }
-        $sql = "$select $from $where ORDER BY lastname ASC, firstname ASC";
         $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
         $users = array();
         $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
@@ -142,6 +120,44 @@ class mws_search_users {
         return $users;
     }
 
+    /**
+     * Build the SQL from the object properties.
+     *
+     * @return string
+     */
+    private function buildSql() {
+        $select = "SELECT u.id, u.username, u.firstname, u.lastname";
+        $from =  "FROM {user} u";
+        $where = "WHERE ( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
+                . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )";
+        if ($this->filterstudent == 'no') {
+            $where = " AND idnumber = '' ";
+        } else if ($this->filterstudent == 'only') {
+            $where = " AND idnumber != '' ";
+        }
+        if ($this->affiliation) {
+            $fieldId = $this->getAffiliationFieldId();
+            $select .= ", d1.data AS affiliation ";
+            $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
+        }
+        if ($this->cohorts) {
+            $cohortsId = $this->cohortsNamesToId($this->cohorts);
+            if ($cohortsId) {
+                $cohortsId = join(',', $cohortsId);
+                $from .= " JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId))";
+                $where .= ' GROUP BY u.id';
+            }
+        }
+        return "$select $from $where ORDER BY lastname ASC, firstname ASC";
+    }
+
+    /**
+     * Converts a list of cohort names into a list of cohort IDs.
+     *
+     * @global moodle_database $DB
+     * @param array $names
+     * @return array of integers
+     */
     private function cohortsNamesToId($names) {
         global $DB;
         $rs = $DB->get_recordset_list('cohort', 'name', $names, '', 'id');
