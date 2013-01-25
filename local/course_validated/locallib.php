@@ -1,6 +1,4 @@
 <?php
-// This file is part of a plugin for Moodle - http://moodle.org/
-
 /**
  * @package    local
  * @subpackage course_validated
@@ -9,6 +7,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../up1_metadata/lib.php');
 
 /**
  * @todo checkboxes multiple selections + dropdown menu
