@@ -960,11 +960,19 @@ class core_wizard {
     * @param string $mgv destiné à l'approbateur et aux validateurs
     */
     public function send_message_notification($mgc, $mgv) {
+        $userfrom = new object();
+        static $supportuser;
+        if (!empty($supportuser)) {
+            $userfrom = $supportuser;
+        } else {
+            $userfrom = $this->user;
+        }
+
         $subject = $this->get_email_subject('approbation');
         $eventdata = new object();
         $eventdata->component = 'moodle';
         $eventdata->name = 'courserequested';
-        $eventdata->userfrom = $this->user;
+        $eventdata->userfrom = $userfrom;
         $eventdata->subject = $subject; //** @todo get_string()
         $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
         $eventdata->fullmessage = $mgv;
