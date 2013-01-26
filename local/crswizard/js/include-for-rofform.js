@@ -2,13 +2,17 @@ $(document).ready(function() {
     $('div.item-select').on("click", ".element", function(event) {
         var select = $("#items-selected1").children('div[class=item-selected]');
         var intitule = select.children('div[class=intitule-selected]').text();
-        $('#id_fullname').val(intitule);
+        $('#fullname').val(intitule);
+        $('#fullnamelab').empty();
+        $('#fullnamelab').text(intitule);
     });
 
     $("#items-selected").on("click", ".selected-remove", function(event) {
         var select = $("#items-selected1").children('div[class=item-selected]');
         var intitule = select.children('div[class=intitule-selected]').text();
-        $('#id_fullname').val(intitule);
+        $('#fullname').val(intitule);
+        $('#fullnamelab').empty();
+        $('#fullnamelab').text(intitule);
     });
 
     $('#mform1').submit(function(){

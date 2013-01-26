@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step2_rof_form extends moodleform {
 
     function definition() {
-        global $OUTPUT;
+        global $OUTPUT, $SESSION;
 
         $mform = $this->_form;
 
@@ -74,14 +74,31 @@ class course_wizard_step2_rof_form extends moodleform {
         $coursegeneralhelp = get_string('coursegeneralhelpRof', 'local_crswizard');
         $mform->addElement('html', html_writer::tag('div', $coursegeneralhelp, array('class' => 'fitem')));
 
-        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50" readonly="readonly"');
-        //$mform->addHelpButton('fullname', 'fullnamecourse');
-        $mform->setType('fullname', PARAM_MULTILANG);
+        $labelname = '';
+        $valcomplement = '';
+        if (isset($SESSION->wizard['form_step2']['fullname'])) {
+            $labelname = $SESSION->wizard['form_step2']['fullname'];
+        }
+        if (isset($SESSION->wizard['form_step2']['complement'])) {
+            $valcomplement = $SESSION->wizard['form_step2']['complement'];
+        }
+        $htmlcn = '<div id="fgroup_id_coursename" class="fitem required fitem_fgroup">'
+            . '<div class="fitemtitle">'
+            . '<div class="fgrouplabel">'
+            . '<label>' . get_string('fullnamecourse', 'local_crswizard') . ' * </label>'
+            . '</div>'
+            . '</div>'
+            . '<fieldset class="felement fgroup">'
+            . '<span id="fullnamelab">' . $labelname . '</span> - '
+            . '<label class="accesshide" for="id_complement"> </label>'
+            . '<input maxlength="254" size="50" name="complement" type="text" '
+            . 'id="id_complement" value="' . $valcomplement . '">'
+            . '</fieldset>'
+            . '</div>';
+        $mform->addElement('html',$htmlcn);
 
-        $mform->addElement('text', 'complement', get_string('complementlabel', 'local_crswizard'), 'maxlength="254" size="50"');
-        //$mform->addHelpButton('shortname', 'shortnamecourse');
-        $mform->setType('complement', PARAM_MULTILANG);
-        $mform->setDefault('complement', get_string('complementdefault', 'local_crswizard'));
+        $mform->addElement('hidden', 'fullname', null, array('id' => 'fullname'));
+        $mform->setType('fullname', PARAM_MULTILANG);
 
         $mform->addElement('editor', 'summary_editor', get_string('coursesummary', 'local_crswizard'), null, $editoroptions);
         //$mform->addHelpButton('summary_editor', 'coursesummary');

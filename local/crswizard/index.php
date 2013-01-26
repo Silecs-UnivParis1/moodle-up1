@@ -93,6 +93,7 @@ switch ($stepin) {
                  $SESSION->wizard['form_step2']['item'] = $_POST['item'];
                  $SESSION->wizard['form_step2']['path'] = $_POST['path'];
                  $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
+                 $SESSION->wizard['form_step2']['complement'] = $_POST['complement'];
             }
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         } else {
