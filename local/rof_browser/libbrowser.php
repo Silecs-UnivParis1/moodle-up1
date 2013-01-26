@@ -472,7 +472,7 @@ class rof_browser {
 		}
         $spancomp = '';
         if (isset($sp->composition)) {
-            $spancomp .= '<span class="comp" class="rof-hidden">'
+            $spancomp .= '<span class="comp rof-hidden">'
             . $sp->composition . '</span>';
         }
 		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
