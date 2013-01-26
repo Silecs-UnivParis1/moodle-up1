@@ -142,5 +142,5 @@ select.selectmenu {
 }
 
 div#items-selected1 span, div#items-selected2 span{
-    font-size: 18px;
+    font-size: 14px; font-weight: bold;
 }
