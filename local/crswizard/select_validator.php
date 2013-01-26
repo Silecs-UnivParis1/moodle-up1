@@ -84,6 +84,7 @@ $tabinfo['courserequestdate'] = date('d-m-Y');
 jQuery(document).ready(function () {
     $('#user-select').autocompleteUser({
         urlUsers: '../mwsgroups/service-users.php',
+        labelDetails: 'approbateur',
         maxSelected: 1,
         wsParams: { exclude: '<?php echo $USER->username;?>' },
         preSelected: <?php echo wizard_preselected_validators();?>

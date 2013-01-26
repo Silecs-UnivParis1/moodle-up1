@@ -470,11 +470,17 @@ class rof_browser {
 			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
 		}
+        $spancomp = '';
+        if (isset($sp->composition)) {
+            $spancomp .= '<span class="comp" class="rof-hidden">'
+            . $sp->composition . '</span>';
+        }
 		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
+            . $spancomp
 			. '<span class="element pointer oplus" title="Sélectionner" id="'
 			. $idElem . '"></span>'
 			. '</div></li>';

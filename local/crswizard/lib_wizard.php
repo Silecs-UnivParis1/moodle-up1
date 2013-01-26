@@ -374,7 +374,7 @@ function wizard_preselected_users() {
 
             foreach ($users as $id => $user) {
                 $liste[] = array(
-                    "label" => fullname($user) . $labelrole,
+                    "label" => fullname($user) . ' — ' . $user->username . $labelrole,
                     "value" => $id,
                     "fieldName" => "user[$role]",
                 );
@@ -421,10 +421,11 @@ function wizard_preselected_validators() {
         return '[]';
     }
     $liste = array();
+    $labelrole = ' (approbateur)';
     if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
         foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
             $liste[] = array(
-                "label" => fullname($user),
+                "label" => fullname($user) . ' — ' . $user->username . $labelrole,
                 "value" => $id,
             );
         }
@@ -687,6 +688,7 @@ class core_wizard {
         $mydata->profile_field_up1rofname = '';
         $mydata->profile_field_up1niveaulmda = '';
         $mydata->profile_field_up1diplome = '';
+        $mydata->profile_field_up1generateur = '';
 
         $mydata->wizard_nom_norme = '';
 
@@ -716,10 +718,12 @@ class core_wizard {
             if ($this->formdata['form_step2']['complement'] !='') {
                 $mydata->course_nom_norme .= ' - '. $this->formdata['form_step2']['complement'];
             }
+            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
             $mydata->course_nom_norme = $this->formdata['form_step2']['shortname'];
+            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
         }
 
         $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];

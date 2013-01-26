@@ -75,7 +75,7 @@
                     if (ui.item.source == 'users') {
                         $($this.settings.outputSelector, $this.elem)
                             .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName,
-                                $this.settings.labelDetails, $this.settings.maxSelected));
+                                $this.settings.labelDetails, $this.settings.maxSelected, 0));
                     }
                     return false;
                 },
@@ -93,7 +93,7 @@
                     fieldName = items[i].fieldName;
                 }
                 $($this.settings.outputSelector, $this.elem)
-                    .append(buildSelectedBlock(items[i], fieldName, '', $this.settings.maxSelected));
+                    .append(buildSelectedBlock(items[i], fieldName, '', $this.settings.maxSelected, 1));
             }
         },
 
@@ -195,15 +195,19 @@
             .appendTo(ul);
     };
 
-    function buildSelectedBlock(item, inputName, details, maxSelected) {
+    function buildSelectedBlock(item, inputName, details, maxSelected, isPreSel) {
 		if (typeof selected[item.value] != 'undefined' && selected[item.value] == 1) {
 			alert(item.label+' fait déjà partie de la sélection.');
 		} else {
             if (maxSelected > nbsel) {
                 selected[item.value] = 1;
                 nbsel = nbsel +1;
-                var label = item.label.replace(/\s+\(\w+\)\s*$/, '');
-                label = label + ' — ' + item.value;
+                if (isPreSel) {
+                    var label = item.label;
+                } else {
+                    var label = item.label.replace(/\s+\(\w+\)\s*$/, '');
+                    label = label + ' — ' + item.value;
+                }
                 var labeldetails = '';
                 if (details) {
                     labeldetails = ' (' + details + ') ';

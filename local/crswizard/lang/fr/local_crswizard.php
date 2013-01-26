@@ -69,6 +69,16 @@ $string['bockhelpE5'] = '<p>Cette étape vous permet de sélectionner les groupe
     . '<li>Recherchez ensuite le groupe d\'utilisateurs dans l\'annuaire de l\'université, en saisissant, '
     . 'par exemple, son intitulé ou une partie de son intitulé ou le nom d\'un étudiant appartenant à ce groupe.</li>'
     . '<li>Cliquez sur le symbole « + » pour inscrire ce groupe d\'utilisateurs à cet espace.</li></ol>';
+$string['bockhelpE6'] = '<p>Si vous n\'avez trouvé aucun groupe d\'utilisateurs à l\'étape précédente, vous '
+    . 'avez la possibilité de communiquer à vos étudiants un code (appelé « clé d\'inscription ») leur '
+    . 'permettant de s\'inscrire eux-mêmes à l\'espace de cours lors de leur premier accès.<br/>'
+    . 'Conseil : prenez note des clés d\'inscription que vous aurez définies à cette étape et conservez-les précieusement.</p>';
+$string['bockhelpE6cleu'] = 'Attention : renseignez le champ « clé d\'inscription » pour que la clé soit créée et sélectionnez, '
+    . 'puis activez à minima une date de début, à partir de laquelle vos étudiants pourront eux-mêmes s\'inscrire à cet espace. '
+    . 'Définissez et activez une date de fin si vous souhaitez que la clé d\'inscription ne soit disponible que pendant une période déterminée.';
+$string['bockhelpE6clev'] = 'Attention : renseignez le champ « clé d\'inscription » pour que la clé soit créée et sélectionnez, '
+    . 'puis activez à minima une date de début, à partir de laquelle vos visiteurs anonymes pourront eux-mêmes s\'inscrire à cet espace. '
+    . 'Définissez et activez une date de fin si vous souhaitez que la clé d\'inscription ne soit disponible que pendant une période déterminée.';
 $string['bockhelpE7p1'] ='<p>En cliquant sur le bouton « Terminer », vous finaliserez votre demande et déclencherez : '
     . '<ul><li>la création de cet espace, qui sera pour l\'instant masqué à vos étudiants, </li>'
     . '<li>la transmission de cette demande -pour approbation- à l\'utilisateur '
@@ -82,14 +92,14 @@ $string['blocktitleE3Rof1'] = 'Enseignant non responsable de l\'élément pédag
 $string['blocktitleE4'] = 'Enseignant(s) contributeur(s) de l\'espace de cours';
 $string['blocktitleE5'] = 'Étudiants : inscriptions par cohorte(s)';
 $string['categoryblock'] = 'Catégorie (rattachement principal de l\'espace de cours)';
+$string['categoryblockE2F'] = 'Catégorie (rattachement(s) de l\'espace de cours)';
 $string['categoryblockE3'] = 'Rattachement principal de l\'espace';
 $string['categoryblockE3s1'] = 'Autre(s) rattachement(s) de l\'espace (optionnel)';
 $string['categoryerrormsg1'] = 'Le niveau sélectionné est invalide.';
-$string['categoryerrormsg2'] = 'Aucun niveau n\'a été sélectionné, alors que le champ est requis.';
+$string['categoryerrormsg2'] = 'Veuillez sélectionner une période et un établissement.';
 $string['cohort'] = 'Cohorte';
 $string['cohortname'] = 'Libellé de groupe ou nom d\'étudiant';
 $string['cohorts'] = 'Groupes';
-$string['complementdefault'] = 'Cours magistral et TD';
 $string['complementlabel'] = 'Complément : ';
 $string['confirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
 $string['confirmationtitle'] = 'Étape 7 - Finalisation de la demande';
@@ -124,12 +134,6 @@ $string['generalinfoblock'] = 'Informations générales de l\'espace de cours';
 $string['guest'] = 'Visiteur';
 $string['guestkey'] = 'Clé d\'inscription pour le rôle "visiteur anonyme"';
 $string['managecourseblock'] = 'Informations concernant la demande';
-$string['messagekeyblock1'] = '<p>Si vous n\'avez trouvé aucun groupe d\'utilisateurs à l\'étape précédente, vous '
-    . 'avez la possibilité de communiquer à vos étudiants un code (appelé « clé d\'inscription ») leur '
-    . 'permettant de s\'inscrire eux-mêmes à l\'espace de cours lors de leur premier accès.<br/>'
-    . 'Conseil : prenez note des clés d\'inscription que vous aurez définies à cette étape et conservez-les précieusement.</p>';
-$string['messagekeyblock2'] = '<b>Attention : </b>Il faut renseigner le champ "<b>clé d\'inscription'
-			. '</b>" pour que la clé soit créée.';
 $string['nextstage'] = 'Étape suivante';
 $string['noeditingteacher'] = 'Enseignant non éditeur';
 $string['previousstage'] = 'Étape précédente';
@@ -139,7 +143,7 @@ $string['role'] = 'Rôle';
 $string['selectcourse'] = 'Étape 1 - Pour quel enseignement souhaitez-vous ouvrir un espace sur la plateforme ?';
 $string['selectedcohort'] = 'Groupes sélectionnés';
 $string['selectedteacher'] = 'Enseignants sélectionnés';
-$string['selectedvalidator'] = 'Approbateur sélectionné';
+$string['selectedvalidator'] = 'Enseignant non responsable de l\'élément pédagogique : désignation d\'un approbateur';
 $string['selectvalidator'] = 'Étape 3 : Gestion de la demande de création d\'espace de cours';
 $string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
 $string['summaryof'] = 'Récapitulatif de la demande';
