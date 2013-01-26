@@ -11,6 +11,9 @@
 defined('MOODLE_INTERNAL') || die;
 
 if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) {
+
+    require_once(dirname(__FILE__).'/lib_wizard.php');
+
     $settings = new admin_settingpage('local_crswizard', 'Assistant de création de cours');
     $ADMIN->add('localplugins', $settings);
 
