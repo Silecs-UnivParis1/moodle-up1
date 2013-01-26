@@ -1,7 +1,15 @@
 $(document).ready(function() {
     $('div.item-select').on("click", ".element", function(event) {
+        var intsel = $(this).prevAll('span.collapse').attr('data_rofid');
         var select = $("#items-selected1").children('div[class=item-selected]');
         var intitule = select.children('div[class=intitule-selected]').text();
+
+        var roffirst = select.children('input:first').val();
+        if (intsel == roffirst) {
+            var comp = $(this).prevAll('span.comp').text();
+            $('#id_complement').val(comp);
+        }
+
         $('#fullname').val(intitule);
         $('#fullnamelab').empty();
         $('#fullnamelab').text(intitule);
@@ -10,6 +18,9 @@ $(document).ready(function() {
     $("#items-selected").on("click", ".selected-remove", function(event) {
         var select = $("#items-selected1").children('div[class=item-selected]');
         var intitule = select.children('div[class=intitule-selected]').text();
+        if (intitule == '') {
+            $('#id_complement').val(intitule);
+        }
         $('#fullname').val(intitule);
         $('#fullnamelab').empty();
         $('#fullnamelab').text(intitule);

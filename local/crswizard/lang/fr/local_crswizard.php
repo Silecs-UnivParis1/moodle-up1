@@ -100,7 +100,6 @@ $string['categoryerrormsg2'] = 'Veuillez sélectionner une période et un établ
 $string['cohort'] = 'Cohorte';
 $string['cohortname'] = 'Libellé de groupe ou nom d\'étudiant';
 $string['cohorts'] = 'Groupes';
-$string['complementdefault'] = 'Cours magistral et TD';
 $string['complementlabel'] = 'Complément : ';
 $string['confirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
 $string['confirmationtitle'] = 'Étape 7 - Finalisation de la demande';
