@@ -29,6 +29,8 @@ class course_wizard_step2_rof_form extends moodleform {
 /// form definition with new course defaults
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'categoryheader', get_string('categoryblockE2F', 'local_crswizard'));
+
+        $default_cat = get_config('local_crswizard','cas2_default_etablissement');
         $mform->addElement(
                 'select', 'category', '', wizard_get_catlevel2(),
                 array(
@@ -36,6 +38,7 @@ class course_wizard_step2_rof_form extends moodleform {
                     'data-labels' => '["Période :", "Établissement :"]'
                 )
         );
+        $mform->setDefault('category', $default_cat);
 
         $labelrof =  '<br/><div class="fitemtitle required mylabel"><label>Elément pédagogique : *</label></div>';
         $mform->addElement('html',  $labelrof);
