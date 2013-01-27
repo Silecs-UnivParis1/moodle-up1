@@ -79,6 +79,11 @@ $tabinfo['courserequestdate'] = date('d-m-Y');
 </fieldset>
 </div>
 
+<?php
+$listCohort = trim(get_config('local_crswizard', 'cohorts_cap_validator'));
+$listCohort = strtr($listCohort, ' ', ',');
+?>
+
 <script type="text/javascript">
 //<![CDATA[
 jQuery(document).ready(function () {
@@ -86,7 +91,8 @@ jQuery(document).ready(function () {
         urlUsers: '../mwsgroups/service-users.php',
         labelDetails: 'approbateur',
         maxSelected: 1,
-        wsParams: { exclude: '<?php echo $USER->username;?>' },
+        wsParams: { exclude: '<?php echo $USER->username;?>',
+            cohorts: '<?php echo $listCohort;?>'},
         preSelected: <?php echo wizard_preselected_validators();?>
     });
 });
