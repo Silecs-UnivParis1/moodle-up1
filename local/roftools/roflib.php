@@ -388,3 +388,27 @@ function rof_get_code_or_rofid($rofid) {
     }
     return $rofid;
 }
+
+
+/**
+ * returns the possible values for a given ROF constant element
+ * as a menu (associative array),
+ * @global type $DB
+ * @param type $element from rof_constant element field
+ * @param type $prefix if true, the value is prefixed by the key. ex. "[DS] Droit, Sciences politique et sociales"
+ * @return associative array  ROF identifer => value
+ */
+function rof_get_menu_constant($element, $prefix=true) {
+    global $DB;
+
+    $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
+    if ( ! $prefix ) {
+        return $records;
+    } else {
+        $res = array();
+        foreach ($records as $key => $value) {
+            $res[$key] = '[' . $key . '] ' . $value;
+        }
+        return $res;
+    }
+}

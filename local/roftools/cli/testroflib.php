@@ -37,11 +37,13 @@ echo "\n\n" . rof_get_code_or_rofid('UP1-C99999');
 echo "\n\n" . rof_get_code_or_rofid('UP1-PROG37797');
 echo "\n\n" ;
 
+print_r(rof_get_menu_constant("composante"));
+print_r(rof_get_menu_constant("composante", false));
+
 echo "rof_get_metadata (3)" ;
-var_dump(rof_get_metadata('UP1-PROG25375'));
+//var_dump(rof_get_metadata('UP1-PROG25375'));
 //var_dump(rof_get_metadata($path));
 //var_dump(rof_get_metadata($cpath));
-
-var_dump(rof_get_metadata('UP1-C25379'));
+//var_dump(rof_get_metadata('UP1-C25379'));
 
 return 0;
