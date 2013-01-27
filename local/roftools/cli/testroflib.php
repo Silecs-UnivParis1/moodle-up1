@@ -4,9 +4,9 @@ define('CLI_SCRIPT', true);
 require(dirname(dirname(dirname(__DIR__))).'/config.php'); // global moodle config file.
 require(__DIR__ . '/../roflib.php');
 
-// echo typeDiplomeOrderedList();
+echo rof_typeDiplome_ordered_list() . "\n\n";
 
-// echo fmtPath(getCourseFirstPath($argv[1]), 'combined');
+echo rof_format_path(rof_get_course_first_path($argv[1]), 'combined') . "\n\n";
 // echo "\n";
 
 // rof_insert_paths_statistics(0);

@@ -397,7 +397,7 @@ function wizard_preselected_rof() {
     if (!empty($SESSION->wizard['form_step2']['all-rof'])) {
         foreach ($SESSION->wizard['form_step2']['all-rof'] as $rofid => $rof) {
             $object = $rof['object'];
-            $tabrof = get_combined_path(explode('_', $rof['path']));
+            $tabrof = rof_get_combined_path(explode('_', $rof['path']));
             $chemin = substr(rof_format_path($tabrof, 'name', false, ' > '), 3);
             $liste[] = array(
                     "label" => $object->name,
