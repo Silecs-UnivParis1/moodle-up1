@@ -37,6 +37,8 @@ $table->head = array('Items', 'Nb');
 $table->data = report_rofstats_generic();
 echo html_writer::table($table);
 
+echo rof_links_constants('/report/rofstats/constant.php');
+
 echo "<h3>Composantes</h3>\n";
 $table = new html_table();
 $table->head = array('', '# Programmes', 'Id. ROF', 'Nom');
