@@ -699,7 +699,7 @@ class core_wizard {
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
             }
-            $mydata->shortname = $rof1['apogee'] . ' - '
+            $mydata->shortname = $rof1['idnumber'] . ' - '
                 . $this->formdata['form_step2']['complement'];
             $mydata->idnumber = $rof1['idnumber'];
 

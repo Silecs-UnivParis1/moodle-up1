@@ -35,7 +35,7 @@ $(document).ready(function() {
             $('#mgerrorrof').empty();
             $('#mgerrorrof').append('<div class="felement fselect error"><span class="error">'+textm+'</span></div>');
             event.preventDefault();
-            $('html,body').animate({scrollTop: 0}, 'slow');
+            $('html,body').animate({scrollTop: $('#mgerrorrof').offset().top}, 'slow');
         }
         return ret;
     });
