@@ -10,7 +10,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-require_once(__DIR__ . '/../../local/rof_categories/locallib.php');
+require_once(dirname(dirname(__DIR__)).'/config.php'); // global moodle config file.
+//require_once($CFG->dirroot . "/course/lib.php");
+
 
 /**
  * Get the first path for a course or a program
@@ -502,7 +504,7 @@ function rof_rofpath_to_category($rofpath) {
     }
     $typedip = $DB->get_field('rof_program', 'typedip', array('rofid' => $rofpath[1]), MUST_EXIST);
     if ($typedip) {
-        $eqvDiplomas = equivalentDiplomas();
+        $eqvDiplomas = equivalent_diplomas();
         $catcode = '4:' . $rofpath[0] .'/'. $eqvDiplomas[$typedip];
 
         $res = $DB->get_field('course_categories', 'id', array('idnumber' => $catcode));

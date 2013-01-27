@@ -1,6 +1,6 @@
 <?php
 /* @var $DB moodle_database */
-require_once("$CFG->dirroot/report/rofstats/roflib.php");
+require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 
 /**

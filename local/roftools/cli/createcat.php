@@ -5,7 +5,7 @@ require(dirname(dirname(dirname(__DIR__))).'/config.php'); // global moodle conf
 require(__DIR__ . '/../locallib.php');
 
 echo "create categories... \n";
-createRofCategories(1);
+create_rof_categories(1);
 
 echo "OK.\n";
 

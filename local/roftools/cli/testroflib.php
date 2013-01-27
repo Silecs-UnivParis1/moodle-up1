@@ -1,8 +1,8 @@
 <?php
 
 define('CLI_SCRIPT', true);
-require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global moodle config file.
-require('../roflib.php');
+require(dirname(dirname(dirname(__DIR__))).'/config.php'); // global moodle config file.
+require(__DIR__ . '/../roflib.php');
 
 // echo typeDiplomeOrderedList();
 
