@@ -17,6 +17,10 @@ function report_rofstats_generic() {
     global $DB;
     $res = array();
 
+    $count = $DB->count_records('rof_constant');
+    $res[] = array('Constantes', $count);
+    $sql = 'SELECT COUNT(DISTINCT element) FROM {rof_constant}';
+    $res[] = array('Constantes éléments', $DB->get_field_sql($sql));
     $count = $DB->count_records('rof_component');
     $res[] = array('Composantes', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
@@ -24,6 +28,8 @@ function report_rofstats_generic() {
     $res[] = array('Programmes', $count);
     $count = $DB->count_records('rof_program', array('level' => 2));
     $res[] = array('Sous-programmes', $count);
+    $count = $DB->count_records('rof_course');
+    $res[] = array('Cours ROF', $count);
     $res[] = array('', ''); //** @todo meilleur séparateur ?
     $count = $DB->count_records('rof_person');
     $res[] = array('Personnes', $count);
