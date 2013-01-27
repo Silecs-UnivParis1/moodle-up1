@@ -258,6 +258,55 @@ function rof_view_record($rofid) {
     return true;
 }
 
+/**
+ * displays a table of ROF constants for a given $element
+ * @param string $element : matches element field (2nd field of rof_constant)
+ */
+function rof_table_constants($element) {
+    global $DB;
+
+    $res = array();
+    $constants = $DB->get_records('rof_constant', array('element' => $element));
+    if ( ! $constants ) {
+        return false;
+    }
+    $excludes = array('id', 'element', 'timesync');
+
+    foreach ($constants as $constant) {
+        $row = array();
+        $header=array();
+        foreach (get_object_vars($constant) as $field => $value) {
+            if ( ! in_array($field, $excludes) ) {
+                $header[] = $field; //this could be put out of the loop but doesn't optimize much
+                $row[] = $value;
+            }
+        }
+     $res[] = $row;
+    }
+    $table = new html_table();
+    $table->head = $header;
+    $table->data = $res;
+    echo html_writer::table($table);
+    return true;
+}
+
+function rof_get_constants() {
+    global $DB;
+
+    $sql = 'SELECT DISTINCT element FROM {rof_constant} ORDER BY element';
+    return $DB->get_fieldset_sql($sql);
+}
+
+function rof_links_constants($baseurl) {
+    $constants = rof_get_constants();
+    $links = '';
+    foreach ($constants as $constant) {
+        $url = new moodle_url($baseurl, array('constant' => $constant));
+        $links .= html_writer::link($url, $constant) . ' &nbsp ';
+    }
+    return 'Constantes : ' . $links;
+}
+
 
 /**
  * turn rof information from a rofobject into loosely formatted (up1) course metadata
