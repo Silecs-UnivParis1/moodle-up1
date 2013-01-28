@@ -1,6 +1,6 @@
 <?php
 /* @var $DB moodle_database */
-require_once("$CFG->dirroot/report/rofstats/roflib.php");
+require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 
 /**
@@ -36,6 +36,36 @@ function wizard_get_catlevel2() {
 
     foreach ($displaylist as $id => $label) {
         if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 1) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+/**
+ * Reconstruit le tableau de chemins (composantes/diplômes) pour le plugin jquery select-into-subselects.js
+ * hack de la fonction wizard_get_mydisplaylist()
+ * @param $idcat identifiant de la catégorie diplôme sélectionné à l'étape précédente
+ * @return array
+ * */
+function wizard_get_myComposantelist($idcat) {
+     global $DB;
+    $displaylist = array();
+    $parentlist = array();
+    $category = $DB->get_record('course_categories', array('id' => $idcat));
+    $tpath = explode('/', $category->path);
+    $selected = $DB->get_record('course_categories', array('id' => $tpath[2]));
+    make_categories_list($displaylist, $parentlist, '', 0, $selected); // separator ' / ' is hardcoded into Moodle
+
+    $pos = strlen($category->name);
+    $pos = $pos + 3;
+    foreach ($displaylist as $id => $value){
+        $displaylist[$id] = substr($value, $pos);
+    }
+    $mydisplaylist = array(" Sélectionner la composante / Sélectionner le type de diplôme");
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 2) {
             $mydisplaylist[$id] = $label;
         }
     }
@@ -341,10 +371,10 @@ function wizard_preselected_cohort() {
         foreach ($groups as $id => $group) {
             $desc = '';
             if (isset($group->size) && $group->size) {
-                $desc = '<div>(' . $group->size . ' inscrits)</div>';
+                $desc =  $group->size . ' inscrits';
             }
             $liste[] = array(
-                "label" => $labelrole . '<b>' . $group->name . '</b>' . $desc,
+                "label" => $group->name . ' — ' . $desc . ' (' . $labelrole . ')',
                 "value" => $id,
                 "fieldName" => "group[$role]",
             );
@@ -397,7 +427,7 @@ function wizard_preselected_rof() {
     if (!empty($SESSION->wizard['form_step2']['all-rof'])) {
         foreach ($SESSION->wizard['form_step2']['all-rof'] as $rofid => $rof) {
             $object = $rof['object'];
-            $tabrof = get_combined_path(explode('_', $rof['path']));
+            $tabrof = rof_get_combined_path(explode('_', $rof['path']));
             $chemin = substr(rof_format_path($tabrof, 'name', false, ' > '), 3);
             $liste[] = array(
                     "label" => $object->name,

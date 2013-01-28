@@ -1,12 +1,12 @@
 <?php
 
 define('CLI_SCRIPT', true);
-require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global moodle config file.
-require('../roflib.php');
+require(dirname(dirname(dirname(__DIR__))).'/config.php'); // global moodle config file.
+require(__DIR__ . '/../roflib.php');
 
-// echo typeDiplomeOrderedList();
+echo rof_typeDiplome_ordered_list() . "\n\n";
 
-// echo fmtPath(getCourseFirstPath($argv[1]), 'combined');
+echo rof_format_path(rof_get_course_first_path($argv[1]), 'combined') . "\n\n";
 // echo "\n";
 
 // rof_insert_paths_statistics(0);
@@ -37,11 +37,13 @@ echo "\n\n" . rof_get_code_or_rofid('UP1-C99999');
 echo "\n\n" . rof_get_code_or_rofid('UP1-PROG37797');
 echo "\n\n" ;
 
+print_r(rof_get_menu_constant("composante"));
+print_r(rof_get_menu_constant("composante", false));
+
 echo "rof_get_metadata (3)" ;
-var_dump(rof_get_metadata('UP1-PROG25375'));
+//var_dump(rof_get_metadata('UP1-PROG25375'));
 //var_dump(rof_get_metadata($path));
 //var_dump(rof_get_metadata($cpath));
-
-var_dump(rof_get_metadata('UP1-C25379'));
+//var_dump(rof_get_metadata('UP1-C25379'));
 
 return 0;

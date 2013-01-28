@@ -71,7 +71,19 @@ jQuery(document).ready(function () {
         wsParams: { maxRows: 10 },
         labelMaker: function(item) {
             var label = $('#group-role > option:selected').text();
-            return label + ' : ' + '<b>' + item.label + '</b>';
+            var chaine = item.label;
+            var nameg=chaine.substring(3,chaine.indexOf("</b>"));
+            var ps = chaine.indexOf("</p>");
+            var p2 = chaine.length-7;
+            var nbi ='';
+            if (ps!= -1) {
+                nbi =  chaine.substring(ps+6, p2);
+            } else {
+                var ed = '<div class="autocompletegroup-descr">';
+                var p1 = chaine.indexOf(ed) + ed.length + 2;
+                nbi =  chaine.substring(p1, p2);
+            }
+            return nameg  + ' — ' + nbi +' (' + label + ')';
         },
         preSelected: <?php echo wizard_preselected_cohort(); ?>
     });

@@ -1,9 +1,15 @@
 <?php
+/**
+ * @package    local
+ * @subpackage roftools
+ * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once($CFG->dirroot . "/course/lib.php");
 
 // Classes d'équivalence des diplômes pour les catégories
-function equivalentDiplomas() {
+function equivalent_diplomas() {
 
     $diplomaEqv = array(
         'Licences' => 'L1,L2,L3,DP',
@@ -21,7 +27,7 @@ function equivalentDiplomas() {
     return $idxEqv;
 }
 
-function highLevelCategories() {
+function high_level_categories() {
     return
         array(
             array('name' => 'Année 2012-2013', 'idnumber' => '1:2012-2013'),
@@ -29,12 +35,12 @@ function highLevelCategories() {
         );
 }
 
-function createRofCategories($verb=0) {
+function create_rof_categories($verb=0) {
     global $DB;
 
     $dipOrdre = array('Licences', 'Masters', 'Doctorats', 'Autres');
-    $idxEqv = equivalentDiplomas();
-    $hlCategories = highLevelCategories();
+    $idxEqv = equivalent_diplomas();
+    $hlCategories = high_level_categories();
     $parentid=0;
 
     // Crée les deux niveaux supérieurs
@@ -62,14 +68,14 @@ function createRofCategories($verb=0) {
         $category = create_course_category($newcategory);
         $compCatId = $category->id;
         fix_course_sortorder();
-        $sql = 'SELECT * FROM {rof_program} WHERE rofid IN ' . serializedToSql($component->sub);
+        $sql = 'SELECT * FROM {rof_program} WHERE rofid IN ' . serialized_to_sql($component->sub);
         $programs = $DB->get_records_sql($sql);
 
         $diplomeCat = array();
         foreach ($programs as $program) {
             if ($verb >= 1) echo '.';
             if ($verb >= 2) echo " $program->rofid ";
-            $typesimple = typeSimplifie($program->typedip, $idxEqv);
+            $typesimple = type_simplifie($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
 
@@ -94,7 +100,7 @@ function createRofCategories($verb=0) {
  * turns a serialized list into one suitable for SQL IN request, ex.
  * "A,B,C" -> "'A','B','C'"
  */
-function serializedToSql($serial) {
+function serialized_to_sql($serial) {
     return "('" . implode("', '", explode(",", $serial)) ."')";
 }
 
@@ -102,7 +108,7 @@ function serializedToSql($serial) {
  * returns a simplified category for the diploma, ex. 'L2' -> 'Licences'
  * @param string $typedip
  */
-function typeSimplifie($typedip, $idxEqv) {
+function type_simplifie($typedip, $idxEqv) {
     if (array_key_exists($typedip, $idxEqv)) {
         return $idxEqv[$typedip];
     } else {

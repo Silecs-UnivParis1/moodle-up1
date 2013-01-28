@@ -1,5 +1,5 @@
 <?php
-require_once($CFG->dirroot . '/report/rofstats/roflib.php');
+require_once($CFG->dirroot . '/local/roftools/roflib.php');
 
 /**
  * renvoie la liste des components

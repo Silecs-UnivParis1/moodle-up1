@@ -9,7 +9,7 @@
 define('NO_OUTPUT_BUFFERING', false);
 global $DB;
 require('../../config.php');
-require_once($CFG->dirroot.'/report/rofstats/roflib.php'); // to get ROF data
+require_once($CFG->dirroot.'/local/roftools/roflib.php'); // to get ROF data
 require_once($CFG->dirroot.'/local/up1_metadata/lib.php'); // to get prepared metadata
 require_once($CFG->libdir.'/adminlib.php');
 require_once('locallib.php');

@@ -26,7 +26,7 @@ if (rof_view_record($rofid)) {
         if (isset($path)) {
             echo "Chemin d'accès : <br />\n";
             $accPath = explode('_', $path);
-            echo rof_format_path(get_combined_path($accPath), 'combined', true);
+            echo rof_format_path(rof_get_combined_path($accPath), 'combined', true);
             echo "<br />\n<br />\n";
         }
 
