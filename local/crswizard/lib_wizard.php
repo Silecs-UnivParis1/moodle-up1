@@ -43,6 +43,36 @@ function wizard_get_catlevel2() {
 }
 
 /**
+ * Reconstruit le tableau de chemins (composantes/diplômes) pour le plugin jquery select-into-subselects.js
+ * hack de la fonction wizard_get_mydisplaylist()
+ * @param $idcat identifiant de la catégorie diplôme sélectionné à l'étape précédente
+ * @return array
+ * */
+function wizard_get_myComposantelist($idcat) {
+     global $DB;
+    $displaylist = array();
+    $parentlist = array();
+    $category = $DB->get_record('course_categories', array('id' => $idcat));
+    $tpath = explode('/', $category->path);
+    $selected = $DB->get_record('course_categories', array('id' => $tpath[2]));
+    make_categories_list($displaylist, $parentlist, '', 0, $selected); // separator ' / ' is hardcoded into Moodle
+
+    $pos = strlen($category->name);
+    $pos = $pos + 3;
+    foreach ($displaylist as $id => $value){
+        $displaylist[$id] = substr($value, $pos);
+    }
+    $mydisplaylist = array(" Sélectionner la composante / Sélectionner le type de diplôme");
+
+    foreach ($displaylist as $id => $label) {
+        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 2) {
+            $mydisplaylist[$id] = $label;
+        }
+    }
+    return $mydisplaylist;
+}
+
+/**
  * Returns the list of the names of the ancestor categories, including the target.
  * @global moodle_database $DB
  * @param integer $idcategory
