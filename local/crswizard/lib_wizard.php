@@ -49,7 +49,7 @@ function wizard_get_catlevel2() {
  * @return array
  * */
 function wizard_get_myComposantelist($idcat) {
-     global $DB;
+    global $DB;
     $displaylist = array();
     $parentlist = array();
     $category = $DB->get_record('course_categories', array('id' => $idcat));
@@ -57,16 +57,11 @@ function wizard_get_myComposantelist($idcat) {
     $selected = $DB->get_record('course_categories', array('id' => $tpath[2]));
     make_categories_list($displaylist, $parentlist, '', 0, $selected); // separator ' / ' is hardcoded into Moodle
 
-    $pos = strlen($category->name);
-    $pos = $pos + 3;
-    foreach ($displaylist as $id => $value){
-        $displaylist[$id] = substr($value, $pos);
-    }
     $mydisplaylist = array(" Sélectionner la composante / Sélectionner le type de diplôme");
-
     foreach ($displaylist as $id => $label) {
-        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 2) {
-            $mydisplaylist[$id] = $label;
+        if ($id != $selected->id) {
+            $pos = strpos($label, '/');
+            $mydisplaylist[$id] = substr($label, $pos+2);
         }
     }
     return $mydisplaylist;

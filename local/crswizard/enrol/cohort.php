@@ -73,16 +73,9 @@ jQuery(document).ready(function () {
             var label = $('#group-role > option:selected').text();
             var chaine = item.label;
             var nameg=chaine.substring(3,chaine.indexOf("</b>"));
-            var ps = chaine.indexOf("</p>");
-            var p2 = chaine.length-7;
-            var nbi ='';
-            if (ps!= -1) {
-                nbi =  chaine.substring(ps+6, p2);
-            } else {
-                var ed = '<div class="autocompletegroup-descr">';
-                var p1 = chaine.indexOf(ed) + ed.length + 2;
-                nbi =  chaine.substring(p1, p2);
-            }
+            var nbi = '';
+            var reg=new RegExp("[0-9]+ inscrits","g");
+            nbi = chaine.match(reg);
             return nameg  + ' — ' + nbi +' (' + label + ')';
         },
         preSelected: <?php echo wizard_preselected_cohort(); ?>

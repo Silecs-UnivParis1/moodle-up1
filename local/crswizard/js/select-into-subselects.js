@@ -24,7 +24,7 @@ var getTree = function (options, separator) {
 	        if (is_string(current[e])) {
 		        // the tree has nodes that can be selected.
 		        // move the node into subselect
-		        current[e] = { "Tout": current[e] };
+		        current[e] = { "Aucun": current[e] }; // Aucun au lieu de Tout
 	        }
             //current = current[e] || (current[e] = {'-': ''})
             if (!current[e]) {
