@@ -371,10 +371,10 @@ function wizard_preselected_cohort() {
         foreach ($groups as $id => $group) {
             $desc = '';
             if (isset($group->size) && $group->size) {
-                $desc = '<div>(' . $group->size . ' inscrits)</div>';
+                $desc =  $group->size . ' inscrits';
             }
             $liste[] = array(
-                "label" => $labelrole . '<b>' . $group->name . '</b>' . $desc,
+                "label" => $group->name . ' — ' . $desc . ' (' . $labelrole . ')',
                 "value" => $id,
                 "fieldName" => "group[$role]",
             );
