@@ -15,7 +15,7 @@
  * ** MySQL ONLY **
  */
 class mws_search_users {
-    /** @var int */
+    /** @var int max num of results */
     public $maxrows = MWS_SEARCH_MAXROWS;
 
     /** @var string 'no' (no students) | 'only' | 'both' (default) */
@@ -33,9 +33,13 @@ class mws_search_users {
     /** @var array Restrict to the following cohorts names */
     public $cohorts = array();
 
-    private $exclude_map = array();
+    /** @var boolean If a cohorts filter is active, add users that have the site capacity */
+    public $addValidators = true;
 
     const affiliationFieldName = 'up1edupersonprimaryaffiliation';
+    const validatorCapacity = 'local/crswizard:validator';
+
+    private $exclude_map = array();
 
     /**
      * Checks that the parameters are valid, and ints some helper properties.
@@ -103,12 +107,12 @@ class mws_search_users {
     private function buildSql() {
         $select = "SELECT u.id, u.username, u.firstname, u.lastname";
         $from =  "FROM {user} u";
-        $where = "WHERE ( (mnethostid = 1 AND username = ?)  OR  firstname LIKE ? OR lastname LIKE ? "
-                . "OR  CONCAT(firstname, ' ', lastname) LIKE ?  OR  CONCAT(lastname, ' ', firstname) LIKE ? )";
+        $where = "WHERE ( (u.mnethostid = 1 AND u.username = ?)  OR  u.firstname LIKE ? OR u.lastname LIKE ? "
+                . "OR  CONCAT(u.firstname, ' ', u.lastname) LIKE ?  OR  CONCAT(u.lastname, ' ', u.firstname) LIKE ? )";
         if ($this->filterstudent == 'no') {
-            $where = " AND idnumber = '' ";
+            $where = " AND u.idnumber = '' ";
         } else if ($this->filterstudent == 'only') {
-            $where = " AND idnumber != '' ";
+            $where = " AND u.idnumber != '' ";
         }
         if ($this->affiliation) {
             $fieldId = $this->getAffiliationFieldId();
@@ -118,8 +122,15 @@ class mws_search_users {
         if ($this->cohorts) {
             $cohortsId = $this->cohortsNamesToId($this->cohorts);
             if ($cohortsId) {
-                $cohortsId = join(',', $cohortsId);
-                $from .= " JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId))";
+                $roleIds = $this->getValidatorsRolesIds();
+                $from .= " LEFT JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId)) ";
+                if ($roleIds) {
+                    $from .= " LEFT JOIN {role_assignments} ra "
+                            . "ON (ra.userid = u.id AND ra.contextid = 1 AND ra.roleid IN ($roleIds)) ";
+                    $where .= " AND (cm.cohortid IS NOT NULL OR ra.roleid IS NOT NULL) ";
+                } else {
+                    $where .= " AND cm.cohortid IS NOT NULL ";
+                }
                 $where .= ' GROUP BY u.id';
             }
         }
@@ -127,20 +138,47 @@ class mws_search_users {
     }
 
     /**
-     * Converts a list of cohort names into a list of cohort IDs.
+     * Converts a list of cohort names into a string list of cohort IDs.
      *
      * @global moodle_database $DB
      * @param array $names
-     * @return array of integers
+     * @return string list of integers separated by commas
      */
     private function cohortsNamesToId($names) {
         global $DB;
+        if (empty($names)) {
+            return '';
+        }
         $rs = $DB->get_recordset_list('cohort', 'name', $names, '', 'id');
         $ids = array();
         foreach ($rs as $row) {
             $ids[] = $row->id;
         }
-        return $ids;
+        return join(',', $ids);
+    }
+
+    /**
+     * Returns the string list of the IDs of the roles that can validate a course creation.
+     *
+     * @global moodle_database $DB
+     * @return string list of integers, separated by commas
+     */
+    private function getValidatorsRolesIds() {
+        global $DB;
+        if (!$this->addValidators) {
+            return '';
+        }
+        $rs = $DB->get_recordset(
+                'role_capabilities',
+                array('capability' => self::validatorCapacity, 'permission' => 1),
+                '', // sort
+                'roleid'
+        );
+        $ids = array();
+        foreach ($rs as $row) {
+            $ids[] = $row->roleid;
+        }
+        return join(',', $ids);
     }
 
     /**
