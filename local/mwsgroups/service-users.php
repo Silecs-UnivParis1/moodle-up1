@@ -6,7 +6,7 @@ require_once(__DIR__ . '/lib.php');
 
 $token = required_param('token', PARAM_RAW);
 $exclude = optional_param('exclude', '', PARAM_TAGLIST); // usernames to exclude, separated by ","
-$cohorts = optional_param('cohorts', '', PARAM_TAGLIST); // usernames to exclude, separated by ","
+$cohorts = optional_param('cohorts', '', PARAM_TAGLIST); // cohorts to restrict to, separated by ","
 $callback = optional_param('callback', '', PARAM_ALPHANUMEXT); // if set, use jsonp instead of json
 
 $search_u = new mws_search_users();

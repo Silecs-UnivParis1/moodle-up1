@@ -117,12 +117,12 @@ class mws_search_users {
         if ($this->affiliation) {
             $fieldId = $this->getAffiliationFieldId();
             $select .= ", d1.data AS affiliation ";
-            $from .= " LEFT JOIN custom_info_data d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
+            $from .= " LEFT JOIN {custom_info_data} d1 ON (d1.fieldid = $fieldId AND d1.objectid = u.id) ";
         }
         if ($this->cohorts) {
             $cohortsId = $this->cohortsNamesToId($this->cohorts);
+            $roleIds = $this->getValidatorsRolesIds();
             if ($cohortsId) {
-                $roleIds = $this->getValidatorsRolesIds();
                 $from .= " LEFT JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId)) ";
                 if ($roleIds) {
                     $from .= " LEFT JOIN {role_assignments} ra "
@@ -132,6 +132,14 @@ class mws_search_users {
                     $where .= " AND cm.cohortid IS NOT NULL ";
                 }
                 $where .= ' GROUP BY u.id';
+            } else {
+                if ($roleIds) {
+                    $from .= " LEFT JOIN {role_assignments} ra "
+                            . "ON (ra.userid = u.id AND ra.contextid = 1 AND ra.roleid IN ($roleIds)) ";
+                    $where .= " AND ra.roleid IS NOT NULL ";
+                } else {
+                    $where .= " AND 1 = 0 ";
+                }
             }
         }
         return "$select $from $where ORDER BY lastname ASC, firstname ASC";
@@ -149,7 +157,7 @@ class mws_search_users {
         if (empty($names)) {
             return '';
         }
-        $rs = $DB->get_recordset_list('cohort', 'name', $names, '', 'id');
+        $rs = $DB->get_recordset_list('cohort', 'idnumber', $names, '', 'id');
         $ids = array();
         foreach ($rs as $row) {
             $ids[] = $row->id;

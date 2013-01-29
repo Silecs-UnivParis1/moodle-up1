@@ -101,8 +101,14 @@ function get_table_course_to_validate($approbateurid) {
         $row->cells[1] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
         $row->cells[1]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
         $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
-        $row->cells[2] = new html_table_cell($etat[$validated]);
+        // $row->cells[2] = new html_table_cell($etat[$validated]);
+        // $row->cells[2]->attributes = array('title' => '', 'class' => '');
+        $row->cells[2] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible));
         $row->cells[2]->attributes = array('title' => '', 'class' => '');
+        if ( ! $validated ) {
+            $row->attributes = array('class' => 'highlight');
+        }
+
         $demandeur = up1_meta_get_user($dbcourse->id, 'demandeurid');
         $row->cells[3] = new html_table_cell($demandeur['name']);
         $row->cells[3]->attributes = array('title' => '', 'class' => '');
@@ -120,7 +126,7 @@ function get_table_course_to_validate($approbateurid) {
         $row->cells[5] = new html_table_cell($approbateur['name']);
         $row->cells[5]->attributes = array('title' => 'Proposé='.$approbateurprop['name'].' ; effectif='.$approbateureff['name'], 'class' => '');
         $adate = up1_meta_get_date($dbcourse->id, 'datevalid');
-        $row->cells[6] = new html_table_cell($adate['date']);
+        $row->cells[6] = new html_table_cell( (! empty($adate['date']) ? $adate['date'] : '<b>En attente</b>') );
         $row->cells[6]->attributes = array('title' => $adate['datetime'], 'class' => '');
         $row->cells[7] = new html_table_cell(userdate($dbcourse->startdate, '%Y-%m-%d'));
         $row->cells[7]->attributes = array('title' => '', 'class' => '');
@@ -135,11 +141,6 @@ function get_table_course_to_validate($approbateurid) {
             $row->cells[8]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
         }
 
-        $row->cells[9] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible));
-        $row->cells[9]->attributes = array('title' => '', 'class' => '');
-        if ( ! $validated ) {
-            $row->attributes = array('class' => 'highlight');
-        }
         $res->data[] = $row;
     }
 
@@ -193,8 +194,8 @@ function action_icons($crsid, $validated, $visible) {
 
 
 function get_table_course_header() {
-    $headings = array('', get_string('fullnamecourse'), 'État', 'Demandeur', 'Date demande',
-        'Approbateur', 'Date approbation', 'Date ouverture', 'Élément pédagogique', 'Modifier');
+    $headings = array('', get_string('fullnamecourse'), 'Actions', 'Demandeur', 'Date demande',
+        'Approbateur', 'Date approbation', 'Date ouverture', 'Élément pédagogique');
     $row = array();
     foreach ($headings as $h) {
         $cell = new html_table_cell($h);

@@ -3,19 +3,29 @@
 var is_string = function (v){
     return typeof(v) === 'string';
 };
+
 var labels;
 
-var getTree = function (options, separator) {
+var config = {};
+
+var defaultConfig = {
+    separator: " / ",
+    labelOnEmpty: "Aucun",
+    // labels: ["l1", "l2"],
+    required: true
+};
+
+var getTree = function (options) {
     var root = {};
     var first_option = true;
     var emptyChoices = [];
     options.each(function () {
 	    var option = $(this);
 	    var val = option.val();
-	    var pathElems = option.text().split(separator);
+	    var pathElems = option.text().split(config.separator);
 	    var lastElem = pathElems.pop();
         if (first_option) {
-            emptyChoices = option.text().split(separator);
+            emptyChoices = option.text().split(config.separator);
         }
 
 
@@ -24,7 +34,9 @@ var getTree = function (options, separator) {
 	        if (is_string(current[e])) {
 		        // the tree has nodes that can be selected.
 		        // move the node into subselect
-		        current[e] = { "Aucun": current[e] }; // Aucun au lieu de Tout
+                var tmp = current[e];
+                current[e] = {};
+                current[e][config.labelOnEmpty] = tmp;
 	        }
             //current = current[e] || (current[e] = {'-': ''})
             if (!current[e]) {
@@ -58,7 +70,7 @@ var createOneSubselect = function (onchange, tree, depth) {
 var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
     while (!is_string(tree)) {
         var subselect = createOneSubselect(onchange, tree, depth);
-        selectsDiv.append(buildSelectLine(subselect, depth, labels));
+        selectsDiv.append(buildSelectLine(subselect, depth));
         depth++;
         tree = tree[subselect.val()]; // use default value (ie first value)
     }
@@ -66,10 +78,12 @@ var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
 };
 
 var buildSelectLine = function(subselect, depth) {
-    var line = $('<div class="fitem required fitem_fselect" data-depth="' + depth + '">');
-    if (labels && depth in labels) {
+    var line = $(
+        '<div class="fitem ' + (config.required ? 'required ' : '') + 'fitem_fselect" data-depth="' + depth + '">'
+    );
+    if ('labels' in config && config.labels && depth in config.labels) {
         line.append(
-            $('<div class="fitemtitle">').append($('<label>').text(labels[depth]+' *'))
+            $('<div class="fitemtitle">').append($('<label>').text(config.labels[depth]+' *'))
         );
     }
     line.append($('<div class="felement fselect">').append(subselect));
@@ -104,9 +118,8 @@ var createOnchangeHandler = function (theSelect, selectsDiv) {
     return onchange;
 };
 
-var transformIntoSubselects = function (theSelect, separator) {
-    var root = getTree(theSelect.find('option'), separator);
-    labels = theSelect.data('labels');
+var transformIntoSubselects = function (theSelect) {
+    var root = getTree(theSelect.find('option'));
 
     var selectsDiv = $('<div class="subselects">');
     theSelect.parent().after(selectsDiv);
@@ -116,7 +129,7 @@ var transformIntoSubselects = function (theSelect, separator) {
     var getAndSetSelectedValue = function () {
 	    selectsDiv.empty(); // cleanup
 	    var selectedText = theSelect.find(":selected").text();
-	    var selected = selectedText.split(separator);
+	    var selected = selectedText.split(config.separator);
 	    setSubselects(selectsDiv, onchange, root, selected);
     };
 
@@ -124,10 +137,14 @@ var transformIntoSubselects = function (theSelect, separator) {
     getAndSetSelectedValue();
 };
 
-$.fn.transformIntoSubselects = function (separator) {
+$.fn.transformIntoSubselects = function (cfg) {
+    config = $.extend(true, {}, defaultConfig, cfg || {});
     $(this).each(function () {
-	    var theSelect = $(this);
-	    transformIntoSubselects(theSelect, separator);
+        var theSelect = $(this);
+        transformIntoSubselects(theSelect);
+        if (theSelect.attr('id')) {
+            $('label[for="' + theSelect.attr('id') + '"]').hide(0);
+        }
     });
 }
 

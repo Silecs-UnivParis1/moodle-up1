@@ -1,4 +1,6 @@
 $(document).ready(function() {
-    var separator = / \/ /;
-    $('select.transformIntoSubselects').transformIntoSubselects(separator);
+    $('select.transformIntoSubselects').transformIntoSubselects({
+        separator: / \/ /,
+        labels: ["Période :", "Établissement :", "Composante :", "Type de diplôme :"]
+    });
 });

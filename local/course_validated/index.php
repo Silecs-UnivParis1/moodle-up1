@@ -2,8 +2,6 @@
 require_once('../../config.php');
 require_once('locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
-/** @todo keep or drop the following ? normally, should be kept but needs admin rights */
-// admin_externalpage_setup('coursestovalidate');
 
 /**
  * @todo delete/show/hide/validate : GET->POST
@@ -41,9 +39,6 @@ $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 
-//$supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator', 'u.id, u.firstname, u.lastname');
-//var_dump ($supervalidators);
-
 if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
     $table = get_table_course_to_validate(0, 2);
     echo "<p>Vous êtes super-approbateur.</p>";
@@ -55,7 +50,7 @@ if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
 }
 $cnt = ($courselist == '' ? 0 : count(explode(',', $courselist)));
 
-if (empty($table->data)) {
+if ( $cnt == 0 ) {
     if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
         echo $OUTPUT->box("Aucune demande de création de cours n'est en attente d'approbation.");
     } else {
