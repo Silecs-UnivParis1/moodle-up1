@@ -137,8 +137,11 @@ var transformIntoSubselects = function (theSelect) {
 $.fn.transformIntoSubselects = function (cfg) {
     config = $.extend(true, {}, defaultConfig, cfg || {});
     $(this).each(function () {
-	    var theSelect = $(this);
-	    transformIntoSubselects(theSelect);
+        var theSelect = $(this);
+        transformIntoSubselects(theSelect);
+        if (theSelect.attr('id')) {
+            $('label[for="' + theSelect.attr('id') + '"]').hide(0);
+        }
     });
 }
 
