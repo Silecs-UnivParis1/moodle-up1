@@ -110,7 +110,8 @@ function get_table_course_to_validate($approbateurid, $context) {
         }
 
         $demandeur = up1_meta_get_user($dbcourse->id, 'demandeurid');
-        $row->cells[3] = new html_table_cell($demandeur['name']);
+        $url = new moodle_url('/user/profile.php', array('id' => $demandeur['id']));
+        $row->cells[3] = new html_table_cell(html_writer::link($url, $demandeur['name']));
         $row->cells[3]->attributes = array('title' => '', 'class' => '');
         $adate = up1_meta_get_date($dbcourse->id, 'datedemande');
         $row->cells[4] = new html_table_cell($adate['date']);
@@ -190,7 +191,7 @@ function action_icons($crsid, $validated, $visible, $context) {
         $res .= $OUTPUT->action_icon($url, new pix_icon('i/settings', 'Afficher le tableau de bord'));
     } else { // approbateur lambda
         // Synopsis
-        $url = new moodle_url('course/report/synopsis/index.php', array('id' => $crsid));
+        $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
         $res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
         // Demande d'assistance
         $helpuser = get_config('local_crswizard', 'helpdesk_user');

@@ -41,13 +41,13 @@ $context = get_context_instance(CONTEXT_COURSE, $course->id);
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
 
-require_login($course);
-require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
+// require_login($course);
+// require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
 
 // add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
 
 $strreport = get_string('pluginname', 'coursereport_synopsis');
-
+$PAGE->set_context($context);
 $PAGE->set_title($course->shortname .': '. $strreport);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();

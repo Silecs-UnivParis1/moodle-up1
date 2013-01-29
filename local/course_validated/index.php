@@ -58,6 +58,9 @@ if ( $cnt == 0 ) {
     }
 } else {
     echo "<p>Il y a <b>" . $cnt . "</b> espaces de cours en attente d'approbation.</p>\n";
+}
+
+if (count($table->data) > 0) {
     $perpage = 20;
     $baseurl = new moodle_url('/local/course_validated/index.php');;
     $pagingbar = new paging_bar(count($table->data), $page, $perpage, $baseurl);
