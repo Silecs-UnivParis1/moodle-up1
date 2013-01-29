@@ -92,7 +92,9 @@ jQuery(document).ready(function () {
         labelDetails: 'approbateur',
         maxSelected: 1,
         wsParams: { exclude: '<?php echo $USER->username;?>',
-            cohorts: '<?php echo $listCohort;?>'},
+            cohorts: '<?php echo $listCohort;?>',
+            affiliation: 1,
+            maxRows: 50 },
         preSelected: <?php echo wizard_preselected_validators();?>
     });
 });
