@@ -648,7 +648,7 @@ class core_wizard {
         $signature .= 'Courriel : assistance-epi@univ-paris1.fr' . "\n";
 
         $mgc = 'Bonjour,' . "\n\n";
-        $mgc .= 'Vous venez de créer l\'espace de cours ' . $nomcours . ' sur la plateforme '. $CFG->wwwroot . "\n\n";
+        $mgc .= 'Vous venez de créer l\'espace de cours "' . $nomcours . '" sur la plateforme '. $CFG->wwwroot . "\n\n";
         if (count($idval)) {
             $mgc .= 'Votre demande a été transmise à ' . $idval['fullname'] . ', ainsi qu\'aux gestionnaires de '
             . 'la plateforme pour approbation, avant son ouverture aux étudiants';
@@ -673,8 +673,8 @@ class core_wizard {
 
         $mgv = 'Bonjour,' . "\n\n";
         $mgv .= fullname($this->user) . ' ('.$this->user->email.') '
-            . 'vient de créer l\'espace de cours ' . $nomcours . ' sur la plateforme '
-            . $CFG->wwwroot . 'et vous a indiqué comme la personne pouvant valider sa création. ' . "\n\n";
+            . 'vient de créer l\'espace de cours "' . $nomcours . '" sur la plateforme '
+            . $CFG->wwwroot . ' et vous a indiqué comme la personne pouvant valider sa création. ' . "\n\n";
         $mgv .= 'Pour donner votre accord :' . "\n\n";
         $mgv .= '1. Cliquez sur le lien suivant '. $urlvalidator . ' ;' . "\n";
         if (count($idval)) {
@@ -983,7 +983,7 @@ class core_wizard {
         $site = get_site();
         $sitename = format_string($site->shortname);
         $subject .= '[' . $sitename . '] ' . 'Demande '. $type
-            . ' approbation espace';
+            . ' espace';
         if (isset($this->mydata->idnumber) && $this->mydata->idnumber != '') {
             $subject .=' n°';
         }
