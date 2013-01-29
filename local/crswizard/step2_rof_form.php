@@ -89,7 +89,7 @@ class course_wizard_step2_rof_form extends moodleform {
             . '</div>'
             . '</div>'
             . '<fieldset class="felement fgroup">'
-            . '<span id="fullnamelab">' . $labelname . '</span> - '
+            . '<span id="fullnamelab">' . $labelname . ' - </span>'
             . '<label class="accesshide" for="id_complement"> </label>'
             . '<input maxlength="254" size="50" name="complement" type="text" '
             . 'id="id_complement" value="' . $valcomplement . '">'
