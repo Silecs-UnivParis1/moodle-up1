@@ -35,6 +35,15 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $cohorts_cap_validator->plugin = 'local_crswizard';
     $settings->add($cohorts_cap_validator);
 
+    $helpdesk_user = new admin_setting_configtext(
+            'helpdesk_user',
+            'Utilisateur support',
+            'Nom (username) de l\'utilisateur support. Il recevra les demandes d\'aide.',
+            '',
+            PARAM_NOTAGS);
+    $helpdesk_user->plugin = 'local_crswizard';
+    $settings->add($helpdesk_user);
+
     $email_notification_course_creation = new admin_setting_configtext(
             'email_notification_course_creation',
             'Email de notification (création cours)',
