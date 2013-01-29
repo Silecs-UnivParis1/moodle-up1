@@ -65,7 +65,7 @@ var createOneSubselect = function (onchange, tree, depth) {
 var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
     while (!is_string(tree)) {
         var subselect = createOneSubselect(onchange, tree, depth);
-        selectsDiv.append(buildSelectLine(subselect, depth, labels));
+        selectsDiv.append(buildSelectLine(subselect, depth));
         depth++;
         tree = tree[subselect.val()]; // use default value (ie first value)
     }
@@ -74,9 +74,9 @@ var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
 
 var buildSelectLine = function(subselect, depth) {
     var line = $('<div class="fitem required fitem_fselect" data-depth="' + depth + '">');
-    if (labels && depth in labels) {
+    if ('labels' in config && config.labels && depth in config.labels) {
         line.append(
-            $('<div class="fitemtitle">').append($('<label>').text(labels[depth]+' *'))
+            $('<div class="fitemtitle">').append($('<label>').text(config.labels[depth]+' *'))
         );
     }
     line.append($('<div class="felement fselect">').append(subselect));
@@ -113,7 +113,6 @@ var createOnchangeHandler = function (theSelect, selectsDiv) {
 
 var transformIntoSubselects = function (theSelect) {
     var root = getTree(theSelect.find('option'));
-    labels = theSelect.data('labels');
 
     var selectsDiv = $('<div class="subselects">');
     theSelect.parent().after(selectsDiv);
@@ -132,11 +131,7 @@ var transformIntoSubselects = function (theSelect) {
 };
 
 $.fn.transformIntoSubselects = function (cfg) {
-    if (is_string(cfg)) {
-        config.separator = cfg;
-    } else {
-        config = $.extend(true, {}, defaultConfig, cfg || {});
-    }
+    config = $.extend(true, {}, defaultConfig, cfg || {});
     $(this).each(function () {
 	    var theSelect = $(this);
 	    transformIntoSubselects(theSelect);
