@@ -10,6 +10,7 @@ var config = {};
 
 var defaultConfig = {
     separator: " / ",
+    labelOnEmpty: "Aucun",
     // labels: ["l1", "l2"],
     required: true
 };
@@ -33,7 +34,9 @@ var getTree = function (options) {
 	        if (is_string(current[e])) {
 		        // the tree has nodes that can be selected.
 		        // move the node into subselect
-		        current[e] = { "Aucun": current[e] }; // Aucun au lieu de Tout
+                var tmp = current[e];
+                current[e] = {};
+                current[e][config.labelOnEmpty] = tmp;
 	        }
             //current = current[e] || (current[e] = {'-': ''})
             if (!current[e]) {
