@@ -40,12 +40,12 @@ $PAGE->set_pagelayout('admin');
 echo $OUTPUT->header();
 
 if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
-    $table = get_table_course_to_validate(0, 2);
+    $table = get_table_course_to_validate(0, $systemcontext);
     echo "<p>Vous êtes super-approbateur.</p>";
     $courselist = get_id_courses_to_validate(0, 0);
 } else {
-    $table = get_table_course_to_validate($USER->id, 2);
-    echo "<p>Vous n'êtes pas super-approbateur.</p>";
+    $table = get_table_course_to_validate($USER->id, $systemcontext);
+    // echo "<p>Vous n'êtes pas super-approbateur.</p>";
     $courselist = get_id_courses_to_validate($USER->id, 0);
 }
 $cnt = ($courselist == '' ? 0 : count(explode(',', $courselist)));
@@ -58,6 +58,9 @@ if ( $cnt == 0 ) {
     }
 } else {
     echo "<p>Il y a <b>" . $cnt . "</b> espaces de cours en attente d'approbation.</p>\n";
+}
+
+if (count($table->data) > 0) {
     $perpage = 20;
     $baseurl = new moodle_url('/local/course_validated/index.php');;
     $pagingbar = new paging_bar(count($table->data), $page, $perpage, $baseurl);

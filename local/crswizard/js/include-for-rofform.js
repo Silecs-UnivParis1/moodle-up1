@@ -12,7 +12,7 @@ $(document).ready(function() {
 
         $('#fullname').val(intitule);
         $('#fullnamelab').empty();
-        $('#fullnamelab').text(intitule);
+        $('#fullnamelab').text(intitule + ' - ');
     });
 
     $("#items-selected").on("click", ".selected-remove", function(event) {

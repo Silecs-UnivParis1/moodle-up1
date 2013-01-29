@@ -11,12 +11,27 @@ function wizard_get_mydisplaylist() {
     $displaylist = array();
     $parentlist = array();
     make_categories_list($displaylist, $parentlist); // separator ' / ' is hardcoded into Moodle
-    $myconfig = new my_elements_config();
     $mydisplaylist = array(" Sélectionner la période / Sélectionner l'établissement / Sélectionner la composante / Sélectionner le type de diplôme");
 
+    $enfantlist = array();
+    foreach ($parentlist as $id => $tabp) {
+        if (count($tabp)>1) {
+            foreach($tabp as $idp) {
+                $enfantlist[$idp][]=$id;
+            }
+        }
+    }
+
     foreach ($displaylist as $id => $label) {
-        if (array_key_exists($id, $parentlist) && count($parentlist[$id]) == 3) {
-            $mydisplaylist[$id] = $label;
+        if (array_key_exists($id, $parentlist) &&   count($parentlist[$id]) > 1) {
+            $depth = count($parentlist[$id]);
+            if ($depth == 2) {
+                if(!array_key_exists($id, $enfantlist)) {
+                    $mydisplaylist[$id] = $label;
+                }
+            } else {
+                $mydisplaylist[$id] = $label;
+            }
         }
     }
     return $mydisplaylist;
@@ -25,7 +40,6 @@ function wizard_get_mydisplaylist() {
 /**
  * Reconstruit le tableau de chemins (période/établissement) pour le plugin jquery select-into-subselects.js
  * hack de la fonction wizard_get_mydisplaylist()
- * @todo limiter établissement à Paris 1
  * @return array
  * */
 function wizard_get_catlevel2() {
@@ -770,7 +784,9 @@ class core_wizard {
             if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
                 $mydata->profile_field_up1niveau .= ';';
             }
-            $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
+            if (isset($tabcategories[3])) {
+                $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
+            }
         }
 
         // cours doit être validé

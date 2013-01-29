@@ -170,7 +170,7 @@ class course_wizard_step2_form extends moodleform {
 
         $category = $DB->get_record('course_categories', array('id' => $idcategory));
         if ($category) {
-            if ($category->depth < 4) {
+            if ($category->depth < 3) {
                 $errors['category'] = get_string('categoryerrormsg1', 'local_crswizard');
             }
         } else {

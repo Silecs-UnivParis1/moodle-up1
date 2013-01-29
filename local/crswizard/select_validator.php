@@ -81,7 +81,7 @@ $tabinfo['courserequestdate'] = date('d-m-Y');
 
 <?php
 $listCohort = trim(get_config('local_crswizard', 'cohorts_cap_validator'));
-$listCohort = strtr($listCohort, ' ', ',');
+$listCohort = preg_replace('/\s+,\s+/', ',', $listCohort);
 ?>
 
 <script type="text/javascript">

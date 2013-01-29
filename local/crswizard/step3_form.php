@@ -47,7 +47,11 @@ class course_wizard_step3_form extends moodleform {
             //Niveau
             $type = strtolower($myconfig->categorie_cours[3]);
             $mform->addElement('text', $type, ucfirst($type), 'maxlength="40" size="20"');
-            $mform->setConstant($type, $tabcategories[3]);
+            $valdiplome = 'Aucun';
+            if (isset($tabcategories[3])) {
+               $valdiplome = $tabcategories[3];
+            }
+            $mform->setConstant($type, $valdiplome);
             $tabfreeze[] = $type;
 
             $mform->addElement('header','autre_rattachement', get_string('categoryblockE3s1', 'local_crswizard'));

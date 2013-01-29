@@ -66,7 +66,7 @@ function get_id_courses_to_validate($approbateurid, $validated) {
  * @param integer $approbateurid
  * @return \html_table
  */
-function get_table_course_to_validate($approbateurid) {
+function get_table_course_to_validate($approbateurid, $context) {
     global $DB;
     $etat = array(
         false => "En attente",
@@ -103,14 +103,15 @@ function get_table_course_to_validate($approbateurid) {
         $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
         // $row->cells[2] = new html_table_cell($etat[$validated]);
         // $row->cells[2]->attributes = array('title' => '', 'class' => '');
-        $row->cells[2] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible));
+        $row->cells[2] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible, $context));
         $row->cells[2]->attributes = array('title' => '', 'class' => '');
         if ( ! $validated ) {
             $row->attributes = array('class' => 'highlight');
         }
 
         $demandeur = up1_meta_get_user($dbcourse->id, 'demandeurid');
-        $row->cells[3] = new html_table_cell($demandeur['name']);
+        $url = new moodle_url('/user/profile.php', array('id' => $demandeur['id']));
+        $row->cells[3] = new html_table_cell(html_writer::link($url, $demandeur['name']));
         $row->cells[3]->attributes = array('title' => '', 'class' => '');
         $adate = up1_meta_get_date($dbcourse->id, 'datedemande');
         $row->cells[4] = new html_table_cell($adate['date']);
@@ -148,25 +149,31 @@ function get_table_course_to_validate($approbateurid) {
 }
 
 
-function action_icons($crsid, $validated, $visible) {
-    global $OUTPUT;
+function action_icons($crsid, $validated, $visible, $context) {
+    global $DB, $OUTPUT;
     $res = '';
     $coursecontext = get_context_instance(CONTEXT_COURSE, $crsid);
     $baseurl = new moodle_url('/local/course_validated/index.php');
-
     //$res .= html_writer::start_tag('div', array('class'=>'action'));
+
+    // Approuver la demande
+    if ( ! $validated ) {
+        $url = new moodle_url($baseurl, array('validate' => $crsid));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('i/tick_green_small', 'Approuver la demande d\'ouverture'));
+    }
+    // Modif. paramètres cours
     if (has_capability('moodle/course:update', $coursecontext)) {
 		$url = new moodle_url('/course/edit.php', array('id' => $crsid));
-		$res .= $OUTPUT->action_icon($url, new pix_icon('t/edit', 'Modifier paramètres de l\'espace de cours'));
+		$res .= $OUTPUT->action_icon($url, new pix_icon('t/edit', 'Modifier les paramètres de l\'espace de cours'));
 		$res .= '&nbsp;';
     }
-
+    // Supprimer le cours
     if (can_delete_course($crsid)) {
 		$url = new moodle_url('/course/delete.php', array('id' => $crsid));
         $res .= $OUTPUT->action_icon($url, new pix_icon('t/delete', 'Supprimer l\'espace de cours'));
         $res .= '&nbsp;';
     }
-
+    // Ouvrir / fermer le cours
     if (has_capability('moodle/course:visibility', $coursecontext)) {
 		if ($visible) {
 			$url = new moodle_url($baseurl, array('hide' => $crsid));
@@ -178,13 +185,23 @@ function action_icons($crsid, $validated, $visible) {
         $res .= '&nbsp;';
     }
 
-	$url = new moodle_url('/local/courseboard/view.php', array('id' => $crsid));
-	$res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le tableau de bord'));
-
-    // si capability : valider un cours : validatedate
-    if ( ! $validated ) {
-        $url = new moodle_url($baseurl, array('validate' => $crsid));
-        $res .= $OUTPUT->action_icon($url, new pix_icon('i/tick_green_small', 'Approuver la demande d\'ouverture'));
+    if (has_capability('local/crswizard:supervalidator', $context)) {
+        // Tableau de bord
+        $url = new moodle_url('/local/courseboard/view.php', array('id' => $crsid));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('i/settings', 'Afficher le tableau de bord'));
+    } else { // approbateur lambda
+        // Synopsis
+        $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
+        $res .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+        // Demande d'assistance
+        $helpuser = get_config('local_crswizard', 'helpdesk_user');
+        if ( isset($helpuser) ) {
+            $userid = $DB->get_field('user', 'id', array('username' => $helpuser));
+            if ($userid) {
+                $url = new moodle_url('/message/index.php', array('id' => $userid));
+                $res .= ' ' . $OUTPUT->action_icon($url, new pix_icon('a/help', 'Demander de l\'assistance'));
+            }
+        }
     }
 
 	//$res .= html_writer::end_tag('div');
