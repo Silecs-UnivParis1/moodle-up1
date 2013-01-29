@@ -3,19 +3,26 @@
 var is_string = function (v){
     return typeof(v) === 'string';
 };
+
 var labels;
 
-var getTree = function (options, separator) {
+var config = {};
+
+var defaultConfig = {
+    separator: " / "
+};
+
+var getTree = function (options) {
     var root = {};
     var first_option = true;
     var emptyChoices = [];
     options.each(function () {
 	    var option = $(this);
 	    var val = option.val();
-	    var pathElems = option.text().split(separator);
+	    var pathElems = option.text().split(config.separator);
 	    var lastElem = pathElems.pop();
         if (first_option) {
-            emptyChoices = option.text().split(separator);
+            emptyChoices = option.text().split(config.separator);
         }
 
 
@@ -104,8 +111,8 @@ var createOnchangeHandler = function (theSelect, selectsDiv) {
     return onchange;
 };
 
-var transformIntoSubselects = function (theSelect, separator) {
-    var root = getTree(theSelect.find('option'), separator);
+var transformIntoSubselects = function (theSelect) {
+    var root = getTree(theSelect.find('option'));
     labels = theSelect.data('labels');
 
     var selectsDiv = $('<div class="subselects">');
@@ -116,7 +123,7 @@ var transformIntoSubselects = function (theSelect, separator) {
     var getAndSetSelectedValue = function () {
 	    selectsDiv.empty(); // cleanup
 	    var selectedText = theSelect.find(":selected").text();
-	    var selected = selectedText.split(separator);
+	    var selected = selectedText.split(config.separator);
 	    setSubselects(selectsDiv, onchange, root, selected);
     };
 
@@ -124,10 +131,15 @@ var transformIntoSubselects = function (theSelect, separator) {
     getAndSetSelectedValue();
 };
 
-$.fn.transformIntoSubselects = function (separator) {
+$.fn.transformIntoSubselects = function (cfg) {
+    if (is_string(cfg)) {
+        config.separator = cfg;
+    } else {
+        config = $.extend(true, {}, defaultConfig, cfg || {});
+    }
     $(this).each(function () {
 	    var theSelect = $(this);
-	    transformIntoSubselects(theSelect, separator);
+	    transformIntoSubselects(theSelect);
     });
 }
 
