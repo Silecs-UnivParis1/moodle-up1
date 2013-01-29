@@ -12,7 +12,7 @@
 defined('MOODLE_INTERNAL') || die;
 require_once(dirname(dirname(__DIR__)).'/config.php'); // global moodle config file.
 require_once(__DIR__ . '/rofpathlib.php');
-
+require_once(__DIR__ . '/locallib.php');
 
 /**
  * returns table from rofid
