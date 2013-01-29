@@ -26,6 +26,7 @@
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
         outputSelector: '.group-selected',
         fieldName: 'group', // name of the array (<input type="hidden" name="...[]"/>) for the selected items
+        unique: false, // unicity applies to (fieldname, groupname)
         preSelected: [] // [ {"label": "Titre1", "value": "1234"}, {label: "T2", value: "4", fieldName: "myGroup"} ... ]
     };
 
@@ -55,19 +56,27 @@
         this.settings = settings;
         this.elem = elem;
         this.input = input;
+        this.selected = {};
         return this;
     }
 
     AutocompleteGroup.prototype =
     {
         init: function() {
-            this.elem.addClass('autocomplete-group-select');
-            this.input.on('click', function () {
+            var $this = this;
+            $this.elem.addClass('autocomplete-group-select');
+            $this.input.on('click', function () {
                 $(this).autocomplete("search");
             });
             $(this.settings.outputSelector, this.elem).on("click", ".selected-remove", function(event) {
+                if ($this.settings.unique) {
+                    var input = $(this).siblings('input').first();
+                    var id = input.attr('name') + " -- " + input.val();
+                    delete $this.selected[id];
+                }
                 $(this).closest(".group-item-block").remove();
             });
+            $this.elem.before('<div class="autocomplete-group-messages" style="display:none"></div>');
         },
 
         run: function() {
@@ -95,9 +104,11 @@
                             );
                             return false;
                         } else {
-                            $($this.settings.outputSelector, $this.elem)
-                                .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelMaker));
-                            $this.input.val('');
+                            if ($this.addSelected($this.settings.fieldName, ui.item.value)) {
+                                $($this.settings.outputSelector, $this.elem)
+                                    .prepend(buildSelectedBlock(ui.item, $this.settings.fieldName, $this.settings.labelMaker));
+                                $this.input.val('');
+                            }
                         }
                     } else if (ui.item.source == 'users') {
                         $this.input.val(ui.item.label);
@@ -109,6 +120,20 @@
                 close: function () {},
                 minLength: $this.settings.minLength
             }).data("autocomplete")._renderItem = customRenderItem;
+        },
+
+        addSelected: function(field, val) {
+            $this = this;
+            if (!$this.settings.unique) {
+                return true;
+            }
+            var id = field + ' -- ' + val;
+            if (id in $this.selected) {
+                $this.elem.prev(".autocomplete-group-messages").html("Ce groupe a déjà été ajouté.").show().fadeOut(6000);
+                return false;
+            }
+            $this.selected[id] = 1;
+            return true;
         },
 
         fillSelection: function(items) {
@@ -287,7 +312,6 @@
     }
 
     function buildSelectedBlock(item, inputName, labelMaker) {
-        var a = 5;
         return $(
                 '<div class="group-item-block"><div class="group-item-selected">'
                 + labelMaker(item) + '</div></div>'

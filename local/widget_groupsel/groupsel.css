@@ -50,3 +50,7 @@
 	background-color: #F0F0F0;
     color: #303030;
 }
+
+.autocomplete-group-messages {
+    color: red;
+}
