@@ -9,7 +9,9 @@ var labels;
 var config = {};
 
 var defaultConfig = {
-    separator: " / "
+    separator: " / ",
+    // labels: ["l1", "l2"],
+    required: true
 };
 
 var getTree = function (options) {
@@ -73,7 +75,9 @@ var addDefaultSubselects = function (selectsDiv, onchange, tree, depth) {
 };
 
 var buildSelectLine = function(subselect, depth) {
-    var line = $('<div class="fitem required fitem_fselect" data-depth="' + depth + '">');
+    var line = $(
+        '<div class="fitem ' + (config.required ? 'required ' : '') + 'fitem_fselect" data-depth="' + depth + '">'
+    );
     if ('labels' in config && config.labels && depth in config.labels) {
         line.append(
             $('<div class="fitemtitle">').append($('<label>').text(config.labels[depth]+' *'))
