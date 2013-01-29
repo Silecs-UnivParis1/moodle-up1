@@ -29,7 +29,7 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $cohorts_cap_validator = new admin_setting_configtext(
             'cohorts_cap_validator',
             'Cohortes autorisées en approbation',
-            'Liste des cohortes autorisées à approuver les cours soumis via l\'assistant : identifiants séparés par des espaces.',
+            'Liste des cohortes autorisées à approuver les cours soumis via l\'assistant : identifiants séparés par des vigules.',
             '',
             PARAM_NOTAGS);
     $cohorts_cap_validator->plugin = 'local_crswizard';
