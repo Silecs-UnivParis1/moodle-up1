@@ -111,9 +111,9 @@ class mws_search_users {
         $where = "WHERE ( (u.mnethostid = 1 AND u.username = ?)  OR  u.firstname LIKE ? OR u.lastname LIKE ? "
                 . "OR  CONCAT(u.firstname, ' ', u.lastname) LIKE ?  OR  CONCAT(u.lastname, ' ', u.firstname) LIKE ? )";
         if ($this->filterstudent == 'no') {
-            $where = " AND u.idnumber = '' ";
+            $where .= " AND u.idnumber = '' ";
         } else if ($this->filterstudent == 'only') {
-            $where = " AND u.idnumber != '' ";
+            $where .= " AND u.idnumber != '' ";
         }
         if ($this->affiliation) {
             $fieldId = $this->getAffiliationFieldId();
