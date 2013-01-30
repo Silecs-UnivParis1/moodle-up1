@@ -23,7 +23,8 @@ function wizard_has_cohort_permission($permission, $userid) {
         return false;
     }
     $permit_cohorts = get_config('local_crswizard', 'cohorts_cap_' . $permission);
-    $permitted_cohorts = explode(' ', $permit_cohorts);
+    $permit_cohorts = preg_replace('/\s+,\s+/', ',', $permit_cohorts);
+    $permitted_cohorts = explode(',', $permit_cohorts);
 
     $sql = "SELECT c.idnumber FROM {cohort} c JOIN {cohort_members} cm ON (cm.cohortid = c.id) "
          . "WHERE cm.userid = ?";
@@ -49,6 +50,8 @@ function wizard_membersof_permitted_cohorts($permission) {
         return array();
     }
     $permit_cohorts = get_config('local_crswizard', 'cohorts_cap_' . $permission);
+    $permit_cohorts = preg_replace('/\s+,\s+/', ',', $permit_cohorts);
+    $permitted_cohorts = explode(',', $permit_cohorts);
     $pcohorts = explode(' ', $permit_cohorts);
     $sqlcohorts = "('" . join("', '", $pcohorts) . "')";
 

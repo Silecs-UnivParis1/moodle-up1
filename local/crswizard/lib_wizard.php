@@ -729,7 +729,7 @@ class core_wizard {
         $mydata->profile_field_up1diplome = '';
         $mydata->profile_field_up1generateur = '';
 
-        $mydata->wizard_nom_norme = '';
+        $mydata->course_nom_norme = '';
 
         // on est dans le cas 2
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
@@ -738,8 +738,15 @@ class core_wizard {
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
             }
-            $mydata->shortname = $rof1['idnumber'] . ' - '
-                . $this->formdata['form_step2']['complement'];
+
+            $shortname = $rof1['idnumber'];
+            if (isset($this->formdata['form_step2']['complement'])) {
+                $complement = trim($this->formdata['form_step2']['complement']);
+                if ($complement != ''){
+                    $shortname .= ' - ' . $complement;
+                }
+            }
+            $mydata->shortname = $shortname;
             $mydata->idnumber = $rof1['idnumber'];
 
             // metadonnee de rof1
@@ -1013,6 +1020,7 @@ class core_wizard {
     * @param string $mgv destiné à l'approbateur et aux validateurs
     */
     public function send_message_notification($mgc, $mgv) {
+        global $DB;
         $userfrom = new object();
         static $supportuser;
         if (!empty($supportuser)) {
@@ -1050,6 +1058,16 @@ class core_wizard {
             $allvalidators = $form3['all-validators'];
             foreach ($allvalidators as $id => $validator) {
                 $eventdata->userto = $validator;
+                $res = message_send($eventdata);
+            }
+        }
+
+        // envoi à helpdesk_user si définit dans crswizard.setting
+        $helpuser = get_config('local_crswizard', 'helpdesk_user');
+        if (isset($helpuser)) {
+            $userid = $DB->get_field('user', 'id', array('username' => $helpuser));
+            if ($userid) {
+                $eventdata->userto = $userid;
                 $res = message_send($eventdata);
             }
         }
