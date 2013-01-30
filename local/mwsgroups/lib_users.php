@@ -48,6 +48,7 @@ class mws_search_users {
         if (!is_array($this->exclude) || !is_string($this->filterstudent) || !is_array($this->cohorts)) {
             throw new Exception('Invalid arg type for mws_search_users');
         }
+        $this->cohorts = array_filter($this->cohorts);
 
         $this->maxrows = (int) $this->maxrows;
         if (!$this->maxrows || $this->maxrows > MWS_SEARCH_MAXROWS) {
@@ -125,19 +126,23 @@ class mws_search_users {
             if ($cohortsId) {
                 $from .= " LEFT JOIN {cohort_members} cm ON (cm.userid = u.id AND cm.cohortid IN ($cohortsId)) ";
                 if ($roleIds) {
+                    // standard case, use both cohorts and roles
                     $from .= " LEFT JOIN {role_assignments} ra "
                             . "ON (ra.userid = u.id AND ra.contextid = 1 AND ra.roleid IN ($roleIds)) ";
                     $where .= " AND (cm.cohortid IS NOT NULL OR ra.roleid IS NOT NULL) ";
                 } else {
+                    // no roles, use only cohorts
                     $where .= " AND cm.cohortid IS NOT NULL ";
                 }
                 $where .= ' GROUP BY u.id';
             } else {
                 if ($roleIds) {
+                    // cohorts active, but non given, so use only roles
                     $from .= " LEFT JOIN {role_assignments} ra "
                             . "ON (ra.userid = u.id AND ra.contextid = 1 AND ra.roleid IN ($roleIds)) ";
-                    $where .= " AND ra.roleid IS NOT NULL ";
+                    $where .= " AND ra.roleid IS NOT NULL GROUP BY u.id " ;
                 } else {
+                    // corner case: no valid cohort and no valid role
                     $where .= " AND 1 = 0 ";
                 }
             }
