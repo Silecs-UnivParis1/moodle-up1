@@ -51,18 +51,5 @@ $capabilities = array(
             'manager'        => CAP_ALLOW
         )
     ),
-    'local/crswizard:localsupervalidator' => array(
-        'riskbitmask'  => 0,
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_COURSECAT,
-        'archetypes'   => array(
-            'student'        => CAP_PREVENT,
-            'teacher'        => CAP_PREVENT,
-            'editingteacher' => CAP_PREVENT,
-            'manager'        => CAP_ALLOW
-        )
-    ),
 
 );
-
-//** @todo localsupervalidator : est-ce la bonne méthode ? peut-on surcharger un nom avec 2 contextes ?
