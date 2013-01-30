@@ -1013,6 +1013,7 @@ class core_wizard {
     * @param string $mgv destiné à l'approbateur et aux validateurs
     */
     public function send_message_notification($mgc, $mgv) {
+        global $DB;
         $userfrom = new object();
         static $supportuser;
         if (!empty($supportuser)) {
@@ -1050,6 +1051,16 @@ class core_wizard {
             $allvalidators = $form3['all-validators'];
             foreach ($allvalidators as $id => $validator) {
                 $eventdata->userto = $validator;
+                $res = message_send($eventdata);
+            }
+        }
+
+        // envoi à helpdesk_user si définit dans crswizard.setting
+        $helpuser = get_config('local_crswizard', 'helpdesk_user');
+        if (isset($helpuser)) {
+            $userid = $DB->get_field('user', 'id', array('username' => $helpuser));
+            if ($userid) {
+                $eventdata->userto = $userid;
                 $res = message_send($eventdata);
             }
         }
