@@ -189,9 +189,6 @@ switch ($stepin) {
 
         // envoi des notification - messagerie interne
         $corewizard->send_message_notification($messages['mgcreator'], $messages['mgvalidator']);
-        // envoi du mail à l'adresse du paramètre du plugin email_notification_course_creation
-        $config_email = get_config('local_crswizard', 'email_notification_course_creation');
-        wizard_send_email($config_email, $corewizard->get_email_subject('approbation'), $messages['mgvalidator']);
 
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));
