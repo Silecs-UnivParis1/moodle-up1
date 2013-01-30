@@ -1,3 +1,4 @@
 id,name,idnumber,contextid,descriptionformat,timecreated,timemodified
 1,Italiens,italiens,1,0,5000,5000
 2,Russes,russes,1,0,5000,5000
+3,Italiens UP1 : structure UP1,structures-affectation-italiens,1,0,5000,5000

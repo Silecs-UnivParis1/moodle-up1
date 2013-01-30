@@ -57,6 +57,8 @@ class mws_search_users_testcase extends advanced_testcase {
         $users = $search_u->search("italo");
         $this->assertInternalType('array', $users);
         $this->assertCount(2, $users);
+        $this->assertEquals('italo.calvino', $users[0]['uid']);
+        $this->assertEquals('italo.svevo', $users[1]['uid']); // sorted by lastname, so Svevo comes last
 
         $this->assertCount(3, $search_u->search("i"));
 
@@ -140,5 +142,27 @@ class mws_search_users_testcase extends advanced_testcase {
         $search_u->maxrows = 2;
         $search_u->exclude = array('isaac.babel', 'italo.svevo');
         $this->assertCount(1, $search_u->search("i"));
+    }
+
+    public function test_affectation() {
+        $search_u = new mws_search_users();
+        $search_u->affiliation = false;
+        $search_u->exclude = array();
+        $search_u->filterstudent = 'both';
+        $search_u->cohorts = array();
+
+        $search_u->affectation = false;
+        $users = $search_u->search("i");
+        $this->assertCount(3, $users);
+        $this->assertArrayNotHasKey('supannEntiteAffectation', $users[0]);
+        $this->assertArrayNotHasKey('supannEntiteAffectation', $users[1]);
+        $this->assertArrayNotHasKey('supannEntiteAffectation', $users[2]);
+
+        $search_u->affectation = true;
+        $users = $search_u->search("i");
+        $this->assertCount(3, $users);
+        $this->assertEquals(array(), $users[0]['supannEntiteAffectation']);
+        $this->assertEquals(array('Italiens UP1'), $users[1]['supannEntiteAffectation']);
+        $this->assertEquals(array('Italiens UP1'), $users[2]['supannEntiteAffectation']);
     }
 }
