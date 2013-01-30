@@ -580,6 +580,33 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
     return $rof1;
 }
 
+function wizard_get_rattachement_fieldup1($idcat, $tabcategories) {
+    global $DB;
+    $fieldup1 = array();
+    $niveau = '';
+    $composante = $tabcategories[2];
+    if (isset($tabcategories[3])) {
+        $niveau = $tabcategories[3];
+    }
+    $category = $DB->get_record('course_categories', array('id' => $idcat));
+    if ($category) {
+        if($category->depth == 4) {
+            if ($niveau != '') {
+                $niveau .= ';';
+            }
+            $niveau .= $category->name;
+
+            $namecomp = $DB->get_field('course_categories', 'name', array('id' => $category->parent));
+            $composante .= ';' . $namecomp;
+        } else {
+            $composante .=';' . $category->name;
+        }
+    }
+    $fieldup1['profile_field_up1composante'] = $composante;
+    $fieldup1['profile_field_up1niveau'] = $niveau;
+    return $fieldup1;
+}
+
 class core_wizard {
     private $formdata;
     private $user;
@@ -770,31 +797,19 @@ class core_wizard {
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
             $mydata->course_nom_norme = $this->formdata['form_step2']['shortname'];
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
+            if (isset($mydata->rattachements)) {
+                $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
+                if (count($ratt)) {
+                    foreach ($ratt as $fieldname => $value) {
+                        $mydata->$fieldname = $value;
+                    }
+                }
+            }
         }
 
         $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
         $mydata->summaryformat = $this->formdata['form_step2']['summary_editor']['format'];
         //$mydata->startdate = $this->formdata['form_step2']['startdate'];
-
-        //step3 custominfo_field
-        // compoante
-        if (isset($mydata->profile_field_up1composante)) {
-            $up1composante = trim($mydata->profile_field_up1composante);
-            if ($up1composante != '' && substr($up1composante, -1) != ';') {
-                $mydata->profile_field_up1composante .= ';';
-            }
-            $mydata->profile_field_up1composante .= trim($tabcategories[2]);
-        }
-        // niveau
-        if (isset($mydata->profile_field_up1niveau)) {
-            $up1niveau = trim($mydata->profile_field_up1niveau);
-            if ($up1niveau != '' && substr($up1niveau, -1) != ';') {
-                $mydata->profile_field_up1niveau .= ';';
-            }
-            if (isset($tabcategories[3])) {
-                $mydata->profile_field_up1niveau .= trim($tabcategories[3]);
-            }
-        }
 
         // cours doit être validé
         $mydata->profile_field_up1avalider = 1;

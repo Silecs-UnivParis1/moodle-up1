@@ -104,6 +104,9 @@ switch ($stepin) {
     case 3:
         if ($wizardcase == 3) {
             $steptitle = get_string('coursedescription', 'local_crswizard');
+            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+            $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rattachements.js'));
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();

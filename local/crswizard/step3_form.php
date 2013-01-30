@@ -55,16 +55,10 @@ class course_wizard_step3_form extends moodleform {
             $tabfreeze[] = $type;
 
             $mform->addElement('header','autre_rattachement', get_string('categoryblockE3s1', 'local_crswizard'));
-
-            $label = 'up1composante';
-            $field = 'profile_field_' . $label;
-            $mform->addElement('text', $field, get_string($label, 'local_crswizard'),'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_TEXT);
-
-            $label = 'up1niveau';
-            $field = 'profile_field_' . $label;
-            $mform->addElement('text', $field, get_string($label, 'local_crswizard'), 'maxlength="254" size="50"');
-            $mform->setType($field, PARAM_TEXT);
+            $mform->addElement(
+                'select', 'rattachements', '', wizard_get_myComposantelist($idcat),
+                array('class' => 'transformRattachements cache')
+            );
         }
 
         //*********************************************

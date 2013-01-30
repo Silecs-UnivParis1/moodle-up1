@@ -52,25 +52,17 @@ function print_rof() {
 	$list .= '<select class="selectmenu" id="select-2">';
 	$list .= '<option selected="selected" data_deep="2">Sélectionner la composante</option>';
 	foreach ($components as $c) {
-		$id = 'deep2_' . $c->number;
+        $id = 'deep2_' . $c->number;
 		$idElem = $id . '-elem';
 		$data_path = $c->number;
 		$data_rofid = $c->number;
-		$disabled = ' disabled="disabled" ';
-
-		$style = 'collapse';
-		$collapse = '';
-		$listStyle = 'list-none';
 		if ($c->sub != '') {
-			$disabled = ' ';
-			$style = 'collapse curser-point';
-			$collapse = '[+] ';
-		}
-		$list .= '<option '.$disabled.' data_deep="2" '
+            $list .= '<option data_deep="2" '
 			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
 			. '>'
 			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8')
 			. '</option>';
+		}
 	}
 	$list .= '</select>';
 	$list .= '</div>';
@@ -507,34 +499,31 @@ class rof_browser {
 		if (isset($sp->courses)) {
 			$nbCourses = nbSub($sp->courses);
 		}
+        $nbEnf = $nbSub + $nbCourses;
 
-		$coden = trim('deep'.$niveau);
-		$id = $coden.'_'.$sp->rofid;
-		$idElem = $id . '-elem';
-		$labelelem = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
+        if ($nbEnf) {
+            $coden = trim('deep'.$niveau);
+            $id = $coden.'_'.$sp->rofid;
+            $idElem = $id . '-elem';
+            $labelelem = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
 
-		if (isset($sp->code)) {
-            $titleElem .= 'code apogée : ' . $sp->code;
-            if ($listeTitle != '') {
-                 $titleElem .= ', ';
+            if (isset($sp->code)) {
+                $titleElem .= 'code apogée : ' . $sp->code;
+                if ($listeTitle != '') {
+                    $titleElem .= ', ';
+                }
             }
-        }
-        if ($listeTitle != '') {
-            $titleElem .= $listeTitle;
-        }
+            if ($listeTitle != '') {
+                $titleElem .= $listeTitle;
+            }
 
-		$data_path = $this->path . '_' . $sp->rofid;
-
-		$nbEnf = $nbSub + $nbCourses;
-		$disabled = ' disabled="disabled" ';
-		if ($nbEnf) {
-			$disabled = '';
-		}
-		$element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
+            $data_path = $this->path . '_' . $sp->rofid;
+            $element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" id="' . $id . '" data_path="' . $data_path . '" '
-			. 'title="' . $titleElem . '" '.$disabled.'>'
+			. 'title="' . $titleElem . '" >'
 			. $labelelem . '</span>'
 			. '</option>';
+		}
 		return $element;
 	}
 
