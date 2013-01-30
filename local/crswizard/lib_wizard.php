@@ -729,7 +729,7 @@ class core_wizard {
         $mydata->profile_field_up1diplome = '';
         $mydata->profile_field_up1generateur = '';
 
-        $mydata->wizard_nom_norme = '';
+        $mydata->course_nom_norme = '';
 
         // on est dans le cas 2
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
@@ -738,8 +738,15 @@ class core_wizard {
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
             }
-            $mydata->shortname = $rof1['idnumber'] . ' - '
-                . $this->formdata['form_step2']['complement'];
+
+            $shortname = $rof1['idnumber'];
+            if (isset($this->formdata['form_step2']['complement'])) {
+                $complement = trim($this->formdata['form_step2']['complement']);
+                if ($complement != ''){
+                    $shortname .= ' - ' . $complement;
+                }
+            }
+            $mydata->shortname = $shortname;
             $mydata->idnumber = $rof1['idnumber'];
 
             // metadonnee de rof1
