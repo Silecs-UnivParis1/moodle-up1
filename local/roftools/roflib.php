@@ -72,8 +72,6 @@ function rof_get_record($rofid) {
 }
 
 
-
-
 /**
  * returns link to view rofid
  * @param string $rofid
@@ -260,7 +258,7 @@ function rof_get_metadata($rofobject) {
 }
 
 /**
- * return "human-readable" value as : (code) readable-name
+ * return "human-readable" value as : [code] readable-name, ex. [DS] Droit, Sciences politique et sociales
  * @global type $DB
  * @param type $element from the rof_constant table
  * @param type $rawdata reference to the rof_constant table, column dataimport
@@ -268,7 +266,7 @@ function rof_get_metadata($rofobject) {
  */
 function rof_constant_metadata($element, $rawdata) {
     global $DB;
-    return '(' . $rawdata. ') '.
+    return '[' . $rawdata. '] '.
             $DB->get_field('rof_constant', 'value', array('element' => $element, 'dataimport' => $rawdata));
 }
 
