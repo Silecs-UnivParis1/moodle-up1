@@ -39,8 +39,6 @@ class mws_search_users {
     const affiliationFieldName = 'up1edupersonprimaryaffiliation';
     const validatorCapacity = 'local/crswizard:validator';
 
-    private $exclude_map = array();
-
     /**
      * Checks that the parameters are valid, and ints some helper properties.
      */
@@ -49,15 +47,11 @@ class mws_search_users {
             throw new Exception('Invalid arg type for mws_search_users');
         }
         $this->cohorts = array_filter($this->cohorts);
+        $this->exclude = array_filter($this->exclude);
 
         $this->maxrows = (int) $this->maxrows;
         if (!$this->maxrows || $this->maxrows > MWS_SEARCH_MAXROWS) {
             $this->maxrows = MWS_SEARCH_MAXROWS;
-        }
-
-        $this->exclude_map = array();
-        foreach ($this->exclude as $name) {
-            $this->exclude_map[$name] = 1;
         }
     }
 
@@ -71,10 +65,9 @@ class mws_search_users {
     function search($token) {
         global $DB;
         $this->init();
-        $ptoken = $DB->sql_like_escape($token) . '%';
-        $sql = $this->buildSql();
+        $query = $this->buildSql($token);
 
-        $records = $DB->get_records_sql($sql, array($token, $ptoken, $ptoken, $ptoken, $ptoken), 0, $this->maxrows);
+        $records = $DB->get_records_sql($query['sql'], $query['params'], 0, $this->maxrows);
         $users = array();
         $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
              . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
@@ -103,17 +96,28 @@ class mws_search_users {
     /**
      * Build the SQL from the object properties.
      *
+     * @param string $token to search in user table
      * @return string
      */
-    private function buildSql() {
+    private function buildSql($token) {
+        global $DB;
+
         $select = "SELECT u.id, u.username, u.firstname, u.lastname";
         $from =  "FROM {user} u";
         $where = "WHERE ( (u.mnethostid = 1 AND u.username = ?)  OR  u.firstname LIKE ? OR u.lastname LIKE ? "
                 . "OR  CONCAT(u.firstname, ' ', u.lastname) LIKE ?  OR  CONCAT(u.lastname, ' ', u.firstname) LIKE ? )";
+
+        $ptoken = $DB->sql_like_escape($token) . '%';
+        $params = array($token, $ptoken, $ptoken, $ptoken, $ptoken);
+
         if ($this->filterstudent == 'no') {
             $where .= " AND u.idnumber = '' ";
         } else if ($this->filterstudent == 'only') {
             $where .= " AND u.idnumber != '' ";
+        }
+        if ($this->exclude) {
+            $where .= " AND u.username NOT IN (" . join(',', array_fill(0, count($this->exclude), '?')) . ') ';
+            $params = array_merge($params, $this->exclude);
         }
         if ($this->affiliation) {
             $fieldId = $this->getAffiliationFieldId();
@@ -147,7 +151,10 @@ class mws_search_users {
                 }
             }
         }
-        return "$select $from $where ORDER BY lastname ASC, firstname ASC";
+        return array(
+            "sql" => "$select $from $where ORDER BY lastname ASC, firstname ASC",
+            "params" => $params,
+        );
     }
 
     /**
