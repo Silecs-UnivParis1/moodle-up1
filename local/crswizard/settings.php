@@ -20,7 +20,7 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $cohorts_cap_creator = new admin_setting_configtext(
             'cohorts_cap_creator',
             'Cohortes autorisées en création',
-            'Liste des cohortes autorisées à utiliser l\'assistant : identifiants séparés par des espaces.',
+            'Liste des cohortes autorisées à utiliser l\'assistant : identifiants séparés par des virgules.',
             '',
             PARAM_NOTAGS);
     $cohorts_cap_creator->plugin = 'local_crswizard';
