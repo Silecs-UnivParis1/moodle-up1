@@ -67,9 +67,9 @@ class mws_search_users {
         $this->init();
         $query = $this->buildSql($token);
 
-        $records = $DB->get_records_sql($query['sql'], $query['params'], 0, $this->maxrows);
+        $records = $DB->get_recordset_sql($query['sql'], $query['params'], 0, $this->maxrows);
         $users = array();
-        $sqlbyuser = "SELECT c.idnumber, c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
+        $sqlbyuser = "SELECT c.name FROM {cohort} c JOIN {cohort_members} cm ON (c.id = cm.cohortid) "
              . "WHERE c.idnumber LIKE 'structures-%' AND cm.userid = ? ";
         foreach ($records as $record) {
             if (isset($this->exclude_map[$record->username])) {
@@ -80,9 +80,9 @@ class mws_search_users {
                     'displayName' => $record->firstname . ' ' . $record->lastname,
             );
             if ($this->affectation) {
-                $res = $DB->get_records_sql_menu($sqlbyuser, array($record->id));
+                $rawNames = $DB->get_fieldset_sql($sqlbyuser, array($record->id));
                 $user['supannEntiteAffectation'] = array_unique(
-                        array_map(array('self', 'groupNameToShortname'), array_values($res))
+                        array_map(array('self', 'groupNameToShortname'), $rawNames)
                 );
             }
             if ($this->affiliation) {
@@ -138,13 +138,12 @@ class mws_search_users {
                     // no roles, use only cohorts
                     $where .= " AND cm.cohortid IS NOT NULL ";
                 }
-                $where .= ' GROUP BY u.id';
             } else {
                 if ($roleIds) {
                     // cohorts active, but non given, so use only roles
                     $from .= " LEFT JOIN {role_assignments} ra "
                             . "ON (ra.userid = u.id AND ra.contextid = 1 AND ra.roleid IN ($roleIds)) ";
-                    $where .= " AND ra.roleid IS NOT NULL GROUP BY u.id " ;
+                    $where .= " AND ra.roleid IS NOT NULL " ;
                 } else {
                     // corner case: no valid cohort and no valid role
                     $where .= " AND 1 = 0 ";
@@ -152,7 +151,7 @@ class mws_search_users {
             }
         }
         return array(
-            "sql" => "$select $from $where ORDER BY lastname ASC, firstname ASC",
+            "sql" => "$select $from $where GROUP BY u.id ORDER BY lastname ASC, firstname ASC",
             "params" => $params,
         );
     }
