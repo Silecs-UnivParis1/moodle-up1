@@ -248,7 +248,7 @@ class rof_browser {
 					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip in (".$mydip.") " . $sort;
 					$subList = $DB->get_records_sql($sql);
 				} else {
-                    $sql = "SELECT DISTINCT typedip FROM rof_program WHERE rofid in ({$sub})";
+                    $sql = "SELECT DISTINCT typedip FROM rof_program WHERE subnb > 0 and rofid in ({$sub})";
 					$subList = $DB->get_records_sql($sql);
 					return $this->print_select_type_diplome($subList, $this->rofid, 2);
 				}
