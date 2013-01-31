@@ -103,10 +103,6 @@ switch ($stepin) {
         break;
     case 3:
         if ($wizardcase == 3) {
-            $steptitle = get_string('coursedescription', 'local_crswizard');
-            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
-            $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
-            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rattachements.js'));
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
@@ -114,6 +110,11 @@ switch ($stepin) {
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
             }
+
+            $steptitle = get_string('coursedescription', 'local_crswizard');
+            $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+            $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rattachements.js'));
         } elseif ($wizardcase == 2) {
             if (isset($_POST['step'])) {
                 $SESSION->wizard['form_step' . $stepin] = $_POST;

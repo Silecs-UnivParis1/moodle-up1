@@ -56,7 +56,7 @@ class course_wizard_step3_form extends moodleform {
 
             $mform->addElement('header','autre_rattachement', get_string('categoryblockE3s1', 'local_crswizard'));
             $mform->addElement(
-                'select', 'rattachements[0]', '', wizard_get_myComposantelist($idcat),
+                'select', 'rattachements[]', '', wizard_get_myComposantelist($idcat),
                 array('class' => 'transformRattachements')
             );
         }
