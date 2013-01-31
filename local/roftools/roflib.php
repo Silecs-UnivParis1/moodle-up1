@@ -394,11 +394,25 @@ function rof_get_code_or_rofid($rofid) {
  * @global type $DB
  * @param type $element from rof_constant element field
  * @param type $prefix if true, the value is prefixed by the key. ex. "[DS] Droit, Sciences politique et sociales"
- * @return associative array  ROF identifer => value
+ * @return associative array  ROF identifer => value OR FALSE if no such field
  */
-function rof_get_menu_constant($element, $prefix=true) {
+function rof_get_menu_constant($metafield, $prefix=true) {
     global $DB;
 
+    $meta_to_rof = array (
+        'up1composante' => 'composante',
+        'up1domaine' => 'domaineDiplome',
+        'up1type' => 'typeDiplome',
+        'up1nature' => 'natureDiplome',
+        'up1cycle' => 'cycleDiplome',
+        'up1rythme' => 'rythmeDiplome',
+        'up1langue' => 'langueDiplome',
+    );
+    if ( isset($meta_to_rof[$metafield]) ) {
+        $element = $meta_to_rof[$metafield];
+    } else {
+        return false;
+    }
     $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
     if ( ! $prefix ) {
         return $records;
