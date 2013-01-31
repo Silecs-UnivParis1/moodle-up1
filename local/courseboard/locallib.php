@@ -77,7 +77,7 @@ function print_admin_log($crsid) {
             . " OR ( module = 'course' AND action != 'view' AND action != 'login' AND course = ? ) "
             . " OR (module IN ('course_validate', 'crswizard') AND course = ?)  ) "
             . " ORDER BY time ASC ";
-    $logs = $DB->get_records_sql($sql, array($crsid, $crsid));
+    $logs = $DB->get_recordset_sql($sql, array($crsid, $crsid));
 
     foreach ($logs as $log) {
         $row = new html_table_row();
