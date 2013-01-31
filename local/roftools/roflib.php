@@ -400,7 +400,7 @@ function rof_get_menu_constant($metafield, $prefix=true) {
     global $DB;
 
     $meta_to_rof = array (
-        'up1composante' => 'composante',
+//        'up1composante' => 'composante', too comlicated because of multiple values ?
         'up1domaine' => 'domaineDiplome',
         'up1type' => 'typeDiplome',
         'up1nature' => 'natureDiplome',
@@ -413,7 +413,10 @@ function rof_get_menu_constant($metafield, $prefix=true) {
     } else {
         return false;
     }
-    $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
+    // we don't use this because of some redundancy in "dataimport" fields, which should NOT happen. Bad ROF, change ROF.
+    // $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
+    $sql = "SELECT dataimport, MAX(value) FROM {rof_constant} rc WHERE element = ? GROUP BY dataimport";
+    $records = $DB->get_records_sql_menu($sql, array($element));
     if ( ! $prefix ) {
         return $records;
     } else {
