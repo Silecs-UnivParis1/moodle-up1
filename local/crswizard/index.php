@@ -191,7 +191,7 @@ switch ($stepin) {
         }
 
         // envoi des notification - messagerie interne
-        $corewizard->send_message_notification($messages['mgcreator'], $messages['mgvalidator']);
+        $corewizard->send_message_notification($corewizard->course->id, $messages['mgcreator'], $messages['mgvalidator']);
 
         unset($SESSION->wizard);
         redirect(new moodle_url('/'));

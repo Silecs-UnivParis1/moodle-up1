@@ -1031,10 +1031,11 @@ class core_wizard {
 
     /**
     * envoie un message de notification suite à la création du cours
+    * @param int $idcourse : identifiant du cours créé
     * @param string $mgc destiné au demandeur
     * @param string $mgv destiné à l'approbateur et aux validateurs
     */
-    public function send_message_notification($mgc, $mgv) {
+    public function send_message_notification($idcourse, $mgc, $mgv) {
         global $DB;
         $userfrom = new object();
         static $supportuser;
@@ -1057,8 +1058,8 @@ class core_wizard {
         // documentation : http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
 
         // envoi aux supervalidateurs
-        $systemcontext = get_context_instance(CONTEXT_SYSTEM);
-        $supervalidators = get_users_by_capability($systemcontext, 'local/crswizard:supervalidator');
+        $coursecontext = get_context_instance(CONTEXT_COURSE, $idcourse);
+        $supervalidators = get_users_by_capability($coursecontext, 'local/crswizard:supervalidator');
         foreach ($supervalidators as $userto) {
             $eventdata->userto = $userto;
             $res = message_send($eventdata);
