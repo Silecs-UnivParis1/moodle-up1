@@ -104,3 +104,26 @@ function wizard_require_permission($permission, $userid) {
         throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
     }
 }
+
+/**
+ * returns all the categories supervised by a given user as contextual supervalidator
+ * @global type $DB
+ * @param int $userid the user being checked
+ * @return assoc. array (id => idnumber) for all "supervised" categories
+ */
+function wizard_supervalidator_which_categories($userid) {
+    global $DB;
+
+    $sql = "SELECT rc.roleid FROM {role_context_levels} rcl "
+        . "JOIN {role_capabilities} rc ON (rcl.roleid = rc.roleid) "
+        . "WHERE rcl.contextlevel = ? AND rc.capability = ? AND rc.roleid > 6";
+    $roleid = $DB->get_field_sql($sql, array(CONTEXT_COURSECAT, 'local/crswizard:supervalidator'), MUST_EXIST);
+
+    $sql = "SELECT cc.id, cc.idnumber FROM {course_categories} cc "
+        . "JOIN {context} c ON (c.instanceid = cc.id) "
+        . "JOIN {role_assignments} ra ON (ra.contextid = c.id) "
+        . "WHERE ra.roleid=? AND ra.userid=? AND c.contextlevel=?";
+    $res = $DB->get_records_sql_menu($sql, array($roleid, $userid, CONTEXT_COURSECAT));
+
+    return $res;
+}

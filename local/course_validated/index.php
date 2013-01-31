@@ -41,8 +41,17 @@ echo $OUTPUT->header();
 
 if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
     $table = get_table_course_to_validate(0, $systemcontext);
-    echo "<p>Vous êtes super-approbateur.</p>";
+    echo "<p>Vous êtes super-approbateur global.</p>";
     $courselist = get_id_courses_to_validate(0, 0);
+} elseif ($svcats = wizard_supervalidator_which_categories($USER->id)) {
+    if (count($svcats) == 1) {
+        echo "<p>Vous êtes super-approbateur pour la catégorie : ";
+    } else {
+        echo "<p>Vous êtes super-approbateur pour les " . count($svcats) . " catégories : ";
+    }
+    echo '<b>' . join('</b>, <b>', array_values($svcats)) . "</b>.<p>";
+    $courselist = get_id_courses_to_validate(0, 0, true);
+    $table = get_table_course_to_validate(0, $systemcontext, true);
 } else {
     $table = get_table_course_to_validate($USER->id, $systemcontext);
     // echo "<p>Vous n'êtes pas super-approbateur.</p>";

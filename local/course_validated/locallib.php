@@ -20,8 +20,9 @@ require_once(__DIR__ . '/../up1_metadata/lib.php');
  * @global type $DB
  * @param int $approbateurid ; 0 if none
  * @param int $validated = 0, 1, 2 ; 0=not yet validated ; 1=already validated ; 2=both
+ * @param bool $permcheck if set, check the permission on a course by course basis for contextual supervalidators
  */
-function get_id_courses_to_validate($approbateurid, $validated) {
+function get_id_courses_to_validate($approbateurid, $validated, $permcheck=false) {
     global $DB;
 
     $avaliderId = $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1avalider'));
@@ -34,39 +35,51 @@ function get_id_courses_to_validate($approbateurid, $validated) {
         // die ('Erreur ! manque up1avalider ou up1datevalid ou up1approbateurid');
         return;
     }
-    $sql = "SELECT DISTINCT cd1.objectid FROM custom_info_data cd1 "
-         . "JOIN custom_info_data cd2 ON (cd1.objectid=cd2.objectid) " ;
+    $sql = "SELECT DISTINCT cd1.objectid FROM custom_info_data cd1 "     //cd1 = avalider (bool)
+         . "JOIN custom_info_data cd2 ON (cd1.objectid=cd2.objectid) " ; //cd2 = datevalid
     if ($approbateurid) {
-        $sql .= "JOIN custom_info_data cdq ON (cd1.objectid=cdq.objectid) " ;
+        $sql .= "JOIN custom_info_data cdq ON (cd1.objectid=cdq.objectid) " ; //cdq = approbateurpropid
     }
     $sql .= "WHERE cd1.fieldid=$avaliderId AND cd1.data=1 AND cd2.fieldid=$datevalidId ";
     if ($approbateurid) {
         $sql .= "AND cdq.fieldid=$approbateurpropidId AND cdq.data=$approbateurid " ;
     }
     if ($validated == 0) {
-        $sql .= " AND cd2.data=0 ";
+        $sql .= " AND cd2.data = 0 ";
     }
     if ($validated == 1) {
-        $sql .= " AND cd2.data>0 ";
+        $sql .= " AND cd2.data > 0 ";
     }
     $sql .= "ORDER BY objectid DESC ";
-    //echo "\n\n  $sql";
-
-    $listeId='';
     $tabIdCourse = $DB->get_fieldset_sql($sql);
-    if (count($tabIdCourse)) {
-        $listeId = join(', ', $tabIdCourse);
+    $tabchecked = array();
+
+    if ($permcheck) { // on vérifie les permissions de supervalidateur contextuel
+        foreach($tabIdCourse as $crsid) {
+            $crscontext = get_context_instance(CONTEXT_COURSE, $crsid);
+            if (has_capability('local/crswizard:supervalidator', $crscontext)) {
+                $tabchecked[] = $crsid;
+            }
+        }
+    } else {
+        $tabchecked = $tabIdCourse;
+    }
+    $listeId='';
+    if (count($tabchecked)) {
+        $listeId = join(', ', $tabchecked);
     }
     return $listeId;
 }
 
 /**
- *
+ * Build the main table for course_validated
  * @global moodle_database $DB
  * @param integer $approbateurid
+ * @param object $context system context
+ * @param bool $permcheck if set, check the permissions for contextual supervalidators
  * @return \html_table
  */
-function get_table_course_to_validate($approbateurid, $context) {
+function get_table_course_to_validate($approbateurid, $context, $permcheck=false) {
     global $DB;
     $etat = array(
         false => "En attente",
@@ -77,14 +90,14 @@ function get_table_course_to_validate($approbateurid, $context) {
     $res->data = array();
     $count = 0;
 
-    $courseids0 = get_id_courses_to_validate($approbateurid, 0);
+    $courseids0 = get_id_courses_to_validate($approbateurid, 0, $permcheck);
     $dbcourses = array();
     if ($courseids0 != '') {
         $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
              . " FROM {course} c WHERE id IN ($courseids0) ";
         $dbcourses = $DB->get_records_sql($sql);
     }
-    $courseids1 = get_id_courses_to_validate($approbateurid, 1);
+    $courseids1 = get_id_courses_to_validate($approbateurid, 1, $permcheck);
     if ($courseids1 != '') {
         $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
              . " FROM {course} c WHERE id IN ($courseids1) ";
@@ -148,7 +161,16 @@ function get_table_course_to_validate($approbateurid, $context) {
     return $res;
 }
 
-
+/**
+ * Prepare the content for the "action" table cell (icons from permissions)
+ * @global type $DB
+ * @global type $OUTPUT
+ * @param int $crsid
+ * @param bool $validated already validated ?
+ * @param bool $visible visible (open) ? (otherwise, closed)
+ * @param object $context system context
+ * @return string
+ */
 function action_icons($crsid, $validated, $visible, $context) {
     global $DB, $OUTPUT;
     $res = '';

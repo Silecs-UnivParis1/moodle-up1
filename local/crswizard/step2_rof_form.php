@@ -34,7 +34,7 @@ class course_wizard_step2_rof_form extends moodleform {
         $mform->addElement(
                 'select', 'category', '', wizard_get_catlevel2(),
                 array(
-                    'class' => 'transformIntoSubselects cache',
+                    'class' => 'transformIntoSubselects',
                     'data-labels' => '["Période :", "Établissement :"]'
                 )
         );

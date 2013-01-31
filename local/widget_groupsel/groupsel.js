@@ -94,7 +94,7 @@
                                 'Autres types de groupes': 'other'
                             };
                             var localSettings = JSON.parse(JSON.stringify($this.settings));
-                            localSettings.wsParams.groupMaxRows = $this.settings.moreRows;
+                            localSettings.wsParams.groupMaxRows = ui.item.maxRows;
                             delete localSettings.wsParams.maxRows;
                             delete localSettings.wsParams.userMaxRows;
                             var ajaxCall = $this.mainSource(localSettings);
@@ -213,12 +213,15 @@
         prepareList: function(list, titleLabel, itemToResponse, maxRows) {
             var $this = this;
             var len = list.length;
-            return $.merge(
+            var initMaxRows = ('groupMaxRows' in $this.settings.wsParams ?
+                $this.settings.wsParams.groupMaxRows : $this.settings.wsParams.maxRows);
+            var r = $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
                 $.map(list, function(item, index) {
                     if (maxRows && item.num > maxRows) {
                         item = itemToResponse.apply(this, [item]);
                         item.label = 'Afficher plus de réponses';
+                        item.maxRows = maxRows + $this.settings.moreRows;
                         return item;
                     } else if ('source' in item && item.source == 'title') {
                         return item;
@@ -227,6 +230,10 @@
                     }
                 })
             );
+            if (maxRows > initMaxRows && len < maxRows) {
+                r.push({ label: "Toutes les réponses sont listées", source: "title" });
+            }
+            return r;
         }
     }
 
@@ -325,9 +332,9 @@
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
         if (item.label == 'Afficher plus de réponses') {
-             return $("<li></li>")
+             return $('<li class="autocompletegroup-more"></li>')
                 .data("item.autocomplete", item)
-                .append("<a>Afficher plus de réponses</a>")
+                .append('<a>Afficher plus de réponses</a>')
                 .appendTo(ul);
         }
         if (item.pre) {
