@@ -41,7 +41,7 @@ function print_table_course_vs_rof($crsid, $rofdata) {
                 $row->cells[1]->attributes['data-structure'] = json_encode(
                         array(
                             'type' => 'list',
-                            'options' => array_flip($ddlist),
+                            'options' => array_values($ddlist),
                         )
                 );
             }

@@ -53,10 +53,9 @@ $(document).ready(function() {
         console.log(structure);
         if (structure && structure.type == 'list') {
             field = $('<select name="new"></select>');
-            for (var displayName in structure.options) {
+            for (var i=0; i < structure.options.length; i++) {
                 var option = $('<option></option>');
-                option.text(displayName);
-                option.val(structure.options[displayName]);
+                option.text(structure.options[i]);
                 field.append(option);
             }
         } else {
