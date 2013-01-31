@@ -4,6 +4,7 @@ $(document).ready(function() {
         labels: ["Composante :", "Type de diplôme :"],
         required: false
     };
+    $('select.transformRattachements').removeAttr('multiple');
 
     var more = $('.transformRattachements').first().parent().parent().clone();
     more.removeAttr('id');
@@ -15,7 +16,7 @@ $(document).ready(function() {
         var inserted = more.clone();
         var select = inserted.find('select').first();
         //select.attr('name', select.attr('name').replace('[0]', '[' + num + ']'));
-        select.attr('id', select.attr('id').replace(/_$/, '_' + num));
+        select.attr('id', select.attr('id') + '_' + num);
         $('.transformRattachements:last').parent().parent().after(inserted);
         $('select.transformRattachements:last').transformIntoSubselects(config)
     });
