@@ -213,7 +213,9 @@
         prepareList: function(list, titleLabel, itemToResponse, maxRows) {
             var $this = this;
             var len = list.length;
-            return $.merge(
+            var initMaxRows = ('groupMaxRows' in $this.settings.wsParams ?
+                $this.settings.wsParams.groupMaxRows : $this.settings.wsParams.maxRows);
+            var r = $.merge(
                 (len === 0 ? [] : [{ label: titleLabel, source: "title" }]),
                 $.map(list, function(item, index) {
                     if (maxRows && item.num > maxRows) {
@@ -228,6 +230,10 @@
                     }
                 })
             );
+            if (maxRows > initMaxRows && len < maxRows) {
+                r.push({ label: "Toutes les réponses sont listées", source: "title" });
+            }
+            return r;
         }
     }
 
