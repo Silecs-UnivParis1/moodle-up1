@@ -29,7 +29,7 @@ class course_wizard_step2_form extends moodleform {
         $mform->addElement('header', 'categoryheader', get_string('categoryblock', 'local_crswizard'));
         $mform->addElement(
                 'select', 'category', '', wizard_get_mydisplaylist(),
-                array('class' => 'transformIntoSubselects cache')
+                array('class' => 'transformIntoSubselects')
         );
         $mform->addRule('category', "Ces 4 champs doivent tous être remplis.", 'required', null, 'client');
         $mform->addRule('category', "Ces 4 champs doivent tous être remplis.", 'nonzero', null, 'client');
