@@ -405,7 +405,7 @@ function rof_get_menu_constant($metafield, $prefix=true) {
         'up1type' => 'typeDiplome',
         'up1nature' => 'natureDiplome',
         'up1cycle' => 'cycleDiplome',
-        'up1rythme' => 'rythmeDiplome',
+        'up1rythme' => 'publicDiplome',
         'up1langue' => 'langueDiplome',
     );
     if ( isset($meta_to_rof[$metafield]) ) {
