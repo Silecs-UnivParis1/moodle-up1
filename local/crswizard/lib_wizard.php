@@ -1015,12 +1015,10 @@ class core_wizard {
 
     public function get_email_subject($type) {
         $subject = '';
-        $site = get_site();
-        $sitename = format_string($site->shortname);
-        $subject .= '[' . $sitename . '] ' . 'Demande '. $type
-            . ' espace';
-        if (isset($this->mydata->idnumber) && $this->mydata->idnumber != '') {
-            $subject .=' n°';
+        $sitename = format_string(get_site()->shortname);
+        $subject .= "[$sitename] Demande $type espace";
+        if (!empty($this->mydata->idnumber)) {
+            $subject .=' n°' . $this->mydata->idnumber;
         }
         $subject .= ' ' . $this->mydata->course_nom_norme;
         return $subject;
