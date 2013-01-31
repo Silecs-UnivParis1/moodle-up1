@@ -28,6 +28,8 @@ $PAGE->set_url('/local/courseboard/view.php', array('id' => $crsid));
 $PAGE->set_pagelayout('course'); //** @todo nécessaire ici ?
 $PAGE->set_title($course->shortname . ': ' . "tableau de bord");
 $PAGE->set_heading($course->fullname . ' : ' . "tableau de bord");
+$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+$PAGE->requires->js(new moodle_url('/local/courseboard/js/cell_update.js'), true);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('Tableau de bord ' . $course->shortname);

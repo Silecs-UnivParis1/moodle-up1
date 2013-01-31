@@ -32,7 +32,10 @@ function print_table_course_vs_rof($crsid, $rofdata) {
             $row = new html_table_row();
             $row->cells[0] = new html_table_cell($field['name']);
             $row->cells[0]->attributes = array('title' => $shortname, 'class' => '');
-            $row->cells[1] = $field['data'];
+            $row->cells[1] = new html_table_cell($field['data']);
+            $row->cells[1]->attributes = array(
+                    'data-courseid' => $crsid, 'data-fieldshortname' => $shortname, 'class' => 'updatable'
+            );
             $row->cells[2] = (isset($rofdata[$category][$shortname]) ? $rofdata[$category][$shortname] : '(NA)');
             $table->data[] = $row;
         }
