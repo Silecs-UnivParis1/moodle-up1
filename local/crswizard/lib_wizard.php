@@ -186,15 +186,14 @@ function wizard_navigation($stepin) {
 
 /**
  * renvoie les rôles permis pour une inscription
- * @param $labels array
+ * @param $labels array role_shortname => label
  * @return array object role
  */
 function wizard_role($labels) {
     global $DB;
     $roles = array();
-    foreach ($labels as $key => $label) {
-        $sql = "SELECT * FROM {role} WHERE "
-                . "shortname = ?";
+    $sql = "SELECT * FROM {role} WHERE shortname = ?";
+    foreach (array_keys($labels) as $key) {
         $record = $DB->get_record_sql($sql, array($key));
         $roles[] = array(
             'shortname' => $record->shortname,
@@ -295,7 +294,7 @@ function wizard_get_enrolement_users() {
  * @return array
  */
 function wizard_enrolement_user() {
-    global $DB, $SESSION, $USER;
+    global $DB, $USER;
     $list = array();
     $code = 'editingteacher';
     $user = $DB->get_record('user', array('username' => $USER->username));
@@ -335,8 +334,6 @@ function wizard_get_rof() {
         return false;
     }
     $list = array();
-    $formRof = array();
-    $rofPath = array();
     $formRof = $SESSION->wizard['form_step2']['item'];
     $rofPath = $SESSION->wizard['form_step2']['path'];
     foreach ($formRof as $key => $rof) {
@@ -520,7 +517,7 @@ function wizard_get_approbateurpropid() {
     global $SESSION;
     $approbateurpropid = '';
     if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
-        foreach ($SESSION->wizard['form_step3']['all-validators'] as $id => $user) {
+        foreach ($SESSION->wizard['form_step3']['all-validators'] as $user) {
             $approbateurpropid = $user->id . ';';
         }
         $approbateurpropid = substr($approbateurpropid, 0, -1);
@@ -549,7 +546,7 @@ function wizard_rofid_to_idnumber($rofid) {
 }
 
 function __get_serialnumber($idnumber) {
-    if ( preg_match ('/^.*-(\d+)$/', $idnumber, $match)) {
+    if (preg_match('/-(\d+)$/', $idnumber, $match)) {
         return (integer)$match[1];
     }
     return 0;
@@ -674,7 +671,7 @@ class core_wizard {
         $form3 =  $this->formdata['form_step3'];
         if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
             $allvalidators = $form3['all-validators'];
-            foreach ($allvalidators as $id => $validator) {
+            foreach ($allvalidators as $validator) {
                  $idval['fullname'] = fullname($validator);
                  $idval['username'] = $validator->username;
             }
@@ -778,7 +775,7 @@ class core_wizard {
 
             // metadonnee de rof1
             $mdrof1 = rof_get_metadata($rof1['tabpath']);
-            foreach ($mdrof1 as $category => $data) {
+            foreach ($mdrof1 as $data) {
                 if (count($data)) {
                     foreach($data as $label => $value) {
                         $champ = 'profile_field_'.$label;
@@ -910,47 +907,47 @@ class core_wizard {
     }
 
     public function get_recapitulatif_demande() {
-    $myconfig = new my_elements_config();
+        $myconfig = new my_elements_config();
 
-    $mg = '';
-    $mg .= "\n" . '---------------------' . "\n";
-    $mg .= 'Récapitulatif de la demande';
-    $mg .= "\n" . '---------------------' . "\n";
-    $mg .= get_string('username', 'local_crswizard') . fullname($this->user) . "\n";
-    $mg .= get_string('userlogin', 'local_crswizard') . $this->user->username . "\n";
-    $mg .= get_string('courserequestdate', 'local_crswizard') . date('d-m-Y') . "\n";
+        $mg = '';
+        $mg .= "\n" . '---------------------' . "\n";
+        $mg .= 'Récapitulatif de la demande';
+        $mg .= "\n" . '---------------------' . "\n";
+        $mg .= get_string('username', 'local_crswizard') . fullname($this->user) . "\n";
+        $mg .= get_string('userlogin', 'local_crswizard') . $this->user->username . "\n";
+        $mg .= get_string('courserequestdate', 'local_crswizard') . date('d-m-Y') . "\n";
 
-    $wizardcase = $this->formdata['wizardcase'];
+        //$wizardcase = $this->formdata['wizardcase']; // was not used
 
-    // categorie
-    $displaylist = array();
-    $parentlist = array();
-    make_categories_list($displaylist, $parentlist);
+        // categorie
+        $displaylist = array();
+        $parentlist = array();
+        make_categories_list($displaylist, $parentlist);
 
-    $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
-  //  $idcat = $form2['category'];
-    $idcat = $this->mydata->category;
-    $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
-    $mg .= get_string('fullnamecourse', 'local_crswizard') . $form2['fullname'] . "\n";
-    $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
+        $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
+        //  $idcat = $form2['category'];
+        $idcat = $this->mydata->category;
+        $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
+        $mg .= get_string('fullnamecourse', 'local_crswizard') . $form2['fullname'] . "\n";
+        $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
 
-    $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
-    $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
+        $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
+        $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
 
-    // validateur si il y a lieu
-    $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
-    if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
-        $allvalidators = $form3['all-validators'];
-        $mg .= get_string('selectedvalidator', 'local_crswizard'). "\n";
-        foreach ($allvalidators as $id => $validator) {
-            $mg .= '    ' . fullname($validator) . "\n";
+        // validateur si il y a lieu
+        $form3 = $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
+        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+            $allvalidators = $form3['all-validators'];
+            $mg .= get_string('selectedvalidator', 'local_crswizard') . "\n";
+            foreach ($allvalidators as $id => $validator) {
+                $mg .= '    ' . fullname($validator) . "\n";
+            }
         }
-    }
 
-    // liste des enseignants :
-    $form4 =  $this->formdata['form_step4']; // ou $SESSION->wizard['form_step4']
-    $mg .= get_string('teachers', 'local_crswizard'). "\n";
-    if (isset($form4['all-users']) && is_array($form4['all-users'])) {
+        // liste des enseignants :
+        $form4 = $this->formdata['form_step4']; // ou $SESSION->wizard['form_step4']
+        $mg .= get_string('teachers', 'local_crswizard') . "\n";
+        if (isset($form4['all-users']) && is_array($form4['all-users'])) {
             $allusers = $form4['all-users'];
             $labels = $myconfig->role_teachers;
             foreach ($allusers as $role => $users) {
@@ -960,7 +957,7 @@ class core_wizard {
                 }
                 $first = true;
                 foreach ($users as $id => $user) {
-                    $mg .= '    ' . ($first ? $label . ' : ': '') . fullname($user) . "\n";
+                    $mg .= '    ' . ($first ? $label . ' : ' : '') . fullname($user) . "\n";
                     $first = false;
                 }
             }
@@ -969,8 +966,8 @@ class core_wizard {
         }
 
         // liste des groupes
-        $form5 =  $this->formdata['form_step5']; // ou $SESSION->wizard['form_step5']
-        $mg .= get_string('cohorts', 'local_crswizard'). "\n";
+        $form5 = $this->formdata['form_step5']; // ou $SESSION->wizard['form_step5']
+        $mg .= get_string('cohorts', 'local_crswizard') . "\n";
         if (!empty($form5['all-cohorts'])) {
             $groupsbyrole = $form5['all-cohorts'];
             $labels = $myconfig->role_cohort;
@@ -1013,7 +1010,7 @@ class core_wizard {
         } else {
             $mg .= '    Aucune' . "\n";
         }
-    return $mg;
+        return $mg;
     }
 
     public function get_email_subject($type) {
@@ -1038,7 +1035,7 @@ class core_wizard {
     public function send_message_notification($idcourse, $mgc, $mgv) {
         global $DB;
         $userfrom = new object();
-        static $supportuser;
+        static $supportuser = null;
         if (!empty($supportuser)) {
             $userfrom = $supportuser;
         } else {
@@ -1072,7 +1069,7 @@ class core_wizard {
         $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
         if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
             $allvalidators = $form3['all-validators'];
-            foreach ($allvalidators as $id => $validator) {
+            foreach ($allvalidators as $validator) {
                 $eventdata->userto = $validator;
                 $res = message_send($eventdata);
             }
@@ -1090,8 +1087,6 @@ class core_wizard {
 
         // copie au demandeur
         $eventdata->userto = $this->user;
-        $subject = $this->get_email_subject('creation');
-        $subject = $this->get_email_subject('approbation');
         $eventdata->fullmessage = $mgc;
         $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
         $res = message_send($eventdata);
