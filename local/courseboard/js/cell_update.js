@@ -6,7 +6,7 @@ $(document).ready(function() {
 </style>').appendTo("head");
     $('td.updatable:not(.editing)').on('click', function(){
         var $td = $(this);
-        if ($td.hasClass('editing')) {
+        if ($td.hasClass('editing') || $('input', $td).size() || $td.html() === 'Not set') {
             return true;
         }
         $td.addClass('editing').removeClass('status-success status-failure');
