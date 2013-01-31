@@ -577,30 +577,54 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
     return $rof1;
 }
 
-function wizard_get_rattachement_fieldup1($idcat, $tabcategories) {
-    global $DB;
+function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
+   global $DB;
     $fieldup1 = array();
     $niveau = '';
     $composante = $tabcategories[2];
     if (isset($tabcategories[3])) {
         $niveau = $tabcategories[3];
     }
-    $category = $DB->get_record('course_categories', array('id' => $idcat));
-    if ($category) {
-        if($category->depth == 4) {
-            if ($niveau != '') {
-                $niveau .= ';';
-            }
-            $niveau .= $category->name;
+    if (count($tabcat)) {
+        $listecat = implode(",", $tabcat);
+        $sqlcatComp = "SELECT DISTINCT name FROM course_categories WHERE id IN (" . $listecat . ") AND depth=3";
+        $catComp = array();
+        $catComp = $DB->get_fieldset_sql($sqlcatComp);
 
-            $namecomp = $DB->get_field('course_categories', 'name', array('id' => $category->parent));
-            $composante .= ';' . $namecomp;
-        } else {
-            $composante .=';' . $category->name;
+        $sqlcatDip = "SELECT * FROM course_categories WHERE id IN (" . $listecat . ") AND depth=4";
+        $catDip = $DB->get_records_sql($sqlcatDip);
+
+        $tabnewcomp = array();
+        $tabdip = array();
+        foreach ($catDip as $dip) {
+            if(!in_array($dip->parent, $tabcat)) {
+                $tabnewcomp[] = $dip->parent;
+            }
+            if ($dip->name != $niveau) {
+                 $tabdip[$dip->name] = $dip->name;
+            }
+        }
+        foreach ($tabdip as $dip) {
+            $niveau .= ';' . $dip;
+        }
+
+        $catnewComp = array();
+        if (count($tabnewcomp)) {
+            $listenewcat = implode(",", $tabnewcomp);
+            $sqlcatComp = "SELECT DISTINCT name FROM course_categories WHERE id IN (" . $listenewcat . ") AND depth=3";
+            $catnewComp = $DB->get_fieldset_sql($sqlcatComp);
+        }
+
+        $tabcres =  array_merge($catComp, $catnewComp);
+        $comps = array_unique($tabcres);
+        foreach($comps as $comp) {
+            if ($comp != $tabcategories[2]) {
+                $composante .= ';' . $comp;
+            }
         }
     }
     $fieldup1['profile_field_up1composante'] = $composante;
-    $fieldup1['profile_field_up1niveau'] = $niveau;
+    $fieldup1['profile_field_up1niveaulmda'] = $niveau;
     return $fieldup1;
 }
 
