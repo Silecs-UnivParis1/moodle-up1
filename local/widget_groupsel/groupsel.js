@@ -94,7 +94,7 @@
                                 'Autres types de groupes': 'other'
                             };
                             var localSettings = JSON.parse(JSON.stringify($this.settings));
-                            localSettings.wsParams.groupMaxRows = $this.settings.moreRows;
+                            localSettings.wsParams.groupMaxRows = ui.item.maxRows;
                             delete localSettings.wsParams.maxRows;
                             delete localSettings.wsParams.userMaxRows;
                             var ajaxCall = $this.mainSource(localSettings);
@@ -219,6 +219,7 @@
                     if (maxRows && item.num > maxRows) {
                         item = itemToResponse.apply(this, [item]);
                         item.label = 'Afficher plus de réponses';
+                        item.maxRows = maxRows + $this.settings.moreRows;
                         return item;
                     } else if ('source' in item && item.source == 'title') {
                         return item;
