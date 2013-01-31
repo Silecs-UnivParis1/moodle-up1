@@ -50,6 +50,12 @@
 	background-color: #F0F0F0;
     color: #303030;
 }
+li.autocompletegroup-more {
+	text-align: center;
+}
+li.autocompletegroup-more > a {
+    color: blue;
+}
 
 .autocomplete-group-messages {
     color: red;

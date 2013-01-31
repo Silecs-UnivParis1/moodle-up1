@@ -325,9 +325,9 @@
             return $("<li><strong>" + item.label + "</strong></li>").appendTo(ul);
         }
         if (item.label == 'Afficher plus de réponses') {
-             return $("<li></li>")
+             return $('<li class="autocompletegroup-more"></li>')
                 .data("item.autocomplete", item)
-                .append("<a>Afficher plus de réponses</a>")
+                .append('<a>Afficher plus de réponses</a>')
                 .appendTo(ul);
         }
         if (item.pre) {
