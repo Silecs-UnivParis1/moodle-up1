@@ -59,7 +59,7 @@ var createOneSubselect = function (onchange, tree, depth) {
     var subselect = $('<select>').change(onchange).data(
         { depth: depth, tree: tree }
     );
-    console.log(tree);
+    //console.log(tree);
     $.each(tree, function (pathElem, subtree) {
         var option = $('<option>').text(pathElem);
         subselect.append(option);
@@ -147,6 +147,7 @@ $.fn.transformIntoSubselects = function (cfg) {
             $('label[for="' + theSelect.attr('id') + '"]').hide(0);
         }
     });
+    return $(this);
 }
 
 })(jQuery);
