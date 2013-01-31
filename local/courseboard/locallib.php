@@ -36,6 +36,15 @@ function print_table_course_vs_rof($crsid, $rofdata) {
             $row->cells[1]->attributes = array(
                     'data-courseid' => $crsid, 'data-fieldshortname' => $shortname, 'class' => 'updatable'
             );
+            $ddlist = rof_get_menu_constant($shortname, true);
+            if ($ddlist) {
+                $row->cells[1]->attributes['data-structure'] = json_encode(
+                        array(
+                            'type' => 'list',
+                            'options' => array_values($ddlist),
+                        )
+                );
+            }
             $row->cells[2] = (isset($rofdata[$category][$shortname]) ? $rofdata[$category][$shortname] : '(NA)');
             $table->data[] = $row;
         }

@@ -394,12 +394,29 @@ function rof_get_code_or_rofid($rofid) {
  * @global type $DB
  * @param type $element from rof_constant element field
  * @param type $prefix if true, the value is prefixed by the key. ex. "[DS] Droit, Sciences politique et sociales"
- * @return associative array  ROF identifer => value
+ * @return associative array  ROF identifer => value OR FALSE if no such field
  */
-function rof_get_menu_constant($element, $prefix=true) {
+function rof_get_menu_constant($metafield, $prefix=true) {
     global $DB;
 
-    $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
+    $meta_to_rof = array (
+//        'up1composante' => 'composante', too comlicated because of multiple values ?
+        'up1domaine' => 'domaineDiplome',
+        'up1type' => 'typeDiplome',
+        'up1nature' => 'natureDiplome',
+        'up1cycle' => 'cycleDiplome',
+        'up1rythme' => 'publicDiplome',
+        'up1langue' => 'langueDiplome',
+    );
+    if ( isset($meta_to_rof[$metafield]) ) {
+        $element = $meta_to_rof[$metafield];
+    } else {
+        return false;
+    }
+    // we don't use this because of some redundancy in "dataimport" fields, which should NOT happen. Bad ROF, change ROF.
+    // $records = $DB->get_records_menu('rof_constant', array('element'=>$element), null, 'dataimport, value');
+    $sql = "SELECT dataimport, MAX(value) FROM {rof_constant} rc WHERE element = ? GROUP BY dataimport";
+    $records = $DB->get_records_sql_menu($sql, array($element));
     if ( ! $prefix ) {
         return $records;
     } else {
