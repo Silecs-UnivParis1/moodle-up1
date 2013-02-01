@@ -4,8 +4,6 @@ var is_string = function (v){
     return typeof(v) === 'string';
 };
 
-var labels;
-
 var config = {};
 
 var defaultConfig = {
@@ -142,12 +140,48 @@ $.fn.transformIntoSubselects = function (cfg) {
     config = $.extend(true, {}, defaultConfig, cfg || {});
     $(this).each(function () {
         var theSelect = $(this);
+        var valuesSelected = theSelect.val();
+        if (theSelect.attr('multiple')) {
+            if (!valuesSelected) {
+                valuesSelected = [0];
+            }
+            theSelect.removeAttr('multiple').val(valuesSelected[0]);
+            var duplicator = build_duplicator(theSelect, config);
+
+            var button = $('<button type="button">Ajouter un champ supplémentaire de rattachement</button>');
+            button.click(duplicator);
+            theSelect.after(button);
+        }
         transformIntoSubselects(theSelect);
+        if (typeof valuesSelected != 'string' && valuesSelected.length > 1) {
+            for (var i=1; i < valuesSelected.length; i++) {
+                duplicator.apply(this, [valuesSelected[i]]);
+            }
+        }
         if (theSelect.attr('id')) {
             $('label[for="' + theSelect.attr('id') + '"]').hide(0);
         }
     });
     return $(this);
+}
+
+var build_duplicator = function (sel, config) {
+    var root = sel.parent().parent();
+    var more = root.clone();
+    var num = 1;
+    more.removeAttr('id');
+    more.children('div').removeAttr('id');
+    more.find('label').remove();
+    return function(val) {
+        var inserted = more.clone();
+        var select = inserted.find('select').first();
+        select.val(val);
+        num++;
+        //select.attr('name', select.attr('name').replace('[0]', '[' + num + ']'));
+        select.attr('id', select.attr('id') + '_' + num);
+        root.after(inserted);
+        inserted.transformIntoSubselects(config)
+    }
 }
 
 })(jQuery);
