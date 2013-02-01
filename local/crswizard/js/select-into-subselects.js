@@ -110,8 +110,12 @@ var createOnchangeHandler = function (theSelect, selectsDiv) {
 
         selectsDiv.children("div:gt(" + depth + ")").remove(); // remove subselects
 
-        var selectedVal = addDefaultSubselects(selectsDiv, onchange, subtree, depth+1);
-        theSelect.val(selectedVal);
+        try {
+            var selectedVal = addDefaultSubselects(selectsDiv, onchange, subtree, depth+1);
+            theSelect.val(selectedVal);
+        } catch (e) {
+            theSelect.val(0);
+        }
     };
     return onchange;
 };
