@@ -62,6 +62,14 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
+        if (isset($SESSION->wizard['wizardcase'])) {
+            $mform->addElement('text', 'creationmode', "Mode de création :");
+            if ($SESSION->wizard['wizardcase'] == 2) {
+                $mform->setDefault('creationmode', "mode Manuel via assistant (cas n°2 ROF)");
+            } else {
+                $mform->setDefault('creationmode', "mode Manuel via assistant (cas n°3 hors ROF)");
+            }
+        }
         // validateur pour le cas 2
         if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
             $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
