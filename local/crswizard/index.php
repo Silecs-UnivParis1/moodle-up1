@@ -107,6 +107,7 @@ switch ($stepin) {
 
             $data = $editform->get_data();
             if ($data){
+                $data->rattachements = array_filter($data->rattachements);
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
             }
