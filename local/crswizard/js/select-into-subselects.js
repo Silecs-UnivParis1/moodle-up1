@@ -81,7 +81,7 @@ var buildSelectLine = function(subselect, depth) {
     );
     if ('labels' in config && config.labels && depth in config.labels) {
         line.append(
-            $('<div class="fitemtitle">').append($('<label>').text(config.labels[depth]+' *'))
+            $('<div class="fitemtitle">').append($('<label>').text(config.labels[depth]+(config.required ? ' *' : '')))
         );
     }
     line.append($('<div class="felement fselect">').append(subselect));
