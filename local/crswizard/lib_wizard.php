@@ -715,7 +715,7 @@ class core_wizard {
             $mgc .= 'Votre demande a été transmise à ' . $idval['fullname'] . ', ainsi qu\'aux gestionnaires de '
             . 'la plateforme pour approbation, avant son ouverture aux étudiants';
         } else {
-            $mgc .=  'votre demande a été transmise aux gestionnaires de '
+            $mgc .=  'Votre demande a été transmise aux gestionnaires de '
             . 'la plateforme pour approbation, avant son ouverture aux étudiants.';
         }
         $mgc .= "\n\n";
