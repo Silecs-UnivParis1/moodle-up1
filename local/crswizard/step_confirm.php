@@ -38,7 +38,15 @@ class course_wizard_step_confirm extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('category'), $displaylist);
+        $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard'), $displaylist);
+        if (!empty($SESSION->wizard['form_step3']['rattachements'])) {
+            $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category']);
+            foreach ($SESSION->wizard['form_step3']['rattachements'] as $pathid) {
+                $select = $mform->createElement('text', "rattachements$pathid", '');
+                $select->setValue($paths[$pathid]);
+                $mform->addElement($select);
+            }
+        }
 
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
 
@@ -55,7 +63,7 @@ class course_wizard_step_confirm extends moodleform {
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
         // validateur pour le cas 2
-        if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
+        if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
             $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
             $mform->addElement('header', 'validators', get_string('selectedvalidator', 'local_crswizard'));
             foreach ($allvalidators as $id => $validator) {

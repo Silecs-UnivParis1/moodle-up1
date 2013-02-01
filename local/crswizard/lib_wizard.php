@@ -1,7 +1,7 @@
 <?php
 /* @var $DB moodle_database */
-require_once("$CFG->dirroot/local/roftools/roflib.php");
 
+require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
  * Reconstruit le tableau de chemins (période/é/c/niveau) pour le plugin jquery select-into-subselects.js

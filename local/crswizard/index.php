@@ -166,6 +166,7 @@ switch ($stepin) {
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
         }
+
         $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
         $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-confirm.js'));
         break;
