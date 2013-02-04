@@ -810,7 +810,8 @@ class core_wizard {
 
             $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $this->formdata['form_step2']['fullname'];
             if ($this->formdata['form_step2']['complement'] !='') {
-                $mydata->course_nom_norme .= ' - '. $this->formdata['form_step2']['complement'];
+                $mydata->course_nom_norme .= ' - ' . $this->formdata['form_step2']['complement'];
+                $mydata->fullname .= ' - ' . $this->formdata['form_step2']['complement'];
             }
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
