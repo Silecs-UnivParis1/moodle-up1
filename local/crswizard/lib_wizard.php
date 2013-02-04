@@ -577,6 +577,33 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
     return $rof1;
 }
 
+/**
+ * Retourne le rofid, rofpathid et rofname des rattachements secondaires
+ * @param array() $form2
+ * @return array() $rof2 - rofid, rofpathid et rofname
+ */
+function wizard_prepare_rattachement_second($form2) {
+    $rof2 = array();
+    if (isset($form2['item']) && count($form2['item'])) {
+        $allrof = $form2['item'];
+        if (isset($allrof['s']) && count($allrof['s'])) {
+            foreach($allrof['s'] as $rofid) {
+                $rof2['rofid'][] = $rofid;
+                if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
+                    $rofpath = $form2['path'][$rofid];
+                    $path = strtr($rofpath, '_', '/');
+                    $rof2['rofpathid'][] = $path;
+                }
+                if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
+                    $rofobjet =  $form2['all-rof'][$rofid]['object'];
+                    $rof2['rofname'][] = $rofobjet->name;
+                }
+            }
+        }
+    }
+    return $rof2;
+}
+
 function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
    global $DB;
     $fieldup1 = array();
@@ -805,6 +832,21 @@ class core_wizard {
                         $champ = 'profile_field_'.$label;
                         $mydata->$champ = $value;
                     }
+                }
+            }
+
+            // rattachement secondaire
+            $rof2 = wizard_prepare_rattachement_second($form2);
+            if (count($rof2)) {
+                //print_r($rof2);
+                foreach($rof2['rofid'] as $rofid) {
+                    $mydata->profile_field_up1rofid .= ';' . $rofid;
+                }
+                foreach($rof2['rofpathid'] as $rofpath) {
+                    $mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+                }
+                foreach($rof2['rofname'] as $rofname) {
+                    $this->formdata['form_step2']['rofname_second'][] = $rofname;
                 }
             }
 

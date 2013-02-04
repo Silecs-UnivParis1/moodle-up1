@@ -48,6 +48,26 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 
+        // rattachement secondaire - cas 2
+        if (isset($SESSION->wizard['form_step2']['item']['s'])) {
+            $rof2 = $SESSION->wizard['form_step2']['item']['s'];
+            if(count($rof2)) {
+                $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
+                    . '<div class="fstaticlabel"><label>'
+                    . get_string('rofselected2', 'local_crswizard')
+                    . ' : </label></div></div>';
+                $rofall = $SESSION->wizard['form_step2']['all-rof'];
+                foreach ($rof2 as $rofid) {
+                    if (isset($rofall) && array_key_exists($rofid, $rofall)) {
+                        $rofobjet =  $rofall[$rofid]['object'];
+                        $htmlrof2 .= '<div class="felement fstatic">' . $rofobjet->name . '</div>';
+                    }
+                }
+                $htmlrof2 .= '</div>';
+                $mform->addElement('html', $htmlrof2);
+            }
+        }
+
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
 
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
