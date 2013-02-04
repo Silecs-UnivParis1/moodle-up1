@@ -767,7 +767,7 @@ class core_wizard {
         $mgv .= 'Pour donner votre accord :' . "\n\n";
         $mgv .= '1. Cliquez sur le lien suivant '. $urlvalidator . ' ;' . "\n";
         if (count($idval)) {
-            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1' . $idval['username'] . "\n";
+            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1 : ' . $idval['username'] . ' ;' . "\n";
         } else {
             $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1. ' . "\n";
         }
@@ -859,7 +859,7 @@ class core_wizard {
 
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
-            $mydata->course_nom_norme = $this->formdata['form_step2']['shortname'];
+            $mydata->course_nom_norme = $this->formdata['form_step2']['fullname'];
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
             if (isset($mydata->rattachements)) {
                 $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
