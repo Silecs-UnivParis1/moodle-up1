@@ -82,14 +82,8 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
-        if (isset($SESSION->wizard['wizardcase'])) {
-            $mform->addElement('text', 'creationmode', "Mode de création :");
-            if ($SESSION->wizard['wizardcase'] == 2) {
-                $mform->setDefault('creationmode', "mode Manuel via assistant (cas n°2 ROF)");
-            } else {
-                $mform->setDefault('creationmode', "mode Manuel via assistant (cas n°3 hors ROF)");
-            }
-        }
+        $mform->addElement('text', 'profile_field_up1generateur', "Mode de création :");
+
         // validateur pour le cas 2
         if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
             $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
@@ -109,12 +103,18 @@ class course_wizard_step_confirm extends moodleform {
                 if (isset($labels[$role])) {
                     $label = get_string($labels[$role], 'local_crswizard');
                 }
+                $htmlteacher = '<div class="fitem"><div class="fitemtitle">'
+                    . '<div class="fstaticlabel"><label>'
+                    . $label
+                    . ' : </label></div></div>'
+                    . '<div class="felement fstatic">';
                 $first = true;
                 foreach ($users as $id => $user) {
-                    $mform->addElement('text', 'teacher' . $role . $id, ($first ? $label : ''));
-                    $mform->setConstant('teacher' . $role . $id, fullname($user));
+                    $htmlteacher .= ($first ? '' : ', ') . fullname($user);
                     $first = false;
                 }
+                $htmlteacher .= '</div></div>';
+                $mform->addElement('html', $htmlteacher);
             }
         }
 
@@ -129,8 +129,8 @@ class course_wizard_step_confirm extends moodleform {
                 }
                 $first = true;
                 foreach ($groups as $id => $group) {
-                    $mform->addElement('text', 'cohort' . $id, ($first ? $label : ''));
-                    $mform->setConstant('cohort' . $id, $group->name . " ({$group->size})");
+                    $mform->addElement('text', 'cohort' . $id, ($first ? $label : '') . ' : ');
+                    $mform->setConstant('cohort' . $id, $group->name . ' — ' . "{$group->size} inscrits");
                     $first = false;
                 }
             }
