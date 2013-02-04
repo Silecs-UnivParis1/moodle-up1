@@ -129,7 +129,7 @@ class course_wizard_step_confirm extends moodleform {
                 }
                 $first = true;
                 foreach ($groups as $id => $group) {
-                    $mform->addElement('text', 'cohort' . $id, ($first ? $label : '') . ' : ');
+                    $mform->addElement('text', 'cohort' . $id, ($first ? $label . ' : ' : ''));
                     $mform->setConstant('cohort' . $id, $group->name . ' — ' . "{$group->size} inscrits");
                     $first = false;
                 }
