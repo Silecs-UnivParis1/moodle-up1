@@ -716,7 +716,7 @@ class core_wizard {
      */
     public function get_messages() {
         global $CFG;
-        $urlcourse = new moodle_url('/course/view.php', array('id' => $this->course->id));
+        $urlguide = $CFG->wwwroot .'/guide';
         $urlvalidator = $CFG->wwwroot .'/local/course_validated/index.php';
         $idval = array();
         $form3 =  $this->formdata['form_step3'];
@@ -750,8 +750,8 @@ class core_wizard {
             . 'des droits de contribution ont d\'ores et déjà la possibilité de s\'approprier ce nouvel espace de cours : '
             . 'personnaliser le texte de présentation, organiser et nommer à leur convenance '
             . 'les différentes sections, déposer des documents, etc.' . "\n\n";
-        $mgc .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide un ensemble de ressources '
-            . 'd\'aide et de conseil sur les principales fonctionnalités disponibles.' . "\n\n";
+        $mgc .= 'Vous trouverez à cette adresse ' . $urlguide . ' des informations sur le processus d\'approbation des espaces '
+            . 'nouvellement créés.' . "\n\n";
         $mgc .= 'N\'hésitez pas à contacter l\'un des membres de l\'équipe du service TICE :' . "\n";
         $mgc .= '- si vous souhaitez participer à l\'une des sessions de prise en mains régulièrement organisées ;' . "\n";
         $mgc .= '- si vous rencontrez une difficulté ou si vous constatez une anomalie de fonctionnement.' . "\n\n";
@@ -773,8 +773,8 @@ class core_wizard {
         }
         $mgv .= '3. Cliquez sur l\'icône "coche verte" située dans la colonne "Modifier" ;' . "\n";
         $mgv .= '4. '.fullname($this->user).' sera automatiquement prévenu-e par courriel de votre approbation.'  . "\n\n";
-        $mgv .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide des informations sur le processus '
-            . 'd\'approbation des espaces nouvellement créés.' . "\n\n";
+        $mgv .= 'Vous trouverez à cette adresse ' . $urlguide . ' des informations sur le processus d\'approbation des espaces '
+             . 'nouvellement créés.' . "\n\n";
         $mgv .= 'Le récapitulatif technique présenté ci-après peut vous apporter des précisions sur cette demande.'  . "\n\n";
         $mgv .= 'Si cette demande ne vous concerne pas ou si vous ne souhaitez pas y donner suite, '
             . 'merci d\'en faire part à l\'équipe d\'assistance en lui transférant ce message '
