@@ -1096,14 +1096,12 @@ class core_wizard {
         return $mg;
     }
 
-    public function get_email_subject($type) {
+    public function get_email_subject($idcourse, $type) {
         $subject = '';
         $sitename = format_string(get_site()->shortname);
-        $subject .= "[$sitename] Demande $type espace";
-        if (!empty($this->mydata->idnumber)) {
-            $subject .=' n°' . $this->mydata->idnumber;
-        }
-        $subject .= ' ' . $this->mydata->course_nom_norme;
+        $subject .= "[$sitename] $type espace";
+        $subject .=' n°' . $idcourse;
+        $subject .= ' : ' . $this->mydata->course_nom_norme;
         return $subject;
     }
 
@@ -1123,7 +1121,16 @@ class core_wizard {
             $userfrom = $this->user;
         }
 
-        $subject = $this->get_email_subject('approbation');
+        //approbateur désigné ?
+        $approbateur = false;
+        $typeMessage = 'Assistance - Demande approbation';
+        $form3 =  $this->formdata['form_step3'];
+        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+            $approbateur = true;
+             $typeMessage = 'Demande approbation';
+        }
+        $subject = $this->get_email_subject($idcourse, $typeMessage);
+
         $eventdata = new object();
         $eventdata->component = 'moodle';
         $eventdata->name = 'courserequested';
@@ -1147,8 +1154,7 @@ class core_wizard {
         }
 
         // envoi à l'approbateur si besoin
-        $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
-        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+        if ($approbateur) {
             $allvalidators = $form3['all-validators'];
             foreach ($allvalidators as $validator) {
                 $eventdata->userto = $validator;
@@ -1168,6 +1174,8 @@ class core_wizard {
 
         // copie au demandeur
         $eventdata->userto = $this->user;
+        $subject = $this->get_email_subject($idcourse, 'Création');
+        $eventdata->subject = $subject;
         $eventdata->fullmessage = $mgc;
         $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
         $res = message_send($eventdata);
