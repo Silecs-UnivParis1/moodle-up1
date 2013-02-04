@@ -38,7 +38,35 @@ class course_wizard_step_confirm extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('category'), $displaylist);
+        $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard'), $displaylist);
+        if (!empty($SESSION->wizard['form_step3']['rattachements'])) {
+            $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category']);
+            foreach ($SESSION->wizard['form_step3']['rattachements'] as $pathid) {
+                $select = $mform->createElement('text', "rattachements$pathid", '');
+                $select->setValue($paths[$pathid]);
+                $mform->addElement($select);
+            }
+        }
+
+        // rattachement secondaire - cas 2
+        if (isset($SESSION->wizard['form_step2']['item']['s'])) {
+            $rof2 = $SESSION->wizard['form_step2']['item']['s'];
+            if(count($rof2)) {
+                $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
+                    . '<div class="fstaticlabel"><label>'
+                    . get_string('rofselected2', 'local_crswizard')
+                    . ' : </label></div></div>';
+                $rofall = $SESSION->wizard['form_step2']['all-rof'];
+                foreach ($rof2 as $rofid) {
+                    if (isset($rofall) && array_key_exists($rofid, $rofall)) {
+                        $rofobjet =  $rofall[$rofid]['object'];
+                        $htmlrof2 .= '<div class="felement fstatic">' . $rofobjet->name . '</div>';
+                    }
+                }
+                $htmlrof2 .= '</div>';
+                $mform->addElement('html', $htmlrof2);
+            }
+        }
 
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
 
@@ -54,8 +82,10 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
+        $mform->addElement('text', 'profile_field_up1generateur', "Mode de création :");
+
         // validateur pour le cas 2
-        if (isset($SESSION->wizard['form_step3']['all-validators']) && !empty($SESSION->wizard['form_step3']['all-validators'])) {
+        if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
             $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
             $mform->addElement('header', 'validators', get_string('selectedvalidator', 'local_crswizard'));
             foreach ($allvalidators as $id => $validator) {
@@ -73,12 +103,18 @@ class course_wizard_step_confirm extends moodleform {
                 if (isset($labels[$role])) {
                     $label = get_string($labels[$role], 'local_crswizard');
                 }
+                $htmlteacher = '<div class="fitem"><div class="fitemtitle">'
+                    . '<div class="fstaticlabel"><label>'
+                    . $label
+                    . ' : </label></div></div>'
+                    . '<div class="felement fstatic">';
                 $first = true;
                 foreach ($users as $id => $user) {
-                    $mform->addElement('text', 'teacher' . $role . $id, ($first ? $label : ''));
-                    $mform->setConstant('teacher' . $role . $id, fullname($user));
+                    $htmlteacher .= ($first ? '' : ', ') . fullname($user);
                     $first = false;
                 }
+                $htmlteacher .= '</div></div>';
+                $mform->addElement('html', $htmlteacher);
             }
         }
 
@@ -93,8 +129,8 @@ class course_wizard_step_confirm extends moodleform {
                 }
                 $first = true;
                 foreach ($groups as $id => $group) {
-                    $mform->addElement('text', 'cohort' . $id, ($first ? $label : ''));
-                    $mform->setConstant('cohort' . $id, $group->name . " ({$group->size})");
+                    $mform->addElement('text', 'cohort' . $id, ($first ? $label . ' : ' : ''));
+                    $mform->setConstant('cohort' . $id, $group->name . ' — ' . "{$group->size} inscrits");
                     $first = false;
                 }
             }

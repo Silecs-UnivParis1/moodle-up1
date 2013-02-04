@@ -1,7 +1,7 @@
 <?php
 /* @var $DB moodle_database */
-require_once("$CFG->dirroot/local/roftools/roflib.php");
 
+require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
  * Reconstruit le tableau de chemins (période/é/c/niveau) pour le plugin jquery select-into-subselects.js
@@ -372,7 +372,7 @@ function wizard_preselected_cohort() {
     foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
         $labelrole = '';
         if (isset($labels[$role])) {
-            $labelrole = "<span>" . get_string($labels[$role], 'local_crswizard') . "</span> : ";
+            $labelrole = "<span>" . get_string($labels[$role], 'local_crswizard') . "</span>";
         }
         foreach ($groups as $id => $group) {
             $desc = '';
@@ -577,6 +577,33 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
     return $rof1;
 }
 
+/**
+ * Retourne le rofid, rofpathid et rofname des rattachements secondaires
+ * @param array() $form2
+ * @return array() $rof2 - rofid, rofpathid et rofname
+ */
+function wizard_prepare_rattachement_second($form2) {
+    $rof2 = array();
+    if (isset($form2['item']) && count($form2['item'])) {
+        $allrof = $form2['item'];
+        if (isset($allrof['s']) && count($allrof['s'])) {
+            foreach($allrof['s'] as $rofid) {
+                $rof2['rofid'][] = $rofid;
+                if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
+                    $rofpath = $form2['path'][$rofid];
+                    $path = strtr($rofpath, '_', '/');
+                    $rof2['rofpathid'][] = $path;
+                }
+                if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
+                    $rofobjet =  $form2['all-rof'][$rofid]['object'];
+                    $rof2['rofname'][] = $rofobjet->name;
+                }
+            }
+        }
+    }
+    return $rof2;
+}
+
 function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
    global $DB;
     $fieldup1 = array();
@@ -689,7 +716,7 @@ class core_wizard {
      */
     public function get_messages() {
         global $CFG;
-        $urlcourse = new moodle_url('/course/view.php', array('id' => $this->course->id));
+        $urlguide = $CFG->wwwroot .'/guide';
         $urlvalidator = $CFG->wwwroot .'/local/course_validated/index.php';
         $idval = array();
         $form3 =  $this->formdata['form_step3'];
@@ -715,7 +742,7 @@ class core_wizard {
             $mgc .= 'Votre demande a été transmise à ' . $idval['fullname'] . ', ainsi qu\'aux gestionnaires de '
             . 'la plateforme pour approbation, avant son ouverture aux étudiants';
         } else {
-            $mgc .=  'votre demande a été transmise aux gestionnaires de '
+            $mgc .=  'Votre demande a été transmise aux gestionnaires de '
             . 'la plateforme pour approbation, avant son ouverture aux étudiants.';
         }
         $mgc .= "\n\n";
@@ -723,8 +750,8 @@ class core_wizard {
             . 'des droits de contribution ont d\'ores et déjà la possibilité de s\'approprier ce nouvel espace de cours : '
             . 'personnaliser le texte de présentation, organiser et nommer à leur convenance '
             . 'les différentes sections, déposer des documents, etc.' . "\n\n";
-        $mgc .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide un ensemble de ressources '
-            . 'd\'aide et de conseil sur les principales fonctionnalités disponibles.' . "\n\n";
+        $mgc .= 'Vous trouverez à cette adresse ' . $urlguide . ' des informations sur le processus d\'approbation des espaces '
+            . 'nouvellement créés.' . "\n\n";
         $mgc .= 'N\'hésitez pas à contacter l\'un des membres de l\'équipe du service TICE :' . "\n";
         $mgc .= '- si vous souhaitez participer à l\'une des sessions de prise en mains régulièrement organisées ;' . "\n";
         $mgc .= '- si vous rencontrez une difficulté ou si vous constatez une anomalie de fonctionnement.' . "\n\n";
@@ -740,14 +767,14 @@ class core_wizard {
         $mgv .= 'Pour donner votre accord :' . "\n\n";
         $mgv .= '1. Cliquez sur le lien suivant '. $urlvalidator . ' ;' . "\n";
         if (count($idval)) {
-            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1' . $idval['username'] . "\n";
+            $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1 : ' . $idval['username'] . ' ;' . "\n";
         } else {
             $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1. ' . "\n";
         }
         $mgv .= '3. Cliquez sur l\'icône "coche verte" située dans la colonne "Modifier" ;' . "\n";
         $mgv .= '4. '.fullname($this->user).' sera automatiquement prévenu-e par courriel de votre approbation.'  . "\n\n";
-        $mgv .= 'Vous trouverez à cette adresse ' . $urlcourse . '/guide des informations sur le processus '
-            . 'd\'approbation des espaces nouvellement créés.' . "\n\n";
+        $mgv .= 'Vous trouverez à cette adresse ' . $urlguide . ' des informations sur le processus d\'approbation des espaces '
+             . 'nouvellement créés.' . "\n\n";
         $mgv .= 'Le récapitulatif technique présenté ci-après peut vous apporter des précisions sur cette demande.'  . "\n\n";
         $mgv .= 'Si cette demande ne vous concerne pas ou si vous ne souhaitez pas y donner suite, '
             . 'merci d\'en faire part à l\'équipe d\'assistance en lui transférant ce message '
@@ -808,15 +835,31 @@ class core_wizard {
                 }
             }
 
+            // rattachement secondaire
+            $rof2 = wizard_prepare_rattachement_second($form2);
+            if (count($rof2)) {
+                //print_r($rof2);
+                foreach($rof2['rofid'] as $rofid) {
+                    $mydata->profile_field_up1rofid .= ';' . $rofid;
+                }
+                foreach($rof2['rofpathid'] as $rofpath) {
+                    $mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+                }
+                foreach($rof2['rofname'] as $rofname) {
+                    $this->formdata['form_step2']['rofname_second'][] = $rofname;
+                }
+            }
+
             $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $this->formdata['form_step2']['fullname'];
             if ($this->formdata['form_step2']['complement'] !='') {
-                $mydata->course_nom_norme .= ' - '. $this->formdata['form_step2']['complement'];
+                $mydata->course_nom_norme .= ' - ' . $this->formdata['form_step2']['complement'];
+                $mydata->fullname .= ' - ' . $this->formdata['form_step2']['complement'];
             }
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
             $tabcategories = get_list_category($this->formdata['form_step2']['category']);
-            $mydata->course_nom_norme = $this->formdata['form_step2']['shortname'];
+            $mydata->course_nom_norme = $this->formdata['form_step2']['fullname'];
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
             if (isset($mydata->rattachements)) {
                 $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
@@ -951,21 +994,34 @@ class core_wizard {
         $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
         //  $idcat = $form2['category'];
         $idcat = $this->mydata->category;
-        $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
-        $mg .= get_string('fullnamecourse', 'local_crswizard') . $form2['fullname'] . "\n";
+        $mg .= get_string('categoryblockE3', 'local_crswizard') . ' : ' . $displaylist[$idcat] . "\n";
+        if (isset($form2['rofname_second']) && count($form2['rofname_second'])) {
+            $mg .= get_string('rofselected2', 'local_crswizard') . ' : ';
+            $first = true;
+            foreach ($form2['rofname_second'] as $formsecond) {
+                $mg .= ($first ? '' : ', ') . $formsecond;
+                $first = false;
+            }
+            $mg .=  "\n";
+        }
+        $mg .= get_string('fullnamecourse', 'local_crswizard') . $this->mydata->fullname . "\n";
         $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
 
         $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
         $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
+        $mg .= 'Mode de création : ' .  $this->mydata->profile_field_up1generateur . "\n";
 
         // validateur si il y a lieu
         $form3 = $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
         if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
             $allvalidators = $form3['all-validators'];
-            $mg .= get_string('selectedvalidator', 'local_crswizard') . "\n";
+            $mg .= get_string('selectedvalidator', 'local_crswizard') . ' : ';
+            $first = true;
             foreach ($allvalidators as $id => $validator) {
-                $mg .= '    ' . fullname($validator) . "\n";
+                $mg .= ($first ? '' : ', ') . fullname($validator);
+                $first = false;
             }
+            $mg .=  "\n";
         }
 
         // liste des enseignants :
@@ -980,10 +1036,12 @@ class core_wizard {
                     $label = get_string($labels[$role], 'local_crswizard');
                 }
                 $first = true;
+                 $mg .= '    ' . $label . ' : ';
                 foreach ($users as $id => $user) {
-                    $mg .= '    ' . ($first ? $label . ' : ' : '') . fullname($user) . "\n";
+                    $mg .=  ($first ? '' : ', ') . fullname($user);
                     $first = false;
                 }
+                $mg .=  "\n";
             }
         } else {
             $mg .= '    Aucun' . "\n";
@@ -1002,7 +1060,8 @@ class core_wizard {
                 }
                 $first = true;
                 foreach ($groups as $id => $group) {
-                    $mg .= '    ' . ($first ? $label . ' : ' : '') . $group->name . " ({$group->size})" . "\n";
+                    $mg .= '    ' . ($first ? $label . ' : ' : '           ') . $group->name
+                        .  ' — '  . "{$group->size} inscrits" . "\n";
                     $first = false;
                 }
             }
@@ -1037,14 +1096,12 @@ class core_wizard {
         return $mg;
     }
 
-    public function get_email_subject($type) {
+    public function get_email_subject($idcourse, $type) {
         $subject = '';
         $sitename = format_string(get_site()->shortname);
-        $subject .= "[$sitename] Demande $type espace";
-        if (!empty($this->mydata->idnumber)) {
-            $subject .=' n°' . $this->mydata->idnumber;
-        }
-        $subject .= ' ' . $this->mydata->course_nom_norme;
+        $subject .= "[$sitename] $type espace";
+        $subject .=' n°' . $idcourse;
+        $subject .= ' : ' . $this->mydata->course_nom_norme;
         return $subject;
     }
 
@@ -1064,7 +1121,16 @@ class core_wizard {
             $userfrom = $this->user;
         }
 
-        $subject = $this->get_email_subject('approbation');
+        //approbateur désigné ?
+        $approbateur = false;
+        $typeMessage = 'Assistance - Demande approbation';
+        $form3 =  $this->formdata['form_step3'];
+        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+            $approbateur = true;
+             $typeMessage = 'Demande approbation';
+        }
+        $subject = $this->get_email_subject($idcourse, $typeMessage);
+
         $eventdata = new object();
         $eventdata->component = 'moodle';
         $eventdata->name = 'courserequested';
@@ -1088,8 +1154,7 @@ class core_wizard {
         }
 
         // envoi à l'approbateur si besoin
-        $form3 =  $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
-        if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
+        if ($approbateur) {
             $allvalidators = $form3['all-validators'];
             foreach ($allvalidators as $validator) {
                 $eventdata->userto = $validator;
@@ -1109,6 +1174,8 @@ class core_wizard {
 
         // copie au demandeur
         $eventdata->userto = $this->user;
+        $subject = $this->get_email_subject($idcourse, 'Création');
+        $eventdata->subject = $subject;
         $eventdata->fullmessage = $mgc;
         $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
         $res = message_send($eventdata);
