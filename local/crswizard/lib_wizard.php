@@ -994,21 +994,34 @@ class core_wizard {
         $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
         //  $idcat = $form2['category'];
         $idcat = $this->mydata->category;
-        $mg .= get_string('category') . ' : ' . $displaylist[$idcat] . "\n";
-        $mg .= get_string('fullnamecourse', 'local_crswizard') . $form2['fullname'] . "\n";
+        $mg .= get_string('categoryblockE3', 'local_crswizard') . ' : ' . $displaylist[$idcat] . "\n";
+        if (isset($form2['rofname_second']) && count($form2['rofname_second'])) {
+            $mg .= get_string('rofselected2', 'local_crswizard') . ' : ';
+            $first = true;
+            foreach ($form2['rofname_second'] as $formsecond) {
+                $mg .= ($first ? '' : ', ') . $formsecond;
+                $first = false;
+            }
+            $mg .=  "\n";
+        }
+        $mg .= get_string('fullnamecourse', 'local_crswizard') . $this->mydata->fullname . "\n";
         $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
 
         $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
         $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
+        $mg .= 'Mode de création : ' .  $this->mydata->profile_field_up1generateur . "\n";
 
         // validateur si il y a lieu
         $form3 = $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
         if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
             $allvalidators = $form3['all-validators'];
-            $mg .= get_string('selectedvalidator', 'local_crswizard') . "\n";
+            $mg .= get_string('selectedvalidator', 'local_crswizard') . ' : ';
+            $first = true;
             foreach ($allvalidators as $id => $validator) {
-                $mg .= '    ' . fullname($validator) . "\n";
+                $mg .= ($first ? '' : ', ') . fullname($validator);
+                $first = false;
             }
+            $mg .=  "\n";
         }
 
         // liste des enseignants :
@@ -1023,10 +1036,12 @@ class core_wizard {
                     $label = get_string($labels[$role], 'local_crswizard');
                 }
                 $first = true;
+                 $mg .= '    ' . $label . ' : ';
                 foreach ($users as $id => $user) {
-                    $mg .= '    ' . ($first ? $label . ' : ' : '') . fullname($user) . "\n";
+                    $mg .=  ($first ? '' : ', ') . fullname($user);
                     $first = false;
                 }
+                $mg .=  "\n";
             }
         } else {
             $mg .= '    Aucun' . "\n";
@@ -1045,7 +1060,8 @@ class core_wizard {
                 }
                 $first = true;
                 foreach ($groups as $id => $group) {
-                    $mg .= '    ' . ($first ? $label . ' : ' : '') . $group->name . " ({$group->size})" . "\n";
+                    $mg .= '    ' . ($first ? $label . ' : ' : '           ') . $group->name
+                        .  ' — '  . "{$group->size} inscrits" . "\n";
                     $first = false;
                 }
             }
