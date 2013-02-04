@@ -372,7 +372,7 @@ function wizard_preselected_cohort() {
     foreach ($SESSION->wizard['form_step5']['all-cohorts'] as $role => $groups) {
         $labelrole = '';
         if (isset($labels[$role])) {
-            $labelrole = "<span>" . get_string($labels[$role], 'local_crswizard') . "</span> : ";
+            $labelrole = "<span>" . get_string($labels[$role], 'local_crswizard') . "</span>";
         }
         foreach ($groups as $id => $group) {
             $desc = '';
