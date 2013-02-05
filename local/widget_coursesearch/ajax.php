@@ -19,7 +19,7 @@ $searchconfig = array(
         'Indexation' => array(
             'up1composante',
             'up1semestre',
-            'up1niveau',
+            'up1niveaulmda',
         ),
         'Diplome' => array(
             'up1diplome',
