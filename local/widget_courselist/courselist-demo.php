@@ -25,7 +25,7 @@ jQuery(document).ready(function () {
             "search": "",
             "startdateafter": '2008-09-01',
             "custom": {
-                "up1diplome": "Physique"
+                "up1composante": "02"
             }
     });
 });

@@ -558,6 +558,7 @@ function __get_serialnumber($idnumber) {
  * @return array() $rof1 - idcat, apogee et idnumber
  */
 function wizard_prepare_rattachement_rof_moodle($form2) {
+    global $DB;
     $rof1 = array();
     if (isset($form2['item']) && count($form2['item'])) {
         $allrof = $form2['item'];
@@ -568,7 +569,13 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
                 $rofpath = $form2['path'][$rofid];
                 $tabpath = explode('_', $rofpath);
                 $rof1['tabpath'] = $tabpath;
-                $rof1['idcat'] = rof_rofpath_to_category($tabpath);
+                $idcategory = rof_rofpath_to_category($tabpath);
+                if ($idcategory) {
+                    $rof1['idcat'] = $idcategory;
+                    $category = $DB->get_record('course_categories', array('id' => $idcategory));
+                    $rof1['up1niveaulmda'] = $category->name;
+                    $rof1['up1composante'] = $DB->get_field('course_categories', 'name', array('id' => $category->parent));
+                }
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
             $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
@@ -812,6 +819,8 @@ class core_wizard {
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
+                $mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
+                $mydata->profile_field_up1composante = $rof1['up1composante'];
             }
 
             $shortname = $rof1['idnumber'];
