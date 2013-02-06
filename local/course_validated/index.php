@@ -18,6 +18,7 @@ require_login();
 $hide = optional_param('hide', 0, PARAM_INT);
 $show = optional_param('show', 0, PARAM_INT);
 $validate = optional_param('validate', 0, PARAM_INT);
+$perpage = optional_param('perpage', 20, PARAM_INT); // nb of rows per page
 
 // Hide or show a course
 if (!empty($hide) or !empty($show)) {
@@ -70,7 +71,6 @@ if ( $cnt == 0 ) {
 }
 
 if (count($table->data) > 0) {
-    $perpage = 20;
     $baseurl = new moodle_url('/local/course_validated/index.php');;
     $pagingbar = new paging_bar(count($table->data), $page, $perpage, $baseurl);
 
@@ -81,6 +81,12 @@ if (count($table->data) > 0) {
 
     echo html_writer::table($table);
     echo $OUTPUT->render($pagingbar);
+    $ddperpage = array( 20, 50, 100, 1000);
+    echo '<form method="GET">';
+    echo html_writer::select(array_combine($ddperpage, $ddperpage), 'perpage', '20', false);
+    echo "&nbsp résultats par page &nbsp";
+    echo '<input type="submit" value="ok">';
+    echo '</form>';
 }
 
 echo $OUTPUT->footer();
