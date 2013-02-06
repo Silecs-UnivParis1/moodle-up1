@@ -50,7 +50,6 @@ function get_id_courses_to_validate($approbateurid, $validated, $permcheck=false
     if ($validated == 1) {
         $sql .= " AND cd2.data > 0 ";
     }
-    $sql .= "ORDER BY objectid DESC ";
     $tabIdCourse = $DB->get_fieldset_sql($sql);
     $tabchecked = array();
 
@@ -94,13 +93,13 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
     $dbcourses = array();
     if ($courseids0 != '') {
         $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
-             . " FROM {course} c WHERE id IN ($courseids0) ";
+             . " FROM {course} c WHERE id IN ($courseids0) ORDER BY id DESC ";
         $dbcourses = $DB->get_records_sql($sql);
     }
     $courseids1 = get_id_courses_to_validate($approbateurid, 1, $permcheck);
     if ($courseids1 != '') {
         $sql = "SELECT id, idnumber, shortname, fullname, startdate, visible "
-             . " FROM {course} c WHERE id IN ($courseids1) ";
+             . " FROM {course} c WHERE id IN ($courseids1) ORDER BY id DESC ";
         $dbcourses1 = $DB->get_records_sql($sql);
         $dbcourses = array_merge($dbcourses, $dbcourses1);
     }
