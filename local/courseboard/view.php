@@ -45,22 +45,26 @@ echo "<li>No identification : " . (!empty($course->idnumber) ? $course->idnumber
 echo "</ul>\n";
 
 // ROF data
-$rofid = up1_meta_get_text($crsid, 'up1rofid');
-if ($rofid) {
-    $rofcourse = $DB->get_record('rof_course', array('rofid' => $rofid));
+$rofids = up1_meta_get_text($crsid, 'up1rofid');
+$rofdata = array();
+if ($rofids) {
+    $insql = "('" . join("', '", explode(';', $rofids)) . "')";
+    $sql = "SELECT rofid FROM {rof_course} rc WHERE rofid IN " . $insql;
+    $rofcourses = $DB->get_fieldset_sql($sql);
+    $rofdata = array_map('rof_get_metadata', $rofcourses);
 } else {
-    $rofcourse = FALSE;
-    $rofid = FALSE;
+    $rofcourses = FALSE;
+    $rofids = FALSE;
     echo "<h3>Pas de ROF</h3>\n";
     echo "<p>Aucun cours correspondant n'existe dans le ROF avec ce code <b>$course->idnumber</b>.</p>\n";
 }
 
-$rofdata = rof_get_metadata($rofid);
+
 print_table_course_vs_rof($crsid, $rofdata);
 
-if ($rofcourse) {
-    echo "<h3>Tous les chemins : </h3>\n";
-    $allPaths = rof_get_course_all_paths($rofcourse->rofid);
+if ($rofcourses) {
+    echo "<h3>Tous les chemins du rattachement principal : </h3>\n";
+    $allPaths = rof_get_course_all_paths($rofcourses[0]);
     $allPathnames = rof_get_course_all_pathnames($allPaths);
     echo '<ol>';
     foreach ($allPathnames as $pathname) {
