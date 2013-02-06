@@ -11,6 +11,16 @@ require_once($CFG->libdir . '/custominfo/lib.php');
 
 /* @var $DB moodle_database */
 
+/**
+ * print a table of courses data vs ROF data
+ * 1st column = label
+ * 2nd column = rof (metadata) data
+ * 3rd+ columns = rof data, as many as rof references in "up1rofid" meta-field
+ * @global moodle_database $DB
+ * @global type $OUTPUT
+ * @param int $crsid
+ * @param array $rofdata : index => array ($up1category => array( 'up1field' => value ) )
+ */
 function print_table_course_vs_rof($crsid, $rofdata) {
     global $DB, $OUTPUT;
 
@@ -28,7 +38,7 @@ function print_table_course_vs_rof($crsid, $rofdata) {
 
         $table = new html_table();
         $table->data = array();
-        foreach ($fields as $shortname => $field) {
+        foreach ($fields as $shortname => $field) { // $rows
             $row = new html_table_row();
             $row->cells[0] = new html_table_cell($field['name']);
             $row->cells[0]->attributes = array('title' => $shortname, 'class' => '');
@@ -45,16 +55,26 @@ function print_table_course_vs_rof($crsid, $rofdata) {
                         )
                 );
             }
-            $row->cells[2] = (isset($rofdata[$category][$shortname]) ? $rofdata[$category][$shortname] : '(NA)');
+            foreach ($rofdata as $ind => $rofcolumn) { // columns 2+
+                $row->cells[2 + $ind] = (isset($rofcolumn[$category][$shortname]) ? $rofcolumn[$category][$shortname] : '(NA)');
+            }
             $table->data[] = $row;
         }
-        $table->data = array_merge(get_table_course_header(), $table->data);
+        $table->data = array_merge(get_table_course_header(count($rofdata)), $table->data);
         echo html_writer::table($table);
     } // categories
 }
 
-function get_table_course_header() {
-    $headings = array('Métadonnée', 'Cours', 'ROF');
+/**
+ *
+ * @param int $rofcols number of rof columns
+ * @return type
+ */
+function get_table_course_header($rofcols) {
+    $headings = array('Métadonnée', 'Cours');
+    for ($i = 1 ; $i <= $rofcols ; $i++) {
+        $headings[] = 'ROF ' . $i;
+    }
     $row = array();
     foreach ($headings as $h) {
         $cell = new html_table_cell($h);
