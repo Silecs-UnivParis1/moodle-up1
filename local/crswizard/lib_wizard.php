@@ -711,13 +711,13 @@ class core_wizard {
                 $this->formdata['form_step5']['cohorterreur'] = $erreurs;
                 return affiche_error_enrolcohort($erreurs);
             }
-        } else {
-            // inscrire des clefs
-            $clefs = wizard_list_clef();
-            if (count($clefs)) {
-                $this->myenrol_clef($course->id, $clefs);
-            }
         }
+        // inscrire des clefs
+        $clefs = wizard_list_clef();
+        if (count($clefs)) {
+            $this->myenrol_clef($course->id, $clefs);
+        }
+
         $this->mydata = $mydata;
         return '';
     }
