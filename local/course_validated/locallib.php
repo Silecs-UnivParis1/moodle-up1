@@ -111,8 +111,9 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $row->cells[0]->attributes = array('title' => '', 'class' => '');
         $row->cells[1] = $dbcourse->id;
         $url = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
+        $nomnorme = up1_meta_get_text($dbcourse->id, 'nomnorme');
         $row->cells[2] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
-        $row->cells[2]->attributes = array('title' => $dbcourse->shortname .' ['. $dbcourse->idnumber.'] '. $dbcourse->fullname, 'class' => '');
+        $row->cells[2]->attributes = array('title' => $nomnorme, 'class' => '');
         $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
         // $row->cells[3] = new html_table_cell($etat[$validated]);
         // $row->cells[3]->attributes = array('title' => '', 'class' => '');
