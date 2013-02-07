@@ -60,22 +60,28 @@ function wizard_get_catlevel2() {
  * Reconstruit le tableau de chemins (composantes/diplômes) pour le plugin jquery select-into-subselects.js
  * hack de la fonction wizard_get_mydisplaylist()
  * @param $idcat identifiant de la catégorie diplôme sélectionné à l'étape précédente
+ * @param bool $fullpath chemin complet des catégories
  * @return array
  * */
-function wizard_get_myComposantelist($idcat) {
+function wizard_get_myComposantelist($idcat, $fullpath=false) {
     global $DB;
     $displaylist = array();
     $parentlist = array();
     $category = $DB->get_record('course_categories', array('id' => $idcat));
     $tpath = explode('/', $category->path);
+    $annee = $DB->get_field('course_categories', 'name', array('id' => $tpath[1]));
     $selected = $DB->get_record('course_categories', array('id' => $tpath[2]));
     make_categories_list($displaylist, $parentlist, '', 0, $selected); // separator ' / ' is hardcoded into Moodle
 
     $mydisplaylist = array(" Sélectionner la composante / Sélectionner le type de diplôme");
     foreach ($displaylist as $id => $label) {
         if ($id != $selected->id) {
-            $pos = strpos($label, '/');
-            $mydisplaylist[$id] = substr($label, $pos+2);
+            if ($fullpath) {
+                $mydisplaylist[$id]  = $annee . ' / ' . $label;
+            } else {
+                $pos = strpos($label, '/');
+                $mydisplaylist[$id] = substr($label, $pos+2);
+            }
         }
     }
     return $mydisplaylist;
@@ -705,13 +711,13 @@ class core_wizard {
                 $this->formdata['form_step5']['cohorterreur'] = $erreurs;
                 return affiche_error_enrolcohort($erreurs);
             }
-        } else {
-            // inscrire des clefs
-            $clefs = wizard_list_clef();
-            if (count($clefs)) {
-                $this->myenrol_clef($course->id, $clefs);
-            }
         }
+        // inscrire des clefs
+        $clefs = wizard_list_clef();
+        if (count($clefs)) {
+            $this->myenrol_clef($course, $clefs);
+        }
+
         $this->mydata = $mydata;
         return '';
     }
@@ -902,9 +908,9 @@ class core_wizard {
         $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
     }
 
-    private function myenrol_clef($courseid, $tabClefs) {
+    private function myenrol_clef($course, $tabClefs) {
         global $DB;
-        if ($courseid == SITEID) {
+        if ($course->id == SITEID) {
             throw new coding_exception('Invalid request to add enrol instance to frontpage.');
         }
         // traitement des données
@@ -920,14 +926,12 @@ class core_wizard {
             }
             $status = 0;   //0 pour auto-inscription
             if (isset($tabClef['enrolstartdate'])) {
-                $date = $tabClef['enrolstartdate'];
-                $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                $startdate  = $tabClef['enrolstartdate'];
             } else {
                 $startdate = 0;
             }
             if (isset($tabClef['enrolenddate'])) {
-                $date = $tabClef['enrolenddate'];
-                $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                $enddate = $tabClef['enrolenddate'];
             } else {
                 $enddate = 0;
             }
@@ -935,7 +939,7 @@ class core_wizard {
             $instance = new stdClass();
             $instance->enrol = $enrol;
             $instance->status = $status;
-            $instance->courseid = $courseid;
+            $instance->courseid = $course->id;
             $instance->roleid = $roleid;
             $instance->name = $name;
             $instance->password = $tabClef['password'];
@@ -946,9 +950,9 @@ class core_wizard {
 
             $instance->enrolstartdate = $startdate;
             $instance->enrolenddate = $enddate;
-            $instance->timemodified = time();
-            $instance->timecreated = $instance->timemodified;
-            $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $courseid));
+            $instance->timemodified = $course->timecreated;
+            $instance->timecreated = $course->timecreated;
+            $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $course->id));
             $DB->insert_record('enrol', $instance);
         }
     }
@@ -1000,12 +1004,24 @@ class core_wizard {
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
 
-        $form2 = $this->formdata['form_step2']; // ou $SESSION->wizard['form_step2']
+        $form2 = $this->formdata['form_step2'];
+        $form3 = $this->formdata['form_step3'];
         //  $idcat = $form2['category'];
         $idcat = $this->mydata->category;
         $mg .= get_string('categoryblockE3', 'local_crswizard') . ' : ' . $displaylist[$idcat] . "\n";
+        // cas 3
+        if (isset($form3['rattachements']) && count($form3['rattachements'])) {
+            $first = true;
+            foreach ($form3['rattachements'] as $ratt) {
+                $mg .= ($first?get_string('labelE7ratt2', 'local_crswizard') . ' : ' : ', ')
+                    . $displaylist[$ratt];
+                $first = false;
+            }
+            $mg .=  "\n";
+        }
+        // cas 2
         if (isset($form2['rofname_second']) && count($form2['rofname_second'])) {
-            $mg .= get_string('rofselected2', 'local_crswizard') . ' : ';
+            $mg .= get_string('labelE7ratt2', 'local_crswizard') . ' : ';
             $first = true;
             foreach ($form2['rofname_second'] as $formsecond) {
                 $mg .= ($first ? '' : ', ') . $formsecond;
@@ -1021,7 +1037,6 @@ class core_wizard {
         $mg .= 'Mode de création : ' .  $this->mydata->profile_field_up1generateur . "\n";
 
         // validateur si il y a lieu
-        $form3 = $this->formdata['form_step3']; // ou $SESSION->wizard['form_step3']
         if (isset($form3['all-validators']) && !empty($form3['all-validators'])) {
             $allvalidators = $form3['all-validators'];
             $mg .= get_string('selectedvalidator', 'local_crswizard') . ' : ';

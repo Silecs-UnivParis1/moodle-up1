@@ -184,7 +184,7 @@ var build_duplicator = function (sel, config) {
         //select.attr('name', select.attr('name').replace('[0]', '[' + num + ']'));
         select.attr('id', select.attr('id') + '_' + num);
         root.after(inserted);
-        inserted.transformIntoSubselects(config)
+        inserted.find('select').first().transformIntoSubselects(config)
     }
 }
 
