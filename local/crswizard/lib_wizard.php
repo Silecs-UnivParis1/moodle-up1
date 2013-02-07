@@ -715,7 +715,7 @@ class core_wizard {
         // inscrire des clefs
         $clefs = wizard_list_clef();
         if (count($clefs)) {
-            $this->myenrol_clef($course->id, $clefs);
+            $this->myenrol_clef($course, $clefs);
         }
 
         $this->mydata = $mydata;
@@ -908,9 +908,9 @@ class core_wizard {
         $DB->delete_records('enrol', array('courseid' => $courseid, 'enrol' => 'guest'));
     }
 
-    private function myenrol_clef($courseid, $tabClefs) {
+    private function myenrol_clef($course, $tabClefs) {
         global $DB;
-        if ($courseid == SITEID) {
+        if ($course->id == SITEID) {
             throw new coding_exception('Invalid request to add enrol instance to frontpage.');
         }
         // traitement des données
@@ -941,7 +941,7 @@ class core_wizard {
             $instance = new stdClass();
             $instance->enrol = $enrol;
             $instance->status = $status;
-            $instance->courseid = $courseid;
+            $instance->courseid = $course->id;
             $instance->roleid = $roleid;
             $instance->name = $name;
             $instance->password = $tabClef['password'];
@@ -952,9 +952,9 @@ class core_wizard {
 
             $instance->enrolstartdate = $startdate;
             $instance->enrolenddate = $enddate;
-            $instance->timemodified = time();
-            $instance->timecreated = $instance->timemodified;
-            $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $courseid));
+            $instance->timemodified = $course->timecreated;
+            $instance->timecreated = $course->timecreated;
+            $instance->sortorder = $DB->get_field('enrol', 'COALESCE(MAX(sortorder), -1) + 1', array('courseid' => $course->id));
             $DB->insert_record('enrol', $instance);
         }
     }
