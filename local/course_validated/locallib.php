@@ -106,6 +106,7 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
 
     foreach ($dbcourses as $dbcourse) {
         $count++;
+
         $row = new html_table_row();
         $row->cells[0] = new html_table_cell($count);
         $row->cells[0]->attributes = array('title' => '', 'class' => '');
@@ -115,8 +116,6 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $row->cells[2] = new html_table_cell(html_writer::link($url, $dbcourse->fullname));
         $row->cells[2]->attributes = array('title' => $nomnorme, 'class' => '');
         $validated = up1_meta_get_text($dbcourse->id, 'datevalid') > 0;
-        // $row->cells[3] = new html_table_cell($etat[$validated]);
-        // $row->cells[3]->attributes = array('title' => '', 'class' => '');
         $row->cells[3] = new html_table_cell(action_icons($dbcourse->id, $validated, $dbcourse->visible, $context));
         $row->cells[3]->attributes = array('title' => '', 'class' => '');
         if ( ! $validated ) {
@@ -140,10 +139,10 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $row->cells[8]->attributes = array('title' => $adate['datetime'], 'class' => '');
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) {
-            $row->cells[9] = new html_table_cell('Hors ROF');
-            $row->cells[9]->attributes = array('title' => 'UP1 > ' . up1_meta_get_text($dbcourse->id, 'composante') . ' > ' .
-                up1_meta_get_text($dbcourse->id, 'niveaulmda') . ' > ' .up1_meta_get_text($dbcourse->id, 'diplome'),
-                'class' => '' );
+            $catpath = get_category_path($dbcourse->id);
+            $row->cells[9] = new html_table_cell($catpath);
+            //$row->cells[9] = new html_table_cell('Hors ROF');
+            $row->cells[9]->attributes = array('title' => $catpath, 'class' => '' );
         } else {
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
             $row->cells[9] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
@@ -155,6 +154,43 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
 
     return $res;
 }
+
+/**
+ * returns the category "human-readable" path for a given category ($catid)
+ * or a given course ($crsid) ; in this 2nd case, use the parent category
+ * @global type $DB
+ * @param int $crsid or null
+ * @param int $catid or null (not both null)
+ * @param string separator
+ * @return string "human-readable" path
+ */
+function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
+    global $DB;
+    $categories = $DB->get_records_menu('course_categories', null, '', 'id,name'); //** @todo persistent ?
+
+    if (isset ($catid) ) {
+        $catpath = $DB->get_field('course_categories', 'path', array('id' => $catid));
+    } elseif (isset($crsid)) {
+        //echo "<p>crs = $crsid</p>";
+        $crscontextpath = $DB->get_field('context', 'path', array('contextlevel'=>CONTEXT_COURSE, 'instanceid'=>$crsid) , MUST_EXIST);
+        preg_match('/^(\/\d+)+\/\d+$/', $crscontextpath, $matches);
+        $catcontext = substr($matches[1], 1);
+        //var_dump($catcontext);
+        $sql = "SELECT cc.path FROM {course_categories} cc "
+            . "JOIN {context} co ON (contextlevel=? AND co.instanceid=cc.id) "
+            . "WHERE co.id = ?";
+        $catpath = $DB->get_field_sql($sql, array(CONTEXT_COURSECAT, $catcontext));
+    }
+    $arraypath = array_filter(explode('/', $catpath));
+    //var_dump($arraypath);
+    $res = "";
+    foreach ($arraypath as $catid) {
+        $res .= $separator . $categories[$catid];
+    }
+    //var_dump($res);
+    return $res;
+}
+
 
 /**
  * Prepare the content for the "action" table cell (icons from permissions)
