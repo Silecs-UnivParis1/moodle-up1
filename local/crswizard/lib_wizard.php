@@ -926,14 +926,12 @@ class core_wizard {
             }
             $status = 0;   //0 pour auto-inscription
             if (isset($tabClef['enrolstartdate'])) {
-                $date = $tabClef['enrolstartdate'];
-                $startdate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                $startdate  = $tabClef['enrolstartdate'];
             } else {
                 $startdate = 0;
             }
             if (isset($tabClef['enrolenddate'])) {
-                $date = $tabClef['enrolenddate'];
-                $enddate = mktime(0, 0, 0, $date['month'], $date['day'], $date['year']);
+                $enddate = $tabClef['enrolenddate'];
             } else {
                 $enddate = 0;
             }
