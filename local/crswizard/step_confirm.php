@@ -38,13 +38,16 @@ class course_wizard_step_confirm extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard'), $displaylist);
+        $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard') . ' : ', $displaylist);
         if (!empty($SESSION->wizard['form_step3']['rattachements'])) {
-            $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category']);
+            $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category'], true);
+            $first = true;
             foreach ($SESSION->wizard['form_step3']['rattachements'] as $pathid) {
-                $select = $mform->createElement('text', "rattachements$pathid", '');
+                $select = $mform->createElement('text', "rattachements$pathid",
+                    ($first? get_string('labelE7ratt2', 'local_crswizard') : ''));
                 $select->setValue($paths[$pathid]);
                 $mform->addElement($select);
+                $first = false;
             }
         }
 
@@ -143,13 +146,14 @@ class course_wizard_step_confirm extends moodleform {
             foreach ($clefs as $type => $clef) {
                 $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                 $c = $clef['code'];
-                $mform->addElement('text', 'valeur' . $c, $clef['password']);
+                $mform->addElement('text', 'valeur' . $c, get_string('enrolkey', 'local_crswizard') . ' : ');
+                $mform->setConstant('valeur' . $c, $clef['password']);
                 if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
-                    $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self'));
+                    $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self') . ' : ');
                     $mform->setConstant('enrolstartdate' . $c, $clef['enrolstartdate']);
                 }
                 if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
-                    $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self'));
+                    $mform->addElement('date_selector', 'enrolenddate' . $c, get_string('enrolenddate', 'enrol_self') . ' : ');
                     $mform->setConstant('enrolenddate' . $c, $clef['enrolenddate']);
                 }
             }

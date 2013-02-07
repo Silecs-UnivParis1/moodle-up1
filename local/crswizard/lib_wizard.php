@@ -60,22 +60,28 @@ function wizard_get_catlevel2() {
  * Reconstruit le tableau de chemins (composantes/diplômes) pour le plugin jquery select-into-subselects.js
  * hack de la fonction wizard_get_mydisplaylist()
  * @param $idcat identifiant de la catégorie diplôme sélectionné à l'étape précédente
+ * @param bool $fullpath chemin complet des catégories
  * @return array
  * */
-function wizard_get_myComposantelist($idcat) {
+function wizard_get_myComposantelist($idcat, $fullpath=false) {
     global $DB;
     $displaylist = array();
     $parentlist = array();
     $category = $DB->get_record('course_categories', array('id' => $idcat));
     $tpath = explode('/', $category->path);
+    $annee = $DB->get_field('course_categories', 'name', array('id' => $tpath[1]));
     $selected = $DB->get_record('course_categories', array('id' => $tpath[2]));
     make_categories_list($displaylist, $parentlist, '', 0, $selected); // separator ' / ' is hardcoded into Moodle
 
     $mydisplaylist = array(" Sélectionner la composante / Sélectionner le type de diplôme");
     foreach ($displaylist as $id => $label) {
         if ($id != $selected->id) {
-            $pos = strpos($label, '/');
-            $mydisplaylist[$id] = substr($label, $pos+2);
+            if ($fullpath) {
+                $mydisplaylist[$id]  = $annee . ' / ' . $label;
+            } else {
+                $pos = strpos($label, '/');
+                $mydisplaylist[$id] = substr($label, $pos+2);
+            }
         }
     }
     return $mydisplaylist;
