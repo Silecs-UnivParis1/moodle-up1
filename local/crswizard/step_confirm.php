@@ -57,7 +57,7 @@ class course_wizard_step_confirm extends moodleform {
             if(count($rof2)) {
                 $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
                     . '<div class="fstaticlabel"><label>'
-                    . get_string('rofselected2', 'local_crswizard')
+                    . get_string('labelE7ratt2', 'local_crswizard')
                     . ' : </label></div></div>';
                 $rofall = $SESSION->wizard['form_step2']['all-rof'];
                 foreach ($rof2 as $rofid) {
