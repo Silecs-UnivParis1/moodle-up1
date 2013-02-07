@@ -137,18 +137,16 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $adate = up1_meta_get_date($dbcourse->id, 'datevalid');
         $row->cells[8] = new html_table_cell( (! empty($adate['date']) ? $adate['date'] : '<b>En attente</b>') );
         $row->cells[8]->attributes = array('title' => $adate['datetime'], 'class' => '');
-        $row->cells[9] = new html_table_cell(userdate($dbcourse->startdate, '%Y-%m-%d'));
-        $row->cells[9]->attributes = array('title' => '', 'class' => '');
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) {
-            $row->cells[10] = new html_table_cell('Hors ROF');
-            $row->cells[10]->attributes = array('title' => 'UP1 > ' . up1_meta_get_text($dbcourse->id, 'composante') . ' > ' .
+            $row->cells[9] = new html_table_cell('Hors ROF');
+            $row->cells[9]->attributes = array('title' => 'UP1 > ' . up1_meta_get_text($dbcourse->id, 'composante') . ' > ' .
                 up1_meta_get_text($dbcourse->id, 'niveaulmda') . ' > ' .up1_meta_get_text($dbcourse->id, 'diplome'),
                 'class' => '' );
         } else {
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
-            $row->cells[10] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
-            $row->cells[10]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
+            $row->cells[9] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
+            $row->cells[9]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
         }
 
         $res->data[] = $row;
@@ -229,7 +227,7 @@ function action_icons($crsid, $validated, $visible, $context) {
 
 function get_table_course_header() {
     $headings = array('', 'crs.id', get_string('fullnamecourse'), 'Actions', 'Demandeur', 'Date demande',
-        'Approbateur proposé', 'Approbateur effectif', 'Date approbation', 'Date ouverture', 'Élément(s) pédagogique(s)');
+        'Approbateur proposé', 'Approbateur effectif', 'Date approbation', 'Rattachement(s) de l\'espace');
     $row = array();
     foreach ($headings as $h) {
         $cell = new html_table_cell($h);
