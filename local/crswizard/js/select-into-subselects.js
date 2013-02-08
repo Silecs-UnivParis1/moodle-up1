@@ -154,7 +154,8 @@ $.fn.transformIntoSubselects = function (cfg) {
 
             var button = $('<button type="button">Ajouter un champ supplémentaire de rattachement</button>');
             button.click(duplicator);
-            theSelect.after(button);
+            $('<div class="fitem"><div class="felement fstatic"></div></div>').insertAfter(theSelect.parent().parent())
+                .children().first().append(button);
         }
         transformIntoSubselects(theSelect);
         if (typeof valuesSelected != 'string' && valuesSelected.length > 1) {
