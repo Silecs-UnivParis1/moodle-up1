@@ -49,10 +49,10 @@ function insert_metadata_categories($metadata, $object) {
     $sortorder = $record->maxi;
     foreach ($metadata as $cat => $drop) {
         if ( $DB->record_exists('custom_info_category', array('objectname'=>$object, 'name'=>$cat)) ) {
-            echo "$cat already exists.\n";
+            echo "[$cat] already exists.<br />\n";
         } else {
             $sortorder++;
-            echo "inserting $cat.\n";
+            echo "inserting [$cat].<br />\n";
             $record = new StdClass;
             $record->objectname = $object;
             $record->name = $cat;
@@ -79,7 +79,7 @@ function insert_metadata_fields($metadata, $object) {
             $sortorder = 0;
             foreach ($fields as $shortname => $cif_fields) {
                 if ( $DB->record_exists('custom_info_field', array('objectname'=>$object, 'shortname'=>$prefix.$shortname)) ) {
-                    echo "$shortname already exists. Keeping it.\n";
+                    echo "[$shortname] already exists. Keeping it.<br />\n";
                     continue; // next field
                 }
                 $sortorder++;
@@ -123,7 +123,7 @@ function insert_metadata_fields($metadata, $object) {
             } // $shortname
         }
     } // $cat
-    echo "\n$fieldsnb champs créés.\n\n";
+    echo "<br />\n$fieldsnb champs créés.<br />\n\n";
 }
 
 /**
@@ -152,7 +152,7 @@ function delete_metadata_fields($metadata, $object) {
             } // $shortname
         }
     } // $cat
-    echo "\n$fieldsnb champs supprimés.\n\n";
+    echo "<br />\n$fieldsnb champs supprimés.<br />\n\n";
 }
 
 
