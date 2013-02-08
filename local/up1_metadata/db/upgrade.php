@@ -20,10 +20,11 @@ function xmldb_local_up1_metadata_upgrade($oldversion) {
     if ( true ) { // on peut faire cette mise à jour inconditionnellement
         $metadata = up1_course_metadata();
 
-        echo "Création des catégories :\n";
+        echo "Création des catégories :<br />\n";
         insert_metadata_categories($metadata, 'course');
 
-        echo "\nCréation des champs :\n";
+        echo "<br />\n<br />\n";
+        echo "Création des champs :<br />\n";
         insert_metadata_fields($metadata, 'course');
     }
 
