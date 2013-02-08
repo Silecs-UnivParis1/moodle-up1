@@ -140,13 +140,15 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) { // rattachement catégories de cours
             $catpath = get_category_path($dbcourse->id);
-            $row->cells[9] = new html_table_cell($catpath);
+            $row->cells[9] = new html_table_cell($catpath . '<div class="tooltip-content">Whatever !</div>');
             //$row->cells[9] = new html_table_cell('Hors ROF');
-            $row->cells[9]->attributes = array('title' => $catpath, 'class' => '' );
+            $row->cells[9]->attributes = array('class' => 'with-tooltip');
         } else { // rattachement ROF
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
-            $row->cells[9] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
-            $row->cells[9]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
+            $row->cells[9] = new html_table_cell(
+                    '(' . $roflinks . ') ' . $rofname . html_rattachements_rof($dbcourse->id)
+            );
+            $row->cells[9]->attributes = array('class' => 'with-tooltip');
             echo html_rattachements_rof($dbcourse->id);
         }
 
@@ -200,7 +202,7 @@ function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
 function html_rattachements_rof($crsid) {
     $pathids = explode(';', up1_meta_get_text($crsid, 'rofpathid'));
     $n = count($pathids);
-    $res = "<div>\n";
+    $res = '<div class="tooltip-content">' . "\n";
     $res .= count($pathids) . " rattachement" . ($n>1 ? 's' : '') . "<br />\n<ol>\n";
     foreach ($pathids as $pathid) {
         $patharray = array_filter(explode('/', $pathid));
