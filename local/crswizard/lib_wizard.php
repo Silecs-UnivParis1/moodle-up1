@@ -606,6 +606,11 @@ function wizard_prepare_rattachement_second($form2) {
                     $rofpath = $form2['path'][$rofid];
                     $path = strtr($rofpath, '_', '/');
                     $rof2['rofpathid'][] = $path;
+
+                    $tabpath = explode('_', $rofpath);
+                    $tabrof = rof_get_combined_path($tabpath);
+                    $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
+                    $rof2['rofchemin'][] = $chemin;
                 }
                 if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
                     $rofobjet =  $form2['all-rof'][$rofid]['object'];
@@ -805,7 +810,7 @@ class core_wizard {
 
     /**
      * Met à jour la variable nameparam de $SESSION->wizard
-     * @param string $value nouvelle valeur
+     * @param string/array() $value nouvelle valeur
      * @param string $nameparam nom du parametre à mettre à jour
      * @param string $formparam nom du tableau intermédiaire
      */
@@ -869,7 +874,7 @@ class core_wizard {
             // rattachement secondaire
             $rof2 = wizard_prepare_rattachement_second($form2);
             if (count($rof2)) {
-                //print_r($rof2);
+                $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
                 foreach($rof2['rofid'] as $rofid) {
                     $mydata->profile_field_up1rofid .= ';' . $rofid;
                 }
