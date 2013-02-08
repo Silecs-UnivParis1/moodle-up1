@@ -125,7 +125,7 @@ var transformIntoSubselects = function (theSelect) {
     var root = getTree(theSelect.find('option'));
 
     var selectsDiv = $('<div class="subselects">');
-    theSelect.parent().after(selectsDiv);
+    theSelect.parent().siblings(':last').after(selectsDiv);
 
     var onchange = createOnchangeHandler(theSelect, selectsDiv);
 
@@ -184,7 +184,7 @@ var build_duplicator = function (sel, config) {
         num++;
         //select.attr('name', select.attr('name').replace('[0]', '[' + num + ']'));
         select.attr('id', select.attr('id') + '_' + num);
-        root.after(inserted);
+        root.siblings().last().before(inserted);
         inserted.find('select').first().transformIntoSubselects(config)
     }
 }
