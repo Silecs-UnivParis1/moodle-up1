@@ -38,6 +38,8 @@ $PAGE->set_title("Espaces de cours en attente d'approbation");
 $PAGE->set_heading("Espaces de cours en attente d'approbation");
 $PAGE->set_pagelayout('admin');
 
+$PAGE->requires->css(new moodle_url('/local/course_validated/css/coursevalidated.css'));
+
 echo $OUTPUT->header();
 
 if (has_capability('local/crswizard:supervalidator', $systemcontext)) {
