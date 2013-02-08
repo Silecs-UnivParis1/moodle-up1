@@ -118,7 +118,7 @@ function insert_metadata_fields($metadata, $object) {
                 $id = $DB->insert_record('custom_info_field', $record);
                 echo "OK. id=$id\n";
                 if ( ! is_null($cif_fields['init']) ) {
-                    initialize_custom_data('user', $id, $cif_fields['init']);
+                    initialize_custom_data($object, $id, $cif_fields['init']);
                 }
             } // $shortname
         }
