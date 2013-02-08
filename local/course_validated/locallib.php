@@ -141,8 +141,7 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) { // rattachement catégories de cours
             $catpath = get_category_path($dbcourse->id);
-            $row->cells[9] = new html_table_cell($catpath . '<div class="tooltip-content">Whatever !</div>');
-            //$row->cells[9] = new html_table_cell('Hors ROF');
+            $row->cells[9] = new html_table_cell($catpath . html_rattachements_hors_rof($catpath, $dbcourse->id));
             $row->cells[9]->attributes = array('class' => 'with-tooltip');
         } else { // rattachement ROF
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
@@ -150,7 +149,6 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
                     '(' . $roflinks . ') ' . $rofname . html_rattachements_rof($dbcourse->id)
             );
             $row->cells[9]->attributes = array('class' => 'with-tooltip');
-            echo html_rattachements_rof($dbcourse->id);
         }
 
         $res->data[] = $row;
@@ -175,23 +173,19 @@ function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
     if (isset ($catid) ) {
         $catpath = $DB->get_field('course_categories', 'path', array('id' => $catid));
     } elseif (isset($crsid)) {
-        //echo "<p>crs = $crsid</p>";
         $crscontextpath = $DB->get_field('context', 'path', array('contextlevel'=>CONTEXT_COURSE, 'instanceid'=>$crsid) , MUST_EXIST);
         preg_match('/^(\/\d+)+\/\d+$/', $crscontextpath, $matches);
         $catcontext = substr($matches[1], 1);
-        //var_dump($catcontext);
         $sql = "SELECT cc.path FROM {course_categories} cc "
             . "JOIN {context} co ON (contextlevel=? AND co.instanceid=cc.id) "
             . "WHERE co.id = ?";
         $catpath = $DB->get_field_sql($sql, array(CONTEXT_COURSECAT, $catcontext));
     }
     $arraypath = array_filter(explode('/', $catpath));
-    //var_dump($arraypath);
     $res = "";
     foreach ($arraypath as $catid) {
         $res .= $separator . $categories[$catid];
     }
-    //var_dump($res);
     return $res;
 }
 
@@ -204,7 +198,7 @@ function html_rattachements_rof($crsid) {
     $pathids = explode(';', up1_meta_get_text($crsid, 'rofpathid'));
     $n = count($pathids);
     $res = '<div class="tooltip-content">' . "\n";
-    $res .= count($pathids) . " rattachement" . ($n>1 ? 's' : '') . "<br />\n<ol>\n";
+    $res .= $n . " rattachement" . ($n>1 ? 's' : '') . " ROF<br />\n<ol>\n";
     foreach ($pathids as $pathid) {
         $patharray = array_filter(explode('/', $pathid));
         $combined = rof_get_combined_path($patharray);
@@ -213,6 +207,26 @@ function html_rattachements_rof($crsid) {
     $res .= "</ol>\n</div>\n";
     return $res;
 }
+
+/**
+ *
+ * @param int $crsid
+ * @return string html <div>...</div> block
+ */
+function html_rattachements_hors_rof($catpath, $crsid) {
+
+    $catids = array_filter(explode(';', up1_meta_get_text($crsid, 'categoriesbis')));
+    $n = 1 + count($catids);
+    $res = '<div class="tooltip-content">' . "\n";
+    $res .= $n . " rattachement" . ($n>1 ? 's' : '') . " HORS ROF<br />\n<ol>\n";
+    $res .= "<li>" . $catpath . "</li>\n";
+    foreach ($catids as $catid) {
+        $res .= "<li>" . get_category_path(null, $catid) . "</li>\n";
+    }
+    $res .= "</ol>\n</div>\n";
+    return $res;
+}
+
 
 /**
  * Prepare the content for the "action" table cell (icons from permissions)
