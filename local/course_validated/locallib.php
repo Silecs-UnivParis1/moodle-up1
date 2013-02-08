@@ -147,6 +147,7 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
             $row->cells[9] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
             $row->cells[9]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
+            echo html_rattachements_rof($dbcourse->id);
         }
 
         $res->data[] = $row;
@@ -191,6 +192,24 @@ function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
     return $res;
 }
 
+/**
+ *
+ * @param int $crsid
+ * @return string html <div>...</div> block
+ */
+function html_rattachements_rof($crsid) {
+    $pathids = explode(';', up1_meta_get_text($crsid, 'rofpathid'));
+    $n = count($pathids);
+    $res = "<div>\n";
+    $res .= count($pathids) . " rattachement" . ($n>1 ? 's' : '') . "<br />\n<ol>\n";
+    foreach ($pathids as $pathid) {
+        $patharray = array_filter(explode('/', $pathid));
+        $combined = rof_get_combined_path($patharray);
+        $res .= "<li>" . rof_format_path($combined, 'name', false, ' > ') . "</li>\n";
+    }
+    $res .= "</ol>\n</div>\n";
+    return $res;
+}
 
 /**
  * Prepare the content for the "action" table cell (icons from permissions)

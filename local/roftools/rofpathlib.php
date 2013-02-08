@@ -118,7 +118,7 @@ function rof_get_combined_path($rofidpath) {
 
 /**
  * returns a formatted string with the result of getCourseFirstPath (or other)
- * @param associative array $pathArray
+ * @param associative array $pathArray : combined path
  * @param enum $format
  * @param bool $roflink : if set, rofid links to view.php
  * @param string $separator
