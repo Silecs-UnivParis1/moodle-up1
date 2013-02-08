@@ -140,13 +140,13 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $row->cells[8]->attributes = array('title' => $adate['datetime'], 'class' => '');
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
         if ( empty($rofname) ) { // rattachement catégories de cours
-            $catpath = get_category_path($dbcourse->id);
-            $row->cells[9] = new html_table_cell($catpath . html_rattachements_hors_rof($catpath, $dbcourse->id));
+            $catpath = get_category_path_from_course($dbcourse->id);
+            $row->cells[9] = new html_table_cell($catpath . tooltip_rattachements_hors_rof($catpath, $dbcourse->id));
             $row->cells[9]->attributes = array('class' => 'with-tooltip');
         } else { // rattachement ROF
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
             $row->cells[9] = new html_table_cell(
-                    '(' . $roflinks . ') ' . $rofname . html_rattachements_rof($dbcourse->id)
+                    '(' . $roflinks . ') ' . $rofname . tooltip_rattachements_rof($dbcourse->id)
             );
             $row->cells[9]->attributes = array('class' => 'with-tooltip');
         }
@@ -159,28 +159,16 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
 
 /**
  * returns the category "human-readable" path for a given category ($catid)
- * or a given course ($crsid) ; in this 2nd case, use the parent category
  * @global type $DB
- * @param int $crsid or null
- * @param int $catid or null (not both null)
+ * @param int $catid or null
  * @param string separator
  * @return string "human-readable" path
  */
-function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
+function get_category_path($catid, $separator = ' > ') {
     global $DB;
     $categories = $DB->get_records_menu('course_categories', null, '', 'id,name'); //** @todo persistent ?
 
-    if (isset ($catid) ) {
-        $catpath = $DB->get_field('course_categories', 'path', array('id' => $catid));
-    } elseif (isset($crsid)) {
-        $crscontextpath = $DB->get_field('context', 'path', array('contextlevel'=>CONTEXT_COURSE, 'instanceid'=>$crsid) , MUST_EXIST);
-        preg_match('/^(\/\d+)+\/\d+$/', $crscontextpath, $matches);
-        $catcontext = substr($matches[1], 1);
-        $sql = "SELECT cc.path FROM {course_categories} cc "
-            . "JOIN {context} co ON (contextlevel=? AND co.instanceid=cc.id) "
-            . "WHERE co.id = ?";
-        $catpath = $DB->get_field_sql($sql, array(CONTEXT_COURSECAT, $catcontext));
-    }
+    $catpath = $DB->get_field('course_categories', 'path', array('id' => $catid));
     $arraypath = array_filter(explode('/', $catpath));
     $res = "";
     foreach ($arraypath as $catid) {
@@ -190,11 +178,32 @@ function get_category_path($crsid = null, $catid = null, $separator = ' > ') {
 }
 
 /**
- *
+ * returns the category "human-readable" path for a given course ($crsid) : use the parent category
+ * @global type $DB
+ * @param int $crsid
+ * @param string separator
+ * @return string "human-readable" path
+ */
+function get_category_path_from_course($crsid, $separator = ' > ') {
+    global $DB;
+
+    $crscontextpath = $DB->get_field('context', 'path', array('contextlevel'=>CONTEXT_COURSE, 'instanceid'=>$crsid) , MUST_EXIST);
+    preg_match('/^(\/\d+)+\/\d+$/', $crscontextpath, $matches);
+    $catcontext = substr($matches[1], 1);
+    $sql = "SELECT cc.id FROM {course_categories} cc "
+         . "JOIN {context} co ON (contextlevel=? AND co.instanceid=cc.id) "
+         . "WHERE co.id = ?";
+    $catid = $DB->get_field_sql($sql, array(CONTEXT_COURSECAT, $catcontext));
+    return get_category_path($catid, $separator);
+}
+
+
+/**
+ * build the div tootltip for rattachements ROF
  * @param int $crsid
  * @return string html <div>...</div> block
  */
-function html_rattachements_rof($crsid) {
+function tooltip_rattachements_rof($crsid) {
     $pathids = explode(';', up1_meta_get_text($crsid, 'rofpathid'));
     $n = count($pathids);
     $res = '<div class="tooltip-content">' . "\n";
@@ -209,19 +218,19 @@ function html_rattachements_rof($crsid) {
 }
 
 /**
- *
+ * build the div tootltip for rattachements HORS ROF
  * @param int $crsid
  * @return string html <div>...</div> block
  */
-function html_rattachements_hors_rof($catpath, $crsid) {
+function tooltip_rattachements_hors_rof($catpath, $crsid) {
 
     $catids = array_filter(explode(';', up1_meta_get_text($crsid, 'categoriesbis')));
     $n = 1 + count($catids);
     $res = '<div class="tooltip-content">' . "\n";
     $res .= $n . " rattachement" . ($n>1 ? 's' : '') . " HORS ROF<br />\n<ol>\n";
-    $res .= "<li>" . $catpath . "</li>\n";
+    $res .= "<li><b>" . $catpath . "</b></li>\n";
     foreach ($catids as $catid) {
-        $res .= "<li>" . get_category_path(null, $catid) . "</li>\n";
+        $res .= "<li>" . get_category_path($catid) . "</li>\n";
     }
     $res .= "</ol>\n</div>\n";
     return $res;
