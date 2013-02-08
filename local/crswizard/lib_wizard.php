@@ -804,6 +804,21 @@ class core_wizard {
     }
 
     /**
+     * Met à jour la variable nameparam de $SESSION->wizard
+     * @param string $value nouvelle valeur
+     * @param string $nameparam nom du parametre à mettre à jour
+     * @param string $formparam nom du tableau intermédiaire
+     */
+    public function set_wizard_session($value, $nameparam, $formparam='') {
+        global $SESSION;
+        if ($formparam != '') {
+            $SESSION->wizard[$formparam][$nameparam] = $value;
+        } else {
+            $SESSION->wizard[$nameparam] = $value;
+        }
+    }
+
+    /**
      * Returns an object with properties derived from the forms data.
      * @return object
      */
@@ -825,6 +840,7 @@ class core_wizard {
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
+                $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
                 $mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
                 $mydata->profile_field_up1composante = $rof1['up1composante'];
             }
