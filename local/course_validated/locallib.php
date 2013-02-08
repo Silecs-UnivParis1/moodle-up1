@@ -138,12 +138,12 @@ function get_table_course_to_validate($approbateurid, $context, $permcheck=false
         $row->cells[8] = new html_table_cell( (! empty($adate['date']) ? $adate['date'] : '<b>En attente</b>') );
         $row->cells[8]->attributes = array('title' => $adate['datetime'], 'class' => '');
         $rofname = up1_meta_get_text($dbcourse->id, 'rofname');
-        if ( empty($rofname) ) {
+        if ( empty($rofname) ) { // rattachement catégories de cours
             $catpath = get_category_path($dbcourse->id);
             $row->cells[9] = new html_table_cell($catpath);
             //$row->cells[9] = new html_table_cell('Hors ROF');
             $row->cells[9]->attributes = array('title' => $catpath, 'class' => '' );
-        } else {
+        } else { // rattachement ROF
             $roflinks = count(explode(';', up1_meta_get_text($dbcourse->id, 'rofid')));
             $row->cells[9] = new html_table_cell('(' . $roflinks . ') ' . $rofname);
             $row->cells[9]->attributes = array('title' => up1_meta_get_text($dbcourse->id, 'rofpath'), 'class' => '');
