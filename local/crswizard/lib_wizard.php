@@ -883,6 +883,14 @@ class core_wizard {
                         $mydata->$fieldname = $value;
                     }
                 }
+
+                if (count($mydata->rattachements)) {
+                    $first = true;
+                    foreach ($mydata->rattachements as $rattachement) {
+                        $mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
+                        $first = false;
+                    }
+                }
             }
         }
 
