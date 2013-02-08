@@ -7,7 +7,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-require_once(__DIR__ . '/../up1_metadata/lib.php');
+require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
+require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
 /**
  * @todo checkboxes multiple selections + dropdown menu
