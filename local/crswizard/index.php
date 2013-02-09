@@ -158,9 +158,10 @@ switch ($stepin) {
         break;
     case 7:
         $steptitle = get_string('confirmationtitle', 'local_crswizard');
-        $editform = new course_wizard_step_confirm();
         $corewizard = new core_wizard($SESSION->wizard, $USER);
-        $editform->set_data($corewizard->prepare_course_to_validate());
+        $formdata = $corewizard->prepare_course_to_validate();
+        $editform = new course_wizard_step_confirm();
+        $editform->set_data($formdata);
 
         $data = $editform->get_data();
         if ($data){
