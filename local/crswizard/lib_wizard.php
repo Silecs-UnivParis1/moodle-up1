@@ -606,6 +606,11 @@ function wizard_prepare_rattachement_second($form2) {
                     $rofpath = $form2['path'][$rofid];
                     $path = strtr($rofpath, '_', '/');
                     $rof2['rofpathid'][] = $path;
+
+                    $tabpath = explode('_', $rofpath);
+                    $tabrof = rof_get_combined_path($tabpath);
+                    $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
+                    $rof2['rofchemin'][] = $chemin;
                 }
                 if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
                     $rofobjet =  $form2['all-rof'][$rofid]['object'];
@@ -804,6 +809,21 @@ class core_wizard {
     }
 
     /**
+     * Met à jour la variable nameparam de $SESSION->wizard
+     * @param string/array() $value nouvelle valeur
+     * @param string $nameparam nom du parametre à mettre à jour
+     * @param string $formparam nom du tableau intermédiaire
+     */
+    public function set_wizard_session($value, $nameparam, $formparam='') {
+        global $SESSION;
+        if ($formparam != '') {
+            $SESSION->wizard[$formparam][$nameparam] = $value;
+        } else {
+            $SESSION->wizard[$nameparam] = $value;
+        }
+    }
+
+    /**
      * Returns an object with properties derived from the forms data.
      * @return object
      */
@@ -825,6 +845,7 @@ class core_wizard {
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
             if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
                 $mydata->category = $rof1['idcat'];
+                $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
                 $mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
                 $mydata->profile_field_up1composante = $rof1['up1composante'];
             }
@@ -853,7 +874,7 @@ class core_wizard {
             // rattachement secondaire
             $rof2 = wizard_prepare_rattachement_second($form2);
             if (count($rof2)) {
-                //print_r($rof2);
+                $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
                 foreach($rof2['rofid'] as $rofid) {
                     $mydata->profile_field_up1rofid .= ';' . $rofid;
                 }
@@ -1028,11 +1049,12 @@ class core_wizard {
             $mg .=  "\n";
         }
         // cas 2
-        if (isset($form2['rofname_second']) && count($form2['rofname_second'])) {
+        if (isset($form2['rattachement2']) && count($form2['rattachement2'])) {
             $mg .= get_string('labelE7ratt2', 'local_crswizard') . ' : ';
+            $etab = $displaylist[$form2['category']];
             $first = true;
-            foreach ($form2['rofname_second'] as $formsecond) {
-                $mg .= ($first ? '' : ', ') . $formsecond;
+            foreach ($form2['rattachement2'] as $formsecond) {
+                $mg .= ($first ? '' : ', ') . $etab . ' / ' . $formsecond;
                 $first = false;
             }
             $mg .=  "\n";

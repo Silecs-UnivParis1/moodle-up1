@@ -38,7 +38,14 @@ class course_wizard_step_confirm extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard') . ' : ', $displaylist);
+        if (isset($SESSION->wizard['form_step2']['rattachement1']) ) {
+            $idratt1 = $SESSION->wizard['form_step2']['rattachement1'];
+            $mform->addElement('text', 'category',  get_string('categoryblockE3', 'local_crswizard') . ' : ');
+            $mform->setConstant('category' , $displaylist[$idratt1] . ' / ' . $SESSION->wizard['form_step2']['fullname']);
+        } else {
+            $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard') . ' : ', $displaylist);
+        }
+
         if (!empty($SESSION->wizard['form_step3']['rattachements'])) {
             $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category'], true);
             $first = true;
@@ -52,19 +59,16 @@ class course_wizard_step_confirm extends moodleform {
         }
 
         // rattachement secondaire - cas 2
-        if (isset($SESSION->wizard['form_step2']['item']['s'])) {
-            $rof2 = $SESSION->wizard['form_step2']['item']['s'];
+        if (isset($SESSION->wizard['form_step2']['rattachement2'])) {
+            $rof2 = $SESSION->wizard['form_step2']['rattachement2'];
             if(count($rof2)) {
+                $etab = $displaylist[$SESSION->wizard['form_step2']['category']];
                 $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
                     . '<div class="fstaticlabel"><label>'
                     . get_string('labelE7ratt2', 'local_crswizard')
-                    . ' : </label></div></div>';
-                $rofall = $SESSION->wizard['form_step2']['all-rof'];
-                foreach ($rof2 as $rofid) {
-                    if (isset($rofall) && array_key_exists($rofid, $rofall)) {
-                        $rofobjet =  $rofall[$rofid]['object'];
-                        $htmlrof2 .= '<div class="felement fstatic">' . $rofobjet->name . '</div>';
-                    }
+                    . '</label></div></div>';
+                foreach ($rof2 as $chemin) {
+                    $htmlrof2 .= '<div class="felement fstatic">' . $etab . ' / ' . $chemin . '</div>';
                 }
                 $htmlrof2 .= '</div>';
                 $mform->addElement('html', $htmlrof2);

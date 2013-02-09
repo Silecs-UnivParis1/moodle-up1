@@ -152,7 +152,7 @@ $.fn.transformIntoSubselects = function (cfg) {
             theSelect.removeAttr('multiple').val(valuesSelected[0]);
             var duplicator = build_duplicator(theSelect, config);
 
-            var button = $('<button type="button">Ajouter un champ supplémentaire de rattachement</button>');
+            var button = $('<button type="button">Ajouter une composante et un type de diplôme</button>');
             button.click(duplicator);
             $('<div class="fitem"><div class="felement fstatic"></div></div>').insertAfter(theSelect.parent().parent())
                 .children().first().append(button);
