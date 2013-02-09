@@ -1049,11 +1049,12 @@ class core_wizard {
             $mg .=  "\n";
         }
         // cas 2
-        if (isset($form2['rofname_second']) && count($form2['rofname_second'])) {
+        if (isset($form2['rattachement2']) && count($form2['rattachement2'])) {
             $mg .= get_string('labelE7ratt2', 'local_crswizard') . ' : ';
+            $etab = $displaylist[$form2['category']];
             $first = true;
-            foreach ($form2['rofname_second'] as $formsecond) {
-                $mg .= ($first ? '' : ', ') . $formsecond;
+            foreach ($form2['rattachement2'] as $formsecond) {
+                $mg .= ($first ? '' : ', ') . $etab . ' / ' . $formsecond;
                 $first = false;
             }
             $mg .=  "\n";
