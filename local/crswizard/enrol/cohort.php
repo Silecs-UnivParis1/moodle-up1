@@ -92,4 +92,8 @@ jQuery(document).ready(function () {
 
 <?php
 echo '<input type="hidden" id="cohort" value="1" />';
-require __DIR__ . '/footer.php';
+if (isset($SESSION->wizard['idcourse'])) {
+    require __DIR__ . '/../update/footer.php';
+} else {
+    require __DIR__ . '/footer.php';
+}
