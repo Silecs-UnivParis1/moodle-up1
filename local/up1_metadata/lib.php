@@ -11,7 +11,7 @@
  * @global type $DB
  * @param int $courseid
  * @param string $field UP1 metadata text, ex. complement
- * @param bool $error : if set, throw an exception if $field isn't found
+ * @param bool $error : if set, throw an exception if $field isn't found ; otherwise return an empty string
  */
 function up1_meta_get_text($courseid, $field, $error=false) {
     global $DB;
@@ -56,17 +56,18 @@ function up1_meta_get_date($courseid, $field) {
  * return a metadata up1 as (id, name) assoc. array
  * @global type $DB
  * @param int $courseid
- * @param type $field UP1 metadata userid, among (demandeurid, approbateurpropid, approbateureffid)
+ * @param string $field UP1 metadata userid, among (demandeurid, approbateurpropid, approbateureffid)
+ * @param bool $username : if set, append the username after the fullname
  * @return array('id' => ..., 'name' => ...)
  */
-function up1_meta_get_user($courseid, $field) {
+function up1_meta_get_user($courseid, $field, $username=true) {
     global $DB;
 
     $userid = up1_meta_get_text($courseid, $field);
     if ($userid) {
         $dbuser = $DB->get_record('user', array('id' => $userid));
         if ($dbuser) {
-            $fullname = $dbuser->firstname .' '. $dbuser->lastname .' '. $dbuser->username;
+            $fullname = $dbuser->firstname .' '. $dbuser->lastname . ($username ? ' '. $dbuser->username : '');
             return array('id' => $userid, 'name' => $fullname);
         } else {
             return array('id' => $userid, 'name' => '(id=' . $userid . ')');

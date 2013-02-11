@@ -371,3 +371,44 @@ function validate_course ($crsid) {
     return true;
 }
 
+
+function message_notification_validation ($crsid) {
+    global $CFG;
+    $site  = get_site();
+
+    $res['subject'] = 
+        $site->shortname . " "
+        . "Validation espace n° " . $crsid . " : "
+        . up1_meta_get_text($crsid, 'nomnorme', false);
+
+    $res['body'] = 
+    "Bonjour, \n\n"
+    . "L’espace de cours " . up1_meta_get_text($crsid, 'nomnorme', false)
+    . ", créé par " . up1_meta_get_user($crsid, 'demandeurid'). " sur la plateforme " . $site->url
+    . ", a été validé par " . up1_meta_get_user($crsid, 'approbateureffid') . "."
+    . "\n\n"
+    . "IMPORTANT : Pour rendre cet espace accessible aux étudiants, il est nécessaire "
+    . "que l'une des personnes disposant de droits de contribution clique sur le bouton "
+    . '"Ouvrir le cours".'
+    . "\n\n"
+    . "Vous trouverez à cette adresse " . $site->url . "/guide " 
+    . "un ensemble de ressources d'aide et de conseil sur les principales fonctionnalités disponibles."
+    . "\n\n"
+    . "N'hésitez pas à contacter l'un des membres de l'équipe du service TICE :\n"
+    . "- si vous souhaitez participer à l’une des sessions de prise en mains régulièrement organisées ;\n"
+    . "- si vous rencontrez une difficulté ou si vous constatez une anomalie de fonctionnement.\n"
+    . "\n\n";
+    . "Conservez ce message. Le récapitulatif technique présenté ci-après "
+    . "peut vous être utile, notamment pour dialoguer avec l'équipe d'assistance."
+    . "\n\n";
+    . "Cordialement,\n"
+    . "\n"
+    . "L’assistance EPI\n"
+    . "\n"
+    . "Service TICE - Pôle Ingénieries pédagogique et de formation\n"
+    . "Université Paris 1 Panthéon-Sorbonne\n"
+    . "Courriel : assistance-epi@univ-paris1.fr\n" ;
+
+    return $res;
+}
+
