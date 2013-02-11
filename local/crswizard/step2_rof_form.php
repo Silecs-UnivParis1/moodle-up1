@@ -186,7 +186,7 @@ class course_wizard_step2_rof_form extends moodleform {
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(
             'link', 'previousstage', null,
-            new moodle_url('/local/crswizard/index.php', array('stepin' => 1)),
+            new moodle_url($SESSION->wizard['wizardurl'], array('stepin' => 1)),
             get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
         $buttonarray[] = $mform->createElement('submit', 'stepgo_3', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', null, false);

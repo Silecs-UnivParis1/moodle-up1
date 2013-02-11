@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step2_form extends moodleform {
 
     function definition() {
-        global $OUTPUT;
+        global $OUTPUT, $SESSION;
 
         $mform = $this->_form;
 
@@ -135,7 +135,7 @@ class course_wizard_step2_form extends moodleform {
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(
             'link', 'previousstage', null,
-            new moodle_url('/local/crswizard/index.php', array('stepin' => 1)),
+            new moodle_url($SESSION->wizard['wizardurl'], array('stepin' => 1)),
             get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
         $buttonarray[] = $mform->createElement('submit', 'stepgo_3', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', null, false);

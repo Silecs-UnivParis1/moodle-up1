@@ -67,6 +67,7 @@ if ($wizardcase) {
 
 switch ($stepin) {
     case 1:
+        $SESSION->wizard['wizardurl'] = '/local/crswizard/index.php';
         $steptitle = get_string('selectcourse', 'local_crswizard');
         $editform = new course_wizard_step1_form();
         break;

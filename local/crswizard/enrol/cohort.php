@@ -29,7 +29,7 @@ echo $OUTPUT->heading( get_string('enrolcohorts', 'local_crswizard'));
 echo $OUTPUT->heading(get_string('blocktitleE5', 'local_crswizard'), 4, '');
 echo $OUTPUT->box(get_string('bockhelpE5', 'local_crswizard'), '');
 
-echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
+echo '<form action="' . $CFG->wwwroot . $SESSION->wizard['wizardurl'] . '" method="post">';
 ?>
 <div class="role">
     <h3><?php echo get_string('role', 'local_crswizard');?></h3>
