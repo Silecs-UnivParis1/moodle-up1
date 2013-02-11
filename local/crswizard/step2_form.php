@@ -152,9 +152,13 @@ class course_wizard_step2_form extends moodleform {
     }
 
     private function validation_shortname($shortname, &$errors) {
-        global $DB;
+        global $DB, $SESSION;
 
         $foundcourses = $DB->get_records('course', array('shortname' => $shortname));
+        if (isset($SESSION->wizard['idcourse'])) {
+            unset($foundcourses[$SESSION->wizard['idcourse']]);
+        }
+
         if ($foundcourses) {
             foreach ($foundcourses as $foundcourse) {
                 $foundcoursenames[] = $foundcourse->fullname;

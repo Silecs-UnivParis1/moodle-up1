@@ -104,10 +104,19 @@ switch ($stepin) {
         break;
     case 3:
         if ($wizardcase == 3) {
+            if (!isset($SESSION->wizard['form_step3'])) {
+                $SESSION->wizard['form_step3']['user_name'] = fullname($USER);
+                $SESSION->wizard['form_step3']['user_login'] = $USER->username;
+                $SESSION->wizard['form_step3']['requestdate'] = time();
+            }
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
             if ($data){
+                $data->user_name = $SESSION->wizard['form_step3']['user_name'];
+                $data->user_login = $SESSION->wizard['form_step3']['user_login'];
+                $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
+
                 $data->rattachements = array_unique(array_filter($data->rattachements));
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);

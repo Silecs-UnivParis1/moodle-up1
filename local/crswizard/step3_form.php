@@ -72,16 +72,13 @@ class course_wizard_step3_form extends moodleform {
 
         $mform->addElement('header', 'gestion', get_string('managecourseblock', 'local_crswizard'));
         $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
-        $mform->setConstant('user_name', fullname($USER));
         $tabfreeze[] = 'user_name';
 
         $mform->addElement('text', 'user_login', get_string('userlogin', 'local_crswizard'),
 			'maxlength="40" size="20", disabled="disabled"');
-        $mform->setConstant('user_login', $USER->username);
         $tabfreeze[] = 'user_login';
 
         $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
-        $mform->setDefault('requestdate', time());
         $tabfreeze[] = 'requestdate';
 
         $mform->hardFreeze($tabfreeze);
