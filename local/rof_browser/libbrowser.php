@@ -106,6 +106,7 @@ class rof_browser {
 	protected $path;
 	protected $format;
 	protected $typedip;
+    protected $readonly;
 
     protected $elemPere;
 
@@ -163,6 +164,10 @@ class rof_browser {
 
 	public function setTypedip($typedip) {
 		$this->typedip = $typedip;
+	}
+
+    public function setReadonly($readonly) {
+		$this->readonly= $readonly;
 	}
 
 	/**
@@ -326,11 +331,15 @@ class rof_browser {
 			.', nature:'.$this->elemPere->naturedip.', cycle:'.$this->elemPere->cycledip.', rythme: '
             .$this->elemPere->rythmedip.', langue:'.$this->elemPere->languedip;
 
+            $classsel = 'element pointer oplus';
+            if ($this->readonly == 1) {
+                $classsel = '';
+            }
             $list .= '<div class="dip-sel">'
                 . '<span class="expanded collapse" data_deep="'.$this->niveau.'" data_path="'
                 . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
                 . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
-                . '<span class="element pointer oplus" title="Sélectionner" id="'
+                . '<span class="' . $classsel . '" title="Sélectionner" id="'
                 . $idElem . '"></span>'
                 . '</div>';
         }
@@ -467,13 +476,17 @@ class rof_browser {
             $spancomp .= '<span class="comp rof-hidden">'
             . $sp->composition . '</span>';
         }
+        $classsel = 'element pointer oplus';
+        if ($this->readonly == 1) {
+            $classsel = '';
+        }
 		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
 			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
             . $spancomp
-			. '<span class="element pointer oplus" title="Sélectionner" id="'
+			. '<span class="' . $classsel . '" title="Sélectionner" id="'
 			. $idElem . '"></span>'
 			. '</div></li>';
 		return $element;

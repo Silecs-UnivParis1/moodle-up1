@@ -6,6 +6,10 @@ jQuery(function () {
     $('div.item-select').load(rootUrl + 'ajax.php');
 
     $('div.item-select').on("change", ".selectmenu", function(event) {
+        var readonly = 0;
+        if ( $('#choose-item-select').hasClass("readonly") ) {
+            readonly = 1;
+        }
 		var id = $(this).attr('id');
 		$('#'+id+' ~ *').remove();
 
@@ -28,7 +32,7 @@ jQuery(function () {
             }
 
 			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1,
-				path: path, format: format, typedip: typedip},
+				path: path, format: format, typedip: typedip, readonly: readonly},
 				function(data){
 				$('#'+id).after(data);
 			}, 'html');
@@ -36,6 +40,10 @@ jQuery(function () {
 	});
 
     $('div.item-select').on("click", ".collapse", function(event) {
+        var readonly = 0;
+        if ( $('#choose-item-select').hasClass("readonly") ) {
+            readonly = 1;
+        }
         if ($(this).parent(".dip-sel").size()) {
             return false;
         }
@@ -67,7 +75,7 @@ jQuery(function () {
 		var fr = $(this).parent('.elem-li').siblings('ul').size();
 		if (fr == 0) {
 		// creation liste ul
-			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path},  function(data){
+			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path, readonly: readonly},  function(data){
 				$("#"+codeid+'-elem').parent('.elem-li').after(data);
 			}, 'html');
 		}
@@ -129,9 +137,13 @@ jQuery(function () {
 		}
 	});
 
-    function addElem(rofid, chemin, intitule, tabItem, path) {
+    function addElem(rofid, chemin, intitule, tabItem, path, readonly) {
+        var suppr = '<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>';
+        if (readonly==true) {
+            suppr = '';
+        }
         var elem = '<div class="item-selected" id="select_'+rofid+'">'
-				+'<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>'
+				+suppr
 				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
 				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
                 +'<input type="hidden" name="path['+rofid+']" value="'+path+'"/>';
@@ -153,6 +165,7 @@ jQuery(function () {
     };
 
     var defaultSettings = {
+        readonly: false,
         preSelected: [] // [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "03_UP1-PROG35376", "nature": "p"}, ]
     };
 
@@ -162,7 +175,7 @@ jQuery(function () {
             var $elem = $(this);
             var acg = new autocompleteRof(settings, $elem);
             if (settings.preSelected.length) {
-                acg.fillSelection(settings.preSelected);
+                acg.fillSelection(settings.preSelected, settings.readonly);
             }
         });
      }
@@ -175,16 +188,16 @@ jQuery(function () {
 
     autocompleteRof.prototype =
     {
-        fillSelection: function(items) {
+        fillSelection: function(items, readonly) {
             var $this = this;
             for (var i=0; i < items.length; i++) {
                 var my = items[i];
-                buildSelectedBlock(items[i]);
+                buildSelectedBlock(items[i], readonly);
             }
         }
     }
 
-    function buildSelectedBlock(item) {
+    function buildSelectedBlock(item, readonly) {
 
         var rofid = item.value;
 		var path =  item.path;
@@ -207,7 +220,7 @@ jQuery(function () {
             reference[0] = name;
         }
         selected[name] = 1;
-        $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
+        $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path, readonly));
     }
 
 });
