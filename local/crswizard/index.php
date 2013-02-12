@@ -34,7 +34,7 @@ require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
 
-global $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
+global $DB, $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
 
@@ -196,6 +196,12 @@ switch ($stepin) {
         }
 
         $recap = $corewizard->get_recapitulatif_demande();
+        $record = new stdClass;
+        $record->courseid = $corewizard->course->id;
+        $record->txt = $recap;
+        $record->html = '';
+        $DB->insert_record('crswizard_summary', $record, false);
+
         $messages['mgvalidator'] .= $remarques . $recap;
         $messages['mgcreator'] .= $remarques . $recap;
 
