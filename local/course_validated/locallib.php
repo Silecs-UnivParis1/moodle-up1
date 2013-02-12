@@ -367,7 +367,9 @@ function validate_course ($crsid) {
     }
     $DB->update_record('custom_info_data', array('id' => $iddate, 'data' => time()));
     $DB->update_record('custom_info_data', array('id' => $idwho, 'data' => $USER->id));
-    add_to_log($crsid, 'course_validated', 'validate', '/local/course_validated/index.php', 'course validated');
+    add_to_log($crsid, 'course_validated', 'validate', '/local/course_validated/index.php', 'course validated by user ' . $USER->id);
+
+    $msg = message_notification_validation($crsid);
     return true;
 }
 
@@ -376,31 +378,34 @@ function message_notification_validation ($crsid) {
     global $CFG;
     $site  = get_site();
 
-    $res['subject'] = 
+
+    $res['subject'] =
         $site->shortname . " "
         . "Validation espace n° " . $crsid . " : "
         . up1_meta_get_text($crsid, 'nomnorme', false);
 
-    $res['body'] = 
+    $demandeur = up1_meta_get_user($crsid, 'demandeurid');
+    $approbateur = up1_meta_get_user($crsid, 'approbateureffid');
+    $res['body'] =
     "Bonjour, \n\n"
     . "L’espace de cours " . up1_meta_get_text($crsid, 'nomnorme', false)
-    . ", créé par " . up1_meta_get_user($crsid, 'demandeurid'). " sur la plateforme " . $site->url
-    . ", a été validé par " . up1_meta_get_user($crsid, 'approbateureffid') . "."
+    . ", créé par " . $demandeur['name'] . " sur la plateforme " . $CFG->wwwroot
+    . ", a été validé par " . $approbateur['name'] . "."
     . "\n\n"
     . "IMPORTANT : Pour rendre cet espace accessible aux étudiants, il est nécessaire "
     . "que l'une des personnes disposant de droits de contribution clique sur le bouton "
     . '"Ouvrir le cours".'
     . "\n\n"
-    . "Vous trouverez à cette adresse " . $site->url . "/guide " 
+    . "Vous trouverez à cette adresse " . $CFG->wwwroot . "/guide "
     . "un ensemble de ressources d'aide et de conseil sur les principales fonctionnalités disponibles."
     . "\n\n"
     . "N'hésitez pas à contacter l'un des membres de l'équipe du service TICE :\n"
     . "- si vous souhaitez participer à l’une des sessions de prise en mains régulièrement organisées ;\n"
     . "- si vous rencontrez une difficulté ou si vous constatez une anomalie de fonctionnement.\n"
-    . "\n\n";
+    . "\n\n"
     . "Conservez ce message. Le récapitulatif technique présenté ci-après "
     . "peut vous être utile, notamment pour dialoguer avec l'équipe d'assistance."
-    . "\n\n";
+    . "\n\n"
     . "Cordialement,\n"
     . "\n"
     . "L’assistance EPI\n"
