@@ -369,7 +369,39 @@ function validate_course ($crsid) {
     $DB->update_record('custom_info_data', array('id' => $idwho, 'data' => $USER->id));
     add_to_log($crsid, 'course_validated', 'validate', '/local/course_validated/index.php', 'course validated by user ' . $USER->id);
 
+
+    // Validation Notification
     $msg = message_notification_validation($crsid);
+    $summary = $DB->get_field('crswizard_summary', 'txt', array('courseid' => $crsid)); //récapitulatif
+    $DB->delete_records('crswizard_summary', array('courseid' => $crsid));
+
+    // max. 3 recipients : demandeur, approbateurprop, helpdesk_user
+    $demandeur = up1_meta_get_user($crsid, 'demandeurid', false);
+    $recipients = array($demandeur['id']);
+    $approb = up1_meta_get_user($crsid, 'approbateurpropid', false);
+    if ($approb['id']) {
+        $recipients[] = $approb['id'];
+    }
+    $helpuser = get_config('local_crswizard', 'helpdesk_user');
+    if (isset($helpuser)) {
+        $userid = $DB->get_field('user', 'id', array('username' => $helpuser));
+        if ($userid) {
+            $recipients[] = $userid;
+        }
+    }
+    $eventdata = new object();
+    $eventdata->component = 'moodle';
+    $eventdata->name = 'courserequested';
+    $eventdata->userfrom = 2;
+    $eventdata->subject = $msg['subject'];
+    $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
+    $eventdata->fullmessage = $msg['body'] . "\n" . ($summary ? $summary : '');
+    $eventdata->fullmessagehtml = '';   //$messagehtml;
+    $eventdata->smallmessage = $msg['body'] . "\n" . ($summary ? $summary : ''); // USED BY DEFAULT !
+    foreach ($recipients as $recipient) {
+        $eventdata->userto = $recipient;
+        $res = message_send($eventdata);
+    }
     return true;
 }
 
