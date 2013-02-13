@@ -16,6 +16,7 @@ $action = optional_param('action',NULL,PARAM_ALPHANUMEXT);
 $detail = optional_param('detail',NULL,PARAM_INT);
 
 $selected = optional_param('selected',NULL,PARAM_ALPHANUMEXT);
+$readonly = optional_param('readonly',NULL,PARAM_INT);
 
 $rb = new rof_browser;
 
@@ -41,6 +42,11 @@ if (array_key_exists ($niveau, $rb->tabNiveau)) {
 		$rb->setTypedip($typedip);
 	} else {
 		$rb->setTypedip(0);
+	}
+    if (isset($readonly)) {
+		$rb->setReadonly($readonly);
+	} else {
+		$rb->setReadonly(0);
 	}
 
     $htmlblock = $rb->createBlock();

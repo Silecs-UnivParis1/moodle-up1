@@ -29,7 +29,7 @@ echo $OUTPUT->heading( get_string('enrolcohorts', 'local_crswizard'));
 echo $OUTPUT->heading(get_string('blocktitleE5', 'local_crswizard'), 4, '');
 echo $OUTPUT->box(get_string('bockhelpE5', 'local_crswizard'), '');
 
-echo '<form action="' . $CFG->wwwroot . '/local/crswizard/index.php" method="post">';
+echo '<form action="' . $CFG->wwwroot . $SESSION->wizard['wizardurl'] . '" method="post">';
 ?>
 <div class="role">
     <h3><?php echo get_string('role', 'local_crswizard');?></h3>
@@ -92,4 +92,8 @@ jQuery(document).ready(function () {
 
 <?php
 echo '<input type="hidden" id="cohort" value="1" />';
-require __DIR__ . '/footer.php';
+if (isset($SESSION->wizard['idcourse'])) {
+    require __DIR__ . '/../update/footer.php';
+} else {
+    require __DIR__ . '/footer.php';
+}

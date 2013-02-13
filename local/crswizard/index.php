@@ -34,7 +34,7 @@ require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
 
-global $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
+global $DB, $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
 
@@ -67,6 +67,7 @@ if ($wizardcase) {
 
 switch ($stepin) {
     case 1:
+        $SESSION->wizard['wizardurl'] = '/local/crswizard/index.php';
         $steptitle = get_string('selectcourse', 'local_crswizard');
         $editform = new course_wizard_step1_form();
         break;
@@ -103,10 +104,19 @@ switch ($stepin) {
         break;
     case 3:
         if ($wizardcase == 3) {
+            if (!isset($SESSION->wizard['form_step3'])) {
+                $SESSION->wizard['form_step3']['user_name'] = fullname($USER);
+                $SESSION->wizard['form_step3']['user_login'] = $USER->username;
+                $SESSION->wizard['form_step3']['requestdate'] = time();
+            }
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
             if ($data){
+                $data->user_name = $SESSION->wizard['form_step3']['user_name'];
+                $data->user_login = $SESSION->wizard['form_step3']['user_login'];
+                $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
+
                 $data->rattachements = array_unique(array_filter($data->rattachements));
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
@@ -186,6 +196,12 @@ switch ($stepin) {
         }
 
         $recap = $corewizard->get_recapitulatif_demande();
+        $record = new stdClass;
+        $record->courseid = $corewizard->course->id;
+        $record->txt = $recap;
+        $record->html = '';
+        $DB->insert_record('crswizard_summary', $record, false);
+
         $messages['mgvalidator'] .= $remarques . $recap;
         $messages['mgcreator'] .= $remarques . $recap;
 

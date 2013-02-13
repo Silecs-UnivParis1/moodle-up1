@@ -19,7 +19,7 @@ echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
 <div>
 <div class="by-widget">
 	<h3>Rechercher un élément pédagogique</h3>
-	<div class="item-select">
+	<div class="item-select" id="choose-item-select"> <!-- ajout class readonly : pas de sélection possible -->
 	</div>
 </div>
 <div class="block-item-selected">
@@ -37,6 +37,7 @@ echo $OUTPUT->heading('Démo sélection d\'élément(s) pédagogique(s)');
     //<![CDATA[
     jQuery(document).ready(function () {
         $('#items-selected').autocompleteRof({
+         // readonly: true, //par défaut false, interdit la suppression des éléments presélectionnés
          //preSelected: [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "UP1-PROG35376", "nature": "p"}]
         });
     });

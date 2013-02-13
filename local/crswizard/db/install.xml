@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/url/db" VERSION="2012072300" COMMENT="XMLDB file for user_sync table"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="crswizard_summary" COMMENT="records the summary (récapitulatif) for each created course">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="txt"/>
+        <FIELD NAME="txt" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="courseid" NEXT="html"/>
+        <FIELD NAME="html" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="txt" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="courseid"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

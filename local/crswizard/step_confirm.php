@@ -188,7 +188,7 @@ class course_wizard_step_confirm extends moodleform {
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(
             'link', 'previousstage', null,
-            new moodle_url('/local/crswizard/index.php', array('stepin' => 6)),
+            new moodle_url($SESSION->wizard['wizardurl'], array('stepin' => 6)),
             get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
         $buttonarray[] = $mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', null, false);

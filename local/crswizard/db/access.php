@@ -51,5 +51,17 @@ $capabilities = array(
             'manager'        => CAP_ALLOW
         )
     ),
+    // modifier les rattachemeents au ROF d'un cours
+    'local/crswizard:rofreferenceeditor' => array(
+        'riskbitmask'  => 0,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => array(
+            'student'        => CAP_PREVENT,
+            'teacher'        => CAP_PREVENT,
+            'editingteacher' => CAP_PREVENT,
+            'manager'        => CAP_ALLOW
+        )
+    ),
 
 );
