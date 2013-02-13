@@ -828,104 +828,163 @@ class core_wizard {
      * @return object
      */
     public function prepare_course_to_validate() {
-        $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
-
-        // profile_field obligatoire pour page course_validate
-        $mydata->profile_field_up1approbateureffid = '';
-        $mydata->profile_field_up1rofname = '';
-        $mydata->profile_field_up1niveaulmda = '';
-        $mydata->profile_field_up1diplome = '';
-        $mydata->profile_field_up1generateur = '';
-
-        $mydata->course_nom_norme = '';
+        $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        $this->setup_mydata();
+        $this->mydata->course_nom_norme = '';
+        $form2 = $this->formdata['form_step2'];
 
         // on est dans le cas 2
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
-            $form2 = $this->formdata['form_step2'];
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
-            if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
-                $mydata->category = $rof1['idcat'];
-                $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
-                $mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
-                $mydata->profile_field_up1composante = $rof1['up1composante'];
-            }
-
-            $shortname = $rof1['idnumber'];
-            if (isset($form2['complement'])) {
-                $complement = trim($form2['complement']);
-                if ($complement != ''){
-                    $shortname .= ' - ' . $complement;
-                }
-            }
-            $mydata->shortname = $shortname;
-            $mydata->idnumber = $rof1['idnumber'];
-
+            $this->set_param_rof1($rof1);
+            $this->set_rof_shortname($rof1['idnumber']);
             // metadonnee de rof1
-            $mdrof1 = rof_get_metadata($rof1['tabpath']);
-            foreach ($mdrof1 as $data) {
-                if (count($data)) {
-                    foreach($data as $label => $value) {
-                        $champ = 'profile_field_'.$label;
-                        $mydata->$champ = $value;
-                    }
-                }
-            }
-
+            $this->set_metadata_rof1($rof1['tabpath']);
             // rattachement secondaire
-            $rof2 = wizard_prepare_rattachement_second($form2);
-            if (count($rof2)) {
-                $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
-                foreach($rof2['rofid'] as $rofid) {
-                    $mydata->profile_field_up1rofid .= ';' . $rofid;
-                }
-                foreach($rof2['rofpathid'] as $rofpath) {
-                    $mydata->profile_field_up1rofpathid .= ';' . $rofpath;
-                }
-                foreach($rof2['rofname'] as $rofname) {
-                    $this->formdata['form_step2']['rofname_second'][] = $rofname;
-                }
-            }
+            $this->set_metadata_rof2();
 
-            $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $form2['fullname'];
-            if ($form2['complement'] !='') {
-                $mydata->course_nom_norme .= ' - ' . $form2['complement'];
-                $mydata->fullname .= ' - ' . $form2['complement'];
-            }
-            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
+            $this->set_rof_fullname();
+            $this->set_rof_nom_norm();
+            $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
-            $tabcategories = get_list_category($form2['category']);
-            $mydata->course_nom_norme = $form2['fullname'];
-            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
-            if (isset($mydata->rattachements)) {
-                $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
-                if (count($ratt)) {
-                    foreach ($ratt as $fieldname => $value) {
-                        $mydata->$fieldname = $value;
-                    }
-                }
+            $this->mydata->course_nom_norme = $form2['fullname'];
+            $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
+            $this->set_categories_connection();
+        }
 
-                if (count($mydata->rattachements)) {
-                    $first = true;
-                    foreach ($mydata->rattachements as $rattachement) {
-                        $mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
-                        $first = false;
-                    }
+        $this->mydata->summary = $form2['summary_editor']['text'];
+        $this->mydata->summaryformat = $form2['summary_editor']['format'];
+
+        // cours doit être validé
+        $this->set_metadata_cycle_life();
+
+        return $this->mydata;
+    }
+
+    /**
+     * Création profile_field obligatoire
+     */
+    private function setup_mydata() {
+        $this->mydata->profile_field_up1approbateureffid = '';
+        $this->mydata->profile_field_up1rofname = '';
+        $this->mydata->profile_field_up1niveaulmda = '';
+        $this->mydata->profile_field_up1diplome = '';
+        $this->mydata->profile_field_up1generateur = '';
+    }
+
+    private function set_metadata_cycle_life() {
+        $this->mydata->profile_field_up1avalider = 1;
+        $this->mydata->profile_field_up1datevalid = 0;
+        $this->mydata->profile_field_up1datedemande = time();
+        $this->mydata->profile_field_up1demandeurid = $this->user->id;
+        $this->mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
+    }
+
+    private function set_param_rof1($rof1) {
+        if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
+            $this->mydata->category = $rof1['idcat'];
+            $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
+            $this->mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
+            $this->mydata->profile_field_up1composante = $rof1['up1composante'];
+        }
+        $this->mydata->idnumber = $rof1['idnumber'];
+    }
+
+    /**
+     * Construit et assigne le paramètre $shortname d'un cours rattaché au ROF
+     * @param string $idnumber
+     */
+    private function set_rof_shortname($idnumber) {
+        $form2 = $this->formdata['form_step2'];
+        $shortname = $idnumber;
+        if (isset($form2['complement'])) {
+            $complement = trim($form2['complement']);
+            if ($complement != ''){
+                $shortname .= ' - ' . $complement;
+            }
+        }
+        $this->mydata->shortname = $shortname;
+    }
+
+    /**
+     * Construit et assigne le paramètre $shortname d'un cours rattaché au ROF
+     * @param string $idnumber
+     */
+    private function set_rof_fullname() {
+        $form2 = $this->formdata['form_step2'];
+        if ($form2['complement'] !='') {
+            $this->mydata->fullname .= ' - ' . $form2['complement'];
+        }
+    }
+
+    private function set_rof_nom_norm() {
+        $form2 = $this->formdata['form_step2'];
+        $this->mydata->course_nom_norme = $this->mydata->idnumber . ' - ' . $form2['fullname'];
+        if ($form2['complement'] !='') {
+            $this->mydata->course_nom_norme .= ' - ' . $form2['complement'];
+        }
+    }
+
+    /**
+     * assigne les informations du rattachement
+     * principal ROF aux metadonnées de cours
+     * @param array $tabpath
+     */
+    private function set_metadata_rof1($tabpath) {
+        $mdrof1 = rof_get_metadata($tabpath);
+        foreach ($mdrof1 as $data) {
+            if (count($data)) {
+                foreach($data as $label => $value) {
+                    $champ = 'profile_field_'.$label;
+                    $this->mydata->$champ = $value;
                 }
             }
         }
+    }
 
-        $mydata->summary = $form2['summary_editor']['text'];
-        $mydata->summaryformat = $form2['summary_editor']['format'];
+    /**
+     * assigne les informations des rattachements
+     * secondaires ROF aux metadonnées de cours
+     */
+    private function set_metadata_rof2() {
+        $form2 = $this->formdata['form_step2'];
+        $rof2 = wizard_prepare_rattachement_second($form2);
+        if (count($rof2)) {
+            $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
+            foreach($rof2['rofid'] as $rofid) {
+                $this->mydata->profile_field_up1rofid .= ';' . $rofid;
+            }
+            foreach($rof2['rofpathid'] as $rofpath) {
+                $this->mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+            }
+            foreach($rof2['rofname'] as $rofname) {
+                $this->mydata->formdata['form_step2']['rofname_second'][] = $rofname;
+            }
+        }
+    }
 
-        // cours doit être validé
-        $mydata->profile_field_up1avalider = 1;
-        $mydata->profile_field_up1datevalid = 0;
-        $mydata->profile_field_up1datedemande = time();
-        $mydata->profile_field_up1demandeurid = $this->user->id;
-        $mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
-
-        return $mydata;
+    /**
+     * assigne les catégories supplémentaires pour les cours hors ROF
+    */
+    private function set_categories_connection() {
+        $form2 = $this->formdata['form_step2'];
+        $tabcategories = get_list_category($form2['category']);
+        if (isset($this->mydata->rattachements)) {
+            $ratt = wizard_get_rattachement_fieldup1($this->mydata->rattachements, $tabcategories);
+            if (count($ratt)) {
+                foreach ($ratt as $fieldname => $value) {
+                    $this->mydata->$fieldname = $value;
+                }
+            }
+            if (count($this->mydata->rattachements)) {
+                $first = true;
+                foreach ($this->mydata->rattachements as $rattachement) {
+                    $this->mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
+                    $first = false;
+                }
+            }
+        }
     }
 
     // supprime les méthodes d'inscriptions guest et self
