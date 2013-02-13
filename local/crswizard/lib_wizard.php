@@ -851,8 +851,8 @@ class core_wizard {
             }
 
             $shortname = $rof1['idnumber'];
-            if (isset($this->formdata['form_step2']['complement'])) {
-                $complement = trim($this->formdata['form_step2']['complement']);
+            if (isset($form2['complement'])) {
+                $complement = trim($form2['complement']);
                 if ($complement != ''){
                     $shortname .= ' - ' . $complement;
                 }
@@ -886,16 +886,16 @@ class core_wizard {
                 }
             }
 
-            $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $this->formdata['form_step2']['fullname'];
-            if ($this->formdata['form_step2']['complement'] !='') {
-                $mydata->course_nom_norme .= ' - ' . $this->formdata['form_step2']['complement'];
-                $mydata->fullname .= ' - ' . $this->formdata['form_step2']['complement'];
+            $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $form2['fullname'];
+            if ($form2['complement'] !='') {
+                $mydata->course_nom_norme .= ' - ' . $form2['complement'];
+                $mydata->fullname .= ' - ' . $form2['complement'];
             }
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
-            $tabcategories = get_list_category($this->formdata['form_step2']['category']);
-            $mydata->course_nom_norme = $this->formdata['form_step2']['fullname'];
+            $tabcategories = get_list_category($form2['category']);
+            $mydata->course_nom_norme = $form2['fullname'];
             $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
             if (isset($mydata->rattachements)) {
                 $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
@@ -915,9 +915,8 @@ class core_wizard {
             }
         }
 
-        $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
-        $mydata->summaryformat = $this->formdata['form_step2']['summary_editor']['format'];
-        //$mydata->startdate = $this->formdata['form_step2']['startdate'];
+        $mydata->summary = $form2['summary_editor']['text'];
+        $mydata->summaryformat = $form2['summary_editor']['format'];
 
         // cours doit être validé
         $mydata->profile_field_up1avalider = 1;
@@ -925,7 +924,6 @@ class core_wizard {
         $mydata->profile_field_up1datedemande = time();
         $mydata->profile_field_up1demandeurid = $this->user->id;
         $mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
-        //$mydata->profile_field_up1datefermeture = $this->formdata['form_step2']['up1datefermeture'];
 
         return $mydata;
     }
