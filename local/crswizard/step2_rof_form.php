@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step2_rof_form extends moodleform {
 
     function definition() {
-        global $OUTPUT, $SESSION;
+        global $OUTPUT, $SESSION, $USER;
 
         $mform = $this->_form;
 
@@ -31,7 +31,21 @@ class course_wizard_step2_rof_form extends moodleform {
         $mform->addElement('header', 'categoryheader', get_string('categoryblockE2F', 'local_crswizard'));
 
         $classreadonly = '';
+        $rofeditor_permission = true;
         if (isset($SESSION->wizard['idcourse'])) {
+            $rofeditor_permission = wizard_has_rofreferenceeditor_permission($SESSION->wizard['idcourse'], $USER->id);
+        }
+        if ($rofeditor_permission) {
+            $default_cat = get_config('local_crswizard','cas2_default_etablissement');
+            $mform->addElement(
+                'select', 'category', '', wizard_get_catlevel2(),
+                array(
+                    'class' => 'transformIntoSubselects',
+                    'data-labels' => '["Période :", "Établissement :"]'
+                )
+            );
+            $mform->setDefault('category', $default_cat);
+        } else {
             $tabfreeze = array();
             $mform->addElement('text', 'rofyear', 'Période : ');
             $mform->setConstant('rofyear', $SESSION->wizard['form_step2']['rofyear']);
@@ -46,17 +60,6 @@ class course_wizard_step2_rof_form extends moodleform {
             $mform->setType('category', PARAM_INT);
 
             $classreadonly = 'readonly';
-
-        } else {
-            $default_cat = get_config('local_crswizard','cas2_default_etablissement');
-            $mform->addElement(
-                'select', 'category', '', wizard_get_catlevel2(),
-                array(
-                    'class' => 'transformIntoSubselects',
-                    'data-labels' => '["Période :", "Établissement :"]'
-                )
-            );
-            $mform->setDefault('category', $default_cat);
         }
 
         $labelrof =  '<br/><div class="fitemtitle required mylabel"><label>Elément pédagogique : *</label></div>';
