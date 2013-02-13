@@ -127,3 +127,30 @@ function wizard_supervalidator_which_categories($userid) {
 
     return $res;
 }
+
+/**
+ * Vérifie si $userid à la capacité enrol/manual:manage sur $courseid
+ * @param int $courseid
+ * @param int $userid
+ * @return boolean
+ */
+function wizard_update_has_permission($courseid, $userid) {
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $courseid);
+    if ( has_capability('enrol/manual:manage', $coursecontext, $userid) ) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Arrêtre l'execution si $userid n'a pas la capacité enrol/manual:manage
+ * sur le cours d'identifiant $courseid
+ * @param int $courseid identifiant du cours
+ * @param int $userid
+ * @throws coding_exception
+ */
+function wizard_require_update_permission($courseid, $userid) {
+    if (! wizard_update_has_permission($courseid, $userid) ) {
+        throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
+    }
+}

@@ -11,10 +11,13 @@ require_once('../libaccess.php');
 
 require_login();
 
+if (isset($SESSION->wizard['idcourse'])) {
+    wizard_require_update_permission($SESSION->wizard['idcourse'], $USER->id);
+} else {
+    wizard_require_permission('creator', $USER->id);
+}
+
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
-
-wizard_require_permission('creator', $USER->id);
-
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/local/crswizard/enrol/cohort.php');
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('cohort', 'local_crswizard'));
