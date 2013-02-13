@@ -67,7 +67,7 @@ function up1_meta_get_user($courseid, $field, $username=true) {
     if ($userid) {
         $dbuser = $DB->get_record('user', array('id' => $userid));
         if ($dbuser) {
-            $fullname = $dbuser->firstname .' '. $dbuser->lastname . ($username ? ' '. $dbuser->username : '');
+            $fullname = $dbuser->firstname .' '. $dbuser->lastname . ($username ? ' ('.$dbuser->username. ')' : '');
             return array('id' => $userid, 'name' => $fullname);
         } else {
             return array('id' => $userid, 'name' => '(id=' . $userid . ')');
