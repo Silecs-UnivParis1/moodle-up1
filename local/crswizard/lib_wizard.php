@@ -845,6 +845,7 @@ class core_wizard {
 
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
+            $this->mydata->profile_field_up1composition = trim($form2['complement']);
             $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
