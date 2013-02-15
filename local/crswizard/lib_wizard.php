@@ -172,6 +172,30 @@ function myenrol_cohort($courseid, $tabGroup) {
     return $error;
 }
 
+function wizard_unenrol_cohort($courseid, $tabGroup) {
+    global $DB, $CFG;
+    if ($courseid == SITEID) {
+        throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+    }
+    require_once("$CFG->dirroot/enrol/cohort/locallib.php");
+
+    $enrol = 'cohort';
+    $plugin_enrol = enrol_get_plugin($enrol);
+    foreach ($tabGroup as $role => $groupes) {
+        $roleid = $DB->get_field('role', 'id', array('shortname' => $role));
+        foreach ($groupes as $idgroup) {
+            $cohort = $DB->get_record('cohort', array('idnumber' => $idgroup));
+            if ($cohort) {
+                $instance = $DB->get_record('enrol', array('courseid' => $courseid, 'enrol' => $enrol,
+                    'roleid' => $roleid, 'customint1' => $cohort->id));
+                if ($instance) {
+                    $plugin_enrol->delete_instance($instance);
+                }
+            }
+        }
+    }
+}
+
 function affiche_error_enrolcohort($erreurs) {
     $message = '';
     $message .= '<div><h3>Messages </h3>';
@@ -1294,6 +1318,128 @@ class core_wizard {
         $eventdata->fullmessage = $mgc;
         $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
         $res = message_send($eventdata);
+    }
+
+    //fonctions spécifiques update_course
+
+    public function get_course($course) {
+        $this->course = $course;
+    }
+
+    public function prepare_update_course() {
+        if (isset($this->formdata['form_step3'])) {
+            $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        } else {
+            $this->mydata = (object) $this->formdata['form_step2'];
+        }
+        $form2 = $this->formdata['form_step2'];
+
+        if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
+            $changerof1 = $this->check_first_connection();
+            $rof1 = wizard_prepare_rattachement_rof_moodle($form2, $changerof1);
+            if ($changerof1 == false) {
+                $rof1['idnumber'] = trim($this->formdata['init_course']['idnumber']);
+            }
+            $this->set_param_rof1($rof1);
+            $this->set_rof_shortname($rof1['idnumber']);
+            // metadonnee de rof1
+            $this->set_metadata_rof1($rof1['tabpath']);
+            // rattachement secondaire
+            $this->set_metadata_rof2();
+            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->set_rof_fullname();
+            $this->set_rof_nom_norm();
+        } else { // cas 3
+            $this->mydata->course_nom_norme = $form2['fullname'];
+            $this->set_categories_connection();
+        }
+
+        $this->mydata->summary = $form2['summary_editor']['text'];
+        $this->mydata->summaryformat = $form2['summary_editor']['format'];
+
+
+        return $this->mydata;
+    }
+
+    /**
+     * Vérifie si le premier rattachement ROF à été modifié
+     * @return bool $check true si modification
+     */
+    private function check_first_connection() {
+        $check = false;
+        $form2 = $this->formdata['form_step2'];
+        if (isset($form2['item']) && count($form2['item'])) {
+            $allrof = $form2['item'];
+            if (isset($allrof['p']) && count($allrof['p'])) {
+                $rofid = $allrof['p'][0];
+                $apogee = rof_get_code_or_rofid($rofid);
+                $up1rofid = trim($this->formdata['init_course']['profile_field_up1rofid']);
+                $rofid = '';
+                if (strstr($up1rofid, ';')) {
+                    $tab = explode(';', $up1rofid);
+                    $rofid = $tab[0];
+                } else {
+                    $rofid = $up1rofid;
+                }
+
+                if ($rofid != $apogee) {
+                    $check = true;
+                }
+            }
+        }
+        return $check;
+    }
+
+    public function update_course() {
+        $this->prepare_update_course();
+        update_course($this->mydata);
+        $custominfo_data = custominfo_data::type('course');
+        $cleandata = $this->customfields_wash($this->mydata);
+        $custominfo_data->save_data($cleandata);
+        $this->update_myenrol_cohort();
+        rebuild_course_cache($this->mydata->id);
+    }
+
+    public function update_myenrol_cohort()
+    {
+        $course = $this->formdata['init_course'];
+        $oldcohorts = array();
+        if (isset($course['group'])) {
+            $oldcohorts = $course['group'];
+        }
+        $newcohorts = array();
+        if (isset($this->formdata['form_step5']['group'])) {
+            $newcohorts = $this->formdata['form_step5']['group'];
+        }
+
+        // ajout
+        $cohortadd = array();
+        foreach ($newcohorts as $role => $tabg) {
+            if (array_key_exists($role, $oldcohorts) == false) {
+                $cohortadd[$role] = $tabg;
+            } else {
+                foreach ($tabg as $g) {
+                    if (! in_array($g, $oldcohorts[$role])) {
+                        $cohortadd[$role][] = $g;
+                    }
+                }
+            }
+        }
+        myenrol_cohort($course['id'], $cohortadd);
+        // suppression
+        $cohortremove = array();
+        foreach ($oldcohorts as $role => $tabg) {
+            if (array_key_exists($role, $newcohorts) == false) {
+                $cohortremove[$role] = $tabg;
+            } else {
+                foreach ($tabg as $g) {
+                    if (in_array($g, $newcohorts[$role]) == false) {
+                        $cohortremove[$role][] = $g;
+                    }
+                }
+            }
+        }
+        wizard_unenrol_cohort($course['id'], $cohortremove);
     }
 }
 
