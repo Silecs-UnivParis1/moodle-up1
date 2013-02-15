@@ -166,6 +166,17 @@ $string['wizardcase2'] = 'Un élément pédagogique de l\'offre de formation';
 $string['wizardcase3'] = 'Un autre besoin en dehors de l\'offre de formation';
 $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
 
+/** update **/
+$string['upcancel'] = 'Annuler';
+$string['updatetitle'] = 'Confirmer les modifications';
+$string['upenrolcohortscase2'] = 'Étape 3 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['upenrolcohortscase3'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['upsavechanges'] = 'Enregistrer les modifications';
+$string['upsummaryof'] = 'Récapitulatif des modifications';
+$string['upstepkeycase2'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
+$string['upstepkeycase3'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
+$string['upwizardcourse'] = 'Assistant paramétrage';
+
 /** old **/
 $string['up1domaine'] = 'Domaine(s) d\'enseignement : ';
 $string['up1mention'] = 'Mention(s) : ';

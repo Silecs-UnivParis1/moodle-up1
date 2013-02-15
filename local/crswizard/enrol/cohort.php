@@ -28,7 +28,17 @@ $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
-echo $OUTPUT->heading( get_string('enrolcohorts', 'local_crswizard'));
+
+$titlepage = get_string('enrolcohorts', 'local_crswizard');
+if (isset($SESSION->wizard['idcourse'])) {
+    if ($SESSION->wizard['wizardcase'] == 2) {
+        $titlepage = get_string('upenrolcohortscase2', 'local_crswizard');
+    } else {
+        $titlepage = get_string('upenrolcohortscase3', 'local_crswizard');
+    }
+}
+echo $OUTPUT->heading($titlepage);
+
 echo $OUTPUT->heading(get_string('blocktitleE5', 'local_crswizard'), 4, '');
 echo $OUTPUT->box(get_string('bockhelpE5', 'local_crswizard'), '');
 
