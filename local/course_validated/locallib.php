@@ -208,10 +208,11 @@ function tooltip_rattachements_rof($crsid) {
     $n = count($pathids);
     $res = '<div class="tooltip-content">' . "\n";
     $res .= $n . " rattachement" . ($n>1 ? 's' : '') . " ROF<br />\n<ol>\n";
+    $pathprefix = get_category_path(get_config('local_crswizard','cas2_default_etablissement'));
     foreach ($pathids as $pathid) {
         $patharray = array_filter(explode('/', $pathid));
         $combined = rof_get_combined_path($patharray);
-        $res .= "<li>" . rof_format_path($combined, 'name', false, ' > ') . "</li>\n";
+        $res .= "<li>" . $pathprefix . rof_format_path($combined, 'name', true, ' > ') . "</li>\n";
     }
     $res .= "</ol>\n</div>\n";
     return $res;

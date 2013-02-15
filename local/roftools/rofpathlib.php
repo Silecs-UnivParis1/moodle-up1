@@ -134,7 +134,11 @@ function rof_format_path($pathArray, $format='rofid', $roflink=false, $separator
                 $ret .= $separator . $linkrofid;
                 break;
             case 'name':
-                $ret .= $separator . $name;
+                if ($roflink) {
+                    $ret .= $separator . rof_rofid_link($rofid, $name);
+                } else {
+                    $ret .= $separator . $name;
+                }
                 break;
             case 'combined':
                 $ret .= $separator . '[' . $linkrofid . '] ' . $name;
