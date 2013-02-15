@@ -75,11 +75,16 @@ function rof_get_record($rofid) {
 /**
  * returns link to view rofid
  * @param string $rofid
+ * @param string $support link support, or false (in which case the support will be the rofid)
  * @return string url
  */
-function rof_rofid_link($rofid) {
+function rof_rofid_link($rofid, $support=false) {
     $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
-    return html_writer::link($url, $rofid);
+    if ($support) {
+        return html_writer::link($url, $support);
+    } else {
+        return html_writer::link($url, $rofid);
+    }
 }
 
 /**
