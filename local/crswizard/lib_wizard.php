@@ -561,9 +561,10 @@ function __get_serialnumber($idnumber) {
 /**
  * Calcule idcat Moodle et identifiant cours partir d'un identifiant rof
  * @param array() $form2
+ * @param bool $change
  * @return array() $rof1 - idcat, apogee et idnumber
  */
-function wizard_prepare_rattachement_rof_moodle($form2) {
+function wizard_prepare_rattachement_rof_moodle($form2, $change=false) {
     global $DB;
     $rof1 = array();
     if (isset($form2['item']) && count($form2['item'])) {
@@ -584,7 +585,9 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
                 }
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
-            $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
+            if ($change == false) {
+                $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
+            }
         }
     }
     return $rof1;
