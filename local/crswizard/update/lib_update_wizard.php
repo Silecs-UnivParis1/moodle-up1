@@ -17,6 +17,8 @@ function wizard_get_course($id) {
         $custominfo_data->load_data($course);
         $SESSION->wizard['init_course'] = (array) $course;
 
+        $SESSION->wizard['form_step2']['up1datefermeture'] = $course->profile_field_up1datefermeture;
+
         // determiner le cas sur profile_field_up1generateur (faute de mieux)
         if (isset($course->profile_field_up1generateur)) {
             $SESSION->wizard['wizardcase'] = wizard_get_up1generateur($course->profile_field_up1generateur);
