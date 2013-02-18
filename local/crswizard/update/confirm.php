@@ -12,42 +12,32 @@ global $CFG;
 
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/custominfo/lib.php');
-require_once('lib_wizard.php');
+require_once(__DIR__ . '/../lib_wizard.php');
 
-class course_wizard_step_confirm extends moodleform {
+class course_wizard_confirm extends moodleform {
 
     function definition() {
         global $USER, $DB, $SESSION, $OUTPUT;
 
         $myconfig = new my_elements_config();
-
         $mform = $this->_form;
-        $mgConf1 = get_string('bockhelpE7p1', 'local_crswizard');
-        $mgConf2 = get_string('bockhelpE7p2', 'local_crswizard');
-        $identifValidateurs = $USER->email;
-        $mform->addElement('html', html_writer::tag('div',
-            $mgConf1 . $identifValidateurs . $mgConf2, array('class' => 'fitem', 'id' => 'bockhelpE7')));
 
-        $mform->addElement('header', 'resume', get_string('summaryof', 'local_crswizard'));
-        $user_name = fullname($USER);
-        $mform->addElement('text', 'user_name', get_string('username', 'local_crswizard'), 'maxlength="40" size="20", disabled="disabled"');
-        $mform->setConstant('user_name', $user_name);
-        $mform->addElement('date_selector', 'requestdate', get_string('courserequestdate', 'local_crswizard'));
-        $mform->setDefault('requestdate', time());
+        $mform->addElement('header', 'resume', get_string('upsummaryof', 'local_crswizard'));
 
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
-        if (isset($SESSION->wizard['form_step2']['rattachement1']) ) {
-            $idratt1 = $SESSION->wizard['form_step2']['rattachement1'];
+        $form2 = $SESSION->wizard['form_step2'];
+        if (isset($form2['rattachement1']) ) {
+            $idratt1 = $form2['rattachement1'];
             $mform->addElement('text', 'category',  get_string('categoryblockE3', 'local_crswizard') . ' : ');
-            $mform->setConstant('category' , $displaylist[$idratt1] . ' / ' . $SESSION->wizard['form_step2']['fullname']);
+            $mform->setConstant('category' , $displaylist[$idratt1] . ' / ' . $form2['fullname']);
         } else {
             $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard') . ' : ', $displaylist);
         }
 
         if (!empty($SESSION->wizard['form_step3']['rattachements'])) {
-            $paths = wizard_get_myComposantelist($SESSION->wizard['form_step2']['category'], true);
+            $paths = wizard_get_myComposantelist($form2['category'], true);
             $first = true;
             foreach ($SESSION->wizard['form_step3']['rattachements'] as $pathid) {
                 $select = $mform->createElement('text', "rattachements$pathid",
@@ -59,10 +49,10 @@ class course_wizard_step_confirm extends moodleform {
         }
 
         // rattachement secondaire - cas 2
-        if (isset($SESSION->wizard['form_step2']['rattachement2'])) {
-            $rof2 = $SESSION->wizard['form_step2']['rattachement2'];
+        if (isset($form2['rattachement2'])) {
+            $rof2 = $form2['rattachement2'];
             if(count($rof2)) {
-                $etab = $displaylist[$SESSION->wizard['form_step2']['category']];
+                $etab = $displaylist[$form2['category']];
                 $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
                     . '<div class="fstaticlabel"><label>'
                     . get_string('labelE7ratt2', 'local_crswizard')
@@ -82,48 +72,12 @@ class course_wizard_step_confirm extends moodleform {
         /** @todo display the summary correctly, with Moodle's conversion functions */
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
                 . get_string('coursesummary', 'local_crswizard') . '</label></div></div>'
-                . '<div class="felement fstatic">' . $SESSION->wizard['form_step2']['summary_editor']['text'] . '</div>';
+                . '<div class="felement fstatic">' . $form2['summary_editor']['text'] . '</div>';
         $mform->addElement('html', html_writer::tag('div', $htmlsummary, array('class' => 'fitem')));
 
         $mform->addElement('date_selector', 'startdate', get_string('coursestartdate', 'local_crswizard'));
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
-
-        $mform->addElement('text', 'profile_field_up1generateur', "Mode de création :");
-
-        // validateur pour le cas 2
-        if (!empty($SESSION->wizard['form_step3']['all-validators'])) {
-            $allvalidators = $SESSION->wizard['form_step3']['all-validators'];
-            $mform->addElement('header', 'validators', get_string('selectedvalidator', 'local_crswizard'));
-            foreach ($allvalidators as $id => $validator) {
-                $mform->addElement('text', 'validator', '');
-                $mform->setConstant('validator' , fullname($validator));
-            }
-        }
-
-        if (isset($SESSION->wizard['form_step4']['all-users']) && is_array($SESSION->wizard['form_step4']['all-users'])) {
-            $allusers = $SESSION->wizard['form_step4']['all-users'];
-            $mform->addElement('header', 'teachers', get_string('teachers', 'local_crswizard'));
-            $labels = $myconfig->role_teachers;
-            foreach ($allusers as $role => $users) {
-                $label = $role;
-                if (isset($labels[$role])) {
-                    $label = get_string($labels[$role], 'local_crswizard');
-                }
-                $htmlteacher = '<div class="fitem"><div class="fitemtitle">'
-                    . '<div class="fstaticlabel"><label>'
-                    . $label
-                    . ' : </label></div></div>'
-                    . '<div class="felement fstatic">';
-                $first = true;
-                foreach ($users as $id => $user) {
-                    $htmlteacher .= ($first ? '' : ', ') . fullname($user);
-                    $first = false;
-                }
-                $htmlteacher .= '</div></div>';
-                $mform->addElement('html', $htmlteacher);
-            }
-        }
 
         if (!empty($SESSION->wizard['form_step5']['all-cohorts'])) {
             $groupsbyrole = $SESSION->wizard['form_step5']['all-cohorts'];
@@ -167,7 +121,7 @@ class course_wizard_step_confirm extends moodleform {
         }
 
         //--------------------------------------------------------------------------------
-        if (isset($SESSION->wizard['idcourse'])) {
+      /**  if (isset($SESSION->wizard['idcourse'])) {
             $idcourse = (int) $SESSION->wizard['idcourse'];
             $custominfo_data = custominfo_data::type('course');
             $cinfos = $custominfo_data->get_record($idcourse);
@@ -178,11 +132,8 @@ class course_wizard_step_confirm extends moodleform {
                         . '<div class="felement fstatic">' . $info . '</div>';
                 $mform->addElement('html', html_writer::tag('div', $htmlinfo, array('class' => 'fitem')));
             }
-        }
+        }**/
 //--------------------------------------------------------------------------------
-        $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
-        $mform->addElement('textarea', 'remarques', null, array('rows' => 15, 'cols' => 80));
-        $mform->setType('content', PARAM_RAW);
 
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
@@ -193,7 +144,7 @@ class course_wizard_step_confirm extends moodleform {
             'link', 'previousstage', null,
             new moodle_url($SESSION->wizard['wizardurl'], array('stepin' => 6)),
             get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
-        $buttonarray[] = $mform->createElement('submit', 'stepgo_8', get_string('finish', 'local_crswizard'));
+        $buttonarray[] = $mform->createElement('submit', 'stepgo_8', get_string('upsavechanges', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', null, false);
         $mform->closeHeaderBefore('buttonar');
 

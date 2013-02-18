@@ -172,6 +172,67 @@ function myenrol_cohort($courseid, $tabGroup) {
     return $error;
 }
 
+/**
+ * désinscrit un ensemble de groupe à un cours
+ * @param int $courseid
+ * @param array $tabGroup
+ */
+function wizard_unenrol_cohort($courseid, $tabGroup) {
+    global $DB, $CFG;
+    if ($courseid == SITEID) {
+        throw new coding_exception('Invalid request to add enrol instance to frontpage.');
+    }
+    require_once("$CFG->dirroot/enrol/cohort/locallib.php");
+
+    $enrol = 'cohort';
+    $plugin_enrol = enrol_get_plugin($enrol);
+    foreach ($tabGroup as $role => $groupes) {
+        $roleid = $DB->get_field('role', 'id', array('shortname' => $role));
+        foreach ($groupes as $idgroup) {
+            $cohort = $DB->get_record('cohort', array('idnumber' => $idgroup));
+            if ($cohort) {
+                $instance = $DB->get_record('enrol', array('courseid' => $courseid, 'enrol' => $enrol,
+                    'roleid' => $roleid, 'customint1' => $cohort->id));
+                if ($instance) {
+                    $plugin_enrol->delete_instance($instance);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * supprime la cle d'inscription de type enrol du cours $course
+ * @param string $enrol
+ * @param course object $course
+ */
+function wizard_unenrol_key($enrol, $course) {
+    global $DB, $CFG;
+    $instance = $DB->get_record('enrol', array('courseid' => $course->id,
+        'enrol' => $enrol, 'timecreated' => $course->timecreated));
+    if ($instance) {
+        require_once("$CFG->dirroot/enrol/".$enrol."/locallib.php");
+        $plugin_enrol = enrol_get_plugin($enrol);
+        $plugin_enrol->delete_instance($instance);
+    }
+}
+
+/**
+ * met à jour les paramètre d'une cle d'inscription existante
+ * @param string $enrol nature de l'inscription (enrol.enrol)
+ * @param object course $course
+ * @param array $tabkey nouvelle valeur de la cle
+ */
+function wizard_update_enrol_key($enrol, $course, $tabkey) {
+    global $DB;
+    $instance = $DB->get_record('enrol', array('courseid' => $course->id,
+        'enrol' => $enrol, 'timecreated' => $course->timecreated));
+    if ($instance) {
+        $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
+            'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate']));
+    }
+}
+
 function affiche_error_enrolcohort($erreurs) {
     $message = '';
     $message .= '<div><h3>Messages </h3>';
@@ -475,29 +536,24 @@ function wizard_preselected_validators() {
     return json_encode($liste);
 }
 
-function wizard_list_clef() {
+function wizard_list_clef($form6) {
     global $SESSION;
     $list = array();
     $tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
-
-    if (isset($SESSION->wizard['form_step6'])) {
-        $form6 = $SESSION->wizard['form_step6'];
-
-        foreach ($tabCle as $c => $type) {
-            $password = 'password' . $c;
-            $enrolstartdate = 'enrolstartdate' . $c;
-            $enrolenddate = 'enrolenddate' . $c;
-            if (isset($form6[$password])) {
-                $pass = trim($form6[$password]);
-                if ($pass != '') {
-                    $list[$type]['code'] = $c;
-                    $list[$type]['password'] = $pass;
-                    if (isset($form6[$enrolstartdate])) {
-                        $list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
-                    }
-                    if (isset($form6[$enrolenddate])) {
-                        $list[$type]['enrolenddate'] = $form6[$enrolenddate];
-                    }
+    foreach ($tabCle as $c => $type) {
+        $password = 'password' . $c;
+        $enrolstartdate = 'enrolstartdate' . $c;
+        $enrolenddate = 'enrolenddate' . $c;
+        if (isset($form6[$password])) {
+            $pass = trim($form6[$password]);
+            if ($pass != '') {
+                $list[$type]['code'] = $c;
+                $list[$type]['password'] = $pass;
+                if (isset($form6[$enrolstartdate])) {
+                    $list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
+                }
+                if (isset($form6[$enrolenddate])) {
+                    $list[$type]['enrolenddate'] = $form6[$enrolenddate];
                 }
             }
         }
@@ -561,9 +617,10 @@ function __get_serialnumber($idnumber) {
 /**
  * Calcule idcat Moodle et identifiant cours partir d'un identifiant rof
  * @param array() $form2
+ * @param bool $change
  * @return array() $rof1 - idcat, apogee et idnumber
  */
-function wizard_prepare_rattachement_rof_moodle($form2) {
+function wizard_prepare_rattachement_rof_moodle($form2, $change=false) {
     global $DB;
     $rof1 = array();
     if (isset($form2['item']) && count($form2['item'])) {
@@ -584,7 +641,9 @@ function wizard_prepare_rattachement_rof_moodle($form2) {
                 }
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
-            $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
+            if ($change == false) {
+                $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
+            }
         }
     }
     return $rof1;
@@ -718,9 +777,12 @@ class core_wizard {
             }
         }
         // inscrire des clefs
-        $clefs = wizard_list_clef();
-        if (count($clefs)) {
-            $this->myenrol_clef($course, $clefs);
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $clefs = wizard_list_clef($form6);
+            if (count($clefs)) {
+                $this->myenrol_clef($course, $clefs);
+            }
         }
 
         $this->mydata = $mydata;
@@ -828,106 +890,165 @@ class core_wizard {
      * @return object
      */
     public function prepare_course_to_validate() {
-        $mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
-
-        // profile_field obligatoire pour page course_validate
-        $mydata->profile_field_up1approbateureffid = '';
-        $mydata->profile_field_up1rofname = '';
-        $mydata->profile_field_up1niveaulmda = '';
-        $mydata->profile_field_up1diplome = '';
-        $mydata->profile_field_up1generateur = '';
-
-        $mydata->course_nom_norme = '';
+        $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        $this->setup_mydata();
+        $this->mydata->course_nom_norme = '';
+        $form2 = $this->formdata['form_step2'];
 
         // on est dans le cas 2
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
-            $form2 = $this->formdata['form_step2'];
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
-            if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
-                $mydata->category = $rof1['idcat'];
-                $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
-                $mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
-                $mydata->profile_field_up1composante = $rof1['up1composante'];
-            }
-
-            $shortname = $rof1['idnumber'];
-            if (isset($this->formdata['form_step2']['complement'])) {
-                $complement = trim($this->formdata['form_step2']['complement']);
-                if ($complement != ''){
-                    $shortname .= ' - ' . $complement;
-                }
-            }
-            $mydata->shortname = $shortname;
-            $mydata->idnumber = $rof1['idnumber'];
-
+            $this->set_param_rof1($rof1);
+            $this->set_rof_shortname($rof1['idnumber']);
             // metadonnee de rof1
-            $mdrof1 = rof_get_metadata($rof1['tabpath']);
-            foreach ($mdrof1 as $data) {
-                if (count($data)) {
-                    foreach($data as $label => $value) {
-                        $champ = 'profile_field_'.$label;
-                        $mydata->$champ = $value;
-                    }
-                }
-            }
-
+            $this->set_metadata_rof1($rof1['tabpath']);
             // rattachement secondaire
-            $rof2 = wizard_prepare_rattachement_second($form2);
-            if (count($rof2)) {
-                $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
-                foreach($rof2['rofid'] as $rofid) {
-                    $mydata->profile_field_up1rofid .= ';' . $rofid;
-                }
-                foreach($rof2['rofpathid'] as $rofpath) {
-                    $mydata->profile_field_up1rofpathid .= ';' . $rofpath;
-                }
-                foreach($rof2['rofname'] as $rofname) {
-                    $this->formdata['form_step2']['rofname_second'][] = $rofname;
-                }
-            }
+            $this->set_metadata_rof2();
 
-            $mydata->course_nom_norme = $mydata->idnumber . ' - ' . $this->formdata['form_step2']['fullname'];
-            if ($this->formdata['form_step2']['complement'] !='') {
-                $mydata->course_nom_norme .= ' - ' . $this->formdata['form_step2']['complement'];
-                $mydata->fullname .= ' - ' . $this->formdata['form_step2']['complement'];
-            }
-            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
+            $this->set_rof_fullname();
+            $this->set_rof_nom_norm();
+            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
-            $tabcategories = get_list_category($this->formdata['form_step2']['category']);
-            $mydata->course_nom_norme = $this->formdata['form_step2']['fullname'];
-            $mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
-            if (isset($mydata->rattachements)) {
-                $ratt = wizard_get_rattachement_fieldup1($mydata->rattachements, $tabcategories);
-                if (count($ratt)) {
-                    foreach ($ratt as $fieldname => $value) {
-                        $mydata->$fieldname = $value;
-                    }
-                }
+            $this->mydata->course_nom_norme = $form2['fullname'];
+            $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
+            $this->set_categories_connection();
+        }
 
-                if (count($mydata->rattachements)) {
-                    $first = true;
-                    foreach ($mydata->rattachements as $rattachement) {
-                        $mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
-                        $first = false;
-                    }
+        $this->mydata->profile_field_up1datefermeture = $form2['up1datefermeture'];
+        $this->mydata->summary = $form2['summary_editor']['text'];
+        $this->mydata->summaryformat = $form2['summary_editor']['format'];
+
+        // cours doit être validé
+        $this->set_metadata_cycle_life();
+
+        return $this->mydata;
+    }
+
+    /**
+     * Création profile_field obligatoire
+     */
+    private function setup_mydata() {
+        $this->mydata->profile_field_up1approbateureffid = '';
+        $this->mydata->profile_field_up1rofname = '';
+        $this->mydata->profile_field_up1niveaulmda = '';
+        $this->mydata->profile_field_up1diplome = '';
+        $this->mydata->profile_field_up1generateur = '';
+    }
+
+    private function set_metadata_cycle_life() {
+        $this->mydata->profile_field_up1avalider = 1;
+        $this->mydata->profile_field_up1datevalid = 0;
+        $this->mydata->profile_field_up1datedemande = time();
+        $this->mydata->profile_field_up1demandeurid = $this->user->id;
+        $this->mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
+    }
+
+    private function set_param_rof1($rof1) {
+        if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
+            $this->mydata->category = $rof1['idcat'];
+            $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
+            $this->mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
+            $this->mydata->profile_field_up1composante = $rof1['up1composante'];
+        }
+        $this->mydata->idnumber = $rof1['idnumber'];
+    }
+
+    /**
+     * Construit et assigne le paramètre $shortname d'un cours rattaché au ROF
+     * @param string $idnumber
+     */
+    private function set_rof_shortname($idnumber) {
+        $form2 = $this->formdata['form_step2'];
+        $shortname = $idnumber;
+        if (isset($form2['complement'])) {
+            $complement = trim($form2['complement']);
+            if ($complement != ''){
+                $shortname .= ' - ' . $complement;
+            }
+        }
+        $this->mydata->shortname = $shortname;
+    }
+
+    /**
+     * Construit et assigne le paramètre $shortname d'un cours rattaché au ROF
+     * @param string $idnumber
+     */
+    private function set_rof_fullname() {
+        $form2 = $this->formdata['form_step2'];
+        if ($form2['complement'] !='') {
+            $this->mydata->fullname .= ' - ' . $form2['complement'];
+        }
+    }
+
+    private function set_rof_nom_norm() {
+        $form2 = $this->formdata['form_step2'];
+        $this->mydata->course_nom_norme = $this->mydata->idnumber . ' - ' . $form2['fullname'];
+        if ($form2['complement'] !='') {
+            $this->mydata->course_nom_norme .= ' - ' . $form2['complement'];
+        }
+    }
+
+    /**
+     * assigne les informations du rattachement
+     * principal ROF aux metadonnées de cours
+     * @param array $tabpath
+     */
+    private function set_metadata_rof1($tabpath) {
+        $mdrof1 = rof_get_metadata($tabpath);
+        foreach ($mdrof1 as $data) {
+            if (count($data)) {
+                foreach($data as $label => $value) {
+                    $champ = 'profile_field_'.$label;
+                    $this->mydata->$champ = $value;
                 }
             }
         }
+    }
 
-        $mydata->summary = $this->formdata['form_step2']['summary_editor']['text'];
-        $mydata->summaryformat = $this->formdata['form_step2']['summary_editor']['format'];
-        //$mydata->startdate = $this->formdata['form_step2']['startdate'];
+    /**
+     * assigne les informations des rattachements
+     * secondaires ROF aux metadonnées de cours
+     */
+    private function set_metadata_rof2() {
+        $form2 = $this->formdata['form_step2'];
+        $rof2 = wizard_prepare_rattachement_second($form2);
+        if (count($rof2)) {
+            $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
+            foreach($rof2['rofid'] as $rofid) {
+                $this->mydata->profile_field_up1rofid .= ';' . $rofid;
+            }
+            foreach($rof2['rofpathid'] as $rofpath) {
+                $this->mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+            }
+            foreach($rof2['rofname'] as $rofname) {
+                $this->mydata->formdata['form_step2']['rofname_second'][] = $rofname;
+            }
+        }
+    }
 
-        // cours doit être validé
-        $mydata->profile_field_up1avalider = 1;
-        $mydata->profile_field_up1datevalid = 0;
-        $mydata->profile_field_up1datedemande = time();
-        $mydata->profile_field_up1demandeurid = $this->user->id;
-        $mydata->profile_field_up1approbateurpropid = wizard_get_approbateurpropid();
-        //$mydata->profile_field_up1datefermeture = $this->formdata['form_step2']['up1datefermeture'];
-
-        return $mydata;
+    /**
+     * assigne les catégories supplémentaires pour les cours hors ROF
+    */
+    private function set_categories_connection() {
+        $form2 = $this->formdata['form_step2'];
+        $tabcategories = get_list_category($form2['category']);
+        if (isset($this->mydata->rattachements)) {
+            $ratt = wizard_get_rattachement_fieldup1($this->mydata->rattachements, $tabcategories);
+            if (count($ratt)) {
+                foreach ($ratt as $fieldname => $value) {
+                    $this->mydata->$fieldname = $value;
+                }
+            }
+            if (count($this->mydata->rattachements)) {
+                $first = true;
+                foreach ($this->mydata->rattachements as $rattachement) {
+                    $this->mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
+                    $first = false;
+                }
+            }
+        }
     }
 
     // supprime les méthodes d'inscriptions guest et self
@@ -1125,27 +1246,30 @@ class core_wizard {
 
         // clefs
         $mg .= get_string('enrolkey', 'local_crswizard') . "\n";
-        $clefs = wizard_list_clef();
-        if (count($clefs)) {
-            foreach ($clefs as $type => $clef) {
-                $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
-                $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolstartdate']);
-                } else {
-                    $mg .= 'incative';
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $clefs = wizard_list_clef($form6);
+            if (count($clefs)) {
+                foreach ($clefs as $type => $clef) {
+                    $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
+                    $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
+                    if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
+                        $mg .= date('d-m-Y', $clef['enrolstartdate']);
+                    } else {
+                        $mg .= 'incative';
+                    }
+                    $mg .= "\n";
+                    $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
+                    if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
+                        $mg .= date('d-m-Y', $clef['enrolenddate']);
+                    } else {
+                        $mg .= 'incative';
+                    }
+                    $mg .= "\n";
                 }
-                $mg .= "\n";
-                $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolenddate']);
-                } else {
-                    $mg .= 'incative';
-                }
-                $mg .= "\n";
+            } else {
+                $mg .= '    Aucune' . "\n";
             }
-        } else {
-            $mg .= '    Aucune' . "\n";
         }
         return $mg;
     }
@@ -1233,6 +1357,179 @@ class core_wizard {
         $eventdata->fullmessage = $mgc;
         $eventdata->smallmessage = $mgc; // USED BY DEFAULT !
         $res = message_send($eventdata);
+    }
+
+    //fonctions spécifiques update_course
+
+    public function get_course($course) {
+        $this->course = $course;
+    }
+
+    public function prepare_update_course() {
+        if (isset($this->formdata['form_step3'])) {
+            $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
+        } else {
+            $this->mydata = (object) $this->formdata['form_step2'];
+        }
+        $form2 = $this->formdata['form_step2'];
+
+        if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
+            $changerof1 = $this->check_first_connection();
+            $rof1 = wizard_prepare_rattachement_rof_moodle($form2, $changerof1);
+            if ($changerof1 == false) {
+                $rof1['idnumber'] = trim($this->formdata['init_course']['idnumber']);
+            }
+            $this->set_param_rof1($rof1);
+            $this->set_rof_shortname($rof1['idnumber']);
+            // metadonnee de rof1
+            $this->set_metadata_rof1($rof1['tabpath']);
+            // rattachement secondaire
+            $this->set_metadata_rof2();
+            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->set_rof_fullname();
+            $this->set_rof_nom_norm();
+        } else { // cas 3
+            $this->mydata->course_nom_norme = $form2['fullname'];
+            $this->set_categories_connection();
+        }
+
+        $this->mydata->profile_field_up1datefermeture = $form2['up1datefermeture'];
+        $this->mydata->summary = $form2['summary_editor']['text'];
+        $this->mydata->summaryformat = $form2['summary_editor']['format'];
+
+
+        return $this->mydata;
+    }
+
+    /**
+     * Vérifie si le premier rattachement ROF à été modifié
+     * @return bool $check true si modification
+     */
+    private function check_first_connection() {
+        $check = false;
+        $form2 = $this->formdata['form_step2'];
+        if (isset($form2['item']) && count($form2['item'])) {
+            $allrof = $form2['item'];
+            if (isset($allrof['p']) && count($allrof['p'])) {
+                $rofid = $allrof['p'][0];
+                $apogee = rof_get_code_or_rofid($rofid);
+                $up1rofid = trim($this->formdata['init_course']['profile_field_up1rofid']);
+                $rofid = '';
+                if (strstr($up1rofid, ';')) {
+                    $tab = explode(';', $up1rofid);
+                    $rofid = $tab[0];
+                } else {
+                    $rofid = $up1rofid;
+                }
+
+                if ($rofid != $apogee) {
+                    $check = true;
+                }
+            }
+        }
+        return $check;
+    }
+
+    public function update_course() {
+        $this->prepare_update_course();
+        update_course($this->mydata);
+        $custominfo_data = custominfo_data::type('course');
+        $cleandata = $this->customfields_wash($this->mydata);
+        $custominfo_data->save_data($cleandata);
+        $this->update_myenrol_cohort();
+        $this->update_myenrol_key();
+        rebuild_course_cache($this->mydata->id);
+    }
+
+    public function update_myenrol_cohort()
+    {
+        $course = $this->formdata['init_course'];
+        $oldcohorts = array();
+        if (isset($course['group'])) {
+            $oldcohorts = $course['group'];
+        }
+        $newcohorts = array();
+        if (isset($this->formdata['form_step5']['group'])) {
+            $newcohorts = $this->formdata['form_step5']['group'];
+        }
+
+        // ajout
+        $cohortadd = array();
+        foreach ($newcohorts as $role => $tabg) {
+            if (array_key_exists($role, $oldcohorts) == false) {
+                $cohortadd[$role] = $tabg;
+            } else {
+                foreach ($tabg as $g) {
+                    if (! in_array($g, $oldcohorts[$role])) {
+                        $cohortadd[$role][] = $g;
+                    }
+                }
+            }
+        }
+        myenrol_cohort($course['id'], $cohortadd);
+        // suppression
+        $cohortremove = array();
+        foreach ($oldcohorts as $role => $tabg) {
+            if (array_key_exists($role, $newcohorts) == false) {
+                $cohortremove[$role] = $tabg;
+            } else {
+                foreach ($tabg as $g) {
+                    if (in_array($g, $newcohorts[$role]) == false) {
+                        $cohortremove[$role][] = $g;
+                    }
+                }
+            }
+        }
+        wizard_unenrol_cohort($course['id'], $cohortremove);
+    }
+
+    function update_myenrol_key() {
+        global $DB;
+        $tabenrol = array('Etudiante' => 'self', 'Visiteur' => 'guest');
+
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $newkey = wizard_list_clef($form6);
+        }
+        $initcourse = $this->formdata['init_course'];
+        $course = $DB->get_record('course', array('id' => $initcourse['id']));
+        $oldkey = array();
+        if (isset($initcourse['key'])) {
+            $oldkey = wizard_list_clef($initcourse['key']);
+
+        }
+
+        $nbdiffk = count($newkey) - count($oldkey);
+        switch ($nbdiffk) {
+            case -2:
+                // supprimer toutes les clefs
+                foreach ($oldkey as $role => $key) {
+                    $enrol = $tabenrol[$role];
+                    wizard_unenrol_key ($enrol, $course);
+                }
+                break;
+             case 2:
+                $this->myenrol_clef($course, $newkey);
+                break;
+            default:
+                foreach ($newkey as $role => $key) {
+                    $enrol = $tabenrol[$role];
+                    if (array_key_exists($role, $oldkey)) {
+                        //update
+                        wizard_update_enrol_key($enrol, $course, $key);
+                    } else {
+                        $this->myenrol_clef($course, array($role => $key));
+                    }
+                }
+                // suppression
+                foreach ($oldkey as $role => $key) {
+                if (array_key_exists($role, $newkey) == false) {
+                    // suppression
+                    $enrol = $tabenrol[$role];
+                    wizard_unenrol_key ($enrol, $course);
+                }
+            }
+        }
     }
 }
 

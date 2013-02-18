@@ -14,7 +14,7 @@ require_once($CFG->libdir . '/completionlib.php');
 class course_wizard_step2_rof_form extends moodleform {
 
     function definition() {
-        global $OUTPUT, $SESSION;
+        global $OUTPUT, $SESSION, $USER;
 
         $mform = $this->_form;
 
@@ -30,15 +30,37 @@ class course_wizard_step2_rof_form extends moodleform {
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'categoryheader', get_string('categoryblockE2F', 'local_crswizard'));
 
-        $default_cat = get_config('local_crswizard','cas2_default_etablissement');
-        $mform->addElement(
+        $classreadonly = '';
+        $rofeditor_permission = true;
+        if (isset($SESSION->wizard['idcourse'])) {
+            $rofeditor_permission = wizard_has_rofreferenceeditor_permission($SESSION->wizard['idcourse'], $USER->id);
+        }
+        if ($rofeditor_permission) {
+            $default_cat = get_config('local_crswizard','cas2_default_etablissement');
+            $mform->addElement(
                 'select', 'category', '', wizard_get_catlevel2(),
                 array(
                     'class' => 'transformIntoSubselects',
                     'data-labels' => '["Période :", "Établissement :"]'
                 )
-        );
-        $mform->setDefault('category', $default_cat);
+            );
+            $mform->setDefault('category', $default_cat);
+        } else {
+            $tabfreeze = array();
+            $mform->addElement('text', 'rofyear', 'Période : ');
+            $mform->setConstant('rofyear', $SESSION->wizard['form_step2']['rofyear']);
+            $tabfreeze[] = 'rofyear';
+
+            $mform->addElement('text', 'rofestablishment', 'Établissement : ');
+            $mform->setConstant('rofestablishment', $SESSION->wizard['form_step2']['rofestablishment']);
+            $tabfreeze[] = 'rofestablishment';
+            $mform->hardFreeze($tabfreeze);
+
+            $mform->addElement('hidden', 'category', null);
+            $mform->setType('category', PARAM_INT);
+
+            $classreadonly = 'readonly';
+        }
 
         $labelrof =  '<br/><div class="fitemtitle required mylabel"><label>Elément pédagogique : *</label></div>';
         $mform->addElement('html',  $labelrof);
@@ -48,8 +70,11 @@ class course_wizard_step2_rof_form extends moodleform {
         $codeJ = '<script type="text/javascript">' . "\n"
             . '//<![CDATA['."\n"
             . 'jQuery(document).ready(function () {'
-            . '$(\'#items-selected\').autocompleteRof({'
-            . 'preSelected: '.$preselected
+            . '$(\'#items-selected\').autocompleteRof({';
+            if ($classreadonly !='') {
+                $codeJ .= 'readonly: true,';
+            }
+            $codeJ .= 'preSelected: '.$preselected
             .'});'
             . '});'
             . '//]]>'. "\n"
@@ -57,7 +82,7 @@ class course_wizard_step2_rof_form extends moodleform {
 
         // ajout du selecteur ROF
         $rofseleted = '<div class="by-widget"><h3>Rechercher un élément pédagogique</h3>'
-            . '<div class="item-select"></div>'
+            . '<div class="item-select ' . $classreadonly . '" id="choose-item-select"></div>'
             . '</div>'
             . '<div class="block-item-selected">'
             . '<h3>Éléments pédagogiques sélectionnés</h3>'
@@ -182,12 +207,15 @@ class course_wizard_step2_rof_form extends moodleform {
         $mform->setConstant('stepin', 2);
 
 //--------------------------------------------------------------------------------
-
+        $labelprevious = get_string('previousstage', 'local_crswizard');
+        if (isset($SESSION->wizard['idcourse'])) {
+            $labelprevious = get_string('upcancel', 'local_crswizard');
+        }
         $buttonarray = array();
         $buttonarray[] = $mform->createElement(
             'link', 'previousstage', null,
             new moodle_url($SESSION->wizard['wizardurl'], array('stepin' => 1)),
-            get_string('previousstage', 'local_crswizard'), array('class' => 'previousstage'));
+                $labelprevious, array('class' => 'previousstage'));
         $buttonarray[] = $mform->createElement('submit', 'stepgo_3', get_string('nextstage', 'local_crswizard'));
         $mform->addGroup($buttonarray, 'buttonar', '', null, false);
         $mform->closeHeaderBefore('buttonar');
