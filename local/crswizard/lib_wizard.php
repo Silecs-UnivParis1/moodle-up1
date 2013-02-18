@@ -499,29 +499,24 @@ function wizard_preselected_validators() {
     return json_encode($liste);
 }
 
-function wizard_list_clef() {
+function wizard_list_clef($form6) {
     global $SESSION;
     $list = array();
     $tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
-
-    if (isset($SESSION->wizard['form_step6'])) {
-        $form6 = $SESSION->wizard['form_step6'];
-
-        foreach ($tabCle as $c => $type) {
-            $password = 'password' . $c;
-            $enrolstartdate = 'enrolstartdate' . $c;
-            $enrolenddate = 'enrolenddate' . $c;
-            if (isset($form6[$password])) {
-                $pass = trim($form6[$password]);
-                if ($pass != '') {
-                    $list[$type]['code'] = $c;
-                    $list[$type]['password'] = $pass;
-                    if (isset($form6[$enrolstartdate])) {
-                        $list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
-                    }
-                    if (isset($form6[$enrolenddate])) {
-                        $list[$type]['enrolenddate'] = $form6[$enrolenddate];
-                    }
+    foreach ($tabCle as $c => $type) {
+        $password = 'password' . $c;
+        $enrolstartdate = 'enrolstartdate' . $c;
+        $enrolenddate = 'enrolenddate' . $c;
+        if (isset($form6[$password])) {
+            $pass = trim($form6[$password]);
+            if ($pass != '') {
+                $list[$type]['code'] = $c;
+                $list[$type]['password'] = $pass;
+                if (isset($form6[$enrolstartdate])) {
+                    $list[$type]['enrolstartdate'] = $form6[$enrolstartdate];
+                }
+                if (isset($form6[$enrolenddate])) {
+                    $list[$type]['enrolenddate'] = $form6[$enrolenddate];
                 }
             }
         }
@@ -745,9 +740,12 @@ class core_wizard {
             }
         }
         // inscrire des clefs
-        $clefs = wizard_list_clef();
-        if (count($clefs)) {
-            $this->myenrol_clef($course, $clefs);
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $clefs = wizard_list_clef($form6);
+            if (count($clefs)) {
+                $this->myenrol_clef($course, $clefs);
+            }
         }
 
         $this->mydata = $mydata;
@@ -1211,27 +1209,30 @@ class core_wizard {
 
         // clefs
         $mg .= get_string('enrolkey', 'local_crswizard') . "\n";
-        $clefs = wizard_list_clef();
-        if (count($clefs)) {
-            foreach ($clefs as $type => $clef) {
-                $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
-                $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolstartdate']);
-                } else {
-                    $mg .= 'incative';
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $clefs = wizard_list_clef($form6);
+            if (count($clefs)) {
+                foreach ($clefs as $type => $clef) {
+                    $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
+                    $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
+                    if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
+                        $mg .= date('d-m-Y', $clef['enrolstartdate']);
+                    } else {
+                        $mg .= 'incative';
+                    }
+                    $mg .= "\n";
+                    $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
+                    if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
+                        $mg .= date('d-m-Y', $clef['enrolenddate']);
+                    } else {
+                        $mg .= 'incative';
+                    }
+                    $mg .= "\n";
                 }
-                $mg .= "\n";
-                $mg .= '    ' . get_string('enrolenddate', 'enrol_self') . ' : ';
-                if (isset($clef['enrolenddate']) && $clef['enrolenddate'] != 0) {
-                    $mg .= date('d-m-Y', $clef['enrolenddate']);
-                } else {
-                    $mg .= 'incative';
-                }
-                $mg .= "\n";
+            } else {
+                $mg .= '    Aucune' . "\n";
             }
-        } else {
-            $mg .= '    Aucune' . "\n";
         }
         return $mg;
     }
