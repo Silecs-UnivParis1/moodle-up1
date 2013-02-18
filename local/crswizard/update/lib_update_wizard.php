@@ -3,7 +3,7 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 function wizard_get_course($id) {
-    global $DB, $SESSION;
+    global $DB, $SESSION, $CFG;
     $error = '';
     if ($id == SITEID){
         // don't allow editing of  'site course' using this from
@@ -20,8 +20,11 @@ function wizard_get_course($id) {
         $SESSION->wizard['form_step2']['up1datefermeture'] = $course->profile_field_up1datefermeture;
 
         // determiner le cas sur profile_field_up1generateur (faute de mieux)
-        if (isset($course->profile_field_up1generateur)) {
-            $SESSION->wizard['wizardcase'] = wizard_get_up1generateur($course->profile_field_up1generateur);
+        if (isset($course->profile_field_up1generateur) && trim($course->profile_field_up1generateur) != '') {
+            $SESSION->wizard['wizardcase'] = wizard_get_up1generateur(trim($course->profile_field_up1generateur));
+        } else {
+            $url = new moodle_url($CFG->wwwroot.'/course/edit.php', array('id'=>$id));
+            redirect($url);
         }
         if ($SESSION->wizard['wizardcase'] == 2) {
             $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
