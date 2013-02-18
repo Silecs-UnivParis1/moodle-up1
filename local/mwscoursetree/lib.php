@@ -11,7 +11,8 @@ require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
 function get_children($node) {
-    global $DB;
+    global $DB, $PAGE;
+    $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 
     $result = array();
     if ( isset($node) ) {
@@ -71,11 +72,9 @@ function get_children($node) {
 function get_entry_from_course($crsid, $depth) {
     global $DB;
 
-    $course = $DB->get_record('course', array('id' => $crsid));
-    $url = new moodle_url('/course/view.php', array('id' => $crsid));
     return array(
         'node' => null,
-        'label' => html_writer::link($url, $course->fullname),
+        'label' => format_course_label('', $crsid),
         'load_on_demand' => false,
         'depth' => $depth,
     );
@@ -127,8 +126,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         $name = $rofobject->name;
 
         if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
-            $url = new moodle_url('/course/view.php', array('id' => $directcourse[$node]));
-            $item['label'] = html_writer::link($url, $name);
+            $item['label'] = format_course_label($name, $directcourse[$node]);
         } else {
             $item['label'] = $name;
         }
@@ -140,4 +138,38 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         $items[] = $item;
     }
     return $items;
+}
+
+
+function format_course_label($name, $crsid) {
+    global $DB, $OUTPUT;
+
+    // main link
+    $url = new moodle_url('/course/view.php', array('id' => $crsid));
+    $dbcourse = $DB->get_record('course', array('id' => $crsid));
+    if ($name == '') {
+        $name = $dbcourse->fullname; //override ROF name with course name ?
+    }
+    $crslink = html_writer::link($url, $name);
+    // teachers
+    $titleteachers = '';
+    $context = get_context_instance(CONTEXT_COURSE, $crsid);
+    $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+    $teachers = get_role_users($role->id, $context);
+    $dup = $teachers;
+    $firstteacher = fullname(array_shift($dup)) . (count($teachers) > 1 ? '...' : '');
+    foreach ($teachers as $teacher) {
+        $titleteachers .= fullname($teacher) . ' ';
+    }
+    $fullteachers = '<span title="'. $titleteachers .'">' . $firstteacher . '</span>';
+    // icons
+    $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
+    $icons = $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+    if ($myicons = enrol_get_course_info_icons($dbcourse)) { // enrolment access icons
+        foreach ($myicons as $pix_icon) {
+            $icons .= $OUTPUT->render($pix_icon);
+        }
+    }
+    //die($crslink .' '. $fullteachers . ' ' . $icons);
+    return $crslink .' '. $fullteachers . ' ' . $icons;
 }
