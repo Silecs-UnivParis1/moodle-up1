@@ -10,6 +10,12 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
+/**
+ * main function for the webservice service-children
+ * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+ * @return array(assoc. array()) : to be used by jqTree after json-encoding
+ * @throws coding_exception
+ */
 function get_children($node) {
     global $DB, $PAGE;
     $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
@@ -38,10 +44,8 @@ function get_children($node) {
                         'load_on_demand' => true,
                         'depth' => $category->depth,
                     );
-
                 }
             }
-
         } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
             $courses = get_courses($parentcatid, "c.sortorder ASC", "c.id");
             list($rofcourses, $catcourses) = split_courses_from_rof($courses);
@@ -56,22 +60,19 @@ function get_children($node) {
     } else { // CASE 3 under ROF root
         $rofpath = '/' . join('/', array_slice($pseudopath, 1));
         $depth = 3 + count($pseudopath);
-//var_dump($rofpath);
         $fieldid = $DB->get_field('custom_info_field', 'id',
                 array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
         $sql = "SELECT objectid, data FROM {custom_info_data} "
              . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
         $rofcourses = $DB->get_records_sql_menu($sql, array($fieldid, '%'.$rofpath.'%'));
-//var_dump($rofcourses);
         $result = get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid);
     }
 
     return $result;
 }
 
-function get_entry_from_course($crsid, $depth) {
-    global $DB;
 
+function get_entry_from_course($crsid, $depth) {
     return array(
         'node' => null,
         'label' => format_course_label('', $crsid),
@@ -80,6 +81,11 @@ function get_entry_from_course($crsid, $depth) {
     );
 }
 
+/**
+ * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
+ * @param array $courses array of course objects (from DB)
+ * @return array($rofcourses, $catcourses)
+ */
 function split_courses_from_rof($courses) {
     $rofcourses = array();
     $catcourses = array();
@@ -94,12 +100,25 @@ function split_courses_from_rof($courses) {
     return array($rofcourses, $catcourses);
 }
 
+/**
+ * get component (ex. 05) from categoryid
+ * @param int $catid
+ * @return string component, ex. "05"
+ */
 function get_component_from_category($catid) {
     global $DB;
     $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
     return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
 }
 
+/**
+ * get entries from courses having a ROF rattachement
+ * @param array $rofcourses as given by split_courses_from_rof() (or other source)
+ * @param int $depth of target entries
+ * @param array(string) $pseudopath for the parent node
+ * @param int $parentcatid
+ * @return array(assoc. array)
+ */
 function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid) {
     $component = get_component_from_category($parentcatid);
     $prenodes = array();
@@ -140,7 +159,12 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
     return $items;
 }
 
-
+/**
+ * format course label
+ * @param string $name course/ROF name ; if empty, will be filled with the course fullname
+ * @param int $crsid
+ * @return strinf formatted label
+ */
 function format_course_label($name, $crsid) {
     global $DB, $OUTPUT;
 
