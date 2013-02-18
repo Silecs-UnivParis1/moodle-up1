@@ -172,6 +172,11 @@ function myenrol_cohort($courseid, $tabGroup) {
     return $error;
 }
 
+/**
+ * désinscrit un ensemble de groupe à un cours
+ * @param int $courseid
+ * @param array $tabGroup
+ */
 function wizard_unenrol_cohort($courseid, $tabGroup) {
     global $DB, $CFG;
     if ($courseid == SITEID) {
@@ -193,6 +198,38 @@ function wizard_unenrol_cohort($courseid, $tabGroup) {
                 }
             }
         }
+    }
+}
+
+/**
+ * supprime la cle d'inscription de type enrol du cours $course
+ * @param string $enrol
+ * @param course object $course
+ */
+function wizard_unenrol_key($enrol, $course) {
+    global $DB, $CFG;
+    $instance = $DB->get_record('enrol', array('courseid' => $course->id,
+        'enrol' => $enrol, 'timecreated' => $course->timecreated));
+    if ($instance) {
+        require_once("$CFG->dirroot/enrol/".$enrol."/locallib.php");
+        $plugin_enrol = enrol_get_plugin($enrol);
+        $plugin_enrol->delete_instance($instance);
+    }
+}
+
+/**
+ * met à jour les paramètre d'une cle d'inscription existante
+ * @param string $enrol nature de l'inscription (enrol.enrol)
+ * @param object course $course
+ * @param array $tabkey nouvelle valeur de la cle
+ */
+function wizard_update_enrol_key($enrol, $course, $tabkey) {
+    global $DB;
+    $instance = $DB->get_record('enrol', array('courseid' => $course->id,
+        'enrol' => $enrol, 'timecreated' => $course->timecreated));
+    if ($instance) {
+        $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
+            'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate']));
     }
 }
 
@@ -1400,6 +1437,7 @@ class core_wizard {
         $cleandata = $this->customfields_wash($this->mydata);
         $custominfo_data->save_data($cleandata);
         $this->update_myenrol_cohort();
+        $this->update_myenrol_key();
         rebuild_course_cache($this->mydata->id);
     }
 
@@ -1443,6 +1481,55 @@ class core_wizard {
             }
         }
         wizard_unenrol_cohort($course['id'], $cohortremove);
+    }
+
+    function update_myenrol_key() {
+        global $DB;
+        $tabenrol = array('Etudiante' => 'self', 'Visiteur' => 'guest');
+
+        if (isset($this->formdata['form_step6'])) {
+            $form6 = $this->formdata['form_step6'];
+            $newkey = wizard_list_clef($form6);
+        }
+        $initcourse = $this->formdata['init_course'];
+        $course = $DB->get_record('course', array('id' => $initcourse['id']));
+        $oldkey = array();
+        if (isset($initcourse['key'])) {
+            $oldkey = wizard_list_clef($initcourse['key']);
+
+        }
+
+        $nbdiffk = count($newkey) - count($oldkey);
+        switch ($nbdiffk) {
+            case -2:
+                // supprimer toutes les clefs
+                foreach ($oldkey as $role => $key) {
+                    $enrol = $tabenrol[$role];
+                    wizard_unenrol_key ($enrol, $course);
+                }
+                break;
+             case 2:
+                $this->myenrol_clef($course, $newkey);
+                break;
+            default:
+                foreach ($newkey as $role => $key) {
+                    $enrol = $tabenrol[$role];
+                    if (array_key_exists($role, $oldkey)) {
+                        //update
+                        wizard_update_enrol_key($enrol, $course, $key);
+                    } else {
+                        $this->myenrol_clef($course, array($role => $key));
+                    }
+                }
+                // suppression
+                foreach ($oldkey as $role => $key) {
+                if (array_key_exists($role, $newkey) == false) {
+                    // suppression
+                    $enrol = $tabenrol[$role];
+                    wizard_unenrol_key ($enrol, $course);
+                }
+            }
+        }
     }
 }
 

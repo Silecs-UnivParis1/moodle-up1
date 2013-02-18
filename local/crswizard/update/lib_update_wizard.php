@@ -62,7 +62,7 @@ function wizard_get_course($id) {
 
         // clefs
         $SESSION->wizard['form_step6'] = wizard_get_keys($course->id, $course->timecreated);
-        $SESSION->wizard['init_course']['key'] = wizard_get_keys($course->id, $course->timecreated);
+        $SESSION->wizard['init_course']['key'] = $SESSION->wizard['form_step6'];
     }
 
 }
