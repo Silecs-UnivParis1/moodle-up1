@@ -10,8 +10,15 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
+/**
+ * main function for the webservice service-children
+ * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+ * @return array(assoc. array()) : to be used by jqTree after json-encoding
+ * @throws coding_exception
+ */
 function get_children($node) {
-    global $DB;
+    global $DB, $PAGE;
+    $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 
     $result = array();
     if ( isset($node) ) {
@@ -37,10 +44,8 @@ function get_children($node) {
                         'load_on_demand' => true,
                         'depth' => $category->depth,
                     );
-
                 }
             }
-
         } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
             $courses = get_courses($parentcatid, "c.sortorder ASC", "c.id");
             list($rofcourses, $catcourses) = split_courses_from_rof($courses);
@@ -55,32 +60,32 @@ function get_children($node) {
     } else { // CASE 3 under ROF root
         $rofpath = '/' . join('/', array_slice($pseudopath, 1));
         $depth = 3 + count($pseudopath);
-//var_dump($rofpath);
         $fieldid = $DB->get_field('custom_info_field', 'id',
                 array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
         $sql = "SELECT objectid, data FROM {custom_info_data} "
              . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
         $rofcourses = $DB->get_records_sql_menu($sql, array($fieldid, '%'.$rofpath.'%'));
-//var_dump($rofcourses);
         $result = get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid);
     }
 
     return $result;
 }
 
-function get_entry_from_course($crsid, $depth) {
-    global $DB;
 
-    $course = $DB->get_record('course', array('id' => $crsid));
-    $url = new moodle_url('/course/view.php', array('id' => $crsid));
+function get_entry_from_course($crsid, $depth) {
     return array(
         'node' => null,
-        'label' => html_writer::link($url, $course->fullname),
+        'label' => format_course_label('', $crsid),
         'load_on_demand' => false,
         'depth' => $depth,
     );
 }
 
+/**
+ * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
+ * @param array $courses array of course objects (from DB)
+ * @return array($rofcourses, $catcourses)
+ */
 function split_courses_from_rof($courses) {
     $rofcourses = array();
     $catcourses = array();
@@ -95,12 +100,25 @@ function split_courses_from_rof($courses) {
     return array($rofcourses, $catcourses);
 }
 
+/**
+ * get component (ex. 05) from categoryid
+ * @param int $catid
+ * @return string component, ex. "05"
+ */
 function get_component_from_category($catid) {
     global $DB;
     $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
     return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
 }
 
+/**
+ * get entries from courses having a ROF rattachement
+ * @param array $rofcourses as given by split_courses_from_rof() (or other source)
+ * @param int $depth of target entries
+ * @param array(string) $pseudopath for the parent node
+ * @param int $parentcatid
+ * @return array(assoc. array)
+ */
 function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid) {
     $component = get_component_from_category($parentcatid);
     $prenodes = array();
@@ -127,8 +145,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         $name = $rofobject->name;
 
         if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
-            $url = new moodle_url('/course/view.php', array('id' => $directcourse[$node]));
-            $item['label'] = html_writer::link($url, $name);
+            $item['label'] = format_course_label($name, $directcourse[$node]);
         } else {
             $item['label'] = $name;
         }
@@ -140,4 +157,43 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         $items[] = $item;
     }
     return $items;
+}
+
+/**
+ * format course label
+ * @param string $name course/ROF name ; if empty, will be filled with the course fullname
+ * @param int $crsid
+ * @return strinf formatted label
+ */
+function format_course_label($name, $crsid) {
+    global $DB, $OUTPUT;
+
+    // main link
+    $url = new moodle_url('/course/view.php', array('id' => $crsid));
+    $dbcourse = $DB->get_record('course', array('id' => $crsid));
+    if ($name == '') {
+        $name = $dbcourse->fullname; //override ROF name with course name ?
+    }
+    $crslink = html_writer::link($url, $name);
+    // teachers
+    $titleteachers = '';
+    $context = get_context_instance(CONTEXT_COURSE, $crsid);
+    $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+    $teachers = get_role_users($role->id, $context);
+    $dup = $teachers;
+    $firstteacher = fullname(array_shift($dup)) . (count($teachers) > 1 ? '...' : '');
+    foreach ($teachers as $teacher) {
+        $titleteachers .= fullname($teacher) . ' ';
+    }
+    $fullteachers = '<span title="'. $titleteachers .'">' . $firstteacher . '</span>';
+    // icons
+    $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
+    $icons = $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+    if ($myicons = enrol_get_course_info_icons($dbcourse)) { // enrolment access icons
+        foreach ($myicons as $pix_icon) {
+            $icons .= $OUTPUT->render($pix_icon);
+        }
+    }
+    //die($crslink .' '. $fullteachers . ' ' . $icons);
+    return $crslink .' '. $fullteachers . ' ' . $icons;
 }
