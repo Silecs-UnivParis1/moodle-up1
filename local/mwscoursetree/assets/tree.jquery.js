@@ -1067,6 +1067,7 @@ limitations under the License.
       this.dnd_handler = new DragAndDropHandler(this);
       this.scroll_handler = new ScrollHandler(this);
       this._initData();
+      this.element.unbind('click'); // added by SILECS because of a conflict with YUI
       this.element.click($.proxy(this._click, this));
       return this.element.bind('contextmenu', $.proxy(this._contextmenu, this));
     };

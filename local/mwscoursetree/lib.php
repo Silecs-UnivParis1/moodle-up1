@@ -38,9 +38,10 @@ function get_children($node) {
                 $n = count($courses);
                 if ($n >= 0) { //** @todo ce calcul est idiot
                     $name = $category->name;
+                    $nodeid = '/' . $category->id;
                     $result[] = array(
-                        'id' => '/' . $category->id,
-                        'label' => $name,
+                        'id' => $nodeid,
+                        'label' => display_name($name, $nodeid),
                         'load_on_demand' => true,
                         'depth' => $category->depth,
                     );
@@ -147,7 +148,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
             $item['label'] = format_course_label($name, $directcourse[$node]);
         } else {
-            $item['label'] = $name;
+            $item['label'] = display_name($name, $node);
         }
         if ( isset($unfold[$node]) &&  $unfold[$node] ) {
             $item['load_on_demand'] = true;
@@ -196,4 +197,14 @@ function format_course_label($name, $crsid) {
     }
     //die($crslink .' '. $fullteachers . ' ' . $icons);
     return $crslink .' '. $fullteachers . ' ' . $icons;
+}
+
+/**
+ * returns the "name" part of the label, with a span showing the node-id depending on class jqtree-hidden
+ * @param string $name
+ * @param string $nodeid 0
+ * @return string
+ */
+function display_name($name, $nodeid) {
+    return '<span class="jqtree-hidden">[' . $nodeid . ']</span> &nbsp; ' . $name ;
 }

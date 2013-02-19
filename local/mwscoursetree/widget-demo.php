@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
+/* @var $PAGE page_base */
 global $PAGE, $OUTPUT;
 
 require_login();
@@ -17,8 +18,13 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading("Démo de l'arbre des cours");
 
 ?>
+<style type="text/css">
+.jqtree-hidden {
+    display: inherit;
+}
+</style>
 <script type="text/javascript" src="<?php echo new moodle_url('/local/mwscoursetree/widget.js'); ?>"></script>
-<div class="coursetree" data-root="/0"></div>
+<div class="coursetree" data-root="/0" data-title="1"></div>
 <?php
 
 echo $OUTPUT->footer();
