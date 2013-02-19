@@ -39,7 +39,7 @@ function get_children($node) {
                 if ($n >= 0) { //** @todo ce calcul est idiot
                     $name = $category->name;
                     $result[] = array(
-                        'node' => '/' . $category->id,
+                        'id' => '/' . $category->id,
                         'label' => $name,
                         'load_on_demand' => true,
                         'depth' => $category->depth,
