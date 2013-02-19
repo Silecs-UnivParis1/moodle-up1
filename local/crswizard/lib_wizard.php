@@ -617,10 +617,10 @@ function __get_serialnumber($idnumber) {
 /**
  * Calcule idcat Moodle et identifiant cours partir d'un identifiant rof
  * @param array() $form2
- * @param bool $change
+ * @param bool $change si true, on recalcule de idnumber
  * @return array() $rof1 - idcat, apogee et idnumber
  */
-function wizard_prepare_rattachement_rof_moodle($form2, $change=false) {
+function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
     global $DB;
     $rof1 = array();
     if (isset($form2['item']) && count($form2['item'])) {
@@ -641,7 +641,7 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=false) {
                 }
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
-            if ($change == false) {
+            if ($change == true) {
                 $rof1['idnumber'] = wizard_rofid_to_idnumber($rofid);
             }
         }
@@ -907,7 +907,7 @@ class core_wizard {
 
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
-            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°2 ROF)';
 
         } else { // cas 3
@@ -1385,7 +1385,7 @@ class core_wizard {
             $this->set_metadata_rof1($rof1['tabpath']);
             // rattachement secondaire
             $this->set_metadata_rof2();
-            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
         } else { // cas 3
@@ -1403,7 +1403,7 @@ class core_wizard {
 
     /**
      * Vérifie si le premier rattachement ROF à été modifié
-     * @return bool $check true si modification
+     * @return bool $check true si modification du rattachement principal
      */
     private function check_first_connection() {
         $check = false;
@@ -1421,8 +1421,8 @@ class core_wizard {
                 } else {
                     $rofid = $up1rofid;
                 }
-
-                if ($rofid != $apogee) {
+                $newapogee = rof_get_code_or_rofid($rofid);
+                if ($newapogee != $apogee) {
                     $check = true;
                 }
             }
