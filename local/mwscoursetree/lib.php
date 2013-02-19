@@ -11,6 +11,13 @@ require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
 /**
+ * @todo gérer les rattachements secondaires de catégories (up1categoriesbis)  dans get_descendant_course_from_catbis()
+ * @todo compter les cours descendants dans le cas 2 ?
+ * @todo compter les cours descendants dans le cas 3 ?
+ * @todo limiter le dépliage au niveau 8 matière (ROFcourse niv.2)
+ */
+
+/**
  * main function for the webservice service-children
  * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
  * @return array(assoc. array()) : to be used by jqTree after json-encoding
@@ -34,10 +41,10 @@ function get_children($node) {
         if ($parentcatid === 0 || ($parentcat && $parentcat->depth < 4)) { // CASE 1 node=category and children=categories
             $categories = get_categories($parentcatid);
             foreach ($categories as $category) {
-                $courses = get_courses($category->id, "c.sortorder ASC", "c.id");
+                $courses = get_descendant_courses($category->id);
                 $n = count($courses);
-                if ($n >= 0) { //** @todo ce calcul est idiot
-                    $name = $category->name;
+                if ($n >= 1) { //** @todo ce calcul est idiot
+                    $name = $category->name . ' ('. $n. ') ';
                     $nodeid = '/' . $category->id;
                     $result[] = array(
                         'id' => $nodeid,
@@ -48,7 +55,7 @@ function get_children($node) {
                 }
             }
         } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
-            $courses = get_courses($parentcatid, "c.sortorder ASC", "c.id");
+            $courses = get_descendant_courses($parentcatid);
             list($rofcourses, $catcourses) = split_courses_from_rof($courses);
             foreach ($catcourses as $crsid) {
                 $result[] = get_entry_from_course($crsid, 5);
@@ -90,12 +97,12 @@ function get_entry_from_course($crsid, $depth) {
 function split_courses_from_rof($courses) {
     $rofcourses = array();
     $catcourses = array();
-    foreach($courses as $course) {
-        $rofpathid = up1_meta_get_text($course->id, 'rofpathid', false);
+    foreach($courses as $crsid) {
+        $rofpathid = up1_meta_get_text($crsid, 'rofpathid', false);
         if ($rofpathid) {
-            $rofcourses[$course->id] = $rofpathid;
+            $rofcourses[$crsid] = $rofpathid;
         } else {
-            $catcourses[$course->id] = $course->id;
+            $catcourses[$crsid] = $crsid;
         }
     }
     return array($rofcourses, $catcourses);
@@ -207,4 +214,43 @@ function format_course_label($name, $crsid) {
  */
 function display_name($name, $nodeid) {
     return '<span class="jqtree-hidden">[' . $nodeid . ']</span> &nbsp; ' . $name ;
+}
+
+function get_descendant_courses($catid) {
+    $r1 = get_descendant_courses_from_category($catid);
+    //var_dump($r1);
+    $r2 = get_descendant_courses_from_catbis($catid);
+    //var_dump($r2);
+    return array_unique(array_merge($r1, $r2));
+}
+
+function get_descendant_courses_from_category($catid) {
+    global $DB;
+
+    $sql = "SELECT cco.instanceid FROM {context} cco "
+         . "JOIN {context} cca ON (cco.path LIKE CONCAT(cca.path, '/%') ) "
+         . "WHERE cca.instanceid=? AND cco.contextlevel=? and cca.contextlevel=? ";
+    $res = $DB->get_fieldset_sql($sql, array($catid, CONTEXT_COURSE, CONTEXT_COURSECAT));
+    return $res;
+}
+
+function get_descendant_courses_from_catbis($catid) {
+    global $DB;
+
+    $sql = "SELECT cid.objectid, c2.path FROM {course_categories} c1 "
+    . "JOIN course_categories c2 ON (c2.path LIKE CONCAT(c1.path, '/%') OR c2.id=c1.id) "
+    . "JOIN custom_info_data cid ON ((CONCAT(';',data,';') LIKE CONCAT('%;',c2.id,';%'))) "
+    . "WHERE c1.id = ? AND cid.fieldid = ? AND objectname='course' ";
+
+    $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
+/*
+    echo "fieldid =" . $fieldid ."\n";
+    echo "catid=" . $catid ."\n";
+    var_dump($sql);
+ */
+    $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
+    // var_dump($res);
+
+    return $res;
+
 }
