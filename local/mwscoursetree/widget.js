@@ -55,6 +55,4 @@ function onLoad() {
     });
 }
 
-document.write('<div class="coursetree"></div>');
-
 })();

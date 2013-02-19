@@ -39,7 +39,7 @@ function get_children($node) {
                 if ($n >= 0) { //** @todo ce calcul est idiot
                     $name = $category->name;
                     $result[] = array(
-                        'node' => '/' . $category->id,
+                        'id' => '/' . $category->id,
                         'label' => $name,
                         'load_on_demand' => true,
                         'depth' => $category->depth,
@@ -74,7 +74,7 @@ function get_children($node) {
 
 function get_entry_from_course($crsid, $depth) {
     return array(
-        'node' => null,
+        'id' => null,
         'label' => format_course_label('', $crsid),
         'load_on_demand' => false,
         'depth' => $depth,
@@ -152,7 +152,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         if ( isset($unfold[$node]) &&  $unfold[$node] ) {
             $item['load_on_demand'] = true;
         }
-        $item['node'] = $node;
+        $item['id'] = $node;
         $item['depth'] = $depth;
         $items[] = $item;
     }
