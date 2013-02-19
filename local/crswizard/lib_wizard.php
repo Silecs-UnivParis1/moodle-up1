@@ -1385,7 +1385,7 @@ class core_wizard {
             $this->set_metadata_rof1($rof1['tabpath']);
             // rattachement secondaire
             $this->set_metadata_rof2();
-            $this->mydata->profile_field_up1composition = trim($form2['complement']);
+            $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
         } else { // cas 3
