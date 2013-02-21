@@ -85,7 +85,7 @@ switch ($stepin) {
         redirect($url);
         break;
     case 2:
-        $steptitle = get_string('coursedefinition', 'local_crswizard');
+        $steptitle = get_string('upcoursedefinition', 'local_crswizard');
         $editoroptions = array(
             'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
         );
@@ -128,7 +128,7 @@ switch ($stepin) {
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 redirect($CFG->wwwroot . '/local/crswizard/update/index.php?stepin=' . $stepgo);
             }
-            $steptitle = get_string('coursedescription', 'local_crswizard');
+            $steptitle = get_string('upcoursedescription', 'local_crswizard');
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/../js/include-for-rattachements.js'));

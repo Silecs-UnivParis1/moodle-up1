@@ -168,14 +168,16 @@ $string['wizardcourse'] = 'Assistant ouverture/paramétrage coursMoodle';
 
 /** update **/
 $string['upcancel'] = 'Annuler';
+$string['upcoursedefinition'] = 'Étape 1 - Identification de l\'espace de cours';
+$string['upcoursedescription'] = 'Étape 2 - Description de l\'espace de cours';
 $string['updatetitle'] = 'Confirmer les modifications';
-$string['upenrolcohortscase2'] = 'Étape 3 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
-$string['upenrolcohortscase3'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['upenrolcohortscase2'] = 'Étape 2 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['upenrolcohortscase3'] = 'Étape 3 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
 $string['uprofreadonlymess'] = 'Les rattachements sont protégés, vous ne disposez pas des droits de modification.';
 $string['upsavechanges'] = 'Enregistrer les modifications';
 $string['upsummaryof'] = 'Récapitulatif des modifications';
-$string['upstepkeycase2'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
-$string['upstepkeycase3'] = 'Étape 5 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
+$string['upstepkeycase2'] = 'Étape 3 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
+$string['upstepkeycase3'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
 $string['upwizardcourse'] = 'Assistant paramétrage';
 
 /** old **/
