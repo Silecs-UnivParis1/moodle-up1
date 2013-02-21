@@ -137,6 +137,29 @@ ul.jqtree-tree .jqtree-moving > div .jqtree-title {
     outline: dashed 1px #0000ff;
 }
 
+/* Custom */
+
 .jqtree-hidden {
     display: none;
 }
+
+li:not(.jqtree-folder) .jqtree-title {
+	border-bottom: 1px dashed #808080;
+}
+.jqtree-title > .coursetree-name {
+	width: 60%;
+	max-width: 50ex;
+	display: inline-block;
+}
+.jqtree-title > .coursetree-teachers {
+	width: 35%;
+	max-width: 25ex;
+	display: inline-block;
+}
+.jqtree-title > .coursetree-icons {
+	width: 5%;
+	max-width: 5ex;
+	display: inline-block;
+}
+
+
