@@ -46,16 +46,16 @@ function onLoad() {
     jQuery(function () {
         $('head').append('<link rel="stylesheet" href="' + rootUrl + 'assets/jqtree.css">');
         $('.coursetree').each(function(){
-            var root = $(this).data('root');
-            if (root) {
-                root = '?node=' + root;
+            var rootNode = $(this).data('root');
+            if (rootNode) {
+                rootNode = '?node=' + rootNode;
             } else {
-                root = '';
+                rootNode = '';
             }
             $(this).tree({
-                dataUrl: rootUrl + 'service-children.php' + root,
+                dataUrl: rootUrl + 'service-children.php' + rootNode,
                 autoEscape: false, // allow HTML labels
-                autoOpen: 0, // first level is open at launch
+                autoOpen: false,
                 slide: false, // turn off the animation
                 dragAndDrop: false
            });
