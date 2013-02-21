@@ -190,8 +190,9 @@ function format_course_label($name, $crsid) {
     $dup = $teachers;
     $firstteacher = fullname(array_shift($dup)) . (count($teachers) > 1 ? '...' : '');
     foreach ($teachers as $teacher) {
-        $titleteachers .= fullname($teacher) . ' ';
+        $titleteachers .= fullname($teacher) . ', ';
     }
+    $titleteachers = substr($titleteachers, 0, -2);
     $fullteachers = '<span class="coursetree-teachers" title="'. $titleteachers .'">' . $firstteacher . '</span>';
     // icons
     $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
