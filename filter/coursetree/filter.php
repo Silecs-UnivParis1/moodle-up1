@@ -11,7 +11,7 @@ defined('MOODLE_INTERNAL') || die();
 class filter_coursetree extends moodle_text_filter {
 
     public function filter($text, array $options = array()) {
-        if ( preg_match('/\[coursetree (.+)\]/', $text, $matches) ) {
+        if ( preg_match( '#\[coursetree (/[\d/]+[\w/-]*)\]#', $text, $matches) ) {
                 $widget =  new moodle_url('/local/mwscoursetree/widget.js');
                 $script = '<script type="text/javascript" src="' . $widget . '"></script>';
                 $div = '<div class="coursetree" data-root="' . $matches[1] .'"></div>';
