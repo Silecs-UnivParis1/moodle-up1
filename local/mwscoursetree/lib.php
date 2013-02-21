@@ -214,7 +214,8 @@ function format_course_label($name, $crsid) {
  * @return string
  */
 function display_name($name, $nodeid) {
-    return '<span class="jqtree-hidden">[' . $nodeid . ']</span> &nbsp; <span class="name">' . $name . "</span>";
+    return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
+         . '<span class="coursetree-name">' . $name . "</span>";
 }
 
 /**
