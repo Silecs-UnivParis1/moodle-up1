@@ -11,7 +11,6 @@ require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
 /**
- * @todo gérer les rattachements secondaires de catégories (up1categoriesbis)  dans get_descendant_course_from_catbis()
  * @todo compter les cours descendants dans le cas 2 ?
  * @todo compter les cours descendants dans le cas 3 ?
  * @todo limiter le dépliage au niveau 8 matière (ROFcourse niv.2)
@@ -216,14 +215,23 @@ function display_name($name, $nodeid) {
     return '<span class="jqtree-hidden">[' . $nodeid . ']</span> &nbsp; ' . $name ;
 }
 
+/**
+ * recherche les rattachements des cours aux catégories (principaux ET secondaires)
+ * @param int $catid
+ * @return array(int crsid)
+ */
 function get_descendant_courses($catid) {
     $r1 = get_descendant_courses_from_category($catid);
-    //var_dump($r1);
     $r2 = get_descendant_courses_from_catbis($catid);
-    //var_dump($r2);
     return array_unique(array_merge($r1, $r2));
 }
 
+/**
+ * recherche les rattachements principaux aux catégories (standard moodle)
+ * @global type $DB
+ * @param int $catid
+ * @return array(int crsid)
+ */
 function get_descendant_courses_from_category($catid) {
     global $DB;
 
@@ -234,6 +242,12 @@ function get_descendant_courses_from_category($catid) {
     return $res;
 }
 
+/**
+ * recherche les rattachements secondaires des catégories (up1categoriesbis)
+ * @global type $DB
+ * @param type $catid
+ * @return array(int crsid)
+ */
 function get_descendant_courses_from_catbis($catid) {
     global $DB;
 
@@ -243,14 +257,7 @@ function get_descendant_courses_from_catbis($catid) {
     . "WHERE c1.id = ? AND cid.fieldid = ? AND objectname='course' ";
 
     $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
-/*
-    echo "fieldid =" . $fieldid ."\n";
-    echo "catid=" . $catid ."\n";
-    var_dump($sql);
- */
     $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
-    // var_dump($res);
-
     return $res;
 
 }

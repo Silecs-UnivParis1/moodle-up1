@@ -45,13 +45,21 @@ function loadJs(url, last) {
 function onLoad() {
     jQuery(function () {
         $('head').append('<link rel="stylesheet" href="' + rootUrl + 'assets/jqtree.css">');
-        $('.coursetree').tree({
-            dataUrl: rootUrl + 'service-children.php',
-            autoEscape: false, // allow HTML labels
-            autoOpen: 0, // first level is open at launch
-            slide: false, // turn off the animation
-            dragAndDrop: false
-       });
+        $('.coursetree').each(function(){
+            var rootNode = $(this).data('root');
+            if (rootNode) {
+                rootNode = '?node=' + rootNode;
+            } else {
+                rootNode = '';
+            }
+            $(this).tree({
+                dataUrl: rootUrl + 'service-children.php' + rootNode,
+                autoEscape: false, // allow HTML labels
+                autoOpen: false,
+                slide: false, // turn off the animation
+                dragAndDrop: false
+           });
+        });
     });
 }
 
