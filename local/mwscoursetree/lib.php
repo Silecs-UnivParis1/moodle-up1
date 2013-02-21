@@ -181,7 +181,7 @@ function format_course_label($name, $crsid) {
     if ($name == '') {
         $name = $dbcourse->fullname; //override ROF name with course name ?
     }
-    $crslink = html_writer::link($url, $name);
+    $crslink = '<span class="coursetree-name">' . html_writer::link($url, $name) . '</span>';
     // teachers
     $titleteachers = '';
     $context = get_context_instance(CONTEXT_COURSE, $crsid);
@@ -190,19 +190,22 @@ function format_course_label($name, $crsid) {
     $dup = $teachers;
     $firstteacher = fullname(array_shift($dup)) . (count($teachers) > 1 ? '...' : '');
     foreach ($teachers as $teacher) {
-        $titleteachers .= fullname($teacher) . ' ';
+        $titleteachers .= fullname($teacher) . ', ';
     }
-    $fullteachers = '<span title="'. $titleteachers .'">' . $firstteacher . '</span>';
+    $titleteachers = substr($titleteachers, 0, -2);
+    $fullteachers = '<span class="coursetree-teachers" title="'. $titleteachers .'">' . $firstteacher . '</span>';
     // icons
     $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
-    $icons = $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+    $icons = '<span class="coursetree-icons">';
     if ($myicons = enrol_get_course_info_icons($dbcourse)) { // enrolment access icons
         foreach ($myicons as $pix_icon) {
             $icons .= $OUTPUT->render($pix_icon);
         }
     }
+    $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+    $icons .= '</span>';
     //die($crslink .' '. $fullteachers . ' ' . $icons);
-    return $crslink .' '. $fullteachers . ' ' . $icons;
+    return  $crslink . $fullteachers . $icons ;
 }
 
 /**
@@ -212,7 +215,8 @@ function format_course_label($name, $crsid) {
  * @return string
  */
 function display_name($name, $nodeid) {
-    return '<span class="jqtree-hidden">[' . $nodeid . ']</span> &nbsp; ' . $name ;
+    return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
+         . '<span class="coursetree-name">' . $name . "</span>";
 }
 
 /**

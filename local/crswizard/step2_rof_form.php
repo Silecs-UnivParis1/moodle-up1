@@ -31,6 +31,7 @@ class course_wizard_step2_rof_form extends moodleform {
         $mform->addElement('header', 'categoryheader', get_string('categoryblockE2F', 'local_crswizard'));
 
         $classreadonly = '';
+        $messagerof = '';
         $rofeditor_permission = true;
         if (isset($SESSION->wizard['idcourse'])) {
             $rofeditor_permission = wizard_has_rofreferenceeditor_permission($SESSION->wizard['idcourse'], $USER->id);
@@ -60,6 +61,7 @@ class course_wizard_step2_rof_form extends moodleform {
             $mform->setType('category', PARAM_INT);
 
             $classreadonly = 'readonly';
+            $messagerof = '<div><span>' .get_string('uprofreadonlymess', 'local_crswizard')  . '</span></div>';
         }
 
         $labelrof =  '<br/><div class="fitemtitle required mylabel"><label>Elément pédagogique : *</label></div>';
@@ -89,6 +91,7 @@ class course_wizard_step2_rof_form extends moodleform {
             . '<div id="items-selected">'
             . '<div id="items-selected1"><span>' . get_string('rofselected1', 'local_crswizard') . '</span></div>'
             . '<div id="items-selected2"><span>' . get_string('rofselected2', 'local_crswizard') . '</span></div>'
+            . $messagerof
             . '</div>'
             . '</div>'
             . $codeJ;
