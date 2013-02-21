@@ -30,11 +30,12 @@ function crswizard_extends_navigation(global_navigation $navigation) {
             $node3 = $node1->add('Approbation', new moodle_url('/local/course_validated/index.php'));
         }
         if ($permassistant) {
-            $node3 = $node1->add('Assistant paramétrage', new moodle_url('/local/crswizard/update/index.php',
+            $node3 = $node1->add('Paramétrage', new moodle_url('/local/crswizard/update/index.php',
                 array('id' => $context->instanceid)));
         }
     } elseif ($permassistant) {
-        $node1 = $navigation->add('Assistant paramétrage', new moodle_url('/local/crswizard/update/index.php',
+        $node1 = $navigation->add('Assistant création de cours');
+        $node2 = $node1->add('Paramétrage', new moodle_url('/local/crswizard/update/index.php',
                 array('id' => $context->instanceid)));
     }
 }
