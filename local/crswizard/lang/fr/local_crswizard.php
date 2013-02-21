@@ -171,6 +171,7 @@ $string['upcancel'] = 'Annuler';
 $string['updatetitle'] = 'Confirmer les modifications';
 $string['upenrolcohortscase2'] = 'Étape 3 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
 $string['upenrolcohortscase3'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (étudiants)';
+$string['uprofreadonlymess'] = 'Les rattachements sont protégés, vous ne disposez pas des droits de modification.';
 $string['upsavechanges'] = 'Enregistrer les modifications';
 $string['upsummaryof'] = 'Récapitulatif des modifications';
 $string['upstepkeycase2'] = 'Étape 4 - Inscription des utilisateurs à l\'espace de cours (clé d\'inscription)';
