@@ -47,6 +47,7 @@ function onLoad() {
         $('head').append('<link rel="stylesheet" href="' + rootUrl + 'assets/jqtree.css">');
         $('.coursetree').each(function(){
             var rootNode = $(this).data('root');
+            var treeWidth = $(this).width();
             if (rootNode) {
                 rootNode = '?node=' + rootNode;
             } else {
@@ -54,6 +55,17 @@ function onLoad() {
             }
             $(this).tree({
                 dataUrl: rootUrl + 'service-children.php' + rootNode,
+                onAppendLi: function(node, $li) {
+                    if (!node.load_on_demand && !('is_open' in node) && node.children.length == 0) {
+                        var $name = $li.find('.jqtree-title').first().find('.coursetree-name');
+                        var lineWidth = treeWidth - 12*node.depth;
+                        setTimeout(function(){ // trick to wait for the CSS to be applied
+                            $name.width(function(i,w){
+                                return (lineWidth - 270 - 20); // 20px margin-right
+                            });
+                        }, 0);
+                    }
+                },
                 autoEscape: false, // allow HTML labels
                 autoOpen: false,
                 slide: false, // turn off the animation

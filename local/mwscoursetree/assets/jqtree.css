@@ -147,19 +147,17 @@ li:not(.jqtree-folder) .jqtree-title {
 	border-bottom: 1px dashed #F0F0F0;
 }
 .jqtree-title > .coursetree-name {
-	width: 62%;
-	max-width: 62ex;
+	width: 60%;
 	display: inline-block;
 }
 .jqtree-title > .coursetree-teachers {
-	width: 30%;
-	max-width: 30ex;
+	width: 250px;
 	display: inline-block;
 }
 .jqtree-title > .coursetree-icons {
-	width: 8%;
-	max-width: 8ex;
+	width: 20px;
 	display: inline-block;
+	text-align: right;
 }
 
 

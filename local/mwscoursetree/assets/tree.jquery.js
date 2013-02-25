@@ -777,6 +777,7 @@ limitations under the License.
       onSetStateFromStorage: null,
       onGetStateFromStorage: null,
       onCreateLi: null,
+      onAppendLi: null,
       onIsMoveHandle: null,
       onCanMove: null,
       onCanMoveTo: null,
@@ -1212,6 +1213,9 @@ limitations under the License.
           child = children[_i];
           $li = createLi(child);
           $ul.append($li);
+          if (_this.options.onAppendLi) {
+			  _this.options.onAppendLi(child, $li);
+		  }
           child.element = $li[0];
           $li.data('node', child);
           if (child.hasChildren()) {

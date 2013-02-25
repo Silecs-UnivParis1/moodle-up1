@@ -156,9 +156,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         } else {
             $item['label'] = display_name($name, $node);
         }
-        if ( isset($unfold[$node]) &&  $unfold[$node] ) {
-            $item['load_on_demand'] = true;
-        }
+        $item['load_on_demand'] = !empty($unfold[$node]);
         $item['id'] = $node;
         $item['depth'] = $depth;
         $items[] = $item;
