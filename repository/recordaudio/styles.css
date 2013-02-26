@@ -1,0 +1,5 @@
+.repository_recordaudio .fp-file,
+.repository_recordaudio .fp-saveas,
+.repository_recordaudio .fp-upload-btn {display:none;}
+.repository_recordaudio_wrapper textarea {display:none;}
+.repository_recordaudio .fp-recordaudio-recorder .mdl-right {vertical-align:top;}
