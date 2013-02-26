@@ -48,27 +48,24 @@ function onLoad() {
         var teachersWidth = 0;
         var iconsWidth = 0;
         $('.coursetree').each(function(){
-            var rootNode = $(this).data('root');
-            var treeWidth = $(this).width();
+            var $tree = $(this);
+            var rootNode = $tree.data('root');
             if (rootNode) {
                 rootNode = '?node=' + rootNode;
             } else {
                 rootNode = '';
             }
-            $(this).tree({
+            $tree.tree({
                 dataUrl: rootUrl + 'service-children.php' + rootNode,
                 onAppendLi: function(node, $li) {
                     if (!node.load_on_demand && !('is_open' in node) && node.children.length == 0) {
-                        var $name = $li.find('.jqtree-title').first().find('.coursetree-name');
+                        var $name = $li.find('.jqtree-title:first').first().find('.coursetree-name').first();
                         setTimeout(function(){ // trick to wait for the CSS to be applied
                             var lineWidth = $li.width();
                             if (teachersWidth == 0) {
                                 teachersWidth = $('.jqtree-title > .coursetree-teachers:first', $li).first().width();
                                 iconsWidth = $('.jqtree-title > .coursetree-icons:first', $li).first().width();
                             }
-                            console.log($li);
-                            console.log("lineWidth: " + lineWidth);
-                            console.log("teachersWidth: " + teachersWidth);
                             $name.width(function(i,w){
                                 return (lineWidth - teachersWidth - iconsWidth - 20); // 20px margin-right
                             });
@@ -79,7 +76,15 @@ function onLoad() {
                 autoOpen: false,
                 slide: false, // turn off the animation
                 dragAndDrop: false
-           });
+            });
+        });
+        $(window).resize(function () {
+			console.log('resize');
+            $('.coursetree-name').each(function() {
+                var n = $(this);
+				var w = n.closest('.jqtree-title').parent().width() - n.siblings('.coursetree-teachers').first().width() - n.siblings('.coursetree-icons').first().width() - 20;
+                $(this).width(w);
+            });
         });
     });
 }
