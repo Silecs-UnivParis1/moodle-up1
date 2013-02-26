@@ -155,7 +155,7 @@ li:not(.jqtree-folder) .jqtree-title {
 	display: inline-block;
 }
 .jqtree-title > .coursetree-icons {
-	width: 20px;
+	width: 60px;
 	display: inline-block;
 	text-align: right;
 }

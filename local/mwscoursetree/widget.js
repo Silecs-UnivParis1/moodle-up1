@@ -45,6 +45,8 @@ function loadJs(url, last) {
 function onLoad() {
     jQuery(function () {
         $('head').append('<link rel="stylesheet" href="' + rootUrl + 'assets/jqtree.css">');
+        var teachersWidth = 0;
+        var iconsWidth = 0;
         $('.coursetree').each(function(){
             var rootNode = $(this).data('root');
             var treeWidth = $(this).width();
@@ -59,9 +61,15 @@ function onLoad() {
                     if (!node.load_on_demand && !('is_open' in node) && node.children.length == 0) {
                         var $name = $li.find('.jqtree-title').first().find('.coursetree-name');
                         var lineWidth = treeWidth - 12*node.depth;
+                        if (teachersWidth == 0) {
+                            teachersWidth = $('.jqtree-title > .coursetree-teachers:first').first().width();
+                            iconsWidth = $('.jqtree-title > .coursetree-icons:first').first().width();
+                            console.log(teachersWidth);
+                            console.log(iconsWidth);
+                        }
                         setTimeout(function(){ // trick to wait for the CSS to be applied
                             $name.width(function(i,w){
-                                return (lineWidth - 270 - 20); // 20px margin-right
+                                return (lineWidth - teachersWidth - iconsWidth - 20); // 20px margin-right
                             });
                         }, 0);
                     }
