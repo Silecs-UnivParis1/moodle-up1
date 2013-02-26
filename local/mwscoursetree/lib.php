@@ -151,12 +151,12 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
         list($rofobject, $top) = rof_get_record($rofid);
         $name = $rofobject->name;
 
-        if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
-            $item['label'] = format_course_label($name, $directcourse[$node]);
-        } else {
-            $item['label'] = display_name($name, $node);
-        }
         $item['load_on_demand'] = !empty($unfold[$node]);
+        if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
+            $item['label'] = format_course_label($name, $directcourse[$node], !$item['load_on_demand']);
+        } else {
+            $item['label'] = display_name($name, $node, !$item['load_on_demand']);
+        }
         $item['id'] = $node;
         $item['depth'] = $depth;
         $items[] = $item;
@@ -168,9 +168,10 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
  * format course label
  * @param string $name course/ROF name ; if empty, will be filled with the course fullname
  * @param int $crsid
+ * @param boolean $leaf opt, true
  * @return strinf formatted label
  */
-function format_course_label($name, $crsid) {
+function format_course_label($name, $crsid, $leaf=true) {
     global $DB, $OUTPUT;
 
     // main link
@@ -179,7 +180,7 @@ function format_course_label($name, $crsid) {
     if ($name == '') {
         $name = $dbcourse->fullname; //override ROF name with course name ?
     }
-    $crslink = '<span class="coursetree-name">' . html_writer::link($url, $name) . '</span>';
+    $crslink = '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . html_writer::link($url, $name) . '</span>';
     // teachers
     $titleteachers = '';
     $context = get_context_instance(CONTEXT_COURSE, $crsid);
@@ -210,11 +211,12 @@ function format_course_label($name, $crsid) {
  * returns the "name" part of the label, with a span showing the node-id depending on class jqtree-hidden
  * @param string $name
  * @param string $nodeid 0
+ * @param boolean $leaf opt, false
  * @return string
  */
-function display_name($name, $nodeid) {
+function display_name($name, $nodeid, $leaf=false) {
     return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
-         . '<span class="coursetree-name">' . $name . "</span>";
+         . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
 }
 
 /**
