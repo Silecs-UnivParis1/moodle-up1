@@ -139,12 +139,21 @@ ul.jqtree-tree .jqtree-moving > div .jqtree-title {
 
 /* Custom */
 
+.coursetree ul.jqtree-tree {
+	padding-left: 10px;
+}
+
+/* overwrite YUI's CSS */
+.jqtree-tree ul {
+	margin-top: 5px;
+}
+
 .jqtree-hidden {
     display: none;
 }
 
 li:not(.jqtree-folder) .jqtree-title {
-	border-bottom: 1px dashed #F0F0F0;
+	border-bottom: 1px dashed #ECECEC;
 }
 .jqtree-title > .coursetree-name {
 	width: 60%;
