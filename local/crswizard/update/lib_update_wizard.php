@@ -23,8 +23,7 @@ function wizard_get_course($id) {
         if (isset($course->profile_field_up1generateur) && trim($course->profile_field_up1generateur) != '') {
             $SESSION->wizard['wizardcase'] = wizard_get_up1generateur(trim($course->profile_field_up1generateur));
         } else {
-            $url = new moodle_url($CFG->wwwroot.'/course/edit.php', array('id'=>$id));
-            redirect($url);
+            throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
         }
         if ($SESSION->wizard['wizardcase'] == 2) {
             $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
