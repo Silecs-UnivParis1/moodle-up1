@@ -350,7 +350,9 @@ if (isloggedin() and !isguestuser()) {
 		. " créé individuellement pour cette application."
         . " Le lien <em>Connexion</em> utilise par contre les comptes globaux.";
     echo $OUTPUT->box($msg, 'generalbox boxaligncenter boxwidthnormal');
-    if (!empty($CFG->loginpageautofocus)) {
+    if ($errormsg) {
+        $PAGE->requires->js_init_call('M.util.focus_login_error', null, true);
+    } else if (!empty($CFG->loginpageautofocus)) {
         //focus username or password
         $PAGE->requires->js_init_call('M.util.focus_login_form', null, true);
     }

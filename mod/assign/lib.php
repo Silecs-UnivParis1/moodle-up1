@@ -295,6 +295,9 @@ function assign_print_overview($courses, &$htmlarray) {
         return true;
     }
 
+    // Definitely something to print, now include the constants we need.
+    require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
     $strduedate = get_string('duedate', 'assign');
     $strduedateno = get_string('duedateno', 'assign');
     $strgraded = get_string('graded', 'assign');
@@ -309,12 +312,25 @@ function assign_print_overview($courses, &$htmlarray) {
     //
     list($sqlassignmentids, $assignmentidparams) = $DB->get_in_or_equal($assignmentids);
 
-    // build up and array of unmarked submissions indexed by assignment id/ userid
-    // for use where the user has grading rights on assignment
-    $rs = $DB->get_recordset_sql("SELECT s.assignment as assignment, s.userid as userid, s.id as id, s.status as status, g.timemodified as timegraded
-                            FROM {assign_submission} s LEFT JOIN {assign_grades} g ON s.userid = g.userid and s.assignment = g.assignment
-                            WHERE g.timemodified = 0 OR s.timemodified > g.timemodified
-                            AND s.assignment $sqlassignmentids", $assignmentidparams);
+    // Build up and array of unmarked submissions indexed by assignment id/ userid
+    // for use where the user has grading rights on assignment.
+    $dbparams = array_merge(array(ASSIGN_SUBMISSION_STATUS_SUBMITTED), $assignmentidparams);
+    $rs = $DB->get_recordset_sql('SELECT
+                                      s.assignment as assignment,
+                                      s.userid as userid,
+                                      s.id as id,
+                                      s.status as status,
+                                      g.timemodified as timegraded
+                                  FROM {assign_submission} s
+                                  LEFT JOIN {assign_grades} g ON
+                                      s.userid = g.userid AND
+                                      s.assignment = g.assignment
+                                  WHERE
+                                      ( g.timemodified is NULL OR
+                                      s.timemodified > g.timemodified ) AND
+                                      s.timemodified IS NOT NULL AND
+                                      s.status = ? AND
+                                      s.assignment ' . $sqlassignmentids, $dbparams);
 
     $unmarkedsubmissions = array();
     foreach ($rs as $rd) {
@@ -326,7 +342,7 @@ function assign_print_overview($courses, &$htmlarray) {
     // get all user submissions, indexed by assignment id
     $mysubmissions = $DB->get_records_sql("SELECT a.id AS assignment, a.nosubmissions AS nosubmissions, g.timemodified AS timemarked, g.grader AS grader, g.grade AS grade, s.status AS status
                             FROM {assign} a LEFT JOIN {assign_grades} g ON g.assignment = a.id AND g.userid = ? LEFT JOIN {assign_submission} s ON s.assignment = a.id AND s.userid = ?
-                            AND a.id $sqlassignmentids", array_merge(array($USER->id, $USER->id), $assignmentidparams));
+                            WHERE a.id $sqlassignmentids", array_merge(array($USER->id, $USER->id), $assignmentidparams));
 
     foreach ($assignments as $assignment) {
         // Do not show assignments that are not open
