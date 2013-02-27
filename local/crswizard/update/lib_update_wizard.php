@@ -19,12 +19,13 @@ function wizard_get_course($id) {
 
         $SESSION->wizard['form_step2']['up1datefermeture'] = $course->profile_field_up1datefermeture;
 
-        // determiner le cas sur profile_field_up1generateur (faute de mieux)
-        if (isset($course->profile_field_up1generateur) && trim($course->profile_field_up1generateur) != '') {
-            $SESSION->wizard['wizardcase'] = wizard_get_up1generateur(trim($course->profile_field_up1generateur));
+        $case = wizard_get_generateur($course);
+        if ($case == 0) {
+             throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
         } else {
-            throw new moodle_exception('Vous n\'avez pas la permission d\'accéder à cette page.');
+            $SESSION->wizard['wizardcase'] = $case;
         }
+
         if ($SESSION->wizard['wizardcase'] == 2) {
             $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
             $SESSION->wizard['form_step2']['summary_editor'] = $summary;
@@ -158,4 +159,59 @@ function wizard_rof_connection($up1rofpathid) {
     }
 }
 
+/**
+ * determine
+ * @param object course $course
+ * @return int
+ */
+function wizard_get_generateur($course) {
+    global $DB;
+    $case = 0;
+    if (isset($course->profile_field_up1generateur) && trim($course->profile_field_up1generateur) != '') {
+            $case = wizard_get_up1generateur(trim($course->profile_field_up1generateur));
+            if ($case == 2) {
+                $trofid = explode(';', $course->profile_field_up1rofid);
+                $r1 = trim($trofid[0]);
+                if (substr($r1, 0, 5) == 'UP1-P') {
+                    $rof = $DB->get_record('rof_program',  array('rofid' => $r1));
+                    if ($rof && ($rof->name == $course->profile_field_up1rofname) ) {
+                        return $case;
+                    } else {
+                        return 0;
+                    }
+                }elseif (substr($r1, 0, 5) == 'UP1-C') {
+                    $rof = $DB->get_record('rof_course',  array('rofid' => $r1));
+                    if ($rof && ($rof->name == $course->profile_field_up1rofname) ) {
+                        if ($rof->code == $course->profile_field_up1code) {
+                            return $case;
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                } else {// si pas de $rof
+                    return 0;
+                }
+            } elseif($case == 3) {
+                //verifier si categorie est une feuille
+                $nbsel = $DB->count_records('course_categories', array('id' => $course->category));
+                if ($nbsel != 1) {
+                    return 0;
+                }
+                $cat = $DB->get_record('course_categories',  array('id' => $course->category));
+                if ($cat && ($cat->depth > 2)) {
+                    $enf = $DB->get_field('course_categories', 'id', array('parent' => $cat->id));
+                    if ($enf) {
+                        return 0;
+                    }
+                } else {
+                    return 0;
+                }
+            }
+        } else {
+            return 0;
+        }
+    return $case;
+}
 ?>
