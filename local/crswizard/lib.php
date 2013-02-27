@@ -19,6 +19,9 @@ function crswizard_extends_navigation(global_navigation $navigation) {
     $context = $PAGE->context;
     if ($context->contextlevel == 50 && $context->instanceid != 1) {
         $permassistant = wizard_update_has_permission($context->instanceid, $USER->id);
+        if ($permassistant) {
+            $permassistant = wizard_update_course($context->instanceid);
+        }
     }
 
     if ($permcreator || $permvalidator) {

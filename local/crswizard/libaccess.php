@@ -168,3 +168,25 @@ function wizard_has_rofreferenceeditor_permission($courseid, $userid) {
     }
     return false;
 }
+
+/**
+ * vérifie si le cours peut être modifié par l'assistant allégé
+ * @param int $courseid
+ * @return boolean
+ */
+function wizard_update_course($courseid) {
+    global $DB, $CFG;
+        $course = $DB->get_record('course', array('id'=>$courseid), '*', MUST_EXIST);
+        if ($course) {
+            if ($course->format=='site') {
+                return false;
+            }
+            require_once("$CFG->dirroot/lib/custominfo/lib.php");
+            $custominfo_data = custominfo_data::type('course');
+            $custominfo_data->load_data($course);
+            if (isset($course->profile_field_up1generateur) && trim($course->profile_field_up1generateur) != '') {
+                return true;
+            }
+        }
+    return false;
+}
