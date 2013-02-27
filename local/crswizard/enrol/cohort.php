@@ -26,7 +26,7 @@ if (isset($SESSION->wizard['idcourse'])) {
     $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
     $PAGE->set_context($systemcontext);
     wizard_require_permission('creator', $USER->id);
-    $PAGE->set_url('/local/crswizard/enrol/cohort.php');
+    $PAGE->set_url('/local/crswizard/index.php');
 }
 
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('cohort', 'local_crswizard'));
