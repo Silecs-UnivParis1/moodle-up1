@@ -16,7 +16,7 @@ $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 wizard_require_permission('creator', $USER->id);
 
 $PAGE->set_context($systemcontext);
-$PAGE->set_url('/local/crswizard/enrol/teacher.php');
+$PAGE->set_url('/local/crswizard/index.php');
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('teacher', 'local_crswizard'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'), true);

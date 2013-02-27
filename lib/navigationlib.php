@@ -187,8 +187,6 @@ class navigation_node implements renderable {
         if ($this->text === null) {
             throw new coding_exception('You must set the text for the node when you create it.');
         }
-        // Default the title to the text
-        $this->title = $this->text;
         // Instantiate a new navigation node collection for this nodes children
         $this->children = new navigation_node_collection();
     }
@@ -2323,8 +2321,8 @@ class global_navigation extends navigation_node {
 
         if (!empty($CFG->messaging)) {
             $messageargs = null;
-            if ($USER->id!=$user->id) {
-                $messageargs = array('id'=>$user->id);
+            if ($USER->id != $user->id) {
+                $messageargs = array('user1' => $user->id);
             }
             $url = new moodle_url('/message/index.php',$messageargs);
             $usernode->add(get_string('messages', 'message'), $url, self::TYPE_SETTING, null, 'messages');

@@ -12,14 +12,23 @@ require_once('../libaccess.php');
 require_login();
 
 if (isset($SESSION->wizard['idcourse'])) {
-    wizard_require_update_permission($SESSION->wizard['idcourse'], $USER->id);
+    $idcourse = $SESSION->wizard['idcourse'];
+    wizard_require_update_permission($idcourse, $USER->id);
+    $course = $DB->get_record('course', array('id'=>$idcourse), '*', MUST_EXIST);
+    require_login($course);
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+    $PAGE->set_context($coursecontext);
+    $pageparams = array('id'=>$idcourse);
+    $PAGE->set_url('/local/crswizard/update/index.php', $pageparams);
+    $streditcoursesettings = get_string("editcoursesettings");
+    $PAGE->navbar->add($streditcoursesettings);
 } else {
+    $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+    $PAGE->set_context($systemcontext);
     wizard_require_permission('creator', $USER->id);
+    $PAGE->set_url('/local/crswizard/index.php');
 }
 
-$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
-$PAGE->set_context($systemcontext);
-$PAGE->set_url('/local/crswizard/enrol/cohort.php');
 $PAGE->set_title($SESSION->wizard['form_step2']['fullname'] . ': ' . get_string('cohort', 'local_crswizard'));
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'), true);
