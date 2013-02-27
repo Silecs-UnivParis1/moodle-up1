@@ -41,13 +41,7 @@ global $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
 
-$systemcontext = get_context_instance(CONTEXT_SYSTEM);
-$PAGE->set_url('/local/crswizard/update/index.php');
-$PAGE->set_context($systemcontext);
-$PAGE->requires->css(new moodle_url('../local/crswizard/css/crswizard.css'));
-
 $id = optional_param('id', 0, PARAM_INT);
-
 if (empty($id)) {
     if (isset($SESSION->wizard['init_course']['id'])) {
         $id = $SESSION->wizard['init_course']['id'];
@@ -55,6 +49,14 @@ if (empty($id)) {
         print_error('invalidcourseid');
     }
 }
+$pageparams = array('id'=>$id);
+$PAGE->set_url('/local/crswizard/update/index.php', $pageparams);
+$PAGE->requires->css(new moodle_url('../local/crswizard/css/crswizard.css'));
+
+$course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
+require_login($course);
+$coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+$PAGE->set_context($coursecontext);
 
 $stepin = optional_param('stepin', 0, PARAM_INT);
 
@@ -188,11 +190,6 @@ switch ($stepin) {
         break;
 }
 
-if ( isset($SESSION->wizard['form_step2']['fullname'])) {
-    $fullname = $SESSION->wizard['form_step2']['fullname'];
-    $url = new moodle_url($CFG->wwwroot.'/course/view.php', array('id'=>$id));
-    $PAGE->navbar->add($fullname, $url);
-}
 $streditcoursesettings = get_string("editcoursesettings");
 $PAGE->navbar->add($streditcoursesettings);
 
