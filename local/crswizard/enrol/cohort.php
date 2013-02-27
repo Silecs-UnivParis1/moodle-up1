@@ -11,12 +11,6 @@ require_once('../libaccess.php');
 
 require_login();
 
-if (isset($SESSION->wizard['idcourse'])) {
-    wizard_require_update_permission($SESSION->wizard['idcourse'], $USER->id);
-} else {
-    wizard_require_permission('creator', $USER->id);
-}
-
 $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_context($systemcontext);
 $PAGE->set_url('/local/crswizard/enrol/cohort.php');
@@ -25,6 +19,20 @@ $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
 $PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'), true);
 $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'), true);
 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+
+if (isset($SESSION->wizard['idcourse'])) {
+    $idcourse = $SESSION->wizard['idcourse'];
+    wizard_require_update_permission($idcourse, $USER->id);
+    if ( isset($SESSION->wizard['form_step2']['fullname'])) {
+        $fullname = $SESSION->wizard['form_step2']['fullname'];
+        $url = new moodle_url($CFG->wwwroot.'/course/view.php', array('id'=>$idcourse));
+        $PAGE->navbar->add($fullname, $url);
+    }
+    $streditcoursesettings = get_string("editcoursesettings");
+    $PAGE->navbar->add($streditcoursesettings);
+} else {
+    wizard_require_permission('creator', $USER->id);
+}
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));

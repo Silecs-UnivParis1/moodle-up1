@@ -188,11 +188,16 @@ switch ($stepin) {
         break;
 }
 
-$straddnewcourse = get_string("addnewcourse");
-$PAGE->navbar->add($straddnewcourse);
+if ( isset($SESSION->wizard['form_step2']['fullname'])) {
+    $fullname = $SESSION->wizard['form_step2']['fullname'];
+    $url = new moodle_url($CFG->wwwroot.'/course/view.php', array('id'=>$id));
+    $PAGE->navbar->add($fullname, $url);
+}
+$streditcoursesettings = get_string("editcoursesettings");
+$PAGE->navbar->add($streditcoursesettings);
 
 $site = get_site();
-$PAGE->set_title("$site->shortname: $straddnewcourse");
+$PAGE->set_title("$site->shortname: $streditcoursesettings");
 $PAGE->set_heading($site->fullname);
 
 echo $OUTPUT->header();
