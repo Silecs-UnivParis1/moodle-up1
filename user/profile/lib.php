@@ -346,7 +346,6 @@ class profile_field_base {
 
 
 } /// End of class definition
->>>>>>> MOODLE_23_STABLE
 
 
 /***** General purpose functions for customisable user profiles *****/
