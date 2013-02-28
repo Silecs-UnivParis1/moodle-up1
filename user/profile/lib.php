@@ -360,17 +360,14 @@ function profile_load_data($user) {
  * @param int $userid id of user whose profile is being edited.
  */
 function profile_definition($mform, $userid = 0) {
-    $custominfo = new custominfo_form_extension('user');
-
-    // if user is "admin" fields are displayed regardless
-    $update = has_capability('moodle/user:update', get_context_instance(CONTEXT_SYSTEM));
-
-    $custominfo->definition($mform, $canviewall, $userid);
+    $custominfo = new custominfo_form_extension('user', $userid);
+    $canviewall = has_capability('moodle/user:update', get_context_instance(CONTEXT_SYSTEM));
+    $custominfo->definition($mform, $canviewall);
 }
 
 function profile_definition_after_data($mform, $userid) {
-    $custominfo = new custominfo_form_extension('user');
-    $custominfo->definition_after_data($mform, $userid);
+    $custominfo = new custominfo_form_extension('user', $userid);
+    $custominfo->definition_after_data($mform);
 }
 
 function profile_validation($usernew, $files) {
