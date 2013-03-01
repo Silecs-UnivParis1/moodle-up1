@@ -36,10 +36,10 @@ function get_id_courses_to_validate($approbateurid, $validated, $permcheck=false
         // die ('Erreur ! manque up1avalider ou up1datevalid ou up1approbateurid');
         return;
     }
-    $sql = "SELECT DISTINCT cd1.objectid FROM custom_info_data cd1 "     //cd1 = avalider (bool)
-         . "JOIN custom_info_data cd2 ON (cd1.objectid=cd2.objectid) " ; //cd2 = datevalid
+    $sql = "SELECT DISTINCT cd1.objectid FROM {custom_info_data} cd1 "     //cd1 = avalider (bool)
+         . "JOIN {custom_info_data} cd2 ON (cd1.objectid=cd2.objectid) " ; //cd2 = datevalid
     if ($approbateurid) {
-        $sql .= "JOIN custom_info_data cdq ON (cd1.objectid=cdq.objectid) " ; //cdq = approbateurpropid
+        $sql .= "JOIN {custom_info_data} cdq ON (cd1.objectid=cdq.objectid) " ; //cdq = approbateurpropid
     }
     $sql .= "WHERE cd1.fieldid=$avaliderId AND cd1.data=1 AND cd2.fieldid=$datevalidId ";
     if ($approbateurid) {
