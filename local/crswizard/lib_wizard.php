@@ -691,11 +691,11 @@ function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
     }
     if (count($tabcat)) {
         $listecat = implode(",", $tabcat);
-        $sqlcatComp = "SELECT DISTINCT name FROM course_categories WHERE id IN (" . $listecat . ") AND depth=3";
+        $sqlcatComp = "SELECT DISTINCT name FROM {course_categories} WHERE id IN (" . $listecat . ") AND depth=3";
         $catComp = array();
         $catComp = $DB->get_fieldset_sql($sqlcatComp);
 
-        $sqlcatDip = "SELECT * FROM course_categories WHERE id IN (" . $listecat . ") AND depth=4";
+        $sqlcatDip = "SELECT * FROM {course_categories} WHERE id IN (" . $listecat . ") AND depth=4";
         $catDip = $DB->get_records_sql($sqlcatDip);
 
         $tabnewcomp = array();
@@ -715,7 +715,7 @@ function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
         $catnewComp = array();
         if (count($tabnewcomp)) {
             $listenewcat = implode(",", $tabnewcomp);
-            $sqlcatComp = "SELECT DISTINCT name FROM course_categories WHERE id IN (" . $listenewcat . ") AND depth=3";
+            $sqlcatComp = "SELECT DISTINCT name FROM {course_categories} WHERE id IN (" . $listenewcat . ") AND depth=3";
             $catnewComp = $DB->get_fieldset_sql($sqlcatComp);
         }
 

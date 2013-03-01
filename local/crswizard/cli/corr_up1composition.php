@@ -11,7 +11,7 @@ $idcomplement = $DB->get_field('custom_info_field', 'id', array('shortname' => '
 echo "idcomposition : " .$idcomposition . "\n";
 echo "idcomplement : " .$idcomplement . "\n";
 
-$sql = "select * from custom_info_data where objectname = 'course' and fieldid=" . $idcomposition;
+$sql = "select * from {custom_info_data} where objectname = 'course' and fieldid=" . $idcomposition;
 $compositions = $DB->get_records_sql($sql);
 
 

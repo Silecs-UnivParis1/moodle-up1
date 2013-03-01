@@ -250,15 +250,15 @@ class rof_browser {
                         $mydip = substr($mydip, 0, -1);
                     }
 
-					$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) AND typedip in (".$mydip.") " . $sort;
+					$sql = 'SELECT * FROM {' . $tabEnf . '} WHERE '. " rofid in ({$sub}) AND typedip in (".$mydip.") " . $sort;
 					$subList = $DB->get_records_sql($sql);
 				} else {
-                    $sql = "SELECT DISTINCT typedip FROM rof_program WHERE subnb > 0 and rofid in ({$sub})";
+                    $sql = "SELECT DISTINCT typedip FROM {rof_program} WHERE subnb > 0 and rofid in ({$sub})";
 					$subList = $DB->get_records_sql($sql);
 					return $this->print_select_type_diplome($subList, $this->rofid, 2);
 				}
 			} else {
-				$sql = 'SELECT * FROM ' . $tabEnf . ' WHERE '. " rofid in ({$sub}) " . $sort;
+				$sql = 'SELECT * FROM {' . $tabEnf . '} WHERE '. " rofid in ({$sub}) " . $sort;
 				$subList = $DB->get_records_sql($sql);
 			}
 
@@ -566,7 +566,7 @@ class rof_browser {
         global $DB;
         $list = '';
         $tabkey = $this->generate_tabconstantkey();
-        $sql = "SELECT DISTINCT typedip FROM rof_program";
+        $sql = "SELECT DISTINCT typedip FROM {rof_program}";
         $typesdip = $DB->get_records_sql($sql);
         foreach ($typesdip as $k=>$v) {
             if (! array_key_exists($k, $tabkey)) {
