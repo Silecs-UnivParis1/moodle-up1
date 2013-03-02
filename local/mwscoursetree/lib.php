@@ -137,7 +137,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
             $arrofpath = array_filter(explode('/', $rofpathid));
             $prenode = "/$parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
             if (count($arrofpath) == $depth - 3 ) { // leaf
-                $directcourse[$prenode] = $crsid;
+                $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
             } elseif (count($arrofpath) > $depth - 3 ) { // subfolders
                 $unfold[$prenode] = true;
             }
@@ -153,13 +153,19 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
 
         $item['load_on_demand'] = !empty($unfold[$node]);
         if ( isset($directcourse[$node]) &&  $directcourse[$node] ) {
-            $item['label'] = format_course_label($name, $directcourse[$node], !$item['load_on_demand']);
+            foreach ($directcourse[$node] as $crsid) {
+                $item['label'] = format_course_label('', $crsid, !$item['load_on_demand']);
+                $item['id'] = $node . '/' . $crsid;
+                $item['depth'] = $depth;
+                $items[] = $item;
+            }
         } else {
             $item['label'] = display_name($name, $node, !$item['load_on_demand']);
+            $item['id'] = $node;
+            $item['depth'] = $depth;
+            $items[] = $item;
         }
-        $item['id'] = $node;
-        $item['depth'] = $depth;
-        $items[] = $item;
+
     }
     return $items;
 }
