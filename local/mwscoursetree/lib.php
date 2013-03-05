@@ -130,19 +130,17 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
     $component = get_component_from_category($parentcatid);
     $prenodes = array();
     $items = array();
+    //$parentrofpath = '/' . join('/', array_slice($pseudopath, 1)); // le chemin sans la catégorie
 
-    foreach ($rofcourses as $crsid => $dummy) {
-        $rofpathids = array_filter(explode(';', up1_meta_get_text($crsid, 'rofpathid', false)));
-        foreach ($rofpathids as $rofpathid) {
-            $arrofpath = array_filter(explode('/', $rofpathid));
-            $prenode = "/$parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
-            if (count($arrofpath) == $depth - 3 ) { // leaf
-                $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
-            } elseif (count($arrofpath) > $depth - 3 ) { // subfolders
-                $unfold[$prenode] = true;
-            }
-            $prenodes[] = $prenode;
+    foreach ($rofcourses as $crsid => $rofpathid) {
+        $arrofpath = array_filter(explode('/', $rofpathid));
+        $prenode = "/$parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+        if (count($arrofpath) == $depth - 3 ) { // leaf
+            $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
+        } elseif (count($arrofpath) > $depth - 3 ) { // subfolders
+            $unfold[$prenode] = true;
         }
+        $prenodes[] = $prenode;
     }
 // var_dump($prenodes);
     foreach (array_unique($prenodes) as $node) {
