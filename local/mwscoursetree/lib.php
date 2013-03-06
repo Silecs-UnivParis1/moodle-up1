@@ -19,9 +19,26 @@ class course_tree {
 
     protected $pseudopath;
     protected $parentcatid;
+    protected $parentcat;
 
     const DEPTH_ROF_BEGIN = 4;
 
+    const LEVEL_CATEGORY = 1;
+    const LEVEL_CATEGORY_AND_ROF = 2;
+    const LEVEL_ROF = 3;
+    const LEVEL_ERROR = 4;
+
+    public function __construct() {
+        global $PAGE;
+        $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+    }
+
+    /**
+     * Static constructor that avoids using "new".
+     *
+     * @param string $node
+     * @return course_tree
+     */
     static public function from_node($node) {
         $new = new self;
         $new->set_node($node);
@@ -34,6 +51,8 @@ class course_tree {
      * @return course_tree
      */
     public function set_node($node = null) {
+        global $DB;
+
         if ($node) {
             $this->pseudopath = explode('/', substr($node, 1));
             $this->parentcatid = (int) $this->pseudopath[0];
@@ -41,6 +60,7 @@ class course_tree {
             $this->parentcatid = 0;
             $this->pseudopath = array('0');
         }
+        $this->parentcat = $DB->get_record('course_categories', array('id' => $this->parentcatid));
     }
 
     /**
@@ -49,34 +69,54 @@ class course_tree {
      * @throws coding_exception
      */
     public function get_children() {
-        global $DB, $PAGE;
-        $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
-
         $result = array();
-
-        $parentcat = $DB->get_record('course_categories', array('id' => $this->parentcatid));
-        if (count($this->pseudopath) == 1) { // course categories
-            if ($this->parentcatid === 0 || ($parentcat && $parentcat->depth < self::DEPTH_ROF_BEGIN)) { // CASE 1 node=category and children=categories
+        switch ($this->get_pseudopath_level()) {
+            case self::LEVEL_CATEGORY:
+                // CASE 1 node=category and children=categories
                 $categories = get_categories($this->parentcatid);
                 $result = $this->get_entries_from_categories($categories);
-            } elseif ($parentcat->depth == self::DEPTH_ROF_BEGIN) { // CASE 2 node=category and children = ROF entries or courses
+                break;
+            case self::LEVEL_CATEGORY_AND_ROF:
+                // CASE 2 node=category and children = ROF entries or courses
                 $courses = $this->get_descendant_courses($this->parentcatid);
                 list($rofcourses, $catcourses) = $this->split_courses_from_rof($courses);
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
                 }
                 $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN));
-            } else {
+                break;
+            case self::LEVEL_ROF:
+                // CASE 3 under ROF root
+                $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
+                $depth = self::DEPTH_ROF_BEGIN - 1 + count($this->pseudopath);
+                $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
+                $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
+                break;
+            case self::LEVEL_ERROR:
+            default:
                 throw new coding_exception('Category depth should not be > ' . self::DEPTH_ROF_BEGIN);
-            }
-        } else { // CASE 3 under ROF root
-            $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
-            $depth = self::DEPTH_ROF_BEGIN - 1 + count($this->pseudopath);
-            $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
-            $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
         }
 
         return $result;
+    }
+
+    /**
+     * Returns a LEVEL_* constant according to the current node's position
+     *
+     * @return integer
+     */
+    protected function get_pseudopath_level() {
+        if (count($this->pseudopath) == 1) { // course categories
+            if ($this->parentcatid === 0 || ($this->parentcat && $this->parentcat->depth < self::DEPTH_ROF_BEGIN)) {
+                return self::LEVEL_CATEGORY;
+            } else if ($this->parentcat->depth == self::DEPTH_ROF_BEGIN) {
+                return self::LEVEL_CATEGORY_AND_ROF;
+            } else {
+                return self::LEVEL_ERROR;
+            }
+        } else {
+            return self::LEVEL_ROF;
+        }
     }
 
     /**
