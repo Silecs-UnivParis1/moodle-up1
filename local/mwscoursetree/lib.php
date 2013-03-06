@@ -161,8 +161,7 @@ class course_tree {
         $context = get_context_instance(CONTEXT_COURSE, $crsid);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $teachers = get_role_users($role->id, $context);
-        $firstteacher = fullname(next($teachers)) . (count($teachers) > 1 ? '…' : '');
-        reset($teachers);
+        $firstteacher = fullname(current($teachers)) . (count($teachers) > 1 ? '…' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
         $fullteachers = '<span class="coursetree-teachers" title="' . $titleteachers . '">' . $firstteacher . '</span>';
 
