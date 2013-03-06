@@ -48,6 +48,7 @@ class course_tree {
     /**
      *
      * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+     * @global moodle_database $DB
      * @return course_tree
      */
     public function set_node($node = null) {
@@ -65,7 +66,7 @@ class course_tree {
 
     /**
      * main function for the webservice service-children
-     * @return array(assoc. array()) : to be used by jqTree after json-encoding
+     * @return array array(assoc-array()) : to be used by jqTree after json-encoding
      * @throws coding_exception
      */
     public function get_children() {
@@ -121,9 +122,9 @@ class course_tree {
 
     /**
      * return all courses rattached to the given rofpath ; only this rofpath in the returned course value
-     * @global type $DB
+     * @global moodle_database $DB
      * @param string $rofpath ex. "/02/UP1-PROG39308/UP1-PROG24870"
-     * @return assoc. array (crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
+     * @return array assoc-array(crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
      */
     protected function get_courses_from_parent_rofpath($rofpath) {
         global $DB;
@@ -158,7 +159,7 @@ class course_tree {
     /**
      * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
      * @param array $courses array of course objects (from DB)
-     * @return array($rofcourses, $catcourses)
+     * @return array array($rofcourses, $catcourses)
      */
     protected function split_courses_from_rof($courses) {
         $rofcourses = array();
@@ -214,7 +215,7 @@ class course_tree {
      * get entries from courses having a ROF rattachement
      * @param array $rofcourses as given by split_courses_from_rof() (or other source)
      * @param int $depth of target entries
-     * @return array(assoc. array)
+     * @return array array(assoc. array)
      */
     protected function get_entries_from_rof_courses($rofcourses, $depth) {
         $component = $this->get_component_from_category($this->parentcatid);
@@ -262,7 +263,7 @@ class course_tree {
      * @param string $name course/ROF name ; if empty, will be filled with the course fullname
      * @param int $crsid
      * @param boolean $leaf opt, true
-     * @return strinf formatted label
+     * @return string formatted label
      */
     protected function format_course_label($name, $crsid, $leaf = true) {
         global $DB, $OUTPUT;
@@ -315,7 +316,7 @@ class course_tree {
     /**
      * recherche les rattachements des cours aux catégories (principaux ET secondaires)
      * @param int $catid
-     * @return array(int crsid)
+     * @return array array(int crsid)
      */
     protected function get_descendant_courses($catid) {
         $r1 = $this->get_descendant_courses_from_category($catid);
@@ -325,9 +326,9 @@ class course_tree {
 
     /**
      * recherche les rattachements principaux aux catégories (standard moodle)
-     * @global type $DB
+     * @global moodle_database $DB
      * @param int $catid
-     * @return array(int crsid)
+     * @return array array(int crsid)
      */
     protected function get_descendant_courses_from_category($catid) {
         global $DB;
@@ -341,9 +342,9 @@ class course_tree {
 
     /**
      * recherche les rattachements secondaires des catégories (up1categoriesbis)
-     * @global type $DB
-     * @param type $catid
-     * @return array(int crsid)
+     * @global moodle_database $DB
+     * @param int $catid
+     * @return array array(int crsid)
      */
     protected function get_descendant_courses_from_catbis($catid) {
         global $DB;
