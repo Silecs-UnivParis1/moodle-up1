@@ -239,7 +239,8 @@ class rof_tools {
         foreach ($courses as $crsid) {
             $rofpathid = up1_meta_get_text($crsid, 'rofpathid', false);
             if ($rofpathid) {
-                $rofcourses[$crsid] = $rofpathid;
+                $rofpath = explode(';', $rofpathid);
+                $rofcourses[$crsid] = $rofpath[0]; // main rofpath only //** @todo CHECK THIS
             } else {
                 $catcourses[$crsid] = $crsid;
             }
@@ -260,6 +261,7 @@ class rof_tools {
         $prenodes = array();
         $directcourse = array();
         $unfold = array();
+        //NORMALEMENT, après les traitements sur $rofcourses, $rofpathid devrait toujours être unique (sans ;)
         foreach ($rofcourses as $crsid => $rofpathid) {
             $arrofpath = array_filter(explode('/', $rofpathid));
             $prenode = "/{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
