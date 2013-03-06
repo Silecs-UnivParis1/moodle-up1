@@ -71,17 +71,18 @@ class course_tree {
      */
     public function get_children() {
         $rof = new rof_tools($this);
+        $cat = new category_tools($this);
 
         $result = array();
         switch ($this->get_pseudopath_level()) {
             case self::LEVEL_CATEGORY:
                 // CASE 1 node=category and children=categories
                 $categories = get_categories($this->parentcatid);
-                $result = $this->get_entries_from_categories($categories);
+                $result = $cat->get_entries_from_categories($categories);
                 break;
             case self::LEVEL_CATEGORY_AND_ROF:
                 // CASE 2 node=category and children = ROF entries or courses
-                $courses = $this->get_descendant_courses($this->parentcatid);
+                $courses = $cat->get_descendant_courses($this->parentcatid);
                 list($rofcourses, $catcourses) = $rof->split_courses_from_rof($courses);
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
@@ -133,42 +134,6 @@ class course_tree {
             'load_on_demand' => false,
             'depth' => $depth,
         );
-    }
-
-    /**
-     * get component (ex. 05) from categoryid
-     * @param int $catid
-     * @return string component, ex. "05"
-     */
-    protected function get_component_from_category($catid) {
-        global $DB;
-        $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
-        return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
-    }
-
-    /**
-     * Returns an arry of nodes.
-     *
-     * @param array $categories
-     * @return array
-     */
-    protected function get_entries_from_categories($categories) {
-        $result = array();
-        foreach ($categories as $category) {
-            $courses = $this->get_descendant_courses($category->id);
-            $n = count($courses);
-            if ($n >= 1) { //** @todo ce calcul est idiot
-                $name = $category->name . ' (' . $n . ') ';
-                $nodeid = '/' . $category->id;
-                $result[] = array(
-                    'id' => $nodeid,
-                    'label' => $this->display_name($name, $nodeid),
-                    'load_on_demand' => true,
-                    'depth' => $category->depth,
-                );
-            }
-        }
-        return $result;
     }
 
     /**
@@ -225,56 +190,10 @@ class course_tree {
         return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
-
-    /**
-     * recherche les rattachements des cours aux catégories (principaux ET secondaires)
-     * @param int $catid
-     * @return array array(int crsid)
-     */
-    protected function get_descendant_courses($catid) {
-        $r1 = $this->get_descendant_courses_from_category($catid);
-        $r2 = $this->get_descendant_courses_from_catbis($catid);
-        return array_unique(array_merge($r1, $r2));
-    }
-
-    /**
-     * recherche les rattachements principaux aux catégories (standard moodle)
-     * @global moodle_database $DB
-     * @param int $catid
-     * @return array array(int crsid)
-     */
-    protected function get_descendant_courses_from_category($catid) {
-        global $DB;
-
-        $sql = "SELECT cco.instanceid FROM {context} cco "
-                . "JOIN {context} cca ON (cco.path LIKE CONCAT(cca.path, '/%') ) "
-                . "WHERE cca.instanceid=? AND cco.contextlevel=? and cca.contextlevel=? ";
-        $res = $DB->get_fieldset_sql($sql, array($catid, CONTEXT_COURSE, CONTEXT_COURSECAT));
-        return $res;
-    }
-
-    /**
-     * recherche les rattachements secondaires des catégories (up1categoriesbis)
-     * @global moodle_database $DB
-     * @param int $catid
-     * @return array array(int crsid)
-     */
-    protected function get_descendant_courses_from_catbis($catid) {
-        global $DB;
-
-        $sql = "SELECT cid.objectid, c2.path FROM {course_categories} c1 "
-                . "JOIN {course_categories} c2 ON (c2.path LIKE CONCAT(c1.path, '/%') OR c2.id=c1.id) "
-                . "JOIN {custom_info_data} cid ON ((CONCAT(';',data,';') LIKE CONCAT('%;',c2.id,';%'))) "
-                . "WHERE c1.id = ? AND cid.fieldid = ? AND objectname='course' ";
-
-        $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
-        $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
-        return $res;
-    }
 }
 
 class rof_tools {
-    public $coursetree;
+    private $coursetree;
 
     public function __construct(course_tree $coursetree) {
         $this->coursetree = $coursetree;
@@ -374,5 +293,95 @@ class rof_tools {
             }
         }
         return $items;
+    }
+}
+
+class category_tools {
+    private $coursetree;
+
+    public function __construct(course_tree $coursetree) {
+        $this->coursetree = $coursetree;
+    }
+
+    /**
+     * get component (ex. 05) from categoryid
+     * @param int $catid
+     * @return string component, ex. "05"
+     */
+    public function get_component_from_category($catid) {
+        global $DB;
+        $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
+        return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
+    }
+
+    /**
+     * Returns an arry of nodes.
+     *
+     * @param array $categories
+     * @return array
+     */
+    public function get_entries_from_categories($categories) {
+        $result = array();
+        foreach ($categories as $category) {
+            $courses = $this->get_descendant_courses($category->id);
+            $n = count($courses);
+            if ($n >= 1) { //** @todo ce calcul est idiot
+                $name = $category->name . ' (' . $n . ') ';
+                $nodeid = '/' . $category->id;
+                $result[] = array(
+                    'id' => $nodeid,
+                    'label' => $this->coursetree->display_name($name, $nodeid),
+                    'load_on_demand' => true,
+                    'depth' => $category->depth,
+                );
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * recherche les rattachements des cours aux catégories (principaux ET secondaires)
+     * @param int $catid
+     * @return array array(int crsid)
+     */
+    public function get_descendant_courses($catid) {
+        $r1 = $this->get_descendant_courses_from_category($catid);
+        $r2 = $this->get_descendant_courses_from_catbis($catid);
+        return array_unique(array_merge($r1, $r2));
+    }
+
+    /**
+     * recherche les rattachements principaux aux catégories (standard moodle)
+     * @global moodle_database $DB
+     * @param int $catid
+     * @return array array(int crsid)
+     */
+    protected function get_descendant_courses_from_category($catid) {
+        global $DB;
+
+        $sql = "SELECT cco.instanceid FROM {context} cco "
+                . "JOIN {context} cca ON (cco.path LIKE CONCAT(cca.path, '/%') ) "
+                . "WHERE cca.instanceid=? AND cco.contextlevel=? and cca.contextlevel=? ";
+        $res = $DB->get_fieldset_sql($sql, array($catid, CONTEXT_COURSE, CONTEXT_COURSECAT));
+        return $res;
+    }
+
+    /**
+     * recherche les rattachements secondaires des catégories (up1categoriesbis)
+     * @global moodle_database $DB
+     * @param int $catid
+     * @return array array(int crsid)
+     */
+    protected function get_descendant_courses_from_catbis($catid) {
+        global $DB;
+
+        $sql = "SELECT cid.objectid, c2.path FROM {course_categories} c1 "
+                . "JOIN {course_categories} c2 ON (c2.path LIKE CONCAT(c1.path, '/%') OR c2.id=c1.id) "
+                . "JOIN {custom_info_data} cid ON ((CONCAT(';',data,';') LIKE CONCAT('%;',c2.id,';%'))) "
+                . "WHERE c1.id = ? AND cid.fieldid = ? AND objectname='course' ";
+
+        $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
+        $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
+        return $res;
     }
 }
