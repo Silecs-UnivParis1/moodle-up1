@@ -132,7 +132,7 @@ class course_tree {
     protected function get_entry_from_course($crsid, $depth) {
         return array(
             'id' => null,
-            'label' => format_course_label('', $crsid),
+            'label' => $this->format_course_label('', $crsid),
             'load_on_demand' => false,
             'depth' => $depth,
         );
