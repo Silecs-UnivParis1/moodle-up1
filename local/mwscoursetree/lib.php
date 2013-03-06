@@ -76,7 +76,7 @@ class course_tree {
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 5);
                 }
-                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 5, $this->pseudopath, $this->parentcatid));
+                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 5));
             } else {
                 throw new coding_exception('Category depth should not be > 4.');
             }
@@ -84,7 +84,7 @@ class course_tree {
             $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
             $depth = 3 + count($this->pseudopath);
             $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
-            $result = $this->get_entries_from_rof_courses($rofcourses, $depth, $this->pseudopath, $this->parentcatid);
+            $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
         }
 
         return $result;
@@ -96,7 +96,7 @@ class course_tree {
      * @param string $rofpath ex. "/02/UP1-PROG39308/UP1-PROG24870"
      * @return assoc. array (crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
      */
-    function get_courses_from_parent_rofpath($rofpath) {
+    protected function get_courses_from_parent_rofpath($rofpath) {
         global $DB;
         // 1st step : find the matching courses
         $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
@@ -117,7 +117,7 @@ class course_tree {
         return $rofcourses;
     }
 
-    function get_entry_from_course($crsid, $depth) {
+    protected function get_entry_from_course($crsid, $depth) {
         return array(
             'id' => null,
             'label' => format_course_label('', $crsid),
@@ -131,7 +131,7 @@ class course_tree {
      * @param array $courses array of course objects (from DB)
      * @return array($rofcourses, $catcourses)
      */
-    function split_courses_from_rof($courses) {
+    protected function split_courses_from_rof($courses) {
         $rofcourses = array();
         $catcourses = array();
         foreach ($courses as $crsid) {
@@ -150,7 +150,7 @@ class course_tree {
      * @param int $catid
      * @return string component, ex. "05"
      */
-    function get_component_from_category($catid) {
+    protected function get_component_from_category($catid) {
         global $DB;
         $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
         return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
@@ -160,19 +160,17 @@ class course_tree {
      * get entries from courses having a ROF rattachement
      * @param array $rofcourses as given by split_courses_from_rof() (or other source)
      * @param int $depth of target entries
-     * @param array(string) $pseudopath for the parent node
-     * @param int $parentcatid
      * @return array(assoc. array)
      */
-    function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid) {
-        $component = $this->get_component_from_category($parentcatid);
+    protected function get_entries_from_rof_courses($rofcourses, $depth) {
+        $component = $this->get_component_from_category($this->parentcatid);
         $prenodes = array();
         $items = array();
-        //$parentrofpath = '/' . join('/', array_slice($pseudopath, 1)); // le chemin sans la catégorie
+        //$parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
 
         foreach ($rofcourses as $crsid => $rofpathid) {
             $arrofpath = array_filter(explode('/', $rofpathid));
-            $prenode = "/$parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+            $prenode = "/$this->parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
             if (count($arrofpath) == $depth - 3) { // leaf
                 $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
             } elseif (count($arrofpath) > $depth - 3) { // subfolders
@@ -212,7 +210,7 @@ class course_tree {
      * @param boolean $leaf opt, true
      * @return strinf formatted label
      */
-    function format_course_label($name, $crsid, $leaf = true) {
+    protected function format_course_label($name, $crsid, $leaf = true) {
         global $DB, $OUTPUT;
 
         // main link
@@ -255,7 +253,7 @@ class course_tree {
      * @param boolean $leaf opt, false
      * @return string
      */
-    function display_name($name, $nodeid, $leaf = false) {
+    protected function display_name($name, $nodeid, $leaf = false) {
         return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
@@ -265,7 +263,7 @@ class course_tree {
      * @param int $catid
      * @return array(int crsid)
      */
-    function get_descendant_courses($catid) {
+    protected function get_descendant_courses($catid) {
         $r1 = $this->get_descendant_courses_from_category($catid);
         $r2 = $this->get_descendant_courses_from_catbis($catid);
         return array_unique(array_merge($r1, $r2));
@@ -277,7 +275,7 @@ class course_tree {
      * @param int $catid
      * @return array(int crsid)
      */
-    function get_descendant_courses_from_category($catid) {
+    protected function get_descendant_courses_from_category($catid) {
         global $DB;
 
         $sql = "SELECT cco.instanceid FROM {context} cco "
@@ -293,7 +291,7 @@ class course_tree {
      * @param type $catid
      * @return array(int crsid)
      */
-    function get_descendant_courses_from_catbis($catid) {
+    protected function get_descendant_courses_from_catbis($catid) {
         global $DB;
 
         $sql = "SELECT cid.objectid, c2.path FROM {course_categories} c1 "
