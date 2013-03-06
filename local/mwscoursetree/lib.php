@@ -7,6 +7,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
 require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
 
@@ -147,28 +149,28 @@ class course_tree {
         global $DB, $OUTPUT;
 
         // main link
-        $url = new moodle_url('/course/view.php', array('id' => $crsid));
+        $urlCourse = new moodle_url('/course/view.php', array('id' => $crsid));
         $dbcourse = $DB->get_record('course', array('id' => $crsid));
         if ($name == '') {
             $name = $dbcourse->fullname; //override ROF name with course name ?
         }
-        $crslink = '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . html_writer::link($url, $name) . '</span>';
+        $crslink = '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">'
+                . html_writer::link($urlCourse, $name) . '</span>';
+
         // teachers
-        $titleteachers = '';
         $context = get_context_instance(CONTEXT_COURSE, $crsid);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $teachers = get_role_users($role->id, $context);
-        $dup = $teachers;
-        $firstteacher = fullname(array_shift($dup)) . (count($teachers) > 1 ? '...' : '');
-        foreach ($teachers as $teacher) {
-            $titleteachers .= fullname($teacher) . ', ';
-        }
-        $titleteachers = substr($titleteachers, 0, -2);
+        $firstteacher = fullname(next($teachers)) . (count($teachers) > 1 ? '…' : '');
+        reset($teachers);
+        $titleteachers = join(', ', array_map('fullname', $teachers));
         $fullteachers = '<span class="coursetree-teachers" title="' . $titleteachers . '">' . $firstteacher . '</span>';
+
         // icons
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
         $icons = '<span class="coursetree-icons">';
-        if ($myicons = enrol_get_course_info_icons($dbcourse)) { // enrolment access icons
+        $myicons = enrol_get_course_info_icons($dbcourse);
+        if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
                 $icons .= $OUTPUT->render($pix_icon);
             }
@@ -274,7 +276,7 @@ class rof_tools {
         foreach (array_unique($prenodes) as $node) {
             $arrofpath = explode('/', $node);
             $rofid = array_pop($arrofpath);
-            list($rofobject, $top) = rof_get_record($rofid);
+            list($rofobject, ) = rof_get_record($rofid);
             $name = $rofobject->name;
 
             $item['load_on_demand'] = !empty($unfold[$node]);
