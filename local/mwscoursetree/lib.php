@@ -67,17 +67,40 @@ function get_children($node) {
     } else { // CASE 3 under ROF root
         $rofpath = '/' . join('/', array_slice($pseudopath, 1));
         $depth = 3 + count($pseudopath);
-        $fieldid = $DB->get_field('custom_info_field', 'id',
-                array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
-        $sql = "SELECT objectid, data FROM {custom_info_data} "
-             . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
-        $rofcourses = $DB->get_records_sql_menu($sql, array($fieldid, '%'.$rofpath.'%'));
+        $rofcourses = get_courses_from_parent_rofpath($rofpath);
         $result = get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid);
     }
 
     return $result;
 }
 
+/**
+ * return all courses rattached to the given rofpath ; only this rofpath in the returned course value
+ * @global type $DB
+ * @param string $rofpath ex. "/02/UP1-PROG39308/UP1-PROG24870"
+ * @return assoc. array (crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
+ */
+function get_courses_from_parent_rofpath($rofpath) {
+    global $DB;
+    // 1st step : find the matching courses
+    $fieldid = $DB->get_field('custom_info_field', 'id',
+            array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
+    $sql = "SELECT objectid, data FROM {custom_info_data} "
+         . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
+    $res = $DB->get_records_sql_menu($sql, array($fieldid, '%'.$rofpath.'%'));
+    //var_dump($res);
+    // 2nd step : filter the results to keep only matching rofpaths
+    $rofcourses = array();
+    foreach ($res as $crsid => $rofpathids) {
+        foreach (explode(';', $rofpathids) as $rofpathid) {
+            if (strstr($rofpathid, $rofpath)) {
+                $rofcourses[$crsid] = $rofpathid;
+            }
+        }
+    }
+    //var_dump($rofcourses);
+    return $rofcourses;
+}
 
 function get_entry_from_course($crsid, $depth) {
     return array(
