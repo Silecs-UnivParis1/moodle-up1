@@ -182,12 +182,13 @@ class course_tree {
 
     /**
      * returns the "name" part of the label, with a span showing the node-id depending on class jqtree-hidden
+     * used for all non-course entries (course categories and ROF entries)
      * @param string $name
-     * @param string $nodeid 0
+     * @param string $nodeid to display optionally
      * @param boolean $leaf opt, false
      * @return string
      */
-    public function display_name($name, $nodeid, $leaf = false) {
+    public function display_entry_name($name, $nodeid, $leaf = false) {
         return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
@@ -287,7 +288,7 @@ class rof_tools {
                     $items[] = $item;
                 }
             } else {
-                $item['label'] = $this->coursetree->display_name($name, $node, !$item['load_on_demand']);
+                $item['label'] = $this->coursetree->display_entry_name($name, $node, !$item['load_on_demand']);
                 $item['id'] = $node;
                 $item['depth'] = $depth;
                 $items[] = $item;
@@ -331,7 +332,7 @@ class category_tools {
                 $nodeid = '/' . $category->id;
                 $result[] = array(
                     'id' => $nodeid,
-                    'label' => $this->coursetree->display_name($name, $nodeid),
+                    'label' => $this->coursetree->display_entry_name($name, $nodeid),
                     'load_on_demand' => true,
                     'depth' => $category->depth,
                 );
