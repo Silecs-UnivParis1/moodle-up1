@@ -56,20 +56,7 @@ class course_tree {
         if (count($this->pseudopath) == 1) { // course categories
             if ($this->parentcatid === 0 || ($parentcat && $parentcat->depth < 4)) { // CASE 1 node=category and children=categories
                 $categories = get_categories($this->parentcatid);
-                foreach ($categories as $category) {
-                    $courses = $this->get_descendant_courses($category->id);
-                    $n = count($courses);
-                    if ($n >= 1) { //** @todo ce calcul est idiot
-                        $name = $category->name . ' (' . $n . ') ';
-                        $nodeid = '/' . $category->id;
-                        $result[] = array(
-                            'id' => $nodeid,
-                            'label' => $this->display_name($name, $nodeid),
-                            'load_on_demand' => true,
-                            'depth' => $category->depth,
-                        );
-                    }
-                }
+                $result = $this->get_entries_from_categories($categories);
             } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
                 $courses = $this->get_descendant_courses($this->parentcatid);
                 list($rofcourses, $catcourses) = $this->split_courses_from_rof($courses);
@@ -154,6 +141,31 @@ class course_tree {
         global $DB;
         $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
         return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
+    }
+
+    /**
+     * Returns an arry of nodes.
+     *
+     * @param array $categories
+     * @return array
+     */
+    protected function get_entries_from_categories($categories) {
+        $result = array();
+        foreach ($categories as $category) {
+            $courses = $this->get_descendant_courses($category->id);
+            $n = count($courses);
+            if ($n >= 1) { //** @todo ce calcul est idiot
+                $name = $category->name . ' (' . $n . ') ';
+                $nodeid = '/' . $category->id;
+                $result[] = array(
+                    'id' => $nodeid,
+                    'label' => $this->display_name($name, $nodeid),
+                    'load_on_demand' => true,
+                    'depth' => $category->depth,
+                );
+            }
+        }
+        return $result;
     }
 
     /**
