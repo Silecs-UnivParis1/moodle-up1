@@ -20,6 +20,8 @@ class course_tree {
     protected $pseudopath;
     protected $parentcatid;
 
+    const DEPTH_ROF_BEGIN = 4;
+
     static public function from_node($node) {
         $new = new self;
         $new->set_node($node);
@@ -54,22 +56,22 @@ class course_tree {
 
         $parentcat = $DB->get_record('course_categories', array('id' => $this->parentcatid));
         if (count($this->pseudopath) == 1) { // course categories
-            if ($this->parentcatid === 0 || ($parentcat && $parentcat->depth < 4)) { // CASE 1 node=category and children=categories
+            if ($this->parentcatid === 0 || ($parentcat && $parentcat->depth < self::DEPTH_ROF_BEGIN)) { // CASE 1 node=category and children=categories
                 $categories = get_categories($this->parentcatid);
                 $result = $this->get_entries_from_categories($categories);
-            } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
+            } elseif ($parentcat->depth == self::DEPTH_ROF_BEGIN) { // CASE 2 node=category and children = ROF entries or courses
                 $courses = $this->get_descendant_courses($this->parentcatid);
                 list($rofcourses, $catcourses) = $this->split_courses_from_rof($courses);
                 foreach ($catcourses as $crsid) {
-                    $result[] = $this->get_entry_from_course($crsid, 5);
+                    $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
                 }
-                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 5));
+                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN));
             } else {
-                throw new coding_exception('Category depth should not be > 4.');
+                throw new coding_exception('Category depth should not be > ' . self::DEPTH_ROF_BEGIN);
             }
         } else { // CASE 3 under ROF root
             $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
-            $depth = 3 + count($this->pseudopath);
+            $depth = self::DEPTH_ROF_BEGIN - 1 + count($this->pseudopath);
             $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
             $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
         }
