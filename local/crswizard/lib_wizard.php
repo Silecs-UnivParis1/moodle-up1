@@ -664,7 +664,7 @@ function wizard_prepare_rattachement_second($form2) {
                 if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
                     $rofpath = $form2['path'][$rofid];
                     $path = strtr($rofpath, '_', '/');
-                    $rof2['rofpathid'][] = $path;
+                    $rof2['rofpathid'][] = '/' . $path;
 
                     $tabpath = explode('_', $rofpath);
                     $tabrof = rof_get_combined_path($tabpath);
