@@ -17,9 +17,9 @@ require_once($CFG->dirroot . "/local/roftools/roflib.php");
  */
 class course_tree {
 
-    protected $pseudopath;
-    protected $parentcatid;
-    protected $parentcat;
+    public $pseudopath;
+    public $parentcatid;
+    public $parentcat;
 
     const DEPTH_ROF_BEGIN = 4;
 
@@ -70,6 +70,8 @@ class course_tree {
      * @throws coding_exception
      */
     public function get_children() {
+        $rof = new rof_tools($this);
+
         $result = array();
         switch ($this->get_pseudopath_level()) {
             case self::LEVEL_CATEGORY:
@@ -80,18 +82,21 @@ class course_tree {
             case self::LEVEL_CATEGORY_AND_ROF:
                 // CASE 2 node=category and children = ROF entries or courses
                 $courses = $this->get_descendant_courses($this->parentcatid);
-                list($rofcourses, $catcourses) = $this->split_courses_from_rof($courses);
+                list($rofcourses, $catcourses) = $rof->split_courses_from_rof($courses);
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
                 }
-                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN));
+                $result = array_merge(
+                        $result,
+                        $rof->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN)
+                );
                 break;
             case self::LEVEL_ROF:
                 // CASE 3 under ROF root
                 $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
                 $depth = self::DEPTH_ROF_BEGIN - 1 + count($this->pseudopath);
-                $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
-                $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
+                $rofcourses = $rof->get_courses_from_parent_rofpath($rofpath);
+                $result = $rof->get_entries_from_rof_courses($rofcourses, $depth);
                 break;
             case self::LEVEL_ERROR:
             default:
@@ -120,32 +125,6 @@ class course_tree {
         }
     }
 
-    /**
-     * return all courses rattached to the given rofpath ; only this rofpath in the returned course value
-     * @global moodle_database $DB
-     * @param string $rofpath ex. "/02/UP1-PROG39308/UP1-PROG24870"
-     * @return array assoc-array(crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
-     */
-    protected function get_courses_from_parent_rofpath($rofpath) {
-        global $DB;
-        // 1st step : find the matching courses
-        $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
-        $sql = "SELECT objectid, data FROM {custom_info_data} "
-                . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
-        $res = $DB->get_records_sql_menu($sql, array($fieldid, '%' . $rofpath . '%'));
-        //var_dump($res);
-        // 2nd step : filter the results to keep only matching rofpaths
-        $rofcourses = array();
-        foreach ($res as $crsid => $rofpathids) {
-            foreach (explode(';', $rofpathids) as $rofpathid) {
-                if (strstr($rofpathid, $rofpath)) {
-                    $rofcourses[$crsid] = $rofpathid;
-                }
-            }
-        }
-        //var_dump($rofcourses);
-        return $rofcourses;
-    }
 
     protected function get_entry_from_course($crsid, $depth) {
         return array(
@@ -154,25 +133,6 @@ class course_tree {
             'load_on_demand' => false,
             'depth' => $depth,
         );
-    }
-
-    /**
-     * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
-     * @param array $courses array of course objects (from DB)
-     * @return array array($rofcourses, $catcourses)
-     */
-    protected function split_courses_from_rof($courses) {
-        $rofcourses = array();
-        $catcourses = array();
-        foreach ($courses as $crsid) {
-            $rofpathid = up1_meta_get_text($crsid, 'rofpathid', false);
-            if ($rofpathid) {
-                $rofcourses[$crsid] = $rofpathid;
-            } else {
-                $catcourses[$crsid] = $crsid;
-            }
-        }
-        return array($rofcourses, $catcourses);
     }
 
     /**
@@ -212,60 +172,13 @@ class course_tree {
     }
 
     /**
-     * get entries from courses having a ROF rattachement
-     * @param array $rofcourses as given by split_courses_from_rof() (or other source)
-     * @param int $depth of target entries
-     * @return array array(assoc. array)
-     */
-    protected function get_entries_from_rof_courses($rofcourses, $depth) {
-        $component = $this->get_component_from_category($this->parentcatid);
-        $prenodes = array();
-        $items = array();
-        //$parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
-
-        foreach ($rofcourses as $crsid => $rofpathid) {
-            $arrofpath = array_filter(explode('/', $rofpathid));
-            $prenode = "/$this->parentcatid" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
-            if (count($arrofpath) == $depth - 3) { // leaf
-                $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
-            } elseif (count($arrofpath) > $depth - 3) { // subfolders
-                $unfold[$prenode] = true;
-            }
-            $prenodes[] = $prenode;
-        }
-// var_dump($prenodes);
-        foreach (array_unique($prenodes) as $node) {
-            $arrofpath = explode('/', $node);
-            $rofid = array_pop($arrofpath);
-            list($rofobject, $top) = rof_get_record($rofid);
-            $name = $rofobject->name;
-
-            $item['load_on_demand'] = !empty($unfold[$node]);
-            if (isset($directcourse[$node]) && $directcourse[$node]) {
-                foreach ($directcourse[$node] as $crsid) {
-                    $item['label'] = format_course_label('', $crsid, !$item['load_on_demand']);
-                    $item['id'] = $node . '/' . $crsid;
-                    $item['depth'] = $depth;
-                    $items[] = $item;
-                }
-            } else {
-                $item['label'] = $this->display_name($name, $node, !$item['load_on_demand']);
-                $item['id'] = $node;
-                $item['depth'] = $depth;
-                $items[] = $item;
-            }
-        }
-        return $items;
-    }
-
-    /**
      * format course label
      * @param string $name course/ROF name ; if empty, will be filled with the course fullname
      * @param int $crsid
      * @param boolean $leaf opt, true
      * @return string formatted label
      */
-    protected function format_course_label($name, $crsid, $leaf = true) {
+    public function format_course_label($name, $crsid, $leaf = true) {
         global $DB, $OUTPUT;
 
         // main link
@@ -308,7 +221,7 @@ class course_tree {
      * @param boolean $leaf opt, false
      * @return string
      */
-    protected function display_name($name, $nodeid, $leaf = false) {
+    public function display_name($name, $nodeid, $leaf = false) {
         return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
@@ -357,5 +270,109 @@ class course_tree {
         $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
         $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
         return $res;
+    }
+}
+
+class rof_tools {
+    public $coursetree;
+
+    public function __construct(course_tree $coursetree) {
+        $this->coursetree = $coursetree;
+    }
+
+    /**
+     * return all courses rattached to the given rofpath ; only this rofpath in the returned course value
+     * @global moodle_database $DB
+     * @param string $rofpath ex. "/02/UP1-PROG39308/UP1-PROG24870"
+     * @return array assoc-array(crsid => rofpathid) ; in case of multiple rattachements, only the matching rofpathid is returned
+     */
+    public function get_courses_from_parent_rofpath($rofpath) {
+        global $DB;
+        // 1st step : find the matching courses
+        $fieldid = $DB->get_field('custom_info_field', 'id', array('objectname' => 'course', 'shortname' => 'up1rofpathid'), MUST_EXIST);
+        $sql = "SELECT objectid, data FROM {custom_info_data} "
+                . "WHERE objectname='course' AND fieldid=? AND data LIKE ?";
+        $res = $DB->get_records_sql_menu($sql, array($fieldid, '%' . $rofpath . '%'));
+        //var_dump($res);
+        // 2nd step : filter the results to keep only matching rofpaths
+        $rofcourses = array();
+        foreach ($res as $crsid => $rofpathids) {
+            foreach (explode(';', $rofpathids) as $rofpathid) {
+                if (strstr($rofpathid, $rofpath)) {
+                    $rofcourses[$crsid] = $rofpathid;
+                }
+            }
+        }
+        //var_dump($rofcourses);
+        return $rofcourses;
+    }
+
+    /**
+     * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
+     * @param array $courses array of course objects (from DB)
+     * @return array array($rofcourses, $catcourses)
+     */
+    public function split_courses_from_rof($courses) {
+        $rofcourses = array();
+        $catcourses = array();
+        foreach ($courses as $crsid) {
+            $rofpathid = up1_meta_get_text($crsid, 'rofpathid', false);
+            if ($rofpathid) {
+                $rofcourses[$crsid] = $rofpathid;
+            } else {
+                $catcourses[$crsid] = $crsid;
+            }
+        }
+        return array($rofcourses, $catcourses);
+    }
+
+    /**
+     * get entries from courses having a ROF rattachement
+     * @param array $rofcourses as given by split_courses_from_rof() (or other source)
+     * @param int $depth of target entries
+     * @return array array(assoc. array)
+     */
+    public function get_entries_from_rof_courses($rofcourses, $depth) {
+        //$component = $this->coursetree->get_component_from_category($this->coursetree->parentcatid);
+        //$parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
+
+        $prenodes = array();
+        $directcourse = array();
+        $unfold = array();
+        foreach ($rofcourses as $crsid => $rofpathid) {
+            $arrofpath = array_filter(explode('/', $rofpathid));
+            $prenode = "/{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+            if (count($arrofpath) == $depth - 3) { // leaf
+                $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
+            } elseif (count($arrofpath) > $depth - 3) { // subfolders
+                $unfold[$prenode] = true;
+            }
+            $prenodes[] = $prenode;
+        }
+// var_dump($prenodes);
+
+        $items = array();
+        foreach (array_unique($prenodes) as $node) {
+            $arrofpath = explode('/', $node);
+            $rofid = array_pop($arrofpath);
+            list($rofobject, $top) = rof_get_record($rofid);
+            $name = $rofobject->name;
+
+            $item['load_on_demand'] = !empty($unfold[$node]);
+            if (isset($directcourse[$node]) && $directcourse[$node]) {
+                foreach ($directcourse[$node] as $crsid) {
+                    $item['label'] = $this->coursetree->format_course_label('', $crsid, !$item['load_on_demand']);
+                    $item['id'] = $node . '/' . $crsid;
+                    $item['depth'] = $depth;
+                    $items[] = $item;
+                }
+            } else {
+                $item['label'] = $this->coursetree->display_name($name, $node, !$item['load_on_demand']);
+                $item['id'] = $node;
+                $item['depth'] = $depth;
+                $items[] = $item;
+            }
+        }
+        return $items;
     }
 }
