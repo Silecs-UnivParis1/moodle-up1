@@ -16,63 +16,81 @@ require_once($CFG->dirroot . "/local/roftools/roflib.php");
  * @todo limiter le dépliage au niveau 8 matière (ROFcourse niv.2)
  */
 
-/**
- * main function for the webservice service-children
- * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
- * @return array(assoc. array()) : to be used by jqTree after json-encoding
- * @throws coding_exception
- */
-function get_children($node) {
-    global $DB, $PAGE;
-    $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+class course_tree {
+    protected $pseudopath;
+    protected $parentcatid;
 
-    $result = array();
-    if ( isset($node) ) {
-        $pseudopath = explode('/', substr($node, 1) );
-        $parentcatid = (int) $pseudopath[0] ;
-    } else {
-        $parentcatid = 0;
-        $pseudopath = array('0');
+    static public function from_node($node) {
+        $new = new self;
+        $new->set_node($node);
+        return $new;
     }
-    $parentcat = $DB->get_record('course_categories', array('id' => $parentcatid));
-    if ( count($pseudopath) == 1 ) { // course categories
 
-        if ($parentcatid === 0 || ($parentcat && $parentcat->depth < 4)) { // CASE 1 node=category and children=categories
-            $categories = get_categories($parentcatid);
-            foreach ($categories as $category) {
-                $courses = get_descendant_courses($category->id);
-                $n = count($courses);
-                if ($n >= 1) { //** @todo ce calcul est idiot
-                    $name = $category->name . ' ('. $n. ') ';
-                    $nodeid = '/' . $category->id;
-                    $result[] = array(
-                        'id' => $nodeid,
-                        'label' => display_name($name, $nodeid),
-                        'load_on_demand' => true,
-                        'depth' => $category->depth,
-                    );
-                }
-            }
-        } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
-            $courses = get_descendant_courses($parentcatid);
-            list($rofcourses, $catcourses) = split_courses_from_rof($courses);
-            foreach ($catcourses as $crsid) {
-                $result[] = get_entry_from_course($crsid, 5);
-            }
-            $result = array_merge($result, get_entries_from_rof_courses($rofcourses, 5, $pseudopath, $parentcatid));
+    /**
+     *
+     * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+     * @return course_tree
+     */
+    public function set_node($node=null) {
+        if ($node) {
+            $this->pseudopath = explode('/', substr($node, 1) );
+            $this->parentcatid = (int) $this->pseudopath[0] ;
         } else {
-            throw new coding_exception('Category depth should not be > 4.');
+            $this->parentcatid = 0;
+            $this->pseudopath = array('0');
+        }
+    }
+
+    /**
+     * main function for the webservice service-children
+     * @return array(assoc. array()) : to be used by jqTree after json-encoding
+     * @throws coding_exception
+     */
+    public function get_children() {
+        global $DB, $PAGE;
+        $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+
+        $result = array();
+
+        $parentcat = $DB->get_record('course_categories', array('id' => $this->parentcatid));
+        if ( count($this->pseudopath) == 1 ) { // course categories
+
+            if ($this->parentcatid === 0 || ($parentcat && $parentcat->depth < 4)) { // CASE 1 node=category and children=categories
+                $categories = get_categories($this->parentcatid);
+                foreach ($categories as $category) {
+                    $courses = $this->get_descendant_courses($category->id);
+                    $n = count($courses);
+                    if ($n >= 1) { //** @todo ce calcul est idiot
+                        $name = $category->name . ' ('. $n. ') ';
+                        $nodeid = '/' . $category->id;
+                        $result[] = array(
+                            'id' => $nodeid,
+                            'label' => $this->display_name($name, $nodeid),
+                            'load_on_demand' => true,
+                            'depth' => $category->depth,
+                        );
+                    }
+                }
+            } elseif ($parentcat->depth == 4) { // CASE 2 node=category and children = ROF entries or courses
+                $courses = $this->get_descendant_courses($this->parentcatid);
+                list($rofcourses, $catcourses) = $this->split_courses_from_rof($courses);
+                foreach ($catcourses as $crsid) {
+                    $result[] = $this->get_entry_from_course($crsid, 5);
+                }
+                $result = array_merge($result, $this->get_entries_from_rof_courses($rofcourses, 5, $this->pseudopath, $this->parentcatid));
+            } else {
+                throw new coding_exception('Category depth should not be > 4.');
+            }
+
+        } else { // CASE 3 under ROF root
+            $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
+            $depth = 3 + count($this->pseudopath);
+            $rofcourses = $this->get_courses_from_parent_rofpath($rofpath);
+            $result = $this->get_entries_from_rof_courses($rofcourses, $depth, $this->pseudopath, $this->parentcatid);
         }
 
-    } else { // CASE 3 under ROF root
-        $rofpath = '/' . join('/', array_slice($pseudopath, 1));
-        $depth = 3 + count($pseudopath);
-        $rofcourses = get_courses_from_parent_rofpath($rofpath);
-        $result = get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid);
+        return $result;
     }
-
-    return $result;
-}
 
 /**
  * return all courses rattached to the given rofpath ; only this rofpath in the returned course value
@@ -150,7 +168,7 @@ function get_component_from_category($catid) {
  * @return array(assoc. array)
  */
 function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentcatid) {
-    $component = get_component_from_category($parentcatid);
+    $component = $this->get_component_from_category($parentcatid);
     $prenodes = array();
     $items = array();
     //$parentrofpath = '/' . join('/', array_slice($pseudopath, 1)); // le chemin sans la catégorie
@@ -181,7 +199,7 @@ function get_entries_from_rof_courses($rofcourses, $depth, $pseudopath, $parentc
                 $items[] = $item;
             }
         } else {
-            $item['label'] = display_name($name, $node, !$item['load_on_demand']);
+            $item['label'] = $this->display_name($name, $node, !$item['load_on_demand']);
             $item['id'] = $node;
             $item['depth'] = $depth;
             $items[] = $item;
@@ -252,8 +270,8 @@ function display_name($name, $nodeid, $leaf=false) {
  * @return array(int crsid)
  */
 function get_descendant_courses($catid) {
-    $r1 = get_descendant_courses_from_category($catid);
-    $r2 = get_descendant_courses_from_catbis($catid);
+    $r1 = $this->get_descendant_courses_from_category($catid);
+    $r2 = $this->get_descendant_courses_from_catbis($catid);
     return array_unique(array_merge($r1, $r2));
 }
 
@@ -291,4 +309,5 @@ function get_descendant_courses_from_catbis($catid) {
     $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
     return $res;
 
+}
 }
