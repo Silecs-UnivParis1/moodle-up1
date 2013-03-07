@@ -170,6 +170,7 @@ class course_tree {
         $icons = '<span class="coursetree-icons">';
         if ($this->has_multiple_rattachements($crsid)) {
             $icons .= 'RM' . '&nbsp;';
+            // $icons .= $OUTPUT->render(new pix_icon('rmultiple', 'Rattachement multiple'));
         }
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
