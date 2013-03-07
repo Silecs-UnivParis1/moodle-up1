@@ -132,7 +132,7 @@ class course_tree {
     protected function get_entry_from_course($crsid, $depth) {
         return array(
             'id' => null,
-            'label' => $this->format_course_label('', $crsid),
+            'label' => $this->format_course_entry('', $crsid),
             'load_on_demand' => false,
             'depth' => $depth,
         );
@@ -143,34 +143,50 @@ class course_tree {
      * @param string $name course/ROF name ; if empty, will be filled with the course fullname
      * @param int $crsid
      * @param boolean $leaf opt, true
+     * @param string $format = 'tree' | 'table' | 'list'
      * @return string formatted label
      */
-    public function format_course_label($name, $crsid, $leaf = true) {
-        global $DB, $OUTPUT;
+    public function format_course_entry($name, $crsid, $leaf = true, $format = 'tree') {
+        global $DB;
 
-        // main link
-        $urlCourse = new moodle_url('/course/view.php', array('id' => $crsid));
         $dbcourse = $DB->get_record('course', array('id' => $crsid));
+
+        $crslink = $this->format_course_name($dbcourse, 'span', 'coursetree-' . ($leaf ? "name" : "dir")) ;
+        $fullteachers = $this->format_course_teachers($dbcourse, 'span', 'coursetree-teachers');
+        $icons = $this->format_course_icons($dbcourse, 'span', 'coursetree-icons');
+        return $crslink . $fullteachers . $icons;
+    }
+
+    public function format_course_name($dbcourse, $element, $class) {
+        $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
         $rmicon = '';
-        if ($this->has_multiple_rattachements($crsid)) {
+        if ($this->has_multiple_rattachements($dbcourse->id)) {
             $rmicon .= $OUTPUT->render(new pix_icon('t/add', 'Rattachement multiple'));
         }
-        $crslink = '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">'
-                . html_writer::link($urlCourse, $crsname) . '&nbsp;' . $rmicon . '</span>';
+        $crslink = '<' . $element. ' class="' . $class . '">'
+                . html_writer::link($urlCourse, $crsname) . '&nbsp;' . $rmicon
+                . '</' . $element . '>';
+        return $crslink;
+    }
 
-        // teachers
-        $context = get_context_instance(CONTEXT_COURSE, $crsid);
+    public function format_course_teachers($dbcourse, $element, $class) {
+        global $DB;
+        $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $teachers = get_role_users($role->id, $context);
         $firstteacher = fullname(current($teachers)) . (count($teachers) > 1 ? '…' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
-        $fullteachers = '<span class="coursetree-teachers" title="' . $titleteachers . '">' . $firstteacher . '</span>';
+        $fullteachers = '<' . $element . ' class="' . $class . '" title="' . $titleteachers . '">'
+                . $firstteacher
+                . '</' . $element . '>';
+        return $fullteachers;
+    }
 
-        // icons
-        $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
-        $icons = '<span class="coursetree-icons">';
-
+    public function format_course_icons($dbcourse, $element, $class) {
+        global $OUTPUT;
+        $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
+        $icons = '<' .$element. ' class="' . $class. '">';
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
@@ -181,10 +197,10 @@ class course_tree {
             $icons .= $OUTPUT->render(new pix_icon('t/block', 'Fermé aux étudiants'));
         }
         $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
-        $icons .= '</span>';
-        //die($crslink .' '. $fullteachers . ' ' . $icons);
-        return $crslink . $fullteachers . $icons;
+        $icons .= '</' . $element . '>';
+        return $icons;
     }
+
 
     /**
      * returns the "name" part of the label, with a span showing the node-id depending on class jqtree-hidden
@@ -305,7 +321,7 @@ class rof_tools {
             $item['load_on_demand'] = !empty($unfold[$node]);
             if (isset($directcourse[$node]) && $directcourse[$node]) {
                 foreach ($directcourse[$node] as $crsid) {
-                    $item['label'] = $this->coursetree->format_course_label('', $crsid, !$item['load_on_demand']);
+                    $item['label'] = $this->coursetree->format_course_entry('', $crsid, !$item['load_on_demand']);
                     $item['id'] = $node . '/' . $crsid;
                     $item['depth'] = $depth;
                     $items[] = $item;
@@ -318,6 +334,14 @@ class rof_tools {
             }
         }
         return $items;
+    }
+
+    public function html_course_list($pseudopath, $format) {
+        $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
+        $courses = get_courses_from_parent_rofpath($rofpath);
+        //@todo sort $courses by niveau / semestre / nom
+
+
     }
 }
 
