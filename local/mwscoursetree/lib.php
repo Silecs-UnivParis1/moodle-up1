@@ -151,11 +151,13 @@ class course_tree {
         // main link
         $urlCourse = new moodle_url('/course/view.php', array('id' => $crsid));
         $dbcourse = $DB->get_record('course', array('id' => $crsid));
-        if ($name == '') {
-            $name = $dbcourse->fullname; //override ROF name with course name ?
+        $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
+        $rmicon = '';
+        if ($this->has_multiple_rattachements($crsid)) {
+            $rmicon .= $OUTPUT->render(new pix_icon('t/add', 'Rattachement multiple'));
         }
         $crslink = '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">'
-                . html_writer::link($urlCourse, $name) . '</span>';
+                . html_writer::link($urlCourse, $crsname) . '&nbsp;' . $rmicon . '</span>';
 
         // teachers
         $context = get_context_instance(CONTEXT_COURSE, $crsid);
@@ -168,15 +170,15 @@ class course_tree {
         // icons
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
         $icons = '<span class="coursetree-icons">';
-        if ($this->has_multiple_rattachements($crsid)) {
-            $icons .= 'RM' . '&nbsp;';
-            // $icons .= $OUTPUT->render(new pix_icon('rmultiple', 'Rattachement multiple'));
-        }
+
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
                 $icons .= $OUTPUT->render($pix_icon);
             }
+        }
+        if ( $dbcourse->visible == 0 ) {
+            $icons .= $OUTPUT->render(new pix_icon('t/block', 'Fermé aux étudiants'));
         }
         $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
         $icons .= '</span>';
