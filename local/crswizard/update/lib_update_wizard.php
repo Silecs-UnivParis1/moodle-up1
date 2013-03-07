@@ -154,7 +154,7 @@ function wizard_rof_connection($up1rofpathid) {
              $SESSION->wizard['form_step2']['path'][$rofid] = substr($newpath, 1);
         } else {
             $SESSION->wizard['form_step2']['item']['s'][] = $rofid;
-            $SESSION->wizard['form_step2']['path'][$rofid] = $newpath;
+            $SESSION->wizard['form_step2']['path'][$rofid] = substr($newpath, 1);
         }
     }
 }
