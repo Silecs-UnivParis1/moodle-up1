@@ -148,13 +148,29 @@ class course_tree {
      */
     public function format_course_entry($name, $crsid, $leaf = true, $format = 'tree') {
         global $DB;
-
+        $rowelems = array('tree' => '', 'table' => 'tr', 'list' => 'li');
+        $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
+        $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
+        $rowelem = $rowelems[$format];
+        $cellelem = $cellelems[$format];
+        $sep = $seps[$format];
         $dbcourse = $DB->get_record('course', array('id' => $crsid));
+        $first = '';
+        $teachers = '';
+        $icons = '';
 
-        $crslink = $this->format_course_name($dbcourse, 'span', 'coursetree-' . ($leaf ? "name" : "dir")) ;
-        $fullteachers = $this->format_course_teachers($dbcourse, 'span', 'coursetree-teachers');
-        $icons = $this->format_course_icons($dbcourse, 'span', 'coursetree-icons');
-        return $crslink . $fullteachers . $icons;
+        if ($format == 'table'|| $format == 'list') {
+            $first = $this->format_course_firstcols($dbcourse, $cellelem, $sep);
+        }
+        $crslink = $this->format_course_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir")) ;
+        if ($format == 'table'|| $format == 'tree') {
+            $teachers = $this->format_course_teachers($dbcourse, $cellelem, 'coursetree-teachers');
+            $icons = $this->format_course_icons($dbcourse, $cellelem, 'coursetree-icons');
+        }
+        $sep2 = (! empty($teachers) ? $sep : '');
+        return (empty($rowelem) ? '' : '<' . $rowelem . '> ')
+                . $first .$sep. $crslink .$sep2. $teachers .$sep2. $icons .
+               (empty($rowelem) ? '' : '</' . $rowelem . '>');
     }
 
     public function format_course_name($dbcourse, $element, $class) {
@@ -199,6 +215,17 @@ class course_tree {
         $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
         $icons .= '</' . $element . '>';
         return $icons;
+    }
+
+    public function format_course_firstcols($dbcourse, $element, $sep) {
+        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
+        $code = strstr($dbcourse->idnumber, '-', true);
+        $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
+        $niveau = $convertannee[$niveauannee];
+        $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
+        return   '<' . $element . '>' . $code . '</' . $element . '>' . $sep
+               . '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
+               . '<' . $element . '>' . $semestre. '</' . $element . '>';
     }
 
 
@@ -336,12 +363,30 @@ class rof_tools {
         return $items;
     }
 
-    public function html_course_list($pseudopath, $format) {
+    public function html_course_table($pseudopath) {
         $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
-        $courses = get_courses_from_parent_rofpath($rofpath);
+        $courses = $this->get_courses_from_parent_rofpath($rofpath);
         //@todo sort $courses by niveau / semestre / nom
 
+        echo '<table class="generaltable">' . "\n" ;
+        echo "<tr> <th>Code</th> <th>Niveau</th> <th>Semestre</th> "
+            . "<th>Nom du cours</th> <th>Enseignants</th> <th>Icônes</th></tr>";
+        foreach ($courses as $crsid => $rofpathid) {
+            echo $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
+        }
+        echo "</table>\n";
+    }
 
+    public function html_course_list($pseudopath) {
+        $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
+        $courses = $this->get_courses_from_parent_rofpath($rofpath);
+        //@todo sort $courses by niveau / semestre / nom
+
+        echo "<ol>\n" ;
+        foreach ($courses as $crsid => $rofpathid) {
+            echo $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
+        }
+        echo "</ol>\n";
     }
 }
 
