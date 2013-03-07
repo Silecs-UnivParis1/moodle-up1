@@ -168,6 +168,9 @@ class course_tree {
         // icons
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $crsid));
         $icons = '<span class="coursetree-icons">';
+        if ($this->has_multiple_rattachements($crsid)) {
+            $icons .= 'RM' . '&nbsp;';
+        }
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
@@ -192,7 +195,22 @@ class course_tree {
         return '<span class="jqtree-hidden">[' . $nodeid . ']</span>&nbsp;'
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
+
+
+    public function has_multiple_rattachements($crsid) {
+        $catbis = up1_meta_get_text($crsid, 'up1categoriesbis', false);
+        if ( ! $catbis == '') {
+            return true;
+        }
+        $rofpathids = up1_meta_get_text($crsid, 'up1rofpathid', false);
+        $n = count(explode(';', $rofpathids));
+        if ($n > 1) {
+            return true ;
+        }
+        return false;
+    }
 }
+
 
 class rof_tools {
     private $coursetree;
@@ -299,6 +317,7 @@ class rof_tools {
         return $items;
     }
 }
+
 
 class category_tools {
     private $coursetree;
