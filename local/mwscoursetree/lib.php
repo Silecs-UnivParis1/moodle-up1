@@ -49,7 +49,7 @@ class course_tree {
 
     /**
      *
-     * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+     * @param string $node is a concat of '/cat(catid)' and the rofpathid, ex. '/cat2136/03/UP1-PROG28809'
      * @global moodle_database $DB
      * @return course_tree
      */
@@ -58,7 +58,12 @@ class course_tree {
 
         if ($node) {
             $this->pseudopath = explode('/', substr($node, 1));
-            $this->parentcatid = (int) $this->pseudopath[0];
+            if (preg_match('/cat(\d+)/', $this->pseudopath[0], $matches)) {
+                $this->parentcatid = (int) $matches[1];
+            } else {
+                $this->parentcatid = 0;
+                $this->pseudopath = array('0');
+            }
         } else {
             $this->parentcatid = 0;
             $this->pseudopath = array('0');
@@ -148,16 +153,33 @@ class course_tree {
      */
     public function format_course_entry($name, $crsid, $leaf = true, $format = 'tree') {
         global $DB;
-
+        $rowelems = array('tree' => '', 'table' => 'tr', 'list' => 'li');
+        $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
+        $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
+        $rowelem = $rowelems[$format];
+        $cellelem = $cellelems[$format];
+        $sep = $seps[$format];
         $dbcourse = $DB->get_record('course', array('id' => $crsid));
+        $first = '';
+        $teachers = '';
+        $icons = '';
 
-        $crslink = $this->format_course_name($dbcourse, 'span', 'coursetree-' . ($leaf ? "name" : "dir")) ;
-        $fullteachers = $this->format_course_teachers($dbcourse, 'span', 'coursetree-teachers');
-        $icons = $this->format_course_icons($dbcourse, 'span', 'coursetree-icons');
-        return $crslink . $fullteachers . $icons;
+        if ($format == 'table'|| $format == 'list') {
+            $first = $this->format_course_firstcols($dbcourse, $cellelem, $sep);
+        }
+        $crslink = $this->format_course_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir")) ;
+        if ($format == 'table'|| $format == 'tree') {
+            $teachers = $this->format_course_teachers($dbcourse, $cellelem, 'coursetree-teachers');
+            $icons = $this->format_course_icons($dbcourse, $cellelem, 'coursetree-icons');
+        }
+        $sep2 = (! empty($teachers) ? $sep : '');
+        return (empty($rowelem) ? '' : '<' . $rowelem . '> ')
+                . $first .$sep. $crslink .$sep2. $teachers .$sep2. $icons .
+               (empty($rowelem) ? '' : '</' . $rowelem . '>');
     }
 
     public function format_course_name($dbcourse, $element, $class) {
+        global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
         $rmicon = '';
@@ -199,6 +221,17 @@ class course_tree {
         $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
         $icons .= '</' . $element . '>';
         return $icons;
+    }
+
+    public function format_course_firstcols($dbcourse, $element, $sep) {
+        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
+        $code = strstr($dbcourse->idnumber, '-', true);
+        $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
+        $niveau = ( isset($convertannee[$niveauannee]) ? $convertannee[$niveauannee] : 'A' );
+        $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
+        return   '<' . $element . '>' . $code . '</' . $element . '>' . $sep
+               . '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
+               . '<' . $element . '>' . $semestre. '</' . $element . '>';
     }
 
 
@@ -301,7 +334,7 @@ class rof_tools {
         //NORMALEMENT, après les traitements sur $rofcourses, $rofpathid devrait toujours être unique (sans ;)
         foreach ($rofcourses as $crsid => $rofpathid) {
             $arrofpath = array_filter(explode('/', $rofpathid));
-            $prenode = "/{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+            $prenode = "/cat{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
             if (count($arrofpath) == $depth - 3) { // leaf
                 $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
             } elseif (count($arrofpath) > $depth - 3) { // subfolders
@@ -336,12 +369,32 @@ class rof_tools {
         return $items;
     }
 
-    public function html_course_list($pseudopath, $format) {
+    public function html_course_table($pseudopath) {
         $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
-        $courses = get_courses_from_parent_rofpath($rofpath);
+        $courses = $this->get_courses_from_parent_rofpath($rofpath);
         //@todo sort $courses by niveau / semestre / nom
 
+        $res = '<table class="generaltable">' . "\n" ;
+        $res .= "<tr> <th>Code</th> <th>Niveau</th> <th>Semestre</th> "
+            . "<th>Nom du cours</th> <th>Enseignants</th> <th>Icônes</th></tr>";
+        foreach ($courses as $crsid => $rofpathid) {
+            $res .= $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
+        }
+        $res .= "</table>\n";
+        return $res;
+    }
 
+    public function html_course_list($pseudopath) {
+        $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
+        $courses = $this->get_courses_from_parent_rofpath($rofpath);
+        //@todo sort $courses by niveau / semestre / nom
+
+        $res = "<ol>\n" ;
+        foreach ($courses as $crsid => $rofpathid) {
+             $res .= $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
+        }
+        $res .= "</ol>\n";
+        return $res;
     }
 }
 
@@ -375,9 +428,9 @@ class category_tools {
         foreach ($categories as $category) {
             $courses = $this->get_descendant_courses($category->id);
             $n = count($courses);
-            if ($n >= 1) { //** @todo ce calcul est idiot
+            if ($n >= 1) {
                 $name = $category->name . ' (' . $n . ') ';
-                $nodeid = '/' . $category->id;
+                $nodeid = '/cat' . $category->id;
                 $result[] = array(
                     'id' => $nodeid,
                     'label' => $this->coursetree->display_entry_name($name, $nodeid),
