@@ -49,7 +49,7 @@ class course_tree {
 
     /**
      *
-     * @param string $node is a concat of '/(catid)' and the rofpathid, ex. '/2136/03/UP1-PROG28809'
+     * @param string $node is a concat of '/cat(catid)' and the rofpathid, ex. '/cat2136/03/UP1-PROG28809'
      * @global moodle_database $DB
      * @return course_tree
      */
@@ -58,7 +58,12 @@ class course_tree {
 
         if ($node) {
             $this->pseudopath = explode('/', substr($node, 1));
-            $this->parentcatid = (int) $this->pseudopath[0];
+            if (preg_match('/cat(\d+)/', $this->pseudopath[0], $matches)) {
+                $this->parentcatid = (int) $matches[1];
+            } else {
+                $this->parentcatid = 0;
+                $this->pseudopath = array('0');
+            }
         } else {
             $this->parentcatid = 0;
             $this->pseudopath = array('0');
@@ -174,6 +179,7 @@ class course_tree {
     }
 
     public function format_course_name($dbcourse, $element, $class) {
+        global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
         $rmicon = '';
@@ -328,7 +334,7 @@ class rof_tools {
         //NORMALEMENT, après les traitements sur $rofcourses, $rofpathid devrait toujours être unique (sans ;)
         foreach ($rofcourses as $crsid => $rofpathid) {
             $arrofpath = array_filter(explode('/', $rofpathid));
-            $prenode = "/{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+            $prenode = "/cat{$this->coursetree->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
             if (count($arrofpath) == $depth - 3) { // leaf
                 $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
             } elseif (count($arrofpath) > $depth - 3) { // subfolders
@@ -420,9 +426,9 @@ class category_tools {
         foreach ($categories as $category) {
             $courses = $this->get_descendant_courses($category->id);
             $n = count($courses);
-            if ($n >= 1) { //** @todo ce calcul est idiot
+            if ($n >= 1) {
                 $name = $category->name . ' (' . $n . ') ';
-                $nodeid = '/' . $category->id;
+                $nodeid = '/cat' . $category->id;
                 $result[] = array(
                     'id' => $nodeid,
                     'label' => $this->coursetree->display_entry_name($name, $nodeid),
