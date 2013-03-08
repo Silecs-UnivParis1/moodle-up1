@@ -2,7 +2,7 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(__DIR__ . '/lib.php');
 
-$node = optional_param('node', '/0', PARAM_RAW);
+$node = optional_param('node', '/cat0', PARAM_RAW);
 
 /* @var $PAGE page_base */
 global $PAGE, $OUTPUT;
@@ -16,6 +16,12 @@ $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading("Démo table et liste des cours");
+
+if ($node == '/cat0') {
+    echo $OUTPUT->box("Vous devriez indiquer en fin d'URL un paramètre node. "
+    . "Par exemple : .../coursetable-demo.php?node=/cat2060/02/UP1-PROG26751");
+}
+echo "<p></p>";
 
 $coursetree = new course_tree();
 $rofcourselist = new rof_tools($coursetree);

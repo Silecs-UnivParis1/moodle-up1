@@ -24,7 +24,7 @@ echo $OUTPUT->heading("Démo de l'arbre des cours");
 }
 </style>
 <script type="text/javascript" src="<?php echo new moodle_url('/local/mwscoursetree/widget.js'); ?>"></script>
-<div class="coursetree" data-root="/0" data-title="1"></div>
+<div class="coursetree" data-root="/cat0" data-title="1"></div>
 <?php
 
 echo $OUTPUT->footer();
