@@ -374,13 +374,14 @@ class rof_tools {
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
         //@todo sort $courses by niveau / semestre / nom
 
-        echo '<table class="generaltable">' . "\n" ;
-        echo "<tr> <th>Code</th> <th>Niveau</th> <th>Semestre</th> "
+        $res = '<table class="generaltable">' . "\n" ;
+        $res .= "<tr> <th>Code</th> <th>Niveau</th> <th>Semestre</th> "
             . "<th>Nom du cours</th> <th>Enseignants</th> <th>Icônes</th></tr>";
         foreach ($courses as $crsid => $rofpathid) {
-            echo $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
+            $res .= $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
         }
-        echo "</table>\n";
+        $res .= "</table>\n";
+        return $res;
     }
 
     public function html_course_list($pseudopath) {
@@ -388,11 +389,12 @@ class rof_tools {
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
         //@todo sort $courses by niveau / semestre / nom
 
-        echo "<ol>\n" ;
+        $res = "<ol>\n" ;
         foreach ($courses as $crsid => $rofpathid) {
-            echo $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
+             $res .= $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
         }
-        echo "</ol>\n";
+        $res .= "</ol>\n";
+        return $res;
     }
 }
 
