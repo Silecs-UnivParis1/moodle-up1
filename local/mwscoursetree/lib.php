@@ -227,7 +227,7 @@ class course_tree {
         $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
         $code = strstr($dbcourse->idnumber, '-', true);
         $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
-        $niveau = $convertannee[$niveauannee];
+        $niveau = ( isset($convertannee[$niveauannee]) ? $convertannee[$niveauannee] : 'A' );
         $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
         return   '<' . $element . '>' . $code . '</' . $element . '>' . $sep
                . '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
