@@ -222,15 +222,30 @@ function wizard_unenrol_key($enrol, $course) {
  * @param string $enrol nature de l'inscription (enrol.enrol)
  * @param object course $course
  * @param array $tabkey nouvelle valeur de la cle
+ * @retun bool $modif
  */
 function wizard_update_enrol_key($enrol, $course, $tabkey) {
     global $DB;
+    $modif = false;
     $instance = $DB->get_record('enrol', array('courseid' => $course->id,
         'enrol' => $enrol, 'timecreated' => $course->timecreated));
     if ($instance) {
-        $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
-            'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate']));
+        if ($tabkey['password'] != $instance->password) {
+            $modif = true;
+        }
+        if ($tabkey['enrolstartdate'] != $instance->enrolstartdate) {
+            $modif = true;
+        }
+        if ($tabkey['enrolenddate'] != $instance->enrolenddate) {
+            $modif = true;
+        }
+        if ($modif) {
+            $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
+                'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate'],
+                'timemodified' => time()));
+        }
     }
+    return $modif;
 }
 
 function affiche_error_enrolcohort($erreurs) {
@@ -1441,7 +1456,11 @@ class core_wizard {
             add_to_log($this->mydata->id, 'crswizard', 'update',
                 'update/index.php?id=' . $this->mydata->id, 'Update Cohorts (course ' . $this->mydata->id . ' )');
         }
-        $this->update_myenrol_key();
+        $modif = $this->update_myenrol_key();
+        if ($modif) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update keys (course ' . $this->mydata->id . ' )');
+        }
         rebuild_course_cache($this->mydata->id);
     }
 
@@ -1499,8 +1518,13 @@ class core_wizard {
         return $modif;
     }
 
+    /**
+     * met à jour (suppression/ajout), si besoin, la liste des clefs
+     * @return bool $modif
+    */
     function update_myenrol_key() {
         global $DB;
+        $modif = false;
         $tabenrol = array('Etudiante' => 'self', 'Visiteur' => 'guest');
 
         if (isset($this->formdata['form_step6'])) {
@@ -1523,18 +1547,23 @@ class core_wizard {
                     $enrol = $tabenrol[$role];
                     wizard_unenrol_key ($enrol, $course);
                 }
+                $modif = true;
                 break;
              case 2:
                 $this->myenrol_clef($course, $newkey);
+                $modif = true;
                 break;
             default:
                 foreach ($newkey as $role => $key) {
                     $enrol = $tabenrol[$role];
                     if (array_key_exists($role, $oldkey)) {
                         //update
-                        wizard_update_enrol_key($enrol, $course, $key);
+                        if (wizard_update_enrol_key($enrol, $course, $key)) {
+                            $modif = true;
+                        }
                     } else {
                         $this->myenrol_clef($course, array($role => $key));
+                        $modif = true;
                     }
                 }
                 // suppression
@@ -1543,9 +1572,11 @@ class core_wizard {
                     // suppression
                     $enrol = $tabenrol[$role];
                     wizard_unenrol_key ($enrol, $course);
+                    $modif = true;
                 }
             }
         }
+        return $modif;
     }
 }
 
