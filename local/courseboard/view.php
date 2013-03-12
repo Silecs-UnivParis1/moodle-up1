@@ -74,8 +74,17 @@ if ($rofcourses) {
 } else {
 
 }
-echo '<p><a href="' . $browserurl . '">Navigateur ROF</a></p>';
+// echo '<p><a href="' . $browserurl . '">Navigateur ROF</a></p>';
+
+echo '<h2 id="course-log">Journal du cours</h2>' . "\n";
 
 print_admin_log($crsid);
+
+echo '<form action="add_memo.php" method="POST">';
+echo '<label for="memo">Nouveau mémo </label>';
+echo '<input type="text" name="memo" id="memo" required="required" size="100" />';
+echo '<input type="hidden" name="crsid" value="' . $crsid . '"/>';
+echo '</form>';
+
 
 echo $OUTPUT->footer();

@@ -107,7 +107,7 @@ function print_admin_log($crsid) {
             . "FROM {log} l JOIN {user} u  ON (l.userid = u.id)"
             . "WHERE ( ( module = 'course' AND action = 'new' AND info LIKE '%ID " . $crsid . "%' ) "
             . " OR ( module = 'course' AND action != 'view' AND action != 'login' AND course = ? ) "
-            . " OR (module IN ('course_validate', 'crswizard') AND course = ?)  ) "
+            . " OR (module IN ('course_validate', 'crswizard', 'courseboard') AND course = ?)  ) "
             . " ORDER BY time ASC ";
     $logs = $DB->get_recordset_sql($sql, array($crsid, $crsid));
 
