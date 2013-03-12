@@ -153,37 +153,46 @@ class course_tree {
      */
     public function format_course_entry($name, $crsid, $leaf = true, $format = 'tree') {
         global $DB;
-        $rowelems = array('tree' => '', 'table' => 'tr', 'list' => 'li');
         $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
         $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
-        $rowelem = $rowelems[$format];
         $cellelem = $cellelems[$format];
         $sep = $seps[$format];
-        $dbcourse = $DB->get_record('course', array('id' => $crsid));
         $first = '';
         $teachers = '';
         $icons = '';
+        $dbcourse = $DB->get_record('course', array('id' => $crsid));
 
+        // compute the elements
         if ($format == 'table'|| $format == 'list') {
-            $first = $this->format_course_firstcols($dbcourse, $cellelem, $sep);
+            $code = $this->format_course_code($dbcourse, $cellelem, $sep);
+            $level = $this->format_course_level($dbcourse, $cellelem, $sep);
+
         }
-        $crslink = $this->format_course_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir")) ;
+        $crslink = $this->format_course_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir"), $format) ;
         if ($format == 'table'|| $format == 'tree') {
             $teachers = $this->format_course_teachers($dbcourse, $cellelem, 'coursetree-teachers');
             $icons = $this->format_course_icons($dbcourse, $cellelem, 'coursetree-icons');
         }
-        $sep2 = (! empty($teachers) ? $sep : '');
-        return (empty($rowelem) ? '' : '<' . $rowelem . '> ')
-                . $first .$sep. $crslink .$sep2. $teachers .$sep2. $icons .
-               (empty($rowelem) ? '' : '</' . $rowelem . '>');
+
+        // renders the line
+        switch ($format) {
+            case 'tree':
+                return $crslink . $teachers . $icons ;
+                break;
+            case 'table':
+                return '<tr>' . $code . $level . $crslink . $teachers . $icons . '</tr>';
+                break;
+            case 'list':
+                return '<li>' . $level . ' - ' . $crslink . ' ('. $code . ')' . '</li>';
+        }
     }
 
-    public function format_course_name($dbcourse, $element, $class) {
+    public function format_course_name($dbcourse, $element, $class, $format) {
         global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
         $rmicon = '';
-        if ($this->has_multiple_rattachements($dbcourse->id)) {
+        if ($format == 'tree'  &&  $this->has_multiple_rattachements($dbcourse->id)) {
             $rmicon .= $OUTPUT->render(new pix_icon('t/add', 'Rattachement multiple'));
         }
         $crslink = '<' . $element. ' class="' . $class . '">'
@@ -223,14 +232,20 @@ class course_tree {
         return $icons;
     }
 
-    public function format_course_firstcols($dbcourse, $element, $sep) {
-        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
+    public function format_course_code($dbcourse, $element, $sep) {
         $code = strstr($dbcourse->idnumber, '-', true);
+        if ($this->has_multiple_rattachements($dbcourse->id)) {
+            $code .= '&nbsp;+';
+        }
+        return   '<' . $element . '>' . $code . '</' . $element . '>' ;
+    }
+
+     public function format_course_level($dbcourse, $element, $sep) {
+        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
         $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
         $niveau = ( isset($convertannee[$niveauannee]) ? $convertannee[$niveauannee] : 'A' );
         $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
-        return   '<' . $element . '>' . $code . '</' . $element . '>' . $sep
-               . '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
+        return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
                . '<' . $element . '>' . $semestre. '</' . $element . '>';
     }
 
@@ -375,8 +390,8 @@ class rof_tools {
         //@todo sort $courses by niveau / semestre / nom
 
         $res = '<table class="generaltable">' . "\n" ;
-        $res .= "<tr> <th>Code</th> <th>Niveau</th> <th>Semestre</th> "
-            . "<th>Nom du cours</th> <th>Enseignants</th> <th>Icônes</th></tr>";
+        $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
+            . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
         foreach ($courses as $crsid => $rofpathid) {
             $res .= $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
         }
@@ -389,11 +404,11 @@ class rof_tools {
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
         //@todo sort $courses by niveau / semestre / nom
 
-        $res = "<ol>\n" ;
+        $res = "<ul>\n" ;
         foreach ($courses as $crsid => $rofpathid) {
              $res .= $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
         }
-        $res .= "</ol>\n";
+        $res .= "</ul>\n";
         return $res;
     }
 }
