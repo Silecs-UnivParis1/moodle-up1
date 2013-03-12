@@ -1436,13 +1436,22 @@ class core_wizard {
         $custominfo_data = custominfo_data::type('course');
         $cleandata = $this->customfields_wash($this->mydata);
         $custominfo_data->save_data($cleandata);
-        $this->update_myenrol_cohort();
+        $modif = $this->update_myenrol_cohort();
+        if ($modif) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Cohorts (course ' . $this->mydata->id . ' )');
+        }
         $this->update_myenrol_key();
         rebuild_course_cache($this->mydata->id);
     }
 
+    /**
+     * met à jour (suppression/ajout), si besoin, la liste des inscriptions de cohortes
+     * @return bool $modif
+    */
     public function update_myenrol_cohort()
     {
+        $modif = false;
         $course = $this->formdata['init_course'];
         $oldcohorts = array();
         if (isset($course['group'])) {
@@ -1466,6 +1475,9 @@ class core_wizard {
                 }
             }
         }
+        if (count($cohortadd)) {
+            $modif = true;
+        }
         myenrol_cohort($course['id'], $cohortadd);
         // suppression
         $cohortremove = array();
@@ -1480,7 +1492,11 @@ class core_wizard {
                 }
             }
         }
+        if (count($cohortremove)) {
+            $modif = true;
+        }
         wizard_unenrol_cohort($course['id'], $cohortremove);
+        return $modif;
     }
 
     function update_myenrol_key() {
