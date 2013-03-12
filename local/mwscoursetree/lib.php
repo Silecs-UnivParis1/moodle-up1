@@ -235,7 +235,7 @@ class course_tree {
     public function format_course_code($dbcourse, $element, $sep) {
         $code = strstr($dbcourse->idnumber, '-', true);
         if ($this->has_multiple_rattachements($dbcourse->id)) {
-            $code .= '&nbsp;+';
+            $code .= '<span title="Rattachement multiple">&nbsp;+</span>';
         }
         return   '<' . $element . '>' . $code . '</' . $element . '>' ;
     }
