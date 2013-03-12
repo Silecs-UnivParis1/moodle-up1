@@ -1,0 +1,40 @@
+h2.main {
+    text-align: left;
+    margin-left: 30%;
+}
+h3.main {
+    text-align: left;
+    margin-left: 0;
+}
+
+div.box.generalbox {
+    width: 50%;
+    margin: 0 25%;
+}
+.loginbox {
+    width: 100%;
+    margin-left: 0;
+}
+
+.generalbox.shiblogin .form-input {
+    padding-left: 20px;
+}
+.generalbox.shiblogin .form-submit {
+    float: right;
+    padding-right: 20px;
+}
+.generalbox.shiblogin.first .form-submit {
+    padding-top: 5px;
+}
+.generalbox.shiblogin label {
+    display: block;
+}
+
+#toggle-local {
+    float: right;
+    padding-right: 20px;
+    font-size: 40px;
+}
+#toggle-local:hover {
+    cursor: pointer;
+}

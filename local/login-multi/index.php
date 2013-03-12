@@ -17,6 +17,7 @@ $context = get_context_instance(CONTEXT_SYSTEM);
 $PAGE->set_url("$CFG->httpswwwroot/local/login-multi/index.php");
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('login');
+$PAGE->requires->css(new moodle_url('/local/login-multi/login.css'));
 
 $site = get_site();
 $loginsite = get_string("loginsite");
@@ -68,7 +69,7 @@ echo $OUTPUT->heading("Votre compte Paris 1", 3);
 <?php
 echo $OUTPUT->box_end();
 
-echo $OUTPUT->box_start();
+echo $OUTPUT->box_start('generalbox shiblogin');
 echo $OUTPUT->heading("Les identifiants d'un autre établissement", 3);
 ?>
 <div class="loginbox clearfix onecolumn">
@@ -88,6 +89,7 @@ echo $OUTPUT->heading("Les identifiants d'un autre établissement", 3);
 echo $OUTPUT->box_end();
 
 echo $OUTPUT->box_start();
+echo '<div id="toggle-local">&#x25BD;</div>';
 echo $OUTPUT->heading("Un compte invité", 3);
 display_local_login();
 echo $OUTPUT->box_end();
