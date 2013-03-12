@@ -31,6 +31,22 @@ $PAGE->verify_https_required();
 $PAGE->set_title("$site->fullname: $loginsite");
 $PAGE->set_heading($site->fullname);
 
+$PAGE->requires->js_init_code('
+    var localLoginShown = true;
+    function toggleLocalLogin() {
+        if (localLoginShown) {
+            document.getElementsByClassName("local-login")[0].className = "box generalbox local-login hide-form";
+        } else {
+            document.getElementsByClassName("local-login")[0].className = "box generalbox local-login";
+        }
+        localLoginShown = !localLoginShown;
+    }
+    toggleLocalLogin();
+    document.getElementsByClassName("local-login")[0].addEventListener("click", toggleLocalLogin, true);
+');
+
+
+
 echo $OUTPUT->header();
 
 if (isloggedin() and !isguestuser()) {
@@ -88,7 +104,7 @@ echo $OUTPUT->heading("Les identifiants d'un autre établissement", 3);
 <?php
 echo $OUTPUT->box_end();
 
-echo $OUTPUT->box_start();
+echo $OUTPUT->box_start('generalbox local-login');
 echo '<div id="toggle-local">&#x25BD;</div>';
 echo $OUTPUT->heading("Un compte invité", 3);
 display_local_login();

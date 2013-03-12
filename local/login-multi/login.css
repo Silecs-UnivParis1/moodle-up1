@@ -38,3 +38,7 @@ div.box.generalbox {
 #toggle-local:hover {
     cursor: pointer;
 }
+
+.hide-form .loginpanel {
+    display: none;
+}
