@@ -100,3 +100,28 @@ function up1_meta_get_id($courseid, $field) {
     //echo $sql ."\n -> $id\n";
     return $id;
 }
+
+/**
+ *
+ * @param string $object = 'course' or 'user'
+ * @param array(string) $fields ex. array('up1complement', 'up1diplome', 'up1cycle')
+ */
+function up1_meta_gen_sql_query($object, $fields) {
+   global $DB;
+
+   $sql = "SELECT shortname, id FROM {custom_info_field} WHERE objectname = ? AND shortname IN ('"
+        . implode("' ,'", $fields) . "')" ;
+   $fieldids = $DB->get_records_sql_menu($sql, array($object));
+
+   $select = "SELECT c.id " ;
+   $from = "FROM {course} c ";
+   foreach ($fields as $field) {
+       $fid = $fieldids[$field];
+       $table = "cid" . $fid;
+       $select = $select . ", ${table}.data AS $field ";
+       $from = $from . "\n  JOIN {custom_info_data} AS ${table} "
+                    . " ON ( ${table}.fieldid = $fid AND ${table}.objectid = c.id )" ;
+   }
+   $sql = $select . $from;
+   return $sql;
+}

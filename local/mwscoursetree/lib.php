@@ -384,15 +384,37 @@ class rof_tools {
         return $items;
     }
 
+
+    /**
+     * sort courses by annee / semestre / fullname
+     * @param array $courses ($crsid => $rofpathid)
+     * @return array ($crsid)
+     */
+    private function sort_courses($courses) {
+        global $DB;
+
+        if (empty($courses)) {
+            return array();
+        }
+        $subquery = up1_meta_gen_sql_query('course', array('up1niveauannee', 'up1semestre'));
+        $sql = "SELECT c.id "
+            . "FROM {course} AS c JOIN (" . $subquery .") AS s ON (s.id = c.id) "
+            . "WHERE c.id IN  ( " . implode(", ", array_keys($courses)) . " ) "
+            . "ORDER BY s.up1niveauannee, s.up1semestre, c.fullname ";
+        $sortcourses = $DB->get_fieldset_sql($sql);
+        return $sortcourses;
+    }
+
     public function html_course_table($pseudopath) {
+        global $DB;
         $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
-        //@todo sort $courses by niveau / semestre / nom
 
         $res = '<table class="generaltable">' . "\n" ;
         $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
             . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
-        foreach ($courses as $crsid => $rofpathid) {
+        foreach ($this->sort_courses($courses) as $crsid) {
+            $rofpathid = $courses[$crsid];
             $res .= $this->coursetree->format_course_entry('', $crsid, true, 'table') . "\n";
         }
         $res .= "</table>\n";
@@ -402,11 +424,11 @@ class rof_tools {
     public function html_course_list($pseudopath) {
         $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
-        //@todo sort $courses by niveau / semestre / nom
 
         $res = "<ul>\n" ;
-        foreach ($courses as $crsid => $rofpathid) {
-             $res .= $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
+        foreach ($this->sort_courses($courses) as $crsid) {
+            $rofpathid = $courses[$crsid];
+            $res .= $this->coursetree->format_course_entry('', $crsid, true, 'list') . "\n";
         }
         $res .= "</ul>\n";
         return $res;
