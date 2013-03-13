@@ -36,8 +36,10 @@ $PAGE->requires->js_init_code('
     function toggleLocalLogin() {
         if (localLoginShown) {
             document.getElementsByClassName("local-login")[0].className = "box generalbox local-login hide-form";
+            document.getElementById("toggle-local").innerHTML = "&#x25BD;";
         } else {
             document.getElementsByClassName("local-login")[0].className = "box generalbox local-login";
+            document.getElementById("toggle-local").innerHTML = "&#x25B3;";
         }
         localLoginShown = !localLoginShown;
     }
