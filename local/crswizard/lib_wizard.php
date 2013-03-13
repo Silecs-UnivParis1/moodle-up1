@@ -1380,19 +1380,26 @@ class core_wizard {
         $this->course = $course;
     }
 
+    /**
+     * prépare les données du cours en vue de sa mise à jour
+    */
     public function prepare_update_course() {
         if (isset($this->formdata['form_step3'])) {
             $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
         } else {
             $this->mydata = (object) $this->formdata['form_step2'];
         }
+        $this->formdata['modif'] = array('identification' => false, 'attach' => false);
         $form2 = $this->formdata['form_step2'];
+        $initc = $this->formdata['init_course'];
 
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
             $changerof1 = $this->check_first_connection();
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2, $changerof1);
             if ($changerof1 == false) {
                 $rof1['idnumber'] = trim($this->formdata['init_course']['idnumber']);
+            } else {
+                $this->formdata['modif']['identification'] = true;
             }
             $this->set_param_rof1($rof1);
             $this->set_rof_shortname($rof1['idnumber']);
@@ -1403,15 +1410,49 @@ class core_wizard {
             $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
+
+            // log update attach
+            $new = array();
+            if (isset($this->formdata['form_step2']['item']['s'])) {
+                $new = $this->formdata['form_step2']['item']['s'];
+            }
+            $old = array();
+            if (isset($this->formdata['init_course']['form_step2']['item']['s'])) {
+                $old = $this->formdata['init_course']['form_step2']['item']['s'];
+            }
+            if (count(array_diff($old, $new)) || count(array_diff($new, $old))) {
+                $this->formdata['modif']['attach'] = true;
+            }
+
         } else { // cas 3
             $this->mydata->course_nom_norme = $form2['fullname'];
             $this->set_categories_connection();
+
+            // log update rattach
+            $old = array();
+            if (isset($initc['profile_field_up1categoriesbis']) && $initc['profile_field_up1categoriesbis'] != '') {
+                $old = explode(';', $initc['profile_field_up1categoriesbis']);
+            }
+            $new = array();
+            if (isset($this->formdata['form_step3']['rattachements'])) {
+                $new = $this->formdata['form_step3']['rattachements'];
+            }
+            if (count(array_diff($old, $new)) || count(array_diff($new, $old))) {
+                $this->formdata['modif']['attach'] = true;
+            }
+
+            //log
+            if ($form2['fullname'] != $initc['fullname'] || $form2['shortname'] != $initc['shortname'] ) {
+                $this->formdata['modif']['identification'] = true;
+            }
+            if ($form2['category'] != $initc['category']) {
+                $this->formdata['modif']['attach'] = true;
+            }
         }
 
         $this->mydata->profile_field_up1datefermeture = $form2['up1datefermeture'];
         $this->mydata->summary = $form2['summary_editor']['text'];
         $this->mydata->summaryformat = $form2['summary_editor']['format'];
-
 
         return $this->mydata;
     }
@@ -1447,6 +1488,15 @@ class core_wizard {
 
     public function update_course() {
         $this->prepare_update_course();
+
+        if ($this->formdata['modif']['identification']) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Identification (course ' . $this->mydata->id . ' )');
+        }
+        if ($this->formdata['modif']['attach']) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Rattachement (course ' . $this->mydata->id . ' )');
+        }
         update_course($this->mydata);
         $custominfo_data = custominfo_data::type('course');
         $cleandata = $this->customfields_wash($this->mydata);
