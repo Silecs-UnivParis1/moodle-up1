@@ -8,6 +8,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+/* @var $PAGE page_base */
+
 global $CFG;
 require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
 require_once($CFG->dirroot . "/local/roftools/roflib.php");
@@ -32,7 +34,9 @@ class course_tree {
 
     public function __construct() {
         global $PAGE;
-        $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+        if (empty($PAGE->context)) {
+            $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+        }
     }
 
     /**
