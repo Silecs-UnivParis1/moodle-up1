@@ -22,11 +22,12 @@ if (!defined('AUTH_GID_NOGROUP')) {
 
 require_once($CFG->libdir.'/authlib.php');
 require_once($CFG->libdir.'/ldaplib.php');
+require_once('auth_trivial.php'); // all trivial methods
 
 /**
  * LDAP authentication plugin.
  */
-class auth_plugin_ldapup1 extends auth_plugin_base {
+class auth_plugin_ldapup1 extends auth_plugin_trivial{
 
     /**
      * Init plugin config from database settings depending on the plugin auth type.
@@ -91,17 +92,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         $this->roleauth = 'auth_ldapup1';
         $this->errorlogtag = '[AUTH LDAPUP1] ';
         $this->init_plugin($this->authtype);
-    }
-
-    /**
-     * Returns true if the username and password work => DISABLED
-     * @param string $username The username (without system magic quotes)
-     * @param string $password The password (without system magic quotes)
-     *
-     * @return bool Authentication success or failure.
-     */
-    function user_login($username, $password) {
-        return false;
     }
 
     /**
@@ -223,71 +213,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         return count($users);
     }
 
-    /**
-     * Creates a new user on LDAP.
-     * By using information in userobject
-     * Use user_exists to prevent duplicate usernames
-     *
-     * @param mixed $userobject  Moodle userobject
-     * @param mixed $plainpass   Plaintext password
-     */
-    function user_create($userobject, $plainpass) {
-        return false;
-    }
-
-    /**
-     * Returns true if plugin allows resetting of password from moodle.
-     *
-     * @return bool
-     */
-    function can_reset_password() {
-        return false;
-    }
-
-    /**
-     * Returns true if plugin allows signup and user creation.
-     *
-     * @return bool
-     */
-    function can_signup() {
-        return false;
-    }
-
-    /**
-     * Sign up a new user ready for confirmation. => DISABLED
-     * @param object $user new user object
-     * @param boolean $notify print notice with link and terminate
-     */
-    function user_signup($user, $notify=true) {
-        return false;
-    }
-
-    /**
-     * Returns true if plugin allows confirming of new users.
-     *
-     * @return bool
-     */
-    function can_confirm() {
-        return false;
-    }
-
-    /**
-     * Confirm the new user as registered. => DISABLED
-     * @param string $username
-     * @param string $confirmsecret
-     */
-    function user_confirm($username, $confirmsecret) {
-            return AUTH_CONFIRM_ERROR;
-    }
-
-    /**
-     * Return number of days to user password expires => DISABLED
-     * @param mixed $username username
-     * @return integer
-     */
-    function password_expire($username) {
-        return 0;
-    }
 
     /**
      * Syncronizes user fron external LDAP server to moodle user table
@@ -574,23 +499,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         return true;
     }
 
-    /**
-     * displays or logs modified users ; called by sync_users()
-     * @param string $output  'stdout' or 'file' or 'stderr'
-     * @param string $msg  message to log
-     */
-    function do_log($output, $msg) {
-        if ($output == 'stdout') {
-            echo $msg;
-        }
-        elseif ($output == 'file') {
-            $logdate = date('Y-m-d H:i:s  ');
-            error_log($logdate . $msg, 3, "sync_users.log");
-        }
-        elseif ($output == 'stderr') {
-            error_log($msg, 4);
-        }
-    }
 
     /**
      * Update a local user record from an external source.
@@ -675,47 +583,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         if ($verb >= 1) echo '.';
     }
 
-    /**
-     * Activates (enables) user in external LDAP so user can login => DISABLED
-     *
-     * @param mixed $username
-     * @return boolean result
-     */
-    function user_activate($username) {
-        return true;
-    }
-
-    /**
-     * Returns true if user should be coursecreator => DISABLED
-     *
-     * @param mixed $username    username (without system magic quotes)
-     * @return mixed result      null if course creators is not configured, boolean otherwise.
-     */
-    function iscreator($username) {
-        return null;
-    }
-
-    /**
-     * Called when the user record is updated => DISABLED
-     * @param mixed $olduser     Userobject before modifications    (without system magic quotes)
-     * @param mixed $newuser     Userobject new modified userobject (without system magic quotes)
-     * @return boolean result
-     *
-     */
-    function user_update($olduser, $newuser) {
-        return false;
-    }
-
-    /**
-     * Changes userpassword in LDAP => DISABLED
-     * @param  object  $user        User table object
-     * @param  string  $newpassword Plaintext password (not crypted/md5'ed)
-     * @return boolean result
-     *
-     */
-    function user_update_password($user, $newpassword) {
-        return false;
-    }
 
     /**
      * Take expirationtime and return it as unix timestamp in seconds
@@ -795,7 +662,7 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
 
         // UP1 - SILECS addition
         $customattrs = array('eduPersonPrimaryAffiliation', 'supannEntiteAffectationPrincipale');
-        //** @todo if possible, use custom user metadata description instead, where shortname begins with up1
+        //** @todo ? use custom user metadata description instead, where shortname begins with up1
         foreach ($customattrs as $attr) {
             $moodleattributes['up1' . strtolower($attr)] = strtolower($attr); // le second strtolower est bien nécessaire !
         }
@@ -857,53 +724,6 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         return $fresult;
     }
 
-    /**
-     * Indicates if password hashes should be stored in local moodle database.
-     *
-     * @return bool true means flag 'not_cached' stored instead of password hash
-     */
-    function prevent_local_passwords() {
-        return true;
-    }
-
-    /**
-     * Returns true if this authentication plugin is 'internal'.
-     *
-     * @return bool
-     */
-    function is_internal() {
-        return false;
-    }
-
-    /**
-     * Returns true if this authentication plugin can change the user's
-     * password.
-     *
-     * @return bool
-     */
-    function can_change_password() {
-        return false;
-    }
-
-    /**
-     * Returns the URL for changing the user's password, or empty if the default can
-     * be used.
-     *
-     * @return moodle_url
-     */
-    function change_password_url() {
-        return null;
-    }
-
-
-    /**
-     * Sync roles for this user => DISABLED
-     *
-     * @param $user object user object (without system magic quotes)
-     */
-    function sync_roles($user) {
-        return false;
-    }
 
     /**
      * Prints a form for configuring this authentication plugin.
@@ -1063,6 +883,27 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
                                 $this->config->user_attribute, $this->config->search_sub);
     }
 
+
+// NEW FUNCTIONS, introduced by Silecs
+    
+    /**
+     * displays or logs modified users ; called by sync_users()
+     * @param string $output  'stdout' or 'file' or 'stderr'
+     * @param string $msg  message to log
+     */
+    function do_log($output, $msg) {
+        if ($output == 'stdout') {
+            echo $msg;
+        }
+        elseif ($output == 'file') {
+            $logdate = date('Y-m-d H:i:s  ');
+            error_log($logdate . $msg, 3, "sync_users.log");
+        }
+        elseif ($output == 'stderr') {
+            error_log($msg, 4);
+        }
+    }
+
     /**
      * returns the last sync from the logs
      */
@@ -1080,4 +921,5 @@ class auth_plugin_ldapup1 extends auth_plugin_base {
         );
         return $res;
     }
+
 } // End of the class
