@@ -42,7 +42,7 @@ $PAGE->requires->js_init_code('
         localLoginShown = !localLoginShown;
     }
     toggleLocalLogin();
-    document.getElementsByClassName("local-login")[0].addEventListener("click", toggleLocalLogin, true);
+    document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
 ');
 
 
