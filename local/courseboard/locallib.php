@@ -71,7 +71,7 @@ function print_table_course_vs_rof($crsid, $rofdata) {
  * @return type
  */
 function get_table_course_header($rofcols) {
-    $headings = array('Métadonnée', 'Cours');
+    $headings = array('Métadonnée', 'Métadonnée étendue');
     for ($i = 1 ; $i <= $rofcols ; $i++) {
         $headings[] = 'ROF ' . $i;
     }

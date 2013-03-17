@@ -222,15 +222,30 @@ function wizard_unenrol_key($enrol, $course) {
  * @param string $enrol nature de l'inscription (enrol.enrol)
  * @param object course $course
  * @param array $tabkey nouvelle valeur de la cle
+ * @retun bool $modif
  */
 function wizard_update_enrol_key($enrol, $course, $tabkey) {
     global $DB;
+    $modif = false;
     $instance = $DB->get_record('enrol', array('courseid' => $course->id,
         'enrol' => $enrol, 'timecreated' => $course->timecreated));
     if ($instance) {
-        $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
-            'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate']));
+        if ($tabkey['password'] != $instance->password) {
+            $modif = true;
+        }
+        if ($tabkey['enrolstartdate'] != $instance->enrolstartdate) {
+            $modif = true;
+        }
+        if ($tabkey['enrolenddate'] != $instance->enrolenddate) {
+            $modif = true;
+        }
+        if ($modif) {
+            $DB->update_record('enrol', array('id' => $instance->id, 'password' => $tabkey['password'],
+                'enrolstartdate' => $tabkey['enrolstartdate'], 'enrolenddate' => $tabkey['enrolenddate'],
+                'timemodified' => time()));
+        }
     }
+    return $modif;
 }
 
 function affiche_error_enrolcohort($erreurs) {
@@ -1365,19 +1380,26 @@ class core_wizard {
         $this->course = $course;
     }
 
+    /**
+     * prépare les données du cours en vue de sa mise à jour
+    */
     public function prepare_update_course() {
         if (isset($this->formdata['form_step3'])) {
             $this->mydata = (object) array_merge($this->formdata['form_step2'], $this->formdata['form_step3']);
         } else {
             $this->mydata = (object) $this->formdata['form_step2'];
         }
+        $this->formdata['modif'] = array('identification' => false, 'attach' => false);
         $form2 = $this->formdata['form_step2'];
+        $initc = $this->formdata['init_course'];
 
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
             $changerof1 = $this->check_first_connection();
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2, $changerof1);
             if ($changerof1 == false) {
                 $rof1['idnumber'] = trim($this->formdata['init_course']['idnumber']);
+            } else {
+                $this->formdata['modif']['identification'] = true;
             }
             $this->set_param_rof1($rof1);
             $this->set_rof_shortname($rof1['idnumber']);
@@ -1388,15 +1410,49 @@ class core_wizard {
             $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
+
+            // log update attach
+            $new = array();
+            if (isset($this->formdata['form_step2']['item']['s'])) {
+                $new = $this->formdata['form_step2']['item']['s'];
+            }
+            $old = array();
+            if (isset($this->formdata['init_course']['form_step2']['item']['s'])) {
+                $old = $this->formdata['init_course']['form_step2']['item']['s'];
+            }
+            if (count(array_diff($old, $new)) || count(array_diff($new, $old))) {
+                $this->formdata['modif']['attach'] = true;
+            }
+
         } else { // cas 3
             $this->mydata->course_nom_norme = $form2['fullname'];
             $this->set_categories_connection();
+
+            // log update rattach
+            $old = array();
+            if (isset($initc['profile_field_up1categoriesbis']) && $initc['profile_field_up1categoriesbis'] != '') {
+                $old = explode(';', $initc['profile_field_up1categoriesbis']);
+            }
+            $new = array();
+            if (isset($this->formdata['form_step3']['rattachements'])) {
+                $new = $this->formdata['form_step3']['rattachements'];
+            }
+            if (count(array_diff($old, $new)) || count(array_diff($new, $old))) {
+                $this->formdata['modif']['attach'] = true;
+            }
+
+            //log
+            if ($form2['fullname'] != $initc['fullname'] || $form2['shortname'] != $initc['shortname'] ) {
+                $this->formdata['modif']['identification'] = true;
+            }
+            if ($form2['category'] != $initc['category']) {
+                $this->formdata['modif']['attach'] = true;
+            }
         }
 
         $this->mydata->profile_field_up1datefermeture = $form2['up1datefermeture'];
         $this->mydata->summary = $form2['summary_editor']['text'];
         $this->mydata->summaryformat = $form2['summary_editor']['format'];
-
 
         return $this->mydata;
     }
@@ -1432,17 +1488,39 @@ class core_wizard {
 
     public function update_course() {
         $this->prepare_update_course();
+
+        if ($this->formdata['modif']['identification']) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Identification (course ' . $this->mydata->id . ' )');
+        }
+        if ($this->formdata['modif']['attach']) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Rattachement (course ' . $this->mydata->id . ' )');
+        }
         update_course($this->mydata);
         $custominfo_data = custominfo_data::type('course');
         $cleandata = $this->customfields_wash($this->mydata);
         $custominfo_data->save_data($cleandata);
-        $this->update_myenrol_cohort();
-        $this->update_myenrol_key();
+        $modif = $this->update_myenrol_cohort();
+        if ($modif) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update Cohorts (course ' . $this->mydata->id . ' )');
+        }
+        $modif = $this->update_myenrol_key();
+        if ($modif) {
+            add_to_log($this->mydata->id, 'crswizard', 'update',
+                'update/index.php?id=' . $this->mydata->id, 'Update keys (course ' . $this->mydata->id . ' )');
+        }
         rebuild_course_cache($this->mydata->id);
     }
 
+    /**
+     * met à jour (suppression/ajout), si besoin, la liste des inscriptions de cohortes
+     * @return bool $modif
+    */
     public function update_myenrol_cohort()
     {
+        $modif = false;
         $course = $this->formdata['init_course'];
         $oldcohorts = array();
         if (isset($course['group'])) {
@@ -1466,6 +1544,9 @@ class core_wizard {
                 }
             }
         }
+        if (count($cohortadd)) {
+            $modif = true;
+        }
         myenrol_cohort($course['id'], $cohortadd);
         // suppression
         $cohortremove = array();
@@ -1480,11 +1561,20 @@ class core_wizard {
                 }
             }
         }
+        if (count($cohortremove)) {
+            $modif = true;
+        }
         wizard_unenrol_cohort($course['id'], $cohortremove);
+        return $modif;
     }
 
+    /**
+     * met à jour (suppression/ajout), si besoin, la liste des clefs
+     * @return bool $modif
+    */
     function update_myenrol_key() {
         global $DB;
+        $modif = false;
         $tabenrol = array('Etudiante' => 'self', 'Visiteur' => 'guest');
 
         if (isset($this->formdata['form_step6'])) {
@@ -1507,18 +1597,23 @@ class core_wizard {
                     $enrol = $tabenrol[$role];
                     wizard_unenrol_key ($enrol, $course);
                 }
+                $modif = true;
                 break;
              case 2:
                 $this->myenrol_clef($course, $newkey);
+                $modif = true;
                 break;
             default:
                 foreach ($newkey as $role => $key) {
                     $enrol = $tabenrol[$role];
                     if (array_key_exists($role, $oldkey)) {
                         //update
-                        wizard_update_enrol_key($enrol, $course, $key);
+                        if (wizard_update_enrol_key($enrol, $course, $key)) {
+                            $modif = true;
+                        }
                     } else {
                         $this->myenrol_clef($course, array($role => $key));
+                        $modif = true;
                     }
                 }
                 // suppression
@@ -1527,9 +1622,11 @@ class core_wizard {
                     // suppression
                     $enrol = $tabenrol[$role];
                     wizard_unenrol_key ($enrol, $course);
+                    $modif = true;
                 }
             }
         }
+        return $modif;
     }
 }
 

@@ -48,10 +48,13 @@ echo "</ul>\n";
 $rofids = up1_meta_get_text($crsid, 'up1rofid');
 $rofdata = array();
 if ($rofids) {
-    $insql = "('" . join("', '", explode(';', $rofids)) . "')";
-    $sql = "SELECT rofid FROM {rof_course} rc WHERE rofid IN " . $insql;
-    $rofcourses = $DB->get_fieldset_sql($sql);
+    /// Vérification de l'existence dans le cache ROF : probablement inutile
+    // $insql = "('" . join("', '", explode(';', $rofids)) . "')";
+    // $sql = "SELECT rofid FROM {rof_course} rc WHERE rofid IN " . $insql;
+    // $rofcourses = $DB->get_fieldset_sql($sql);
+    $rofcourses = explode(';', $rofids);
     $rofdata = array_map('rof_get_metadata', $rofcourses);
+
 } else {
     $rofcourses = FALSE;
     $rofids = FALSE;
