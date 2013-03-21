@@ -6,9 +6,17 @@ require_once __DIR__ . '/../../config.php';
 
 global $CFG, $PAGE, $OUTPUT, $USER;
 
+define('SHIBB_DEFAULT_IDP', 'urn:mace:cru.fr:federation:univ-paris1.fr');
+
 require_once $CFG->dirroot . "/auth/shibboleth/auth.php";
 
 redirect_if_major_upgrade_required();
+
+if (!empty($_COOKIE['shibb_remember'])) {
+    $_POST['idp'] = SHIBB_DEFAULT_IDP;
+    require $CFG->dirroot . "/auth/shibboleth/login.php";
+    exit;
+}
 
 //HTTPS is required in this page when $CFG->loginhttps enabled
 $PAGE->https_required();
@@ -46,7 +54,22 @@ $PAGE->requires->js_init_code('
     toggleLocalLogin();
     document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
 
-
+    var checkboxes = document.getElementsByClassName("shibb_remember");
+    for (var i=0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener("click", function(){
+            if (this.checked) {
+                var cookie = "shibb_remember=" + this.name;
+                if (this.name == "always") {
+                    var expiration_date = new Date();
+                    expiration_date.setFullYear(expiration_date.getFullYear() + 1);
+                    cookie = cookie + ";expires=" + expiration_date.toGMTString();
+                }
+                document.cookie = cookie;
+            } else {
+                document.cookie = "shibb_remember=;expires=Thu, 01 Jan 1970 00:00:01 GMT";
+            }
+        });
+    }
 ');
 
 
@@ -71,16 +94,16 @@ echo $OUTPUT->heading("Votre compte Paris 1", 3);
 <div class="loginbox clearfix onecolumn">
 <form name="login-up1" id="login-up1" method="post" action="<?php echo $shiburl; ?>login.php">
     <div class="form-submit">
-        <input type="hidden" name="idp" value="urn:mace:cru.fr:federation:univ-paris1.fr" />
+        <input type="hidden" name="idp" value="<?php echo SHIBB_DEFAULT_IDP; ?>" />
         <button type="submit">Valider</button>
     </div>
     <div class="form-input">
         <label>
-            <input name="session" type="checkbox" />
+            <input name="session" class="shibb_remember" type="checkbox" />
             Se souvenir de mon choix pour cette session
         </label>
         <label>
-            <input name="always" type="checkbox" />
+            <input name="always" class="shibb_remember" type="checkbox" />
             Se souvenir de mon choix définitivement
         </label>
     </div>
