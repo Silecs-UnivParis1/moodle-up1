@@ -45,6 +45,8 @@ $PAGE->requires->js_init_code('
     }
     toggleLocalLogin();
     document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
+
+
 ');
 
 
@@ -67,7 +69,7 @@ echo $OUTPUT->box_start('generalbox shiblogin first');
 echo $OUTPUT->heading("Votre compte Paris 1", 3);
 ?>
 <div class="loginbox clearfix onecolumn">
-<form name="login-up1" id="login-up1" method="post" action="<?php echo $shiburl; ?>index.php">
+<form name="login-up1" id="login-up1" method="post" action="<?php echo $shiburl; ?>login.php">
     <div class="form-submit">
         <input type="hidden" name="idp" value="urn:mace:cru.fr:federation:univ-paris1.fr" />
         <button type="submit">Valider</button>
