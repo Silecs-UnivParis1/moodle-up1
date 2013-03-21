@@ -63,7 +63,7 @@ if (isloggedin() and !isguestuser()) {
 }
 
 
-echo $OUTPUT->heading("Se connecter avec :");
+echo $OUTPUT->heading("Se connecter avec :", 2, '');
 
 echo $OUTPUT->box_start('generalbox shiblogin first');
 echo $OUTPUT->heading("Votre compte Paris 1", 3);
