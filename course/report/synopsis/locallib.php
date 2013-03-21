@@ -40,7 +40,6 @@ require_once($CFG->libdir.'/custominfo/lib.php');
  * @param array(role_id, ...) $roleids
  * @return array of cohort records
  */
-
 function get_enrolled_cohorts($courseid, $roleids=null) {
     global $DB;
 
@@ -72,28 +71,3 @@ function html_custom_data($course) {
     echo "</ul>\n";
 }
 
-function report_outline_print_row($mod, $instance, $result) {
-    global $OUTPUT, $CFG;
-
-    $image = "<img src=\"" . $OUTPUT->pix_url('icon', $mod->modname) . "\" class=\"icon\" alt=\"$mod->modfullname\" />";
-
-    echo "<tr>";
-    echo "<td valign=\"top\">$image</td>";
-    echo "<td valign=\"top\" style=\"width:300\">";
-    echo "   <a title=\"$mod->modfullname\"";
-    echo "   href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\">".format_string($instance->name,true)."</a></td>";
-    echo "<td>&nbsp;&nbsp;&nbsp;</td>";
-    echo "<td valign=\"top\">";
-    if (isset($result->info)) {
-        echo "$result->info";
-    } else {
-        echo "<p style=\"text-align:center\">-</p>";
-    }
-    echo "</td>";
-    echo "<td>&nbsp;&nbsp;&nbsp;</td>";
-    if (!empty($result->time)) {
-        $timeago = format_time(time() - $result->time);
-        echo "<td valign=\"top\" style=\"white-space: nowrap\">".userdate($result->time)." ($timeago)</td>";
-    }
-    echo "</tr>";
-}

@@ -30,7 +30,6 @@ require_once($CFG->libdir.'/custominfo/lib.php');
 
 $id = required_param('id', PARAM_INT);       // course id
 $layout = optional_param('layout', 'report', PARAM_ALPHA); // default layout=report
-
 if ($layout != 'popup') {
     $layout = 'report';
 }
@@ -41,28 +40,21 @@ $context = get_context_instance(CONTEXT_COURSE, $course->id);
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
 
-// require_login($course);
-// require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
-
-// add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
-
+$site = get_site();
 $strreport = get_string('pluginname', 'coursereport_synopsis');
 $PAGE->set_context($context);
 $PAGE->set_title($course->shortname .': '. $strreport);
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
-// echo $OUTPUT->heading(format_string($course->fullname));
 
-echo "<h2>" . get_string('Description', 'coursereport_synopsis') . "</h2>\n";
+echo "<h2>" . $course->fullname . "</h2>\n";
 
-echo "<ul>\n";
-echo "<li>Abrégé : ". $course->shortname ."</li>\n";
-echo "<li>Code : ". $course->idnumber ."</li>\n";
-echo "</ul>\n";
-echo '<div id="summary">' . $course->summary . '</div>';
+echo '<div id="course-summary">'
+    . format_text($course->summary, $course->summaryformat)
+    . '</div>' . "\n\n";
 
 // custom info data
-html_custom_data($course);
+// html_custom_data($course);
 
 
 echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
@@ -94,16 +86,6 @@ if (empty($cohorts)) {
     }
 }
 echo "</ul>";
-
-
-echo "<h2>" . get_string('Outline', 'coursereport_synopsis') . "</h2>\n";
-$sections = get_all_sections($course->id);
-echo "<ol>\n";
-foreach ($sections as $section) {
-    $sectiontitle = get_section_name($course, $section);
-    echo "<li>" . $sectiontitle . "</li>";
-}
-echo "</ol>\n";
 
 
 echo $OUTPUT->footer();
