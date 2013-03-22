@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once(dirname(__FILE__).'/lib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
+require_once($CFG->dirroot.'/local/course_validated/locallib.php');
 
 /**
  * Returns list of cohorts enrolled into course.
@@ -142,17 +143,38 @@ function html_rows_status($course) {
 }
 
 
-function html_custom_data($course) {
-    $fieldList = custominfo_data::type('course')->get_structured_fields($course->id, true);
-    echo "<ul>\n";
-    foreach ($fieldList as $category => $fields) {
-        if ($category == 'Other fields') continue;
-            echo "<li>" . $category . "</li>\n<ul>";
-            foreach ($fields as $fname => $fvalue ) {
-                echo "<li>$fname : $fvalue</li>";
-            }
-        echo "</ul>\n";
+function html_table_rattachements($course) {
+    echo "\n\n" . '<table class="generaltable">' . "\n";
+    $parity = 0;
+
+    $pathids = explode(';', up1_meta_get_text($course->id, 'rofpathid'));
+    $n = count($pathids);
+    $res = '';
+    $pathprefix = get_category_path(get_config('local_crswizard','cas2_default_etablissement'));
+    foreach ($pathids as $pathid) {
+        $parity = 1 - $parity;
+        $patharray = array_filter(explode('/', $pathid));
+        $rofid = $patharray[count($patharray)];
+        $rofobject = rof_get_record($rofid);
+        $roftitle = '<b>'.rof_get_code_or_rofid($rofid).'</b>' .' - '. $rofobject[0]->name;
+        $res .= '<tr class="r'. $parity.'"> <td>Élément pédagogique</td> <td>';
+        $res .= $roftitle . "</td></tr>\n";
+
+        $combined = rof_get_combined_path($patharray);
+        $res .= '<tr class="r'. $parity.'"> <td>Chemin complet</td> <td>';
+        $res .= $pathprefix . rof_format_path($combined, 'name', true, ' > ') . "</td></tr>\n";
     }
-    echo "</ul>\n";
+    echo $res;
+    echo "</table>\n";
 }
 
+function html_button_join($course) {
+    global $OUTPUT;
+    $vistitle = array("Espace en préparation", "Rejoindre l'espace");
+
+    echo $OUTPUT->single_button(
+            new moodle_url('/course/view.php', array('id' => $course->id)),
+            $vistitle[$course->visible],
+            'get'
+            );
+}

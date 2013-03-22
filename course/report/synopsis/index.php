@@ -48,6 +48,7 @@ $PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
 
 echo "<h2>" . $course->fullname . "</h2>\n";
+html_button_join($course);
 
 // Description
 echo '<div id="course-summary">'
@@ -59,6 +60,6 @@ echo "<h3>Informations sur l'espace de cours</h3>\n";
 html_table_informations($course);
 
 echo "<h3>Rattachements à l'offre de formation</h3>\n";
-
+html_table_rattachements($course);
 
 echo $OUTPUT->footer();
