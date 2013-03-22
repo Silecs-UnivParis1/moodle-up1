@@ -29,18 +29,17 @@ defined('MOODLE_INTERNAL') || die;
 require_once(dirname(__FILE__).'/lib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
+require_once($CFG->dirroot.'/local/course_validated/locallib.php');
 
 /**
- * Returns list of cohorts enrolled into course/context.
+ * Returns list of cohorts enrolled into course.
  * @todo this function should be moved to  enrol/cohort/locallib.php
  * OR lib/accesslib.php (next to get_enrolled_users)
  *
- * @param context $context (optional)
- * @param course id $courseid (optional)
+ * @param course id $courseid
  * @param array(role_id, ...) $roleids
  * @return array of cohort records
  */
-
 function get_enrolled_cohorts($courseid, $roleids=null) {
     global $DB;
 
@@ -58,42 +57,124 @@ function get_enrolled_cohorts($courseid, $roleids=null) {
 }
 
 
-function html_custom_data($course) {
-    $fieldList = custominfo_data::type('course')->get_structured_fields($course->id, true);
-    echo "<ul>\n";
-    foreach ($fieldList as $category => $fields) {
-        if ($category == 'Other fields') continue;
-            echo "<li>" . $category . "</li>\n<ul>";
-            foreach ($fields as $fname => $fvalue ) {
-                echo "<li>$fname : $fvalue</li>";
-            }
-        echo "</ul>\n";
-    }
-    echo "</ul>\n";
+function html_table_informations($course) {
+    echo "\n\n" . '<table class="generaltable">' . "\n";
+    echo html_rows_informations($course);
+    echo html_rows_teachers($course);
+    echo html_rows_cohorts($course);
+    echo html_rows_status($course);
+    echo "</table>\n";
 }
 
-function report_outline_print_row($mod, $instance, $result) {
-    global $OUTPUT, $CFG;
 
-    $image = "<img src=\"" . $OUTPUT->pix_url('icon', $mod->modname) . "\" class=\"icon\" alt=\"$mod->modfullname\" />";
+function html_rows_informations($course) {
+    $res = '';
+    $res .= '<tr> <td>Nom</td> <td>' . $course->fullname . '</td> </tr>' . "\n";
+    $res .= '<tr> <td>Nom abrégé</td> <td>' . $course->shortname . '</td> </tr>' . "\n";
+    return $res;
+}
 
-    echo "<tr>";
-    echo "<td valign=\"top\">$image</td>";
-    echo "<td valign=\"top\" style=\"width:300\">";
-    echo "   <a title=\"$mod->modfullname\"";
-    echo "   href=\"$CFG->wwwroot/mod/$mod->modname/view.php?id=$mod->id\">".format_string($instance->name,true)."</a></td>";
-    echo "<td>&nbsp;&nbsp;&nbsp;</td>";
-    echo "<td valign=\"top\">";
-    if (isset($result->info)) {
-        echo "$result->info";
+function html_rows_teachers($course) {
+    // output based on roles ; only editingteacher + teacher for now
+    // for an output based on capabilities, use instead get_users_by_capability(): much heavier
+    global $DB;
+    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $troles = array('editingteacher' => 'Enseignants', 'teacher' => 'Autres intervenants' );
+    $res = '';
+    foreach ($troles as $trole => $rowhead) {
+        $role = $DB->get_record('role', array('shortname' => $trole));
+        $teachers = get_role_users($role->id, $context);
+        if ($teachers) {
+            $res .= '<tr> <td>' . $rowhead . '</td>';
+            $who = '';
+            foreach ($teachers as $teacher) {
+                $who .= fullname($teacher) . ', ';
+            }
+            $who = substr($who, 0, -2);
+            $res .= '<td>' . $who . '</td> </tr>';
+        }
+    }
+    return $res;
+}
+
+function html_rows_cohorts($course) {
+    global $DB;
+    $res = '';
+    $sroles = array(
+        'student' => 'Consultation des ressources, participation aux activités :',
+        'guest' => 'Consultation des ressources uniquement :'
+        );
+    $res .= '<tr> <td>Groupes utilisateurs inscrits</td> <td>';
+    foreach ($sroles as $srole => $title) {
+        $role = $DB->get_record('role', array('shortname' => $srole));
+        $cohorts = get_enrolled_cohorts($course->id, array($role->id));
+        if (empty($cohorts)) {
+            $res .= "$title " . get_string('Nocohort', 'coursereport_synopsis');
+        } else {
+            $res .= "$title";
+            $res .= "<ul>";
+                foreach ($cohorts as $cohort) {
+                $res .= "<li> (". $cohort->idnumber .") ". $cohort->name ;
+                $res .= "</li>";
+            }
+            $res .= "</ul>";
+        }
+    }
+    $res .= '</td> </tr>';
+    return $res;
+}
+
+function html_rows_status($course) {
+    $res = '<tr> <td>État</td> <td>';
+    $demandeur = up1_meta_get_user($course->id, 'demandeurid');
+    $adate = up1_meta_get_date($course->id, 'datedemande');
+    if ($demandeur) {
+        $res .= 'Créé par ' . $demandeur['name'] . ' le ' . $adate['datetime'] . "</br>\n";
+    }
+    $approbateureff = up1_meta_get_user($course->id, 'approbateureffid');
+    $adate = up1_meta_get_date($course->id, 'datevalid');
+    if ($approbateureff) {
+        $res .= 'Approuvé par ' . $demandeur['name'] . ' le ' . $adate['datetime'] . "\n";
     } else {
-        echo "<p style=\"text-align:center\">-</p>";
+        $res .= "En attente d'approbation.";
     }
-    echo "</td>";
-    echo "<td>&nbsp;&nbsp;&nbsp;</td>";
-    if (!empty($result->time)) {
-        $timeago = format_time(time() - $result->time);
-        echo "<td valign=\"top\" style=\"white-space: nowrap\">".userdate($result->time)." ($timeago)</td>";
+    $res .= '</td></tr>';
+    return $res;
+}
+
+
+function html_table_rattachements($course) {
+    echo "\n\n" . '<table class="generaltable">' . "\n";
+    $parity = 0;
+
+    $pathids = explode(';', up1_meta_get_text($course->id, 'rofpathid'));
+    $n = count($pathids);
+    $res = '';
+    $pathprefix = get_category_path(get_config('local_crswizard','cas2_default_etablissement'));
+    foreach ($pathids as $pathid) {
+        $parity = 1 - $parity;
+        $patharray = array_filter(explode('/', $pathid));
+        $rofid = $patharray[count($patharray)];
+        $rofobject = rof_get_record($rofid);
+        $roftitle = '<b>'.rof_get_code_or_rofid($rofid).'</b>' .' - '. $rofobject[0]->name;
+        $res .= '<tr class="r'. $parity.'"> <td>Élément pédagogique</td> <td>';
+        $res .= $roftitle . "</td></tr>\n";
+
+        $combined = rof_get_combined_path($patharray);
+        $res .= '<tr class="r'. $parity.'"> <td>Chemin complet</td> <td>';
+        $res .= $pathprefix . rof_format_path($combined, 'name', true, ' > ') . "</td></tr>\n";
     }
-    echo "</tr>";
+    echo $res;
+    echo "</table>\n";
+}
+
+function html_button_join($course) {
+    global $OUTPUT;
+    $vistitle = array("Espace en préparation", "Rejoindre l'espace");
+
+    echo $OUTPUT->single_button(
+            new moodle_url('/course/view.php', array('id' => $course->id)),
+            $vistitle[$course->visible],
+            'get'
+            );
 }

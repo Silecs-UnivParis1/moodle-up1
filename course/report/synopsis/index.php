@@ -30,7 +30,6 @@ require_once($CFG->libdir.'/custominfo/lib.php');
 
 $id = required_param('id', PARAM_INT);       // course id
 $layout = optional_param('layout', 'report', PARAM_ALPHA); // default layout=report
-
 if ($layout != 'popup') {
     $layout = 'report';
 }
@@ -41,69 +40,26 @@ $context = get_context_instance(CONTEXT_COURSE, $course->id);
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
 
-// require_login($course);
-// require_capability('report/outline:view', $context); //** @todo trouver une meilleure capacité
-
-// add_to_log($course->id, 'course', 'course synopsis', "course/report/synopsis/index.php?id=$course->id", $course->id);
-
+$site = get_site();
 $strreport = get_string('pluginname', 'coursereport_synopsis');
 $PAGE->set_context($context);
 $PAGE->set_title($course->shortname .': '. $strreport);
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
-// echo $OUTPUT->heading(format_string($course->fullname));
 
-echo "<h2>" . get_string('Description', 'coursereport_synopsis') . "</h2>\n";
+echo "<h2>" . $course->fullname . "</h2>\n";
+html_button_join($course);
 
-echo "<ul>\n";
-echo "<li>Abrégé : ". $course->shortname ."</li>\n";
-echo "<li>Code : ". $course->idnumber ."</li>\n";
-echo "</ul>\n";
-echo '<div id="summary">' . $course->summary . '</div>';
-
-// custom info data
-html_custom_data($course);
+// Description
+echo '<div id="course-summary">'
+    . format_text($course->summary, $course->summaryformat)
+    . '</div>' . "\n\n";
 
 
-echo "<h2>" . get_string('Teachers', 'coursereport_synopsis') . "</h2>\n";
-// output based on roles ; only editingteacher for now
-// for an output based on capabilities, use instead get_users_by_capability(): much heavier
+echo "<h3>Informations sur l'espace de cours</h3>\n";
+html_table_informations($course);
 
-echo "<ul>\n";
-$troles = array('editingteacher', 'teacher');
-foreach ($troles as $trole) {
-    $role = $DB->get_record('role', array('shortname' => $trole));
-    $teachers = get_role_users($role->id, $context);
-    foreach ($teachers as $teacher) {
-        echo "<li>" . fullname($teacher) . " - " . $teacher->rolename . "</li>\n";
-    }
-}
-echo "</ul>\n";
-
-
-echo "<h2>" . get_string('Cohorts', 'coursereport_synopsis') . "</h2>\n";
-$cohorts = get_enrolled_cohorts($course->id, array(5)); // 5 = students
-if (empty($cohorts)) {
-    echo get_string('Nocohort', 'coursereport_synopsis');
-} else {
-    echo "<ul>";
-        foreach ($cohorts as $cohort) {
-        echo "<li> (". $cohort->idnumber .") ". $cohort->name ;
-        // echo "(". $cohort->rolename .")
-        echo "</li>";
-    }
-}
-echo "</ul>";
-
-
-echo "<h2>" . get_string('Outline', 'coursereport_synopsis') . "</h2>\n";
-$sections = get_all_sections($course->id);
-echo "<ol>\n";
-foreach ($sections as $section) {
-    $sectiontitle = get_section_name($course, $section);
-    echo "<li>" . $sectiontitle . "</li>";
-}
-echo "</ol>\n";
-
+echo "<h3>Rattachements à l'offre de formation</h3>\n";
+html_table_rattachements($course);
 
 echo $OUTPUT->footer();
