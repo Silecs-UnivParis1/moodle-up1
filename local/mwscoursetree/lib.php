@@ -210,9 +210,9 @@ class course_tree {
         $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $teachers = get_role_users($role->id, $context);
-        $firstteacher = fullname(current($teachers)) . (count($teachers) > 1 ? '…' : '');
+        $firstteacher = fullname(current($teachers)) . (count($teachers) > 1 ? ', …' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
-        $fullteachers = '<' . $element . ' class="' . $class . '" title="' . $titleteachers . '">'
+        $fullteachers = '<' . $element . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
                 . $firstteacher
                 . '</' . $element . '>';
         return $fullteachers;
@@ -221,7 +221,7 @@ class course_tree {
     public function format_course_icons($dbcourse, $element, $class) {
         global $OUTPUT;
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
-        $icons = '<' .$element. ' class="' . $class. '">';
+        $icons = '<' .$element. ' class="' . $class. '" style="text-align: right;">';
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
@@ -414,7 +414,7 @@ class rof_tools {
         $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
         $courses = $this->get_courses_from_parent_rofpath($rofpath);
 
-        $res = '<table class="generaltable">' . "\n" ;
+        $res = '<table class="generaltable" style="width: 100%;">' . "\n" ;
         $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
             . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
         foreach ($this->sort_courses($courses) as $crsid) {
