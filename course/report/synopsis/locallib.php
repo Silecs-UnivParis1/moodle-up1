@@ -145,7 +145,7 @@ function html_rows_status($course) {
 
 function html_table_rattachements($course) {
     echo "\n\n" . '<table class="generaltable">' . "\n";
-    $parity = 0;
+    $parity = 1;
 
     $pathids = explode(';', up1_meta_get_text($course->id, 'rofpathid'));
     $n = count($pathids);
@@ -171,10 +171,12 @@ function html_table_rattachements($course) {
 function html_button_join($course) {
     global $OUTPUT;
     $vistitle = array("Espace en préparation", "Rejoindre l'espace");
+    $visclass = array('synopsis-prep', 'synopsis-join');
 
     echo $OUTPUT->single_button(
             new moodle_url('/course/view.php', array('id' => $course->id)),
             $vistitle[$course->visible],
-            'get'
+            'get',
+            array('class' => 'singlebutton prep')
             );
 }
