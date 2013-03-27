@@ -39,6 +39,7 @@ $context = get_context_instance(CONTEXT_COURSE, $course->id);
 
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
+$PAGE->requires->css(new moodle_url('/course/report/synopsis/styles.css'));
 
 $site = get_site();
 $strreport = get_string('pluginname', 'coursereport_synopsis');
@@ -48,18 +49,24 @@ $PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
 
 echo "<h2>" . $course->fullname . "</h2>\n";
+
+echo '<div id="synopsis-bigbutton">' . "\n";
 html_button_join($course);
+echo '</div>' . "\n";
 
 // Description
-echo '<div id="course-summary">'
+echo '<div id="synopsis-summary">'
     . format_text($course->summary, $course->summaryformat)
     . '</div>' . "\n\n";
 
-
+echo '<div id="synopsis-informations">' . "\n";
 echo "<h3>Informations sur l'espace de cours</h3>\n";
 html_table_informations($course);
+echo '</div>' . "\n";
 
+echo '<div id="synopsis-rattachements">' . "\n";
 echo "<h3>Rattachements à l'offre de formation</h3>\n";
 html_table_rattachements($course);
+echo '</div>' . "\n";
 
 echo $OUTPUT->footer();
