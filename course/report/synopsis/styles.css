@@ -1,3 +1,19 @@
 #page-report-synopsis-index td.numviews {text-align:right;}
 #page-report-synopsis-index tr.section {text-align: center;}
 #page-report-synopsis-index td.lastaccess {font-size: 0.8em;}
+
+#page-report-synopsis-index tr.r0 {
+    bgcolor: grey;
+}
+
+#page-report-synopsis-index tr.r1 {
+    bgcolor: white;
+}
+
+div#synopsis-informations {
+    clear: both;
+}
+
+div#synopsis-rattachements {
+    clear: both;
+}

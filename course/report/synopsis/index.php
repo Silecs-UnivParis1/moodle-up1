@@ -51,15 +51,18 @@ echo "<h2>" . $course->fullname . "</h2>\n";
 html_button_join($course);
 
 // Description
-echo '<div id="course-summary">'
+echo '<div id="synopsis-summary">'
     . format_text($course->summary, $course->summaryformat)
     . '</div>' . "\n\n";
 
-
+echo '<div id="synopsis-informations">' . "\n";
 echo "<h3>Informations sur l'espace de cours</h3>\n";
 html_table_informations($course);
+echo '</div>' . "\n";
 
+echo '<div id="synopsis-rattachements">' . "\n";
 echo "<h3>Rattachements à l'offre de formation</h3>\n";
 html_table_rattachements($course);
+echo '</div>' . "\n";
 
 echo $OUTPUT->footer();
