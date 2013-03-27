@@ -44,11 +44,12 @@ function up1_meta_get_date($courseid, $field) {
 
     $dtime = up1_meta_get_text($courseid, $field);
     if ($dtime == 0) {
-        return array('date' => '', 'datetime' => '');
+        return array('date' => false, 'datetime' => false, 'datefr' => false);
     }
     return  array(
         'date' => userdate($dtime, '%Y-%m-%d'),
         'datetime' => userdate($dtime, '%Y-%m-%d %H:%M:%S'),
+        'datefr' => userdate($dtime, '%d/%m/%Y'),
         );
 }
 

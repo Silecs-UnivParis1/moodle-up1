@@ -109,13 +109,12 @@ function html_rows_cohorts($course) {
         $role = $DB->get_record('role', array('shortname' => $srole));
         $cohorts = get_enrolled_cohorts($course->id, array($role->id));
         if (empty($cohorts)) {
-            $res .= "$title " . get_string('Nocohort', 'coursereport_synopsis');
+            $res .= "$title " . get_string('Nocohort', 'coursereport_synopsis') . "<br />\n";
         } else {
             $res .= "$title";
             $res .= "<ul>";
                 foreach ($cohorts as $cohort) {
-                $res .= "<li> (". $cohort->idnumber .") ". $cohort->name ;
-                $res .= "</li>";
+                $res .= "<li>" . $cohort->name . " (". $cohort->idnumber .") </li>";
             }
             $res .= "</ul>";
         }
@@ -129,12 +128,12 @@ function html_rows_status($course) {
     $demandeur = up1_meta_get_user($course->id, 'demandeurid');
     $adate = up1_meta_get_date($course->id, 'datedemande');
     if ($demandeur) {
-        $res .= 'Créé par ' . $demandeur['name'] . ' le ' . $adate['datetime'] . "</br>\n";
+        $res .= 'Créé par ' . $demandeur['name'] . ' le ' . $adate['datefr'] . "</br>\n";
     }
     $approbateureff = up1_meta_get_user($course->id, 'approbateureffid');
     $adate = up1_meta_get_date($course->id, 'datevalid');
-    if ($approbateureff) {
-        $res .= 'Approuvé par ' . $demandeur['name'] . ' le ' . $adate['datetime'] . "\n";
+    if ($adate['datefr']) {
+        $res .= 'Approuvé par ' . $demandeur['name'] . ' le ' . $adate['datefr'] . "\n";
     } else {
         $res .= "En attente d'approbation.";
     }
@@ -162,7 +161,7 @@ function html_table_rattachements($course) {
 
         $combined = rof_get_combined_path($patharray);
         $res .= '<tr class="r'. $parity.'"> <td>Chemin complet</td> <td>';
-        $res .= $pathprefix . rof_format_path($combined, 'name', true, ' > ') . "</td></tr>\n";
+        $res .= $pathprefix . rof_format_path($combined, 'name', false, ' > ') . "</td></tr>\n";
     }
     echo $res;
     echo "</table>\n";
@@ -171,12 +170,12 @@ function html_table_rattachements($course) {
 function html_button_join($course) {
     global $OUTPUT;
     $vistitle = array("Espace en préparation", "Rejoindre l'espace");
-    $visclass = array('synopsis-prep', 'synopsis-join');
+    $visclass = array('prep', 'join');
 
     echo $OUTPUT->single_button(
             new moodle_url('/course/view.php', array('id' => $course->id)),
             $vistitle[$course->visible],
             'get',
-            array('class' => 'singlebutton prep')
+            array('class' => 'singlebutton '.$visclass[$course->visible])
             );
 }
