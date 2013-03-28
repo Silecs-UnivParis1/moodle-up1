@@ -125,12 +125,12 @@ function html_rows_cohorts($course) {
 
 function html_rows_status($course) {
     $res = '<tr> <td>État</td> <td>';
-    $demandeur = up1_meta_get_user($course->id, 'demandeurid');
+    $demandeur = up1_meta_get_user($course->id, 'demandeurid', false);
     $adate = up1_meta_get_date($course->id, 'datedemande');
     if ($demandeur) {
         $res .= 'Créé par ' . $demandeur['name'] . ' le ' . $adate['datefr'] . "</br>\n";
     }
-    $approbateureff = up1_meta_get_user($course->id, 'approbateureffid');
+    $approbateureff = up1_meta_get_user($course->id, 'approbateureffid', false);
     $adate = up1_meta_get_date($course->id, 'datevalid');
     if ($adate['datefr']) {
         $res .= 'Approuvé par ' . $demandeur['name'] . ' le ' . $adate['datefr'] . "\n";
