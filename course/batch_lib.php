@@ -118,6 +118,12 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         }
     }
 
+    // category
+    if (!empty($criteria->category)) {
+        $searchcond[] = "c.category = :categoryid";
+        $params['categoryid'] = (int) $criteria->category;
+    }
+
     if (empty($searchcond)) {
         $totalcount = 0;
         return array();

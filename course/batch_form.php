@@ -31,6 +31,11 @@ class course_batch_search_form extends moodleform {
         $mform->addElement('date_selector', 'createdbefore', get_string('createdon', 'search') . ' &lt;');
         $mform->setDefault('createdbefore', time() + 3600 * 24);
 
+        $displaylist = array();
+        $parentlist = array();
+        make_categories_list($displaylist, $parentlist);
+        $mform->addElement('select', 'category', get_string('category'), $displaylist);
+
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');
         if (empty($this->_customdata['fields'])) {
