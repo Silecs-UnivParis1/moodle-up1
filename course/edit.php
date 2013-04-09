@@ -49,7 +49,12 @@ if ($id) { // editing course
     require_login($course);
     $category = $DB->get_record('course_categories', array('id'=>$course->category), '*', MUST_EXIST);
     $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
-    require_capability('moodle/course:update', $coursecontext);
+
+    if (get_capability_info('local/up1_capabilities:course_updatesettings')) {
+        require_capability('local/up1_capabilities:course_updatesettings', $coursecontext);
+    } else {
+        require_capability('moodle/course:update', $coursecontext);
+    }
 
 } else if ($categoryid) { // creating new course in this category
     $course = null;
