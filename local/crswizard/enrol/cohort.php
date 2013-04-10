@@ -36,7 +36,11 @@ $PAGE->requires->js(new moodle_url('/local/widget_groupsel/groupsel.js'), true);
 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
+if (isset($SESSION->wizard['idcourse'])) {
+    echo $OUTPUT->heading(get_string('upwizardcourse', 'local_crswizard'));
+} else {
+    echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
+}
 
 $titlepage = get_string('enrolcohorts', 'local_crswizard');
 if (isset($SESSION->wizard['idcourse'])) {

@@ -169,7 +169,11 @@ switch ($stepin) {
         }
         break;
     case 7:
-        $steptitle = get_string('updatetitle', 'local_crswizard');
+        if ($wizardcase == 2) {
+            $steptitle = get_string('updatetitlecase2', 'local_crswizard');
+        } else {
+            $steptitle = get_string('updatetitlecase3', 'local_crswizard');
+        }
         $corewizard = new core_wizard($SESSION->wizard, $USER);
         $formdata = $corewizard->prepare_update_course();
         $editform = new course_wizard_confirm();

@@ -181,8 +181,9 @@ class course_wizard_step_confirm extends moodleform {
         }
 //--------------------------------------------------------------------------------
         $mform->addElement('header', 'confirmation', get_string('confirmation', 'local_crswizard'));
-        $mform->addElement('textarea', 'remarques', null, array('rows' => 15, 'cols' => 80));
-        $mform->setType('content', PARAM_RAW);
+        $mform->addElement('textarea', 'remarques', null, array('rows' => 15,
+            'cols' => 80, 'placeholder' => get_string('consigneremarque', 'local_crswizard')));
+        $mform->setType('remarques', PARAM_TEXT);
 
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
