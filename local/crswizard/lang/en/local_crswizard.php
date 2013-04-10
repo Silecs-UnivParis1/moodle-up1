@@ -104,6 +104,9 @@ $string['cohorts'] = 'Groupes';
 $string['complementlabel'] = 'Complément : ';
 $string['confirmation'] = 'Vos remarques ou questions concernant cet espace de cours';
 $string['confirmationtitle'] = 'Étape 7 - finalisation de la demande';
+$string['consigneremarque'] = 'Ici, vous pouvez apporter vos remarques/questions concernant la création de cet espace, '
+    . 'solliciter un rendez-vous pour un accompagnement personnalisé (prise en main de l\'outil, conseil d\'utilisation, '
+    . 'appui à la réalisation d\'un projet pédagogique, etc.).';
 $string['coursedefinition'] = 'Étape 2 - identification de l\'espace';
 $string['coursedescription'] = 'Étape 3 - autres rattachements (facultatif)';
 $string['coursegeneralhelp'] = '<p>Le nom complet de l\'espace est affiché en haut de chacune des pages du cours et sur la '
