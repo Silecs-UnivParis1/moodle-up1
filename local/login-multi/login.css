@@ -42,3 +42,8 @@ div.box.generalbox {
 .hide-form .loginpanel {
     display: none;
 }
+
+/** work around a problem with MyMobile theme */
+.ui-header, .ui-footer {
+    position: static !important;
+}
