@@ -7,6 +7,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once($CFG->dirroot . '/local/up1_courselist/courselist_tools.php');
+
 
 class filter_coursetree extends moodle_text_filter {
 
@@ -24,14 +27,10 @@ class filter_coursetree extends moodle_text_filter {
                     $replace = $script . $div;
                     break;
                 case 'table':
-                    $coursetree = new course_tree();
-                    $rofcourselist = new rof_tools($coursetree);
-                    $replace = $rofcourselist->html_course_table($node);
+                    $replace = courselist_common::html_course_table($node);
                     break;
                 case 'list':
-                    $coursetree = new course_tree();
-                    $rofcourselist = new rof_tools($coursetree);
-                    $replace = $rofcourselist->html_course_list($node);
+                    $replace = courselist_common::html_course_list($node);
                     break;
                 default:
                     $replace = '[courselist : FORMAT ' . $format . ' INCONNU]';
