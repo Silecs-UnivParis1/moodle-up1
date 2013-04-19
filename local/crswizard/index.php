@@ -226,8 +226,8 @@ $PAGE->set_title("$site->shortname: $straddnewcourse");
 $PAGE->set_heading($site->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
-echo $OUTPUT->heading($steptitle);
+echo $OUTPUT->box(get_string('wizardcourse', 'local_crswizard'), 'titlecrswizard');
+echo $OUTPUT->box($steptitle, 'titlecrswizard');
 
 if (isset($editform)) {
     if (isset($SESSION->wizard['form_step' . $stepin])) {

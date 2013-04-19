@@ -24,8 +24,8 @@ $PAGE->requires->js(new moodle_url('/local/widget_teachersel/teachersel.js'), tr
 $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('wizardcourse', 'local_crswizard'));
-echo $OUTPUT->heading(get_string('selectvalidator', 'local_crswizard'));
+echo $OUTPUT->box(get_string('wizardcourse', 'local_crswizard'), 'titlecrswizard');
+echo $OUTPUT->box(get_string('selectvalidator', 'local_crswizard'), 'titlecrswizard');
 echo $OUTPUT->box(get_string('bockhelpE3validator', 'local_crswizard'), '');
 
 
