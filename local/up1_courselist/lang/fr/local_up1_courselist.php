@@ -1,7 +1,5 @@
 <?php
 /**
- * Version details
- *
  * @package    local
  * @subpackage up1_courselist
  * @copyright  2013 Silecs {@link http://www.silecs.info/societe}

@@ -1,6 +1,4 @@
 <?php
-// This file is part of a plugin for Moodle - http://moodle.org/
-
 /**
  * @package    local
  * @subpackage up1_courselist
