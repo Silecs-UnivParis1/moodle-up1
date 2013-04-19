@@ -1769,7 +1769,7 @@ class assign {
         }
         $user = $DB->get_record('user', array('id' => $userid));
         if ($user) {
-            $o .= $this->output->render(new assign_user_summary($user, $this->get_course()->id, has_capability('moodle/site:viewfullnames', $this->get_course_context())));
+            $o .= $this->output->render(new assign_user_summary($user, $this->get_course()->id, has_capability('moodle/site:viewfullnames', $this->get_course_context()), get_extra_user_fields($this->get_context())));
         }
         $submission = $this->get_user_submission($userid, false);
         // get the current grade
@@ -2061,6 +2061,9 @@ class assign {
     public function can_view_submission($userid) {
         global $USER;
 
+        if (is_siteadmin()) {
+            return true;
+        }
         if (!is_enrolled($this->get_course_context(), $userid)) {
             return false;
         }
