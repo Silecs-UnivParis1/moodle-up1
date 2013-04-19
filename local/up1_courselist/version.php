@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package    local
  * @subpackage up1_courselist
@@ -9,12 +8,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2013041700;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2013041900;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2012061700;        // Requires this Moodle version
 $plugin->component = 'local_up1_courselist';       // Full name of the plugin (used for diagnostics)
 
 $plugin->cron      = 0;
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = 'TODO';
- 
+
 $plugin->dependencies = array();
