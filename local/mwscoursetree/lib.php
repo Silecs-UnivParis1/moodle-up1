@@ -11,8 +11,7 @@ defined('MOODLE_INTERNAL') || die();
 /* @var $PAGE page_base */
 
 global $CFG;
-require_once($CFG->dirroot . "/local/up1_metadata/lib.php");
-require_once($CFG->dirroot . "/local/roftools/roflib.php");
+require_once($CFG->dirroot . "/local/up1_courselist/courselist_tools.php");
 
 /**
  * @todo compter les cours descendants dans le cas 2 ?
@@ -81,34 +80,32 @@ class course_tree {
      * @throws coding_exception
      */
     public function get_children() {
-        $rof = new rof_tools($this);
-        $cat = new category_tools($this);
 
         $result = array();
         switch ($this->get_pseudopath_level()) {
             case self::LEVEL_CATEGORY:
                 // CASE 1 node=category and children=categories
                 $categories = get_categories($this->parentcatid);
-                $result = $cat->get_entries_from_categories($categories);
+                $result = $this->get_entries_from_categories($categories);
                 break;
             case self::LEVEL_CATEGORY_AND_ROF:
                 // CASE 2 node=category and children = ROF entries or courses
-                $courses = $cat->get_descendant_courses($this->parentcatid);
-                list($rofcourses, $catcourses) = $rof->split_courses_from_rof($courses);
+                $courses = courselist_cattools::get_descendant_courses($this->parentcatid);
+                list($rofcourses, $catcourses) = courselist_roftools::split_courses_from_rof($courses);
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
                 }
                 $result = array_merge(
                         $result,
-                        $rof->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN)
+                        $this->get_entries_from_rof_courses($rofcourses, 1 + self::DEPTH_ROF_BEGIN)
                 );
                 break;
             case self::LEVEL_ROF:
                 // CASE 3 under ROF root
                 $rofpath = '/' . join('/', array_slice($this->pseudopath, 1));
                 $depth = self::DEPTH_ROF_BEGIN - 1 + count($this->pseudopath);
-                $rofcourses = $rof->get_courses_from_parent_rofpath($rofpath);
-                $result = $rof->get_entries_from_rof_courses($rofcourses, $depth);
+                $rofcourses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
+                $result = $this->get_entries_from_rof_courses($rofcourses, $depth);
                 break;
             case self::LEVEL_ERROR:
             default:
@@ -125,7 +122,8 @@ class course_tree {
      */
     protected function get_pseudopath_level() {
         if (count($this->pseudopath) == 1) { // course categories
-            if ($this->parentcatid === 0 || ($this->parentcat && $this->parentcat->depth < self::DEPTH_ROF_BEGIN)) {
+            if ( $this->parentcatid === 0 ||
+                 ($this->parentcat && $this->parentcat->depth < self::DEPTH_ROF_BEGIN) ) {
                 return self::LEVEL_CATEGORY;
             } else if ($this->parentcat->depth == self::DEPTH_ROF_BEGIN) {
                 return self::LEVEL_CATEGORY_AND_ROF;
@@ -141,7 +139,7 @@ class course_tree {
     protected function get_entry_from_course($crsid, $depth) {
         return array(
             'id' => null,
-            'label' => $this->format_course_entry('', $crsid),
+            'label' => courselist_format::format_entry($crsid),
             'load_on_demand' => false,
             'depth' => $depth,
         );
@@ -160,9 +158,80 @@ class course_tree {
                 . '<span class="coursetree-' . ($leaf ? "name" : "dir") . '">' . $name . "</span>";
     }
 
+
+    /**
+     * get entries from courses having a ROF rattachement
+     * @param array $rofcourses as given by split_courses_from_rof() (or other source)
+     * @param int $depth of target entries
+     * @return array array(assoc. array)
+     */
+    public function get_entries_from_rof_courses($rofcourses, $depth) {
+        //$component = $this->coursetree->get_component_from_category($this->coursetree->parentcatid);
+        //$parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
+
+        $prenodes = array();
+        $directcourse = array();
+        $unfold = array();
+        //NORMALEMENT, après les traitements sur $rofcourses, $rofpathid devrait toujours être unique (sans ;)
+        foreach ($rofcourses as $crsid => $rofpathid) {
+            $arrofpath = array_filter(explode('/', $rofpathid));
+            $prenode = "/cat{$this->parentcatid}" . '/' . join('/', array_slice($arrofpath, 0, $depth - 3));
+            if (count($arrofpath) == $depth - 3) { // leaf
+                $directcourse[$prenode][] = $crsid; // il peut y avoir plusieurs cours attachés à un même ROFid
+            } elseif (count($arrofpath) > $depth - 3) { // subfolders
+                $unfold[$prenode] = true;
+            }
+            $prenodes[] = $prenode;
+        }
+// var_dump($prenodes);
+
+        $items = array();
+        foreach (array_unique($prenodes) as $node) {
+            $arrofpath = explode('/', $node);
+            $rofid = array_pop($arrofpath);
+            list($rofobject, ) = rof_get_record($rofid);
+            $name = $rofobject->name;
+
+            $item['load_on_demand'] = !empty($unfold[$node]);
+            if (isset($directcourse[$node]) && $directcourse[$node]) {
+                foreach ($directcourse[$node] as $crsid) {
+                    $item['label'] = courselist_format::format_entry($crsid, !$item['load_on_demand']);
+                    $item['id'] = $node . '/' . $crsid;
+                    $item['depth'] = $depth;
+                    $items[] = $item;
+                }
+            } else {
+                $item['label'] = $this->display_entry_name($name, $node, !$item['load_on_demand']);
+                $item['id'] = $node;
+                $item['depth'] = $depth;
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
+
+    /**
+     * Returns an array of nodes.
+     *
+     * @param array $categories
+     * @return array
+     */
+    public function get_entries_from_categories($categories) {
+        $result = array();
+        foreach ($categories as $category) {
+            $courses = courselist_cattools::get_descendant_courses($category->id);
+            $n = count($courses);
+            if ($n >= 1) {
+                $name = $category->name . ' (' . $n . ') ';
+                $nodeid = '/cat' . $category->id;
+                $result[] = array(
+                    'id' => $nodeid,
+                    'label' => $this->display_entry_name($name, $nodeid),
+                    'load_on_demand' => true,
+                    'depth' => $category->depth,
+                );
+            }
+        }
+        return $result;
+    }
 }
-
-
-
-
-
