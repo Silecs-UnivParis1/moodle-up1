@@ -10,7 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/libaccess.php');
 
 // doc https://moodle.org/mod/forum/discuss.php?d=170325#yui_3_7_3_2_1359043225921_310
-function crswizard_extends_navigation(global_navigation $navigation) {
+function local_crswizard_extends_navigation(global_navigation $navigation) {
     global $USER, $PAGE;
 
     $permcreator = wizard_has_permission('creator', $USER->id);
