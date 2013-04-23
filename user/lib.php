@@ -24,6 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+global $CFG;
+require_once($CFG->libdir . '/custominfo/lib.php');
 
 /**
  * Creates a user
@@ -280,15 +282,14 @@ function user_get_user_details($user, $course = null, array $userfields = array(
 
     if (in_array('customfields', $userfields)) {
         $fields = $DB->get_recordset_sql("SELECT f.*
-                                            FROM {user_info_field} f
-                                            JOIN {user_info_category} c
+                                            FROM {custom_info_field} f
+                                            JOIN {custom_info_category} c
                                                  ON f.categoryid=c.id
+                                           WHERE c.objectname = 'user'
                                         ORDER BY c.sortorder ASC, f.sortorder ASC");
         $userdetails['customfields'] = array();
         foreach ($fields as $field) {
-            require_once($CFG->dirroot.'/user/profile/field/'.$field->datatype.'/field.class.php');
-            $newfield = 'profile_field_'.$field->datatype;
-            $formfield = new $newfield($field->id, $user->id);
+            $formfield = custominfo_field_factory('user', $field->datatype, $field->id, $user->id);
             if ($formfield->is_visible() and !$formfield->is_empty()) {
                 $userdetails['customfields'][] =
                     array('name' => $formfield->field->name, 'value' => $formfield->data,

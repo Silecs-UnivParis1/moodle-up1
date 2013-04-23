@@ -44,6 +44,9 @@ define('UU_PWRESET_NONE', 0);
 define('UU_PWRESET_WEAK', 1);
 define('UU_PWRESET_ALL', 2);
 
+global $CFG;
+require_once($CFG->libdir . '/custominfo/lib.php');
+
 /**
  * Tracking of processed users.
  *
@@ -376,11 +379,10 @@ function uu_pre_process_custom_profile_data($data) {
     foreach ($data as $key => $value) {
         if (preg_match('/^profile_field_/', $key)) {
             $shortname = str_replace('profile_field_', '', $key);
-            if ($fields = $DB->get_records('user_info_field', array('shortname' => $shortname))) {
+            if ($fields = $DB->get_records('custom_info_field',
+                    array('objectname' => 'user', 'shortname' => $shortname))) {
                 foreach ($fields as $field) {
-                    require_once($CFG->dirroot.'/user/profile/field/'.$field->datatype.'/field.class.php');
-                    $newfield = 'profile_field_'.$field->datatype;
-                    $formfield = new $newfield($field->id, $data->id);
+                    $formfield = custominfo_field_factory("user", $field, $data->id);
                     if (method_exists($formfield, 'convert_external_data')) {
                         $data->$key = $formfield->convert_external_data($value);
                     }
@@ -406,11 +408,10 @@ function uu_check_custom_profile_data(&$data) {
     foreach ($data as $key => $value) {
         if (preg_match('/^profile_field_/', $key)) {
             $shortname = str_replace('profile_field_', '', $key);
-            if ($fields = $DB->get_records('user_info_field', array('shortname' => $shortname))) {
+            if ($fields = $DB->get_records('custom_info_field',
+                    array('objectname' => 'user', 'shortname' => $shortname))) {
                 foreach ($fields as $field) {
-                    require_once($CFG->dirroot.'/user/profile/field/'.$field->datatype.'/field.class.php');
-                    $newfield = 'profile_field_'.$field->datatype;
-                    $formfield = new $newfield($field->id, 0);
+                    $formfield = custominfo_field_factory("user", $field, 0);
                     if (method_exists($formfield, 'convert_external_data') &&
                             is_null($formfield->convert_external_data($value))) {
                         $data['status'][] = get_string('invaliduserfield', 'error', $shortname);

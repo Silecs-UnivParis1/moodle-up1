@@ -473,6 +473,9 @@ M.course_dndupload = {
         resel.groupingspan.className = 'groupinglabel';
         resel.div.appendChild(resel.groupingspan);
 
+        resel.groupingspan.className = 'groupinglabel';
+        resel.div.appendChild(resel.groupingspan);
+
         resel.progressouter.className = 'dndupload-progress-outer';
         resel.progress.className = 'dndupload-progress-inner';
         resel.progress.innerHTML = '&nbsp;';

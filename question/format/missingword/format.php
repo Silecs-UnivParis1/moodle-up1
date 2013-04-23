@@ -122,6 +122,9 @@ class qformat_missingword extends qformat_default {
                 $question = $this->add_blank_combined_feedback($question);
                 $question->single = 1; // Only one answer allowed.
 
+                $question = $this->add_blank_combined_feedback($question);
+                $question->single = 1; // Only one answer allowed.
+
                 foreach ($answers as $key => $answer) {
                     $answer = trim($answer);
 

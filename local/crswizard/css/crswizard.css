@@ -1,0 +1,52 @@
+.cache {
+	display: none;
+}
+
+div.previousstage {
+    margin-bottom: -6ex;
+}
+.previousstage a, a.previousstage {
+    color: inherit;
+    text-transform: none;
+    padding: 1px 6px;
+    text-align: center;
+    border: 2px outset buttonface;
+    background-color: buttonface;
+    box-sizing: border-box;
+}
+.previousstage a:hover, a.previousstage:hover {
+    text-decoration: none;
+}
+
+.widgetselect-panel-left,
+.widgetselect-panel-right {
+    float: left;
+    width: 45%;
+    height: 60ex;
+    border: 2px solid black;
+    padding: 3px;
+    margin: 2px;
+}
+
+#request-details-toggle {
+    margin-bottom: 10px;
+}
+
+span.collapsed {
+    background-image: url(pix/collapsed.png); color: transparent;
+    background-repeat: no-repeat;
+}
+
+span.expanded {
+    background-image: url(pix/expanded.png); color: transparent;
+    background-repeat: no-repeat;
+}
+
+div#mgerrorrof {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+span#fullnamelab {
+    color: black;
+}

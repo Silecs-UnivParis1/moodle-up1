@@ -1,0 +1,3 @@
+objectname,shortname,name,datatype,categoryid,sortorder,visible
+user,textfield,my text field,text,1,1,2
+user,checkboxfield,my checkbox field,checkbox,1,2,1

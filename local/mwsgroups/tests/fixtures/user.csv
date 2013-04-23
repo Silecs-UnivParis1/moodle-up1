@@ -1,0 +1,7 @@
+id,username,email,firstname,lastname,idnumber
+3,italo.svevo,italo.svevo@example.com,Italo,Svevo,1
+4,italo.calvino,italo.calvino@example.com,Italo,Calvino,2
+5,leon.tolstoi,leon.tolstoi@example.com,Léon,Tolstoï,3
+6,comte.leon.tolstoi,leon.tolstoi@example.com,Léon,Tolstoï,4
+7,isaac.babel,isaac.babel@example.com,Isaac,Babel,
+8,vassili.grossman,vassili.grossman@example.com,Vassili,Grossman,

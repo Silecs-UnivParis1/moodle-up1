@@ -34,7 +34,7 @@ $version  = 2012120303.07;              // 20121203      = branching date YYYYMM
                                         //         RR    = release increments - 00 in DEV branches
                                         //           .XX = incremental changes
 
-$release  = '2.4.3+ (Build: 20130418)'; // Human-friendly version name
+$release  = '2.4.3+ (Build: 20130418) UP1'; // Human-friendly version name
 
 $branch   = '24';                       // this version's branch
 $maturity = MATURITY_STABLE;            // this version's maturity level

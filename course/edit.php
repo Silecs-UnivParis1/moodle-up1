@@ -49,7 +49,12 @@ if ($id) { // editing course
     require_login($course);
     $category = $DB->get_record('course_categories', array('id'=>$course->category), '*', MUST_EXIST);
     $coursecontext = context_course::instance($course->id);
-    require_capability('moodle/course:update', $coursecontext);
+
+    if (get_capability_info('local/up1_capabilities:course_updatesettings')) {
+        require_capability('local/up1_capabilities:course_updatesettings', $coursecontext);
+    } else {
+        require_capability('moodle/course:update', $coursecontext);
+    }
 
 } else if ($categoryid) { // creating new course in this category
     $course = null;
@@ -63,6 +68,10 @@ if ($id) { // editing course
     require_login();
     print_error('needcoursecategroyid');
 }
+
+//Load custom fields data
+$custominfo_data = custominfo_data::type('course');
+$custominfo_data->load_data($course);
 
 // Prepare course and the editor
 $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes'=>$CFG->maxbytes, 'trusttext'=>false, 'noclean'=>true);
@@ -110,6 +119,10 @@ if ($editform->is_cancelled()) {
         // In creating the course
         $course = create_course($data, $editoroptions);
 
+        // save custom fields data
+        $data->id = $course->id;
+        $custominfo_data->save_data($data);
+
         // Get the context of the newly created course
         $context = context_course::instance($course->id, MUST_EXIST);
 
@@ -133,6 +146,9 @@ if ($editform->is_cancelled()) {
     } else {
         // Save any changes to the files used in the editor
         update_course($data, $editoroptions);
+
+        // save custom fields data
+        $custominfo_data->save_data($data);
     }
 
     // Redirect user to newly created/updated course.

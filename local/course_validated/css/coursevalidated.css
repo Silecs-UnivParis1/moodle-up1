@@ -1,0 +1,21 @@
+/*
+    Document   : coursevalidated.css
+    Created on : 8 févr. 2013, 15:04:28
+    Author     : François Gannaz <francois.gannaz@silecs.info>
+*/
+
+.tooltip-content {
+    display: none;
+}
+.with-tooltip:hover .tooltip-content {
+	display: block;
+	position: absolute;
+	margin-top: 3px;
+    /* margin-left: -50%; */
+    left: 40%;
+    width: 55%;
+	padding: 1ex;
+	border: 1px solid black;
+	background-color: #F0F0F0;
+    color: #303030;
+}

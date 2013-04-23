@@ -1,0 +1,37 @@
+#page-report-synopsis-index td.numviews {text-align:right;}
+#page-report-synopsis-index tr.section {text-align: center;}
+#page-report-synopsis-index td.lastaccess {font-size: 0.8em;}
+
+
+table.generaltable {
+    width: 100%;
+}
+
+table.generaltable tr.r0 {
+    background-color: Azure;
+}
+
+table.generaltable tr.r1 {
+    background-color: white;
+}
+
+div#synopsis-bigbutton div.prep input
+{
+    background-color: #FFDB4D;
+}
+
+div#synopsis-bigbutton div.join input
+{
+    background-color: PaleGreen;
+}
+
+
+div#synopsis-informations {
+    clear: both;
+    padding-top: 1ex;
+}
+
+div#synopsis-rattachements {
+    clear: both;
+    padding-top: 1ex;
+}

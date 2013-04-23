@@ -3574,8 +3574,16 @@ class settings_navigation extends navigation_node {
             }
 
             // Add the course settings link
-            $url = new moodle_url('/course/edit.php', array('id'=>$course->id));
-            $coursenode->add(get_string('editsettings'), $url, self::TYPE_SETTING, null, null, new pix_icon('i/settings', ''));
+            $localcapup1 = 'local/up1_capabilities:course_updatesettings';
+            if (get_capability_info($localcapup1)) {
+                if (has_capability($localcapup1, $coursecontext)) {
+                    $url = new moodle_url('/course/edit.php', array('id'=>$course->id));
+                    $coursenode->add(get_string('editsettings'), $url, self::TYPE_SETTING, null, null, new pix_icon('i/settings', ''));
+                }
+            } else {
+                $url = new moodle_url('/course/edit.php', array('id'=>$course->id));
+                $coursenode->add(get_string('editsettings'), $url, self::TYPE_SETTING, null, null, new pix_icon('i/settings', ''));
+            }
 
             // Add the course completion settings link
             if ($CFG->enablecompletion && $course->enablecompletion) {
@@ -3619,6 +3627,12 @@ class settings_navigation extends navigation_node {
         if (!empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $coursecontext)) {
             $url = new moodle_url('/grade/edit/outcome/course.php', array('id'=>$course->id));
             $coursenode->add(get_string('outcomes', 'grades'), $url, self::TYPE_SETTING, null, 'outcomes', new pix_icon('i/outcomes', ''));
+        }
+
+        // Tableau de bord
+        if (has_capability('moodle/course:update', $coursecontext)) {
+            $url = new moodle_url('/local/courseboard/view.php', array('id'=>$course->id));
+            $coursenode->add(get_string('pluginname', 'local_courseboard'), $url, self::TYPE_SETTING, null, 'dashboard', null, '');
         }
 
         // Backup this course

@@ -4053,8 +4053,8 @@ function delete_user(stdClass $user) {
     // purge user preferences
     $DB->delete_records('user_preferences', array('userid'=>$user->id));
 
-    // purge user extra profile info
-    $DB->delete_records('user_info_data', array('userid'=>$user->id));
+    // purge user custom profile info
+    $DB->delete_records('custom_info_data', array('objectname' => 'user', 'objectid' => $user->id));
 
     // last course access not necessary either
     $DB->delete_records('user_lastaccess', array('userid'=>$user->id));
@@ -4573,6 +4573,10 @@ function delete_course($courseorid, $showfeedback = true) {
 
     // make the course completely empty
     remove_course_contents($courseid, $showfeedback);
+
+    // delete the custom metadata of this course
+    require __DIR__ . '/custominfo/lib.php';
+    custominfo_data::type('course')->delete($courseid);
 
     // delete the course and related context instance
     delete_context(CONTEXT_COURSE, $courseid);
@@ -8057,7 +8061,7 @@ function get_plugin_types($fullpaths=true) {
                       'filter'        => 'filter',
                       'editor'        => 'lib/editor',
                       'format'        => 'course/format',
-                      'profilefield'  => 'user/profile/field',
+                      'profilefield'  => 'lib/custominfo/field',
                       'report'        => 'report',
                       'coursereport'  => 'course/report', // must be after system reports
                       'gradeexport'   => 'grade/export',
