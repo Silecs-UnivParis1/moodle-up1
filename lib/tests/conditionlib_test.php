@@ -754,6 +754,7 @@ class conditionlib_testcase extends advanced_testcase {
         // redirects and stuff! These are the default text field parameters.
         require_once($CFG->dirroot . '/user/profile/lib.php');
         $field = (object)array(
+                'objectname' => 'user',
                 'shortname' => 'myfield', 'name' => 'My field', 'required' => 0,
                 'locked' => 0, 'forceunique' => 0, 'signup' => 0,
                 'visible' => PROFILE_VISIBLE_ALL,
@@ -761,7 +762,7 @@ class conditionlib_testcase extends advanced_testcase {
                 'descriptionformat' => FORMAT_HTML, 'defaultdata' => '',
                 'defaultdataformat' => FORMAT_HTML, 'param1' => 30, 'param2' => 2048,
                 'param3' => 0, 'param4' => '', 'param5' => '');
-        $customfieldid = $DB->insert_record('user_info_field', $field);
+        $customfieldid = $DB->insert_record('custom_info_field', $field);
 
         // Get list of condition user fields.
         $fields = condition_info::get_condition_user_fields();
