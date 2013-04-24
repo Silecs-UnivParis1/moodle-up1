@@ -12,6 +12,16 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
+    'block/course_opennow:myaddinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+        ),
+
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    ),
+
     'block/course_opennow:addinstance' => array(
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',
