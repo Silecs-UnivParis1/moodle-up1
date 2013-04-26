@@ -102,7 +102,7 @@ function feedback_add_instance($feedback) {
         $cm = get_coursemodule_from_id('feedback', $feedback->id);
         $feedback->coursemodule = $cm->id;
     }
-    $context = get_context_instance(CONTEXT_MODULE, $feedback->coursemodule);
+    $context = context_module::instance($feedback->coursemodule);
 
     $editoroptions = feedback_get_editor_options();
 
@@ -150,7 +150,7 @@ function feedback_update_instance($feedback) {
     //create or update the new events
     feedback_set_events($feedback);
 
-    $context = get_context_instance(CONTEXT_MODULE, $feedback->coursemodule);
+    $context = context_module::instance($feedback->coursemodule);
 
     $editoroptions = feedback_get_editor_options();
 
@@ -416,7 +416,7 @@ function feedback_get_recent_mod_activity(&$activities, &$index,
         return;
     }
 
-    $cm_context      = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $cm_context      = context_module::instance($cm->id);
     $accessallgroups = has_capability('moodle/site:accessallgroups', $cm_context);
     $viewfullnames   = has_capability('moodle/site:viewfullnames', $cm_context);
     $groupmode       = groups_get_activity_groupmode($cm, $course);
@@ -837,9 +837,7 @@ function feedback_get_context($cmid) {
         return $context;
     }
 
-    if (!$context = get_context_instance(CONTEXT_MODULE, $cmid)) {
-            print_error('badcontext');
-    }
+    $context = context_module::instance($cmid);
     return $context;
 }
 
@@ -880,7 +878,7 @@ function feedback_get_incomplete_users($cm,
 
     global $DB;
 
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
 
     //first get all user who can complete this feedback
     $cap = 'mod/feedback:complete';
@@ -986,9 +984,7 @@ function feedback_get_complete_users($cm,
 
     global $DB;
 
-    if (!$context = get_context_instance(CONTEXT_MODULE, $cm->id)) {
-            print_error('badcontext');
-    }
+    $context = context_module::instance($cm->id);
 
     $params = (array)$params;
 
@@ -1034,9 +1030,7 @@ function feedback_get_complete_users($cm,
  */
 function feedback_get_viewreports_users($cmid, $groups = false) {
 
-    if (!$context = get_context_instance(CONTEXT_MODULE, $cmid)) {
-            print_error('badcontext');
-    }
+    $context = context_module::instance($cmid);
 
     //description of the call below:
     //get_users_by_capability($context, $capability, $fields='', $sort='', $limitfrom='',
@@ -1062,9 +1056,7 @@ function feedback_get_viewreports_users($cmid, $groups = false) {
  */
 function feedback_get_receivemail_users($cmid, $groups = false) {
 
-    if (!$context = get_context_instance(CONTEXT_MODULE, $cmid)) {
-            print_error('badcontext');
-    }
+    $context = context_module::instance($cmid);
 
     //description of the call below:
     //get_users_by_capability($context, $capability, $fields='', $sort='', $limitfrom='',
@@ -1137,10 +1129,10 @@ function feedback_save_as_template($feedback, $name, $ispublic = 0) {
     if ($ispublic) {
         $s_context = get_system_context();
     } else {
-        $s_context = get_context_instance(CONTEXT_COURSE, $newtempl->course);
+        $s_context = context_course::instance($newtempl->course);
     }
     $cm = get_coursemodule_from_instance('feedback', $feedback->id);
-    $f_context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $f_context = context_module::instance($cm->id);
 
     //create items of this new template
     //depend items we are storing temporary in an mapping list array(new id => dependitem)
@@ -1242,11 +1234,11 @@ function feedback_items_from_template($feedback, $templateid, $deleteold = false
     if ($template->ispublic) {
         $s_context = get_system_context();
     } else {
-        $s_context = get_context_instance(CONTEXT_COURSE, $feedback->course);
+        $s_context = context_course::instance($feedback->course);
     }
     $course = $DB->get_record('course', array('id'=>$feedback->course));
     $cm = get_coursemodule_from_instance('feedback', $feedback->id);
-    $f_context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $f_context = context_module::instance($cm->id);
 
     //if deleteold then delete all old items before
     //get all items
@@ -1545,7 +1537,7 @@ function feedback_delete_item($itemid, $renumber = true, $template = false) {
         if ($template->ispublic) {
             $context = get_system_context();
         } else {
-            $context = get_context_instance(CONTEXT_COURSE, $template->course);
+            $context = context_course::instance($template->course);
         }
         $templatefiles = $fs->get_area_files($context->id,
                                     'mod_feedback',
@@ -1561,7 +1553,7 @@ function feedback_delete_item($itemid, $renumber = true, $template = false) {
         if (!$cm = get_coursemodule_from_instance('feedback', $item->feedback)) {
             return false;
         }
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        $context = context_module::instance($cm->id);
 
         $itemfiles = $fs->get_area_files($context->id,
                                     'mod_feedback',
@@ -2999,7 +2991,7 @@ function feedback_send_email_anonym($cm, $feedback, $course) {
  * @return string the text you want to post
  */
 function feedback_send_email_text($info, $course) {
-    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+    $coursecontext = context_course::instance($course->id);
     $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
     $posttext  = $courseshortname.' -> '.get_string('modulenameplural', 'feedback').' -> '.
                     $info->feedback."\n";
@@ -3020,7 +3012,7 @@ function feedback_send_email_text($info, $course) {
  */
 function feedback_send_email_html($info, $course, $cm) {
     global $CFG;
-    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+    $coursecontext = context_course::instance($course->id);
     $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
     $course_url = $CFG->wwwroot.'/course/view.php?id='.$course->id;
     $feedback_all_url = $CFG->wwwroot.'/mod/feedback/index.php?id='.$course->id;
@@ -3060,7 +3052,7 @@ function feedback_extend_settings_navigation(settings_navigation $settings,
 
     global $PAGE, $DB;
 
-    if (!$context = get_context_instance(CONTEXT_MODULE, $PAGE->cm->id)) {
+    if (!$context = context_module::instance($PAGE->cm->id, IGNORE_MISSING)) {
         print_error('badcontext');
     }
 

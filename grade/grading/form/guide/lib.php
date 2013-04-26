@@ -506,6 +506,7 @@ class gradingform_guide_controller extends gradingform_controller {
         $comments = $this->definition->guide_comment;
         $options = $this->get_options();
         $guide = '';
+        $guide .= $output->box($this->get_formatted_description(), 'gradingform_guide-description');
         if (has_capability('moodle/grade:managegradingforms', $page->context)) {
             $guide .= $output->display_guide_mapping_explained($this->get_min_max_score());
             $guide .= $output->display_guide($criteria, $comments, $options, self::DISPLAY_PREVIEW, 'guide');

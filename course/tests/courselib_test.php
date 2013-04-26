@@ -25,8 +25,77 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot.'/course/lib.php');
 
 class courselib_testcase extends advanced_testcase {
+
+    public function test_create_course() {
+        global $DB;
+        $this->resetAfterTest(true);
+        $defaultcategory = $DB->get_field_select('course_categories', "MIN(id)", "parent=0");
+
+        $course = new stdClass();
+        $course->fullname = 'Apu loves Unit Təsts';
+        $course->shortname = 'Spread the lŭve';
+        $course->idnumber = '123';
+        $course->summary = 'Awesome!';
+        $course->summaryformat = FORMAT_PLAIN;
+        $course->format = 'topics';
+        $course->newsitems = 0;
+        $course->numsections = 5;
+        $course->category = $defaultcategory;
+
+        $created = create_course($course);
+        $context = context_course::instance($created->id);
+
+        // Compare original and created.
+        $original = (array) $course;
+        $this->assertEquals($original, array_intersect_key((array) $created, $original));
+
+        // Ensure default section is created.
+        $sectioncreated = $DB->record_exists('course_sections', array('course' => $created->id, 'section' => 0));
+        $this->assertTrue($sectioncreated);
+
+        // Ensure blocks have been associated to the course.
+        $blockcount = $DB->count_records('block_instances', array('parentcontextid' => $context->id));
+        $this->assertGreaterThan(0, $blockcount);
+    }
+
+    public function test_create_course_with_generator() {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+
+        // Ensure default section is created.
+        $sectioncreated = $DB->record_exists('course_sections', array('course' => $course->id, 'section' => 0));
+        $this->assertTrue($sectioncreated);
+    }
+
+    public function test_create_course_sections() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course(
+                array('shortname' => 'GrowingCourse',
+                    'fullname' => 'Growing Course',
+                    'numsections' => 5),
+                array('createsections' => true));
+
+        // Ensure all 6 (0-5) sections were created and modinfo/sectioninfo cache works properly
+        $sectionscreated = array_keys(get_fast_modinfo($course)->get_section_info_all());
+        $this->assertEquals(range(0, $course->numsections), $sectionscreated);
+
+        // this will do nothing, section already exists
+        $this->assertFalse(course_create_sections_if_missing($course, $course->numsections));
+
+        // this will create new section
+        $this->assertTrue(course_create_sections_if_missing($course, $course->numsections + 1));
+
+        // Ensure all 7 (0-6) sections were created and modinfo/sectioninfo cache works properly
+        $sectionscreated = array_keys(get_fast_modinfo($course)->get_section_info_all());
+        $this->assertEquals(range(0, $course->numsections + 1), $sectionscreated);
+    }
 
     public function test_reorder_sections() {
         global $DB;
@@ -242,14 +311,17 @@ class courselib_testcase extends advanced_testcase {
         $oldsectionid = $cm->section;
 
         // Perform the move
-        $result = moveto_module($cm, $newsection);
-        $this->assertTrue($result);
+        moveto_module($cm, $newsection);
 
-        // get_fast_modinfo(reset) is usually called the code calling moveto_module so call it here
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        // reset of get_fast_modinfo is usually called the code calling moveto_module so call it here
+        get_fast_modinfo(0, 0, true);
         $cms = get_fast_modinfo($course)->get_cms();
         $cm = reset($cms);
+
+        // Check that the cached modinfo contains the correct section info
+        $modinfo = get_fast_modinfo($course);
+        $this->assertTrue(empty($modinfo->sections[0]));
+        $this->assertFalse(empty($modinfo->sections[3]));
 
         // Check that the old section's sequence no longer contains this ID
         $oldsection = $DB->get_record('course_sections', array('id' => $oldsectionid));
@@ -271,11 +343,15 @@ class courselib_testcase extends advanced_testcase {
         $result = moveto_module($cm, $newsection);
         $this->assertTrue($result);
 
-        // get_fast_modinfo(reset) is usually called the code calling moveto_module so call it here
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        // reset of get_fast_modinfo is usually called the code calling moveto_module so call it here
+        get_fast_modinfo(0, 0, true);
         $cms = get_fast_modinfo($course)->get_cms();
         $cm = reset($cms);
+
+        // Check that the cached modinfo contains the correct section info
+        $modinfo = get_fast_modinfo($course);
+        $this->assertTrue(empty($modinfo->sections[0]));
+        $this->assertFalse(empty($modinfo->sections[2]));
 
         // Check that the old section's sequence no longer contains this ID
         $oldsection = $DB->get_record('course_sections', array('id' => $oldsectionid));
@@ -286,9 +362,6 @@ class courselib_testcase extends advanced_testcase {
         $newsection = $DB->get_record('course_sections', array('id' => $newsection->id));
         $newsequences = explode(',', $newsection->sequence);
         $this->assertTrue(in_array($cm->id, $newsequences));
-
-        // Check that the section number has been changed in the cm
-        $this->assertEquals($newsection->id, $cm->section);
     }
 
     public function test_module_visibility() {
@@ -298,8 +371,8 @@ class courselib_testcase extends advanced_testcase {
         // Create course and modules.
         $course = $this->getDataGenerator()->create_course(array('numsections' => 5));
         $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course->id));
-        $page = $this->getDataGenerator()->create_module('page', array('duedate' => time(), 'course' => $course->id));
-        $modules = compact('forum', 'page');
+        $assign = $this->getDataGenerator()->create_module('assign', array('duedate' => time(), 'course' => $course->id));
+        $modules = compact('forum', 'assign');
 
         // Hiding the modules.
         foreach ($modules as $mod) {
@@ -324,27 +397,27 @@ class courselib_testcase extends advanced_testcase {
         // Testing an empty section.
         $sectionnumber = 1;
         set_section_visible($course->id, $sectionnumber, 0);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 0);
         set_section_visible($course->id, $sectionnumber, 1);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 1);
 
         // Testing a section with visible modules.
         $sectionnumber = 2;
         $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course->id),
                 array('section' => $sectionnumber));
-        $page= $this->getDataGenerator()->create_module('page', array('duedate' => time(),
+        $assign = $this->getDataGenerator()->create_module('assign', array('duedate' => time(),
                 'course' => $course->id), array('section' => $sectionnumber));
-        $modules = compact('forum', 'page');
+        $modules = compact('forum', 'assign');
         set_section_visible($course->id, $sectionnumber, 0);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 0);
         foreach ($modules as $mod) {
             $this->check_module_visibility($mod, 0, 1);
         }
         set_section_visible($course->id, $sectionnumber, 1);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 1);
         foreach ($modules as $mod) {
             $this->check_module_visibility($mod, 1, 1);
@@ -354,21 +427,21 @@ class courselib_testcase extends advanced_testcase {
         $sectionnumber = 3;
         $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course->id),
                 array('section' => $sectionnumber));
-        $page = $this->getDataGenerator()->create_module('page', array('duedate' => time(),
+        $assign = $this->getDataGenerator()->create_module('assign', array('duedate' => time(),
                 'course' => $course->id), array('section' => $sectionnumber));
-        $modules = compact('forum', 'page');
+        $modules = compact('forum', 'assign');
         foreach ($modules as $mod) {
             set_coursemodule_visible($mod->cmid, 0);
             $this->check_module_visibility($mod, 0, 0);
         }
         set_section_visible($course->id, $sectionnumber, 0);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 0);
         foreach ($modules as $mod) {
             $this->check_module_visibility($mod, 0, 0);
         }
         set_section_visible($course->id, $sectionnumber, 1);
-        $section_info = get_fast_modinfo($course)->get_section_info($sectionnumber);
+        $section_info = get_fast_modinfo($course->id)->get_section_info($sectionnumber);
         $this->assertEquals($section_info->visible, 1);
         foreach ($modules as $mod) {
             $this->check_module_visibility($mod, 0, 0);
@@ -385,11 +458,7 @@ class courselib_testcase extends advanced_testcase {
      */
     public function check_module_visibility($mod, $visibility, $visibleold) {
         global $DB;
-
-        rebuild_course_cache($mod->course);
-        $course = $DB->get_record('course', array('id' => $mod->course));
-        $cm = get_fast_modinfo($course)->get_cm($mod->cmid);
-
+        $cm = get_fast_modinfo($mod->course)->get_cm($mod->cmid);
         $this->assertEquals($visibility, $cm->visible);
         $this->assertEquals($visibleold, $cm->visibleold);
 
@@ -413,6 +482,58 @@ class courselib_testcase extends advanced_testcase {
                 $this->assertEquals($visibility, $calevent->visible, "$cm->modname calendar_event visibility");
             }
         }
+    }
+
+    public function test_course_page_type_list() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        // Create a category.
+        $category = new stdClass();
+        $category->name = 'Test Category';
+
+        $testcategory = $this->getDataGenerator()->create_category($category);
+
+        // Create a course.
+        $course = new stdClass();
+        $course->fullname = 'Apu loves Unit Təsts';
+        $course->shortname = 'Spread the lŭve';
+        $course->idnumber = '123';
+        $course->summary = 'Awesome!';
+        $course->summaryformat = FORMAT_PLAIN;
+        $course->format = 'topics';
+        $course->newsitems = 0;
+        $course->numsections = 5;
+        $course->category = $testcategory->id;
+
+        $testcourse = $this->getDataGenerator()->create_course($course);
+
+        // Create contexts.
+        $coursecontext = context_course::instance($testcourse->id);
+        $parentcontext = $coursecontext->get_parent_context(); // Not actually used.
+        $pagetype = 'page-course-x'; // Not used either.
+        $pagetypelist = course_page_type_list($pagetype, $parentcontext, $coursecontext);
+
+        // Page type lists for normal courses.
+        $testpagetypelist1 = array();
+        $testpagetypelist1['*'] = 'Any page';
+        $testpagetypelist1['course-*'] = 'Any course page';
+        $testpagetypelist1['course-view-*'] = 'Any type of course main page';
+
+        $this->assertEquals($testpagetypelist1, $pagetypelist);
+
+        // Get the context for the front page course.
+        $sitecoursecontext = context_course::instance(SITEID);
+        $pagetypelist = course_page_type_list($pagetype, $parentcontext, $sitecoursecontext);
+
+        // Page type list for the front page course.
+        $testpagetypelist2 = array('*' => 'Any page');
+        $this->assertEquals($testpagetypelist2, $pagetypelist);
+
+        // Make sure that providing no current context to the function doesn't result in an error.
+        // Calls made from generate_page_type_patterns() may provide null values.
+        $pagetypelist = course_page_type_list($pagetype, null, null);
+        $this->assertEquals($pagetypelist, $testpagetypelist1);
     }
 
     /**
@@ -450,8 +571,7 @@ class courselib_testcase extends advanced_testcase {
         moveto_module($pagecm, $hiddensection);
 
         // Reset modinfo cache.
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        get_fast_modinfo(0, 0, true);
 
         $modinfo = get_fast_modinfo($course);
 
@@ -482,8 +602,7 @@ class courselib_testcase extends advanced_testcase {
         moveto_module($pagecm, $visiblesection);
 
         // Reset modinfo cache.
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        get_fast_modinfo(0, 0, true);
         $modinfo = get_fast_modinfo($course);
 
         // Verify that forum has been made visible.
@@ -498,8 +617,7 @@ class courselib_testcase extends advanced_testcase {
         moveto_module($pagecm, $visiblesection, $forumcm);
 
         // Reset modinfo cache.
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        get_fast_modinfo(0, 0, true);
 
         // Verify that the the page is still hidden
         $modinfo = get_fast_modinfo($course);
@@ -543,8 +661,7 @@ class courselib_testcase extends advanced_testcase {
         moveto_module($pagecm, $section, $forumcm);
 
         // Reset modinfo cache.
-        $reset = 'reset';
-        get_fast_modinfo($reset);
+        get_fast_modinfo(0, 0, true);
 
         // Verify that the the page is still hidden
         $modinfo = get_fast_modinfo($course);

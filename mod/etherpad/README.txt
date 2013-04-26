@@ -1,4 +1,4 @@
-This is Module for Moodle 2.2
+This module is for Moodle 2.3
 
 Installation
 

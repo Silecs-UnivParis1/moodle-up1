@@ -5,6 +5,7 @@ define('BGR_LASTMODIFIED', '1');
 define('BGR_NEXTONE',      '2');
 
 class block_glossary_random extends block_base {
+
     function init() {
         $this->title = get_string('pluginname','block_glossary_random');
     }
@@ -45,7 +46,7 @@ class block_glossary_random extends block_base {
             if (! $cm = get_coursemodule_from_instance("glossary", $this->config->glossary, $this->course->id)) {
                 return false;
             }
-            $glossaryctx = get_context_instance(CONTEXT_MODULE, $cm->id);
+            $glossaryctx = context_module::instance($cm->id);
 
             $limitfrom = 0;
             $limitnum = 1;
@@ -145,7 +146,7 @@ class block_glossary_random extends block_base {
 
         $cm = $modinfo->instances['glossary'][$glossaryid];
 
-        if (!has_capability('mod/glossary:view', get_context_instance(CONTEXT_MODULE, $cm->id))) {
+        if (!has_capability('mod/glossary:view', context_module::instance($cm->id))) {
             return '';
         }
 
@@ -164,7 +165,7 @@ class block_glossary_random extends block_base {
 
         //Obtain the visible property from the instance
         if ($cm->uservisible) {
-            if (has_capability('mod/glossary:write', get_context_instance(CONTEXT_MODULE, $cm->id))) {
+            if (has_capability('mod/glossary:write', context_module::instance($cm->id))) {
                 $this->content->footer = '<a href="'.$CFG->wwwroot.'/mod/glossary/edit.php?cmid='.$cm->id
                 .'" title="'.$this->config->addentry.'">'.$this->config->addentry.'</a><br />';
             } else {

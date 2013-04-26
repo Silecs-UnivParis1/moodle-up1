@@ -74,7 +74,7 @@ if (isguestuser()) {
     redirect('view.php?d='.$data->id);
 }
 
-$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+$context = context_module::instance($cm->id);
 
 /// If it's hidden then it doesn't show anything.  :)
 if (empty($cm->visible) and !has_capability('moodle/course:viewhiddenactivities', $context)) {
@@ -121,7 +121,7 @@ if ($cancel) {
 
 /// RSS and CSS and JS meta
 if (!empty($CFG->enablerssfeeds) && !empty($CFG->data_enablerssfeeds) && $data->rssarticles > 0) {
-    $courseshortname = format_string($course->shortname, true, array('context' => get_context_instance(CONTEXT_COURSE, $course->id)));
+    $courseshortname = format_string($course->shortname, true, array('context' => context_course::instance($course->id)));
     $rsstitle = $courseshortname . ': ' . format_string($data->name);
     rss_add_http_header($context, 'mod_data', $data, $rsstitle);
 }

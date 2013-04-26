@@ -44,7 +44,7 @@ function lesson_add_instance($data, $mform) {
 
     $cmid = $data->coursemodule;
     $draftitemid = $data->mediafile;
-    $context = get_context_instance(CONTEXT_MODULE, $cmid);
+    $context = context_module::instance($cmid);
 
     lesson_process_pre_save($data);
 
@@ -78,7 +78,7 @@ function lesson_update_instance($data, $mform) {
     $data->id = $data->instance;
     $cmid = $data->coursemodule;
     $draftitemid = $data->mediafile;
-    $context = get_context_instance(CONTEXT_MODULE, $cmid);
+    $context = context_module::instance($cmid);
 
     lesson_process_pre_save($data);
 
@@ -285,7 +285,7 @@ function lesson_print_overview($courses, &$htmlarray) {
             $str .= $OUTPUT->box(get_string('lessoncloseson', 'lesson', userdate($lesson->deadline)), 'info');
 
             // Attempt information
-            if (has_capability('mod/lesson:manage', get_context_instance(CONTEXT_MODULE, $lesson->coursemodule))) {
+            if (has_capability('mod/lesson:manage', context_module::instance($lesson->coursemodule))) {
                 // Number of user attempts
                 $attempts = $DB->count_records('lesson_attempts', array('lessonid'=>$lesson->id));
                 $str     .= $OUTPUT->box(get_string('xattempts', 'lesson', $attempts), 'info');
@@ -967,7 +967,7 @@ function lesson_update_media_file($lessonid, $context, $draftitemid) {
     // Save the file if it exists that is currently in the draft area.
     file_save_draft_area_files($draftitemid, $context->id, 'mod_lesson', 'mediafile', 0);
     // Get the file if it exists.
-    $files = $fs->get_area_files($context->id, 'mod_lesson', 'mediafile', 0, 'sortorder, itemid, filepath, filename', false);
+    $files = $fs->get_area_files($context->id, 'mod_lesson', 'mediafile', 0, 'itemid, filepath, filename', false);
     // Check that there is a file to process.
     if (count($files) == 1) {
         // Get the first (and only) file.

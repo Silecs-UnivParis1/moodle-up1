@@ -158,17 +158,14 @@ abstract class moodleform {
      */
     function moodleform($action=null, $customdata=null, $method='post', $target='', $attributes=null, $editable=true) {
         global $CFG, $FULLME;
-        if (empty($CFG->xmlstrictheaders)) {
-            // no standard mform in moodle should allow autocomplete with the exception of user signup
-            // this is valid attribute in html5, sorry, we have to ignore validation errors in legacy xhtml 1.0
-            if (empty($attributes)) {
-                $attributes = array('autocomplete'=>'off');
-            } else if (is_array($attributes)) {
-                $attributes['autocomplete'] = 'off';
-            } else {
-                if (strpos($attributes, 'autocomplete') === false) {
-                    $attributes .= ' autocomplete="off" ';
-                }
+        // no standard mform in moodle should allow autocomplete with the exception of user signup
+        if (empty($attributes)) {
+            $attributes = array('autocomplete'=>'off');
+        } else if (is_array($attributes)) {
+            $attributes['autocomplete'] = 'off';
+        } else {
+            if (strpos($attributes, 'autocomplete') === false) {
+                $attributes .= ' autocomplete="off" ';
             }
         }
 
@@ -398,7 +395,7 @@ abstract class moodleform {
                     if ($rule['type'] == 'required') {
                         $draftid = (int)$mform->getSubmitValue($elementname);
                         $fs = get_file_storage();
-                        $context = get_context_instance(CONTEXT_USER, $USER->id);
+                        $context = context_user::instance($USER->id);
                         if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
                             $errors[$elementname] = $rule['message'];
                         }
@@ -443,19 +440,6 @@ abstract class moodleform {
             $default_values = (array)$default_values;
         }
         $this->_form->setDefaults($default_values);
-    }
-
-    /**
-     * Sets file upload manager
-     *
-     * @deprecated since Moodle 2.0 Please don't used this API
-     * @todo MDL-31300 this api will be removed.
-     * @see MoodleQuickForm_filepicker
-     * @see MoodleQuickForm_filemanager
-     * @param bool $um upload manager
-     */
-    function set_upload_manager($um=false) {
-        debugging('Old file uploads can not be used any more, please use new filepicker element');
     }
 
     /**
@@ -689,7 +673,7 @@ abstract class moodleform {
             }
             $draftid = $values[$elname];
             $fs = get_file_storage();
-            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            $context = context_user::instance($USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
                 return false;
             }
@@ -737,7 +721,7 @@ abstract class moodleform {
             }
             $draftid = $values[$elname];
             $fs = get_file_storage();
-            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            $context = context_user::instance($USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
                 return false;
             }
@@ -800,7 +784,7 @@ abstract class moodleform {
             }
             $draftid = $values[$elname];
             $fs = get_file_storage();
-            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            $context = context_user::instance($USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
                 return null;
             }
@@ -844,7 +828,7 @@ abstract class moodleform {
                 return false;
             }
             $draftid = $values[$elname];
-            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            $context = context_user::instance($USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user' ,'draft', $draftid, 'id DESC', false)) {
                 return false;
             }
@@ -906,7 +890,7 @@ abstract class moodleform {
             }
             $draftid = $values[$elname];
             $fs = get_file_storage();
-            $context = get_context_instance(CONTEXT_USER, $USER->id);
+            $context = context_user::instance($USER->id);
             if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
                 return false;
             }
@@ -1320,13 +1304,15 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
         } else {
             $this->_pageparams = '';
         }
-        //no 'name' atttribute for form in xhtml strict :
-        $attributes = array('action'=>$action, 'method'=>$method,
-                'accept-charset'=>'utf-8', 'id'=>'mform'.$formcounter) + $target;
+        // No 'name' atttribute for form in xhtml strict :
+        $attributes = array('action' => $action, 'method' => $method, 'accept-charset' => 'utf-8') + $target;
+        if (is_null($this->getAttribute('id'))) {
+            $attributes['id'] = 'mform' . $formcounter;
+        }
         $formcounter++;
         $this->updateAttributes($attributes);
 
-        //this is custom stuff for Moodle :
+        // This is custom stuff for Moodle :
         $oldclass=   $this->getAttribute('class');
         if (!empty($oldclass)){
             $this->updateAttributes(array('class'=>$oldclass.' mform'));
@@ -1583,63 +1569,6 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
      */
     function setDefault($elementName, $defaultValue){
         $this->setDefaults(array($elementName=>$defaultValue));
-    }
-
-    /**
-     * Add an array of buttons to the form
-     *
-     * @param array $buttons An associative array representing help button to attach to
-     *        to the form. keys of array correspond to names of elements in form.
-     * @param bool $suppresscheck if true then string check will be suppressed
-     * @param string $function callback function to dispaly help button.
-     * @deprecated since Moodle 2.0 use addHelpButton() call on each element manually
-     * @todo MDL-31047 this api will be removed.
-     * @see MoodleQuickForm::addHelpButton()
-     */
-    function setHelpButtons($buttons, $suppresscheck=false, $function='helpbutton'){
-
-        debugging('function moodle_form::setHelpButtons() is deprecated');
-        //foreach ($buttons as $elementname => $button){
-        //    $this->setHelpButton($elementname, $button, $suppresscheck, $function);
-        //}
-    }
-
-    /**
-     * Add a help button to element
-     *
-     * @param string $elementname name of the element to add the item to
-     * @param array $buttonargs arguments to pass to function $function
-     * @param bool $suppresscheck whether to throw an error if the element
-     *        doesn't exist.
-     * @param string $function - function to generate html from the arguments in $button
-     * @deprecated since Moodle 2.0 - use addHelpButton() call on each element manually
-     * @todo MDL-31047 this api will be removed.
-     * @see MoodleQuickForm::addHelpButton()
-     */
-    function setHelpButton($elementname, $buttonargs, $suppresscheck=false, $function='helpbutton'){
-        global $OUTPUT;
-
-        debugging('function moodle_form::setHelpButton() is deprecated');
-        if ($function !== 'helpbutton') {
-            //debugging('parameter $function in moodle_form::setHelpButton() is not supported any more');
-        }
-
-        $buttonargs = (array)$buttonargs;
-
-        if (array_key_exists($elementname, $this->_elementIndex)) {
-            //_elements has a numeric index, this code accesses the elements by name
-            $element = $this->_elements[$this->_elementIndex[$elementname]];
-
-            $page     = isset($buttonargs[0]) ? $buttonargs[0] : null;
-            $text     = isset($buttonargs[1]) ? $buttonargs[1] : null;
-            $module   = isset($buttonargs[2]) ? $buttonargs[2] : 'moodle';
-            $linktext = isset($buttonargs[3]) ? $buttonargs[3] : false;
-
-            $element->_helpbutton = $OUTPUT->old_help_icon($page, $text, $module, $linktext);
-
-        } else if (!$suppresscheck) {
-            print_error('nonexistentformelements', 'form', '', $elementname);
-        }
     }
 
     /**
@@ -2321,13 +2250,15 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         // switch next two lines for ol li containers for form items.
         //        $this->_elementTemplates=array('default'=>"\n\t\t".'<li class="fitem"><label>{label}{help}<!-- BEGIN required -->{req}<!-- END required --></label><div class="qfelement<!-- BEGIN error --> error<!-- END error --> {type}"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></li>');
         $this->_elementTemplates = array(
-        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} {help}</label></div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
+        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
 
-        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} {help}</label></div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
+        'actionbuttons'=>"\n\t\t".'<div id="{id}" class="fitem fitem_actionbuttons fitem_{type}"><div class="felement {type}">{element}</div></div>',
 
-        'static'=>"\n\t\t".'<div class="fitem {advanced}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} {help}</label></div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}&nbsp;</div></div>',
+        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
 
-'warning'=>"\n\t\t".'<div class="fitem {advanced}">{element}</div>',
+        'static'=>"\n\t\t".'<div class="fitem {advanced}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg}{help} </label></div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}&nbsp;</div></div>',
+
+        'warning'=>"\n\t\t".'<div class="fitem {advanced}">{element}</div>',
 
         'nodisplay'=>'');
 
@@ -2644,10 +2575,8 @@ MoodleQuickForm::registerElementType('date_selector', "$CFG->libdir/form/datesel
 MoodleQuickForm::registerElementType('date_time_selector', "$CFG->libdir/form/datetimeselector.php", 'MoodleQuickForm_date_time_selector');
 MoodleQuickForm::registerElementType('duration', "$CFG->libdir/form/duration.php", 'MoodleQuickForm_duration');
 MoodleQuickForm::registerElementType('editor', "$CFG->libdir/form/editor.php", 'MoodleQuickForm_editor');
-MoodleQuickForm::registerElementType('file', "$CFG->libdir/form/file.php", 'MoodleQuickForm_file');
 MoodleQuickForm::registerElementType('filemanager', "$CFG->libdir/form/filemanager.php", 'MoodleQuickForm_filemanager');
 MoodleQuickForm::registerElementType('filepicker', "$CFG->libdir/form/filepicker.php", 'MoodleQuickForm_filepicker');
-MoodleQuickForm::registerElementType('format', "$CFG->libdir/form/format.php", 'MoodleQuickForm_format');
 MoodleQuickForm::registerElementType('grading', "$CFG->libdir/form/grading.php", 'MoodleQuickForm_grading');
 MoodleQuickForm::registerElementType('group', "$CFG->libdir/form/group.php", 'MoodleQuickForm_group');
 MoodleQuickForm::registerElementType('header', "$CFG->libdir/form/header.php", 'MoodleQuickForm_header');

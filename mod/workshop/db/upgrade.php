@@ -88,6 +88,28 @@ function xmldb_workshop_upgrade($oldversion) {
     }
 
     // Moodle v2.3.0 release upgrade line
+
+    /**
+     * Add new fields conclusion and conclusionformat
+     */
+    if ($oldversion < 2012102400) {
+        $table = new xmldb_table('workshop');
+
+        $field = new xmldb_field('conclusion', XMLDB_TYPE_TEXT, null, null, null, null, null, 'phaseswitchassessment');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('conclusionformat', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '1', 'conclusion');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2012102400, 'workshop');
+    }
+
+
+    // Moodle v2.4.0 release upgrade line
     // Put any upgrade step following this
 
 

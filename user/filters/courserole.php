@@ -21,7 +21,7 @@ class user_filter_courserole extends user_filter_type {
      * @return array of availble roles
      */
     function get_roles() {
-        $context = get_context_instance(CONTEXT_SYSTEM);
+        $context = context_system::instance();
         $roles = array(0=> get_string('anyrole','filters')) + get_default_enrol_roles($context);
         return $roles;
     }
@@ -132,8 +132,8 @@ class user_filter_courserole extends user_filter_type {
         $a->label = $this->_label;
 
         if ($roleid) {
-            $rolename = $DB->get_field('role', 'name', array('id'=>$roleid));
-            $a->rolename = '"'.format_string($rolename).'"';
+            $role = $DB->get_record('role', array('id'=>$roleid));
+            $a->rolename = '"'.role_get_name($role).'"';
         } else {
             $a->rolename = get_string('anyrole', 'filters');
         }

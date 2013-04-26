@@ -320,6 +320,8 @@ function upgrade_stale_php_files_present() {
     global $CFG;
 
     $someexamplesofremovedfiles = array(
+        // removed in 2.4dev
+        '/admin/tool/unittest/simpletestlib.php',
         // removed in 2.3dev
         '/lib/minify/builder/',
         // removed in 2.2dev
@@ -1416,6 +1418,10 @@ function install_core($version, $verbose) {
     global $CFG, $DB;
 
     try {
+        // Disable the use of cache stores here. We will reset the factory after we've performed the installation.
+        // This ensures that we don't permanently cache anything during installation.
+        cache_factory::disable_stores();
+
         set_time_limit(600);
         print_upgrade_part_start('moodle', true, $verbose); // does not store upgrade running flag
 
@@ -1439,6 +1445,10 @@ function install_core($version, $verbose) {
         admin_apply_default_settings(NULL, true);
 
         print_upgrade_part_end(null, true, $verbose);
+
+        // Purge all caches. They're disabled but this ensures that we don't have any persistent data just in case something
+        // during installation didn't use APIs.
+        cache_helper::purge_all();
     } catch (exception $ex) {
         upgrade_handle_exception($ex);
     }
@@ -1460,6 +1470,9 @@ function upgrade_core($version, $verbose) {
     try {
         // Reset caches before any output
         purge_all_caches();
+        // Disable the use of cache stores here. We will reset the factory after we've performed the installation.
+        // This ensures that we don't permanently cache anything during installation.
+        cache_factory::disable_stores();
 
         // Upgrade current language pack if we can
         upgrade_language_pack();
@@ -1489,8 +1502,12 @@ function upgrade_core($version, $verbose) {
         external_update_descriptions('moodle');
         events_update_definition('moodle');
         message_update_providers('moodle');
+        // Update core definitions.
+        cache_helper::update_definitions(true);
 
-        // Reset caches again, just to be sure
+        // Reset the cache, this returns it to a normal operation state.
+        cache_factory::reset();
+        // Purge caches again, just to be sure we arn't holding onto old stuff now.
         purge_all_caches();
 
         // Clean up contexts - more and more stuff depends on existence of paths and contexts
@@ -1518,10 +1535,16 @@ function upgrade_noncore($verbose) {
 
     // upgrade all plugins types
     try {
+        // Disable the use of cache stores here.
+        // We don't reset this, the site can live without proper caching for life of this request.
+        cache_factory::disable_stores();
+
         $plugintypes = get_plugin_types();
         foreach ($plugintypes as $type=>$location) {
             upgrade_plugins($type, 'print_upgrade_part_start', 'print_upgrade_part_end', $verbose);
         }
+        // Update cache definitions. Involves scanning each plugin for any changes.
+        cache_helper::update_definitions();
     } catch (Exception $ex) {
         upgrade_handle_exception($ex);
     }
@@ -1879,3 +1902,104 @@ function upgrade_save_orphaned_questions() {
             (SELECT 1 FROM {question_categories} WHERE {question_categories}.id = {question}.category)', $params);
 }
 
+/**
+ * Rename old backup files to current backup files.
+ *
+ * When added the setting 'backup_shortname' (MDL-28657) the backup file names did not contain the id of the course.
+ * Further we fixed that behaviour by forcing the id to be always present in the file name (MDL-33812).
+ * This function will explore the backup directory and attempt to rename the previously created files to include
+ * the id in the name. Doing this will put them back in the process of deleting the excess backups for each course.
+ *
+ * This function manually recreates the file name, instead of using
+ * {@link backup_plan_dbops::get_default_backup_filename()}, use it carefully if you're using it outside of the
+ * usual upgrade process.
+ *
+ * @see backup_cron_automated_helper::remove_excess_backups()
+ * @link http://tracker.moodle.org/browse/MDL-35116
+ * @return void
+ * @since 2.4
+ */
+function upgrade_rename_old_backup_files_using_shortname() {
+    global $CFG;
+    $dir = get_config('backup', 'backup_auto_destination');
+    $useshortname = get_config('backup', 'backup_shortname');
+    if (empty($dir) || !is_dir($dir) || !is_writable($dir)) {
+        return;
+    }
+
+    require_once($CFG->libdir.'/textlib.class.php');
+    require_once($CFG->dirroot.'/backup/util/includes/backup_includes.php');
+    $backupword = str_replace(' ', '_', textlib::strtolower(get_string('backupfilename')));
+    $backupword = trim(clean_filename($backupword), '_');
+    $filename = $backupword . '-' . backup::FORMAT_MOODLE . '-' . backup::TYPE_1COURSE . '-';
+    $regex = '#^'.preg_quote($filename, '#').'.*\.mbz$#';
+    $thirtyapril = strtotime('30 April 2012 00:00');
+
+    // Reading the directory.
+    if (!$files = scandir($dir)) {
+        return;
+    }
+    foreach ($files as $file) {
+        // Skip directories and files which do not start with the common prefix.
+        // This avoids working on files which are not related to this issue.
+        if (!is_file($dir . '/' . $file) || !preg_match($regex, $file)) {
+            continue;
+        }
+
+        // Extract the information from the XML file.
+        try {
+            $bcinfo = backup_general_helper::get_backup_information_from_mbz($dir . '/' . $file);
+        } catch (backup_helper_exception $e) {
+            // Some error while retrieving the backup informations, skipping...
+            continue;
+        }
+
+        // Make sure this a course backup.
+        if ($bcinfo->format !== backup::FORMAT_MOODLE || $bcinfo->type !== backup::TYPE_1COURSE) {
+            continue;
+        }
+
+        // Skip the backups created before the short name option was initially introduced (MDL-28657).
+        // This was integrated on the 2nd of May 2012. Let's play safe with timezone and use the 30th of April.
+        if ($bcinfo->backup_date < $thirtyapril) {
+            continue;
+        }
+
+        // Let's check if the file name contains the ID where it is supposed to be, if it is the case then
+        // we will skip the file. Of course it could happen that the course ID is identical to the course short name
+        // even though really unlikely, but then renaming this file is not necessary. If the ID is not found in the
+        // file name then it was probably the short name which was used.
+        $idfilename = $filename . $bcinfo->original_course_id . '-';
+        $idregex = '#^'.preg_quote($idfilename, '#').'.*\.mbz$#';
+        if (preg_match($idregex, $file)) {
+            continue;
+        }
+
+        // Generating the file name manually. We do not use backup_plan_dbops::get_default_backup_filename() because
+        // it will query the database to get some course information, and the course could not exist any more.
+        $newname = $filename . $bcinfo->original_course_id . '-';
+        if ($useshortname) {
+            $shortname = str_replace(' ', '_', $bcinfo->original_course_shortname);
+            $shortname = textlib::strtolower(trim(clean_filename($shortname), '_'));
+            $newname .= $shortname . '-';
+        }
+
+        $backupdateformat = str_replace(' ', '_', get_string('backupnameformat', 'langconfig'));
+        $date = userdate($bcinfo->backup_date, $backupdateformat, 99, false);
+        $date = textlib::strtolower(trim(clean_filename($date), '_'));
+        $newname .= $date;
+
+        if (isset($bcinfo->root_settings['users']) && !$bcinfo->root_settings['users']) {
+            $newname .= '-nu';
+        } else if (isset($bcinfo->root_settings['anonymize']) && $bcinfo->root_settings['anonymize']) {
+            $newname .= '-an';
+        }
+        $newname .= '.mbz';
+
+        // Final check before attempting the renaming.
+        if ($newname == $file || file_exists($dir . '/' . $newname)) {
+            continue;
+        }
+        @rename($dir . '/' . $file, $dir . '/' . $newname);
+    }
+}

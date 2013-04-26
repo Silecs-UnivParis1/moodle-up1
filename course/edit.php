@@ -45,10 +45,10 @@ if ($id) { // editing course
         print_error('cannoteditsiteform');
     }
 
-    $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
+    $course = course_get_format($id)->get_course();
     require_login($course);
     $category = $DB->get_record('course_categories', array('id'=>$course->category), '*', MUST_EXIST);
-    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+    $coursecontext = context_course::instance($course->id);
 
     if (get_capability_info('local/up1_capabilities:course_updatesettings')) {
         require_capability('local/up1_capabilities:course_updatesettings', $coursecontext);
@@ -60,7 +60,7 @@ if ($id) { // editing course
     $course = null;
     require_login();
     $category = $DB->get_record('course_categories', array('id'=>$categoryid), '*', MUST_EXIST);
-    $catcontext = get_context_instance(CONTEXT_COURSECAT, $category->id);
+    $catcontext = context_coursecat::instance($category->id);
     require_capability('moodle/course:create', $catcontext);
     $PAGE->set_context($catcontext);
 
@@ -79,6 +79,12 @@ if (!empty($course)) {
     //add context for editor
     $editoroptions['context'] = $coursecontext;
     $course = file_prepare_standard_editor($course, 'summary', $editoroptions, $coursecontext, 'course', 'summary', 0);
+
+    // Inject current aliases
+    $aliases = $DB->get_records('role_names', array('contextid'=>$coursecontext->id));
+    foreach($aliases as $alias) {
+        $course->{'role_'.$alias->roleid} = $alias->name;
+    }
 
 } else {
     //editor should respect category context if course context is not set.
@@ -118,7 +124,7 @@ if ($editform->is_cancelled()) {
         $custominfo_data->save_data($data);
 
         // Get the context of the newly created course
-        $context = get_context_instance(CONTEXT_COURSE, $course->id, MUST_EXIST);
+        $context = context_course::instance($course->id, MUST_EXIST);
 
         if (!empty($CFG->creatornewroleid) and !is_viewing($context, NULL, 'moodle/role:assign') and !is_enrolled($context, NULL, 'moodle/role:assign')) {
             // deal with course creators - enrol them internally with default role
@@ -144,7 +150,6 @@ if ($editform->is_cancelled()) {
         // save custom fields data
         $custominfo_data->save_data($data);
     }
-    rebuild_course_cache($course->id);
 
     // Redirect user to newly created/updated course.
     redirect(new moodle_url('/course/view.php', array('id' => $course->id)));

@@ -41,7 +41,7 @@ $edit        = optional_param('edit', -1, PARAM_BOOL);
 $userpage    = optional_param('userpage', 0, PARAM_INT); // which page to show
 $perpage     = optional_param('perpage', 24, PARAM_INT);
 
-$systemcontext   = get_context_instance(CONTEXT_SYSTEM);
+$systemcontext   = context_system::instance();
 
 if ($tagname) {
     $tag = tag_get('name', $tagname, '*');
@@ -96,7 +96,7 @@ tag_print_description_box($tag);
 require_once($CFG->dirroot.'/tag/coursetagslib.php');
 $courses = coursetag_get_tagged_courses($tag->id);
 
-if (!empty($CFG->bloglevel) && has_capability('moodle/blog:view', $systemcontext)) {
+if (!empty($CFG->enableblogs) && has_capability('moodle/blog:view', $systemcontext)) {
     require_once($CFG->dirroot.'/blog/lib.php');
     require_once($CFG->dirroot.'/blog/locallib.php');
 

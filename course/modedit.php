@@ -56,10 +56,11 @@ if (!empty($add)) {
     $module = $DB->get_record('modules', array('name'=>$add), '*', MUST_EXIST);
 
     require_login($course);
-    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $context = context_course::instance($course->id);
     require_capability('moodle/course:manageactivities', $context);
 
-    $cw = get_course_section($section, $course->id);
+    course_create_sections_if_missing($course, $section);
+    $cw = get_fast_modinfo($course)->get_section_info($section);
 
     if (!course_allowed_module($course, $module->name)) {
         print_error('moduledisable');
@@ -131,7 +132,7 @@ if (!empty($add)) {
     $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
 
     require_login($course, false, $cm); // needed to setup proper $COURSE
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     require_capability('moodle/course:manageactivities', $context);
 
     $module = $DB->get_record('modules', array('id'=>$cm->module), '*', MUST_EXIST);
@@ -282,9 +283,9 @@ if ($mform->is_cancelled()) {
     }
 
     if (!empty($fromform->coursemodule)) {
-        $context = get_context_instance(CONTEXT_MODULE, $fromform->coursemodule);
+        $context = context_module::instance($fromform->coursemodule);
     } else {
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+        $context = context_course::instance($course->id);
     }
 
     $fromform->course = $course->id;
@@ -356,7 +357,7 @@ if ($mform->is_cancelled()) {
 
         $DB->update_record('course_modules', $cm);
 
-        $modcontext = get_context_instance(CONTEXT_MODULE, $fromform->coursemodule);
+        $modcontext = context_module::instance($fromform->coursemodule);
 
         // update embedded links and save files
         if (plugin_supports('mod', $fromform->modulename, FEATURE_MOD_INTRO, true)) {
@@ -449,7 +450,7 @@ if ($mform->is_cancelled()) {
 
         if (!$returnfromfunc or !is_number($returnfromfunc)) {
             // undo everything we can
-            $modcontext = get_context_instance(CONTEXT_MODULE, $fromform->coursemodule);
+            $modcontext = context_module::instance($fromform->coursemodule);
             delete_context(CONTEXT_MODULE, $fromform->coursemodule);
             $DB->delete_records('course_modules', array('id'=>$fromform->coursemodule));
 
@@ -465,7 +466,7 @@ if ($mform->is_cancelled()) {
         $DB->set_field('course_modules', 'instance', $returnfromfunc, array('id'=>$fromform->coursemodule));
 
         // update embedded links and save files
-        $modcontext = get_context_instance(CONTEXT_MODULE, $fromform->coursemodule);
+        $modcontext = context_module::instance($fromform->coursemodule);
         if (!empty($introeditor)) {
             $fromform->intro = file_save_draft_area_files($introeditor['itemid'], $modcontext->id,
                                                           'mod_'.$fromform->modulename, 'intro', 0,
@@ -475,9 +476,7 @@ if ($mform->is_cancelled()) {
 
         // course_modules and course_sections each contain a reference
         // to each other, so we have to update one of them twice.
-        $sectionid = add_mod_to_section($fromform);
-
-        $DB->set_field('course_modules', 'section', $sectionid, array('id'=>$fromform->coursemodule));
+        $sectionid = course_add_cm_to_section($course, $fromform->coursemodule, $fromform->section);
 
         // make sure visibility is set correctly (in particular in calendar)
         // note: allow them to set it even without moodle/course:activityvisibility
@@ -644,9 +643,9 @@ if ($mform->is_cancelled()) {
     $strmodulenameplural = get_string('modulenameplural', $module->name);
 
     if (!empty($cm->id)) {
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        $context = context_module::instance($cm->id);
     } else {
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+        $context = context_course::instance($course->id);
     }
 
     $PAGE->set_heading($course->fullname);

@@ -41,8 +41,10 @@ class moodlelib_testcase extends advanced_testcase {
             '6.0' => array('Windows XP SP2' => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)'),
             '7.0' => array('Windows XP SP2' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; YPC 3.0.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)'),
             '8.0' => array('Windows Vista' => 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 1.1.4322; .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648)'),
-            '9.0' => array('Windows 7' => 'Mozilla/5.0 (Windows; U; MSIE 9.0; WIndows NT 9.0; en-US))'),
-
+            '9.0' => array('Windows 7' => 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)'),
+            '9.0i' => array('Windows 7' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)'),
+            '10.0' => array('Windows 8' => 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0; Touch)'),
+            '10.0i' => array('Windows 8' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Trident/6.0; Touch; .NET4.0E; .NET4.0C; Tablet PC 2.0)'),
         ),
         'Firefox' => array(
             '1.0.6'   => array('Windows XP' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.10) Gecko/20050716 Firefox/1.0.6'),
@@ -253,6 +255,29 @@ class moodlelib_testcase extends advanced_testcase {
         $this->assertTrue(check_browser_version('MSIE', '9.0'));
         $this->assertFalse(check_browser_version('MSIE', '10'));
 
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0i']['Windows 7'];
+        $this->assertTrue(check_browser_version('MSIE'));
+        $this->assertTrue(check_browser_version('MSIE', 0));
+        $this->assertTrue(check_browser_version('MSIE', '5.0'));
+        $this->assertTrue(check_browser_version('MSIE', '9.0'));
+        $this->assertFalse(check_browser_version('MSIE', '10'));
+
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0']['Windows 8'];
+        $this->assertTrue(check_browser_version('MSIE'));
+        $this->assertTrue(check_browser_version('MSIE', 0));
+        $this->assertTrue(check_browser_version('MSIE', '5.0'));
+        $this->assertTrue(check_browser_version('MSIE', '9.0'));
+        $this->assertTrue(check_browser_version('MSIE', '10'));
+        $this->assertFalse(check_browser_version('MSIE', '11'));
+
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0i']['Windows 8'];
+        $this->assertTrue(check_browser_version('MSIE'));
+        $this->assertTrue(check_browser_version('MSIE', 0));
+        $this->assertTrue(check_browser_version('MSIE', '5.0'));
+        $this->assertTrue(check_browser_version('MSIE', '9.0'));
+        $this->assertTrue(check_browser_version('MSIE', '10'));
+        $this->assertFalse(check_browser_version('MSIE', '11'));
+
         $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['2.0']['Windows XP'];
         $this->assertTrue(check_browser_version('Firefox'));
         $this->assertTrue(check_browser_version('Firefox', '1.5'));
@@ -394,6 +419,18 @@ class moodlelib_testcase extends advanced_testcase {
         $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['8.0']['Windows Vista'];
         $this->assertEquals(array('ie', 'ie8'), get_browser_version_classes());
 
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0']['Windows 7'];
+        $this->assertEquals(array('ie', 'ie9'), get_browser_version_classes());
+
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0i']['Windows 7'];
+        $this->assertEquals(array('ie', 'ie9'), get_browser_version_classes());
+
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0']['Windows 8'];
+        $this->assertEquals(array('ie', 'ie10'), get_browser_version_classes());
+
+        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0i']['Windows 8'];
+        $this->assertEquals(array('ie', 'ie10'), get_browser_version_classes());
+
         $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['2.0']['Windows XP'];
         $this->assertEquals(array('gecko', 'gecko18'), get_browser_version_classes());
 
@@ -473,26 +510,9 @@ class moodlelib_testcase extends advanced_testcase {
         }
 
         // make sure warning is displayed if array submitted - TODO: throw exception in Moodle 2.3
-        $debugging = isset($CFG->debug) ? $CFG->debug : null;
-        $debugdisplay = isset($CFG->debugdisplay) ? $CFG->debugdisplay : null;
-        $CFG->debug = DEBUG_DEVELOPER;
-        $CFG->debugdisplay = true;
-
-        ob_start();
+        $_POST['username'] = array('a'=>'a');
         $this->assertSame(optional_param('username', 'default_user', PARAM_RAW), $_POST['username']);
-        $d = ob_end_clean();
-        $this->assertTrue($d !== '');
-
-        if ($debugging !== null) {
-            $CFG->debug = $debugging;
-        } else {
-            unset($CFG->debug);
-        }
-        if ($debugdisplay !== null) {
-            $CFG->debugdisplay = $debugdisplay;
-        } else {
-            unset($CFG->debugdisplay);
-        }
+        $this->assertDebuggingCalled();
     }
 
     function test_optional_param_array() {
@@ -545,34 +565,14 @@ class moodlelib_testcase extends advanced_testcase {
         }
 
         // do not allow non-arrays
-        $debugging = isset($CFG->debug) ? $CFG->debug : null;
-        $debugdisplay = isset($CFG->debugdisplay) ? $CFG->debugdisplay : null;
-        $CFG->debug = DEBUG_DEVELOPER;
-        $CFG->debugdisplay = true;
-
-        ob_start();
         $_POST['username'] = 'post_user';
         $this->assertSame(optional_param_array('username', array('a'=>'default_user'), PARAM_RAW), array('a'=>'default_user'));
-        $d = ob_end_clean();
-        $this->assertTrue($d !== '');
+        $this->assertDebuggingCalled();
 
         // make sure array keys are sanitised
-        ob_start();
         $_POST['username'] = array('abc123_;-/*-+ '=>'arrggh', 'a1_-'=>'post_user');
         $this->assertSame(optional_param_array('username', array(), PARAM_RAW), array('a1_-'=>'post_user'));
-        $d = ob_end_clean();
-        $this->assertTrue($d !== '');
-
-        if ($debugging !== null) {
-            $CFG->debug = $debugging;
-        } else {
-            unset($CFG->debug);
-        }
-        if ($debugdisplay !== null) {
-            $CFG->debugdisplay = $debugdisplay;
-        } else {
-            unset($CFG->debugdisplay);
-        }
+        $this->assertDebuggingCalled();
     }
 
     function test_required_param() {
@@ -615,26 +615,9 @@ class moodlelib_testcase extends advanced_testcase {
         }
 
         // make sure warning is displayed if array submitted - TODO: throw exception in Moodle 2.3
-        $debugging = isset($CFG->debug) ? $CFG->debug : null;
-        $debugdisplay = isset($CFG->debugdisplay) ? $CFG->debugdisplay : null;
-        $CFG->debug = DEBUG_DEVELOPER;
-        $CFG->debugdisplay = true;
-
-        ob_start();
+        $_POST['username'] = array('a'=>'a');
         $this->assertSame(required_param('username', PARAM_RAW), $_POST['username']);
-        $d = ob_end_clean();
-        $this->assertTrue($d !== '');
-
-        if ($debugging !== null) {
-            $CFG->debug = $debugging;
-        } else {
-            unset($CFG->debug);
-        }
-        if ($debugdisplay !== null) {
-            $CFG->debugdisplay = $debugdisplay;
-        } else {
-            unset($CFG->debugdisplay);
-        }
+        $this->assertDebuggingCalled();
     }
 
     function test_required_param_array() {
@@ -686,29 +669,10 @@ class moodlelib_testcase extends advanced_testcase {
             $this->assertTrue(true);
         }
 
-        // do not allow non-arrays
-        $debugging = isset($CFG->debug) ? $CFG->debug : null;
-        $debugdisplay = isset($CFG->debugdisplay) ? $CFG->debugdisplay : null;
-        $CFG->debug = DEBUG_DEVELOPER;
-        $CFG->debugdisplay = true;
-
         // make sure array keys are sanitised
-        ob_start();
         $_POST['username'] = array('abc123_;-/*-+ '=>'arrggh', 'a1_-'=>'post_user');
         $this->assertSame(required_param_array('username', PARAM_RAW), array('a1_-'=>'post_user'));
-        $d = ob_end_clean();
-        $this->assertTrue($d !== '');
-
-        if ($debugging !== null) {
-            $CFG->debug = $debugging;
-        } else {
-            unset($CFG->debug);
-        }
-        if ($debugdisplay !== null) {
-            $CFG->debugdisplay = $debugdisplay;
-        } else {
-            unset($CFG->debugdisplay);
-        }
+        $this->assertDebuggingCalled();
     }
 
     function test_clean_param() {
@@ -1094,62 +1058,95 @@ class moodlelib_testcase extends advanced_testcase {
         }
     }
 
-    function test_shorten_text() {
+    function test_shorten_text_no_tags_already_short_enough() {
+        // ......12345678901234567890123456.
         $text = "short text already no tags";
         $this->assertEquals($text, shorten_text($text));
+    }
 
+    function test_shorten_text_with_tags_already_short_enough() {
+        // .........123456...7890....12345678.......901234567.
         $text = "<p>short <b>text</b> already</p><p>with tags</p>";
         $this->assertEquals($text, shorten_text($text));
+    }
 
+    function test_shorten_text_no_tags_needs_shortening() {
+        // Default truncation is after 30 chars, but allowing 3 for the final '...'.
+        // ......12345678901234567890123456789023456789012345678901234.
         $text = "long text without any tags blah de blah blah blah what";
         $this->assertEquals('long text without any tags ...', shorten_text($text));
+    }
 
+    function test_shorten_text_with_tags_needs_shortening() {
+        // .......................................123456789012345678901234567890...
         $text = "<div class='frog'><p><blockquote>Long text with tags that will ".
             "be chopped off but <b>should be added back again</b></blockquote></p></div>";
         $this->assertEquals("<div class='frog'><p><blockquote>Long text with " .
             "tags that ...</blockquote></p></div>", shorten_text($text));
+    }
 
+    function test_shorten_text_with_entities() {
+        // Remember to allow 3 chars for the final '...'.
+        // ......123456789012345678901234567_____890...
         $text = "some text which shouldn't &nbsp; break there";
         $this->assertEquals("some text which shouldn't &nbsp; ...",
             shorten_text($text, 31));
-        $this->assertEquals("some text which shouldn't ...",
+        $this->assertEquals("some text which shouldn't &nbsp;...",
             shorten_text($text, 30));
+        $this->assertEquals("some text which shouldn't ...",
+            shorten_text($text, 29));
+    }
 
+    function test_shorten_text_known_tricky_case() {
         // This case caused a bug up to 1.9.5
+        // ..........123456789012345678901234567890123456789.....0_____1___2___...
         $text = "<h3>standard 'break-out' sub groups in TGs?</h3>&nbsp;&lt;&lt;There are several";
         $this->assertEquals("<h3>standard 'break-out' sub groups in ...</h3>",
+            shorten_text($text, 41));
+        $this->assertEquals("<h3>standard 'break-out' sub groups in TGs?...</h3>",
+            shorten_text($text, 42));
+        $this->assertEquals("<h3>standard 'break-out' sub groups in TGs?</h3>&nbsp;...",
             shorten_text($text, 43));
+    }
 
-        $text = "<h1>123456789</h1>";//a string with no convenient breaks
+    function test_shorten_text_no_spaces() {
+        // ..........123456789.
+        $text = "<h1>123456789</h1>"; // A string with no convenient breaks.
         $this->assertEquals("<h1>12345...</h1>",
             shorten_text($text, 8));
+    }
 
-        // ==== this must work with UTF-8 too! ======
-
-        // text without tags
+    function test_shorten_text_utf8_european() {
+        // Text without tags.
+        // ......123456789012345678901234567.
         $text = "Žluťoučký koníček přeskočil";
-        $this->assertEquals($text, shorten_text($text)); // 30 chars by default
+        $this->assertEquals($text, shorten_text($text)); // 30 chars by default.
         $this->assertEquals("Žluťoučký koníče...", shorten_text($text, 19, true));
         $this->assertEquals("Žluťoučký ...", shorten_text($text, 19, false));
-        // And try it with 2-less (that are, in bytes, the middle of a sequence)
+        // And try it with 2-less (that are, in bytes, the middle of a sequence).
         $this->assertEquals("Žluťoučký koní...", shorten_text($text, 17, true));
         $this->assertEquals("Žluťoučký ...", shorten_text($text, 17, false));
 
+        // .........123456789012345678...901234567....89012345.
         $text = "<p>Žluťoučký koníček <b>přeskočil</b> potůček</p>";
         $this->assertEquals($text, shorten_text($text, 60));
         $this->assertEquals("<p>Žluťoučký koníček ...</p>", shorten_text($text, 21));
         $this->assertEquals("<p>Žluťoučký koníče...</p>", shorten_text($text, 19, true));
         $this->assertEquals("<p>Žluťoučký ...</p>", shorten_text($text, 19, false));
-        // And try it with 2-less (that are, in bytes, the middle of a sequence)
+        // And try it with 2 fewer (that are, in bytes, the middle of a sequence).
         $this->assertEquals("<p>Žluťoučký koní...</p>", shorten_text($text, 17, true));
         $this->assertEquals("<p>Žluťoučký ...</p>", shorten_text($text, 17, false));
-        // And try over one tag (start/end), it does proper text len
+        // And try over one tag (start/end), it does proper text len.
         $this->assertEquals("<p>Žluťoučký koníček <b>př...</b></p>", shorten_text($text, 23, true));
         $this->assertEquals("<p>Žluťoučký koníček <b>přeskočil</b> pot...</p>", shorten_text($text, 34, true));
-        // And in the middle of one tag
+        // And in the middle of one tag.
         $this->assertEquals("<p>Žluťoučký koníček <b>přeskočil...</b></p>", shorten_text($text, 30, true));
+    }
 
+    function test_shorten_text_utf8_oriental() {
         // Japanese
+        // text without tags
+        // ......123456789012345678901234.
         $text = '言語設定言語設定abcdefghijkl';
         $this->assertEquals($text, shorten_text($text)); // 30 chars by default
         $this->assertEquals("言語設定言語...", shorten_text($text, 9, true));
@@ -1158,13 +1155,27 @@ class moodlelib_testcase extends advanced_testcase {
         $this->assertEquals("言語設定言語設定...", shorten_text($text, 13, false));
 
         // Chinese
+        // text without tags
+        // ......123456789012345678901234.
         $text = '简体中文简体中文abcdefghijkl';
         $this->assertEquals($text, shorten_text($text)); // 30 chars by default
         $this->assertEquals("简体中文简体...", shorten_text($text, 9, true));
         $this->assertEquals("简体中文简体...", shorten_text($text, 9, false));
         $this->assertEquals("简体中文简体中文ab...", shorten_text($text, 13, true));
         $this->assertEquals("简体中文简体中文...", shorten_text($text, 13, false));
+    }
 
+    function test_shorten_text_multilang() {
+        // This is not necessaryily specific to multilang. The issue is really
+        // tags with attributes, where before we were generating invalid HTML
+        // output like shorten_text('<span id="x" class="y">A</span> B', 1);
+        // returning '<span id="x" ...</span>'. It is just that multilang
+        // requires the sort of HTML that is quite likely to trigger this.
+        // ........................................1...
+        $text = '<span lang="en" class="multilang">A</span>' .
+                '<span lang="fr" class="multilang">B</span>';
+        $this->assertEquals('<span lang="en" class="multilang">...</span>',
+                shorten_text($text, 1));
     }
 
     function test_usergetdate() {
@@ -2138,8 +2149,6 @@ class moodlelib_testcase extends advanced_testcase {
             $this->assertTrue(true);
         }
 
-        $CFG->debug = DEBUG_MINIMAL; // Prevent standard debug warnings.
-
         $record = new stdClass();
         $record->id = 666;
         $record->username = 'xx';
@@ -2152,6 +2161,8 @@ class moodlelib_testcase extends advanced_testcase {
 
         $result = delete_user($admin);
         $this->assertFalse($result);
+
+        $this->resetDebugging();
     }
 
     /**

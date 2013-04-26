@@ -64,7 +64,7 @@ YUI.add('moodle-course-toolboxes', function(Y) {
             var toggle_class;
             if (this.is_label(element)) {
                 toggle_class = CSS.DIMMEDTEXT;
-                dimarea = element.one(CSS.MODINDENTDIV + ' div');
+                dimarea = element.all(CSS.MODINDENTDIV + ' > div').item(1);
             } else {
                 toggle_class = CSS.DIMCLASS;
                 dimarea = element.one('a');
@@ -478,6 +478,7 @@ YUI.add('moodle-course-toolboxes', function(Y) {
         edit_resource_title : function(e) {
             // Get the element we're working on
             var element = e.target.ancestor(CSS.ACTIVITYLI);
+            var elementdiv = element.one('div');
             var instancename  = element.one(CSS.INSTANCENAME);
             var currenttitle = instancename.get('firstChild');
             var oldtitle = currenttitle.get('data');
@@ -513,20 +514,20 @@ YUI.add('moodle-course-toolboxes', function(Y) {
                 })
                 .addClass('titleeditor');
             var editform = Y.Node.create('<form />')
-                .setStyle('padding', '0')
-                .setStyle('display', 'inline')
+                .addClass('activityinstance')
                 .setAttribute('action', '#');
-
             var editinstructions = Y.Node.create('<span />')
                 .addClass('editinstructions')
                 .setAttrs({'id' : 'id_editinstructions'})
                 .set('innerHTML', M.util.get_string('edittitleinstructions', 'moodle'));
+            var activityicon = element.one('img.activityicon').cloneNode();
 
             // Clear the existing content and put the editor in
             currenttitle.set('data', '');
+            editform.appendChild(activityicon);
             editform.appendChild(editor);
             anchor.replace(editform);
-            element.appendChild(editinstructions);
+            elementdiv.appendChild(editinstructions);
             e.preventDefault();
 
             // Focus and select the editor text

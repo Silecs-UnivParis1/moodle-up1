@@ -43,6 +43,7 @@ $string['activitysince'] = 'Activity since {$a}';
 $string['activityweighted'] = 'Activity per user';
 $string['add'] = 'Add';
 $string['addactivity'] = 'Add an activity...';
+$string['addactivitytosection'] = 'Add an activity to section \'{$a}\'';
 $string['addadmin'] = 'Add admin';
 $string['addblock'] = 'Add a block';
 $string['addcomment'] = 'Add a comment...';
@@ -67,6 +68,7 @@ $string['addnousersrecip'] = 'Add users who haven\'t accessed this {$a} to recip
 $string['addpagehere'] = 'Add page here';
 $string['addresource'] = 'Add a resource...';
 $string['addresourceoractivity'] = 'Add an activity or resource';
+$string['addresourcetosection'] = 'Add a resource to section \'{$a}\'';
 $string['address'] = 'Address';
 $string['addstudent'] = 'Add student';
 $string['addsubcategory'] = 'Add a sub-category';
@@ -295,7 +297,7 @@ $string['coursecompletions'] = 'Course completions';
 $string['coursecreators'] = 'Course creator';
 $string['coursecreatorsdescription'] = 'Course creators can create new courses.';
 $string['coursedisplay'] = 'Course layout';
-$string['coursedisplay_help'] = 'This setting determines whether the whole course is displayed on one page or split over several pages. The setting has no affect on certain course formats, such as SCORM format.';
+$string['coursedisplay_help'] = 'This setting determines whether the whole course is displayed on one page or split over several pages.';
 $string['coursedisplay_single'] = 'Show all sections on one page';
 $string['coursedisplay_multi'] = 'Show one section per page';
 $string['coursedeleted'] = 'Deleted course {$a}';
@@ -306,6 +308,8 @@ $string['coursefileswarning'] = 'Course files are deprecated';
 $string['coursefileswarning_help'] = 'Course files are deprecated since Moodle 2.0, please use external repositories instead as much as possible.';
 $string['courseformatdata'] = 'Course format data';
 $string['courseformats'] = 'Course formats';
+$string['courseformatoptions'] = 'Formatting options for {$a}';
+$string['courseformatudpate'] = 'Update format';
 $string['coursegrades'] = 'Course grades';
 $string['coursehelpcategory'] = 'Position the course on the course listing and may make it easier for students to find it.';
 $string['coursehelpforce'] = 'Force the course group mode to every activity in the course.';
@@ -388,6 +392,7 @@ $string['creatinguserroles'] = 'Creating user level role assignments and overrid
 $string['creatingusers'] = 'Creating users';
 $string['creatingxmlfile'] = 'Creating XML file';
 $string['currency'] = 'Currency';
+$string['currentcourse'] = 'Current course';
 $string['currentcourseadding'] = 'Current course, adding data to it';
 $string['currentcoursedeleting'] = 'Current course, deleting it first';
 $string['currentlanguage'] = 'Current language';
@@ -661,26 +666,6 @@ $string['existingcreators'] = 'Existing course creators';
 $string['existingstudents'] = 'Enrolled students';
 $string['existingteachers'] = 'Existing teachers';
 $string['expandall'] = 'Expand all';
-$string['expirynotify'] = 'Enrolment expiry notification';
-$string['expirynotifyemail'] = 'The following students in this course are expiring after exactly {$a->threshold} days:
-
-{$a->current}
-
-The following students in this course are expiring in less than {$a->threshold} days:
-
-{$a->past}
-
-You may go to the following page to extend their enrolment period:
-{$a->extendurl}';
-$string['expirynotifystudents'] = 'Notify students';
-$string['expirynotifystudents_help'] = 'If an enrolment duration has been specified, then this setting determines whether students receive email notification when they are about to be unenrolled from the course.';
-$string['expirynotifystudentsemail'] = 'Dear {$a->studentstr}:
-
-This is a notification that your enrolment in the course {$a->course} will expire in {$a->threshold} days.
-
-Please contact {$a->teacherstr} for any further enquiries.';
-$string['expirythreshold'] = 'Threshold';
-$string['expirythreshold_help'] = 'If an enrolment duration has been specified, then this setting determines the number of days notice given before students are unenrolled from the course.';
 $string['explanation'] = 'Explanation';
 $string['extendenrol'] = 'Extend enrolment (individual)';
 $string['extendperiod'] = 'Extended period';
@@ -1007,6 +992,8 @@ $string['markedthistopic'] = 'This topic is highlighted as the current topic';
 $string['markthistopic'] = 'Highlight this topic as the current topic';
 $string['matchingsearchandrole'] = 'Matching \'{$a->search}\' and {$a->role}';
 $string['maxsizeandattachments'] = 'Maximum size for new files: {$a->size}, maximum attachments: {$a->attachments}';
+$string['maxsizeandattachmentsandareasize'] = 'Maximum size for new files: {$a->size}, maximum attachments: {$a->attachments}, overall limit: {$a->areasize}';
+$string['maxsizeandareasize'] = 'Maximum size for new files: {$a->size}, overall limit: {$a->areasize}';
 $string['maxfilesreached'] = 'You are allowed to attach a maximum of {$a} file(s) to this item';
 $string['maximumgrade'] = 'Maximum grade';
 $string['maximumgradex'] = 'Maximum grade: {$a}';
@@ -1470,10 +1457,6 @@ $string['scalestandard_help'] = 'A standard scale is available site-wide, for al
 $string['scalestandard_link'] = 'grade/scale';
 $string['scalestip'] = 'To create custom scales, use the \'Scales...\' link in your course administration menu.';
 $string['scalestip2'] = 'To create custom scales, click the Grades link in the course administration menu, then choose Edit, Scales.';
-$string['screenreaderno'] = 'No';
-$string['screenreaderuse'] = 'Screen reader';
-$string['screenreaderyes'] = 'Yes';
-$string['screenreaderuse_help'] = 'If set to yes, a more accessible interface is provided in various places such as chat.';
 $string['screenshot'] = 'Screenshot';
 $string['search'] = 'Search'; // TODO MDL-34652 rename to searchforums and move to mod_forum
 $string['search_help'] = 'For basic searching of one or more words anywhere in the text, just type them separated by spaces. All words longer than two characters are used.
@@ -1814,6 +1797,7 @@ $string['warning'] = 'Warning';
 $string['warningdeleteresource'] = 'Warning: {$a} is referred in a resource. Would you like to update the resource?';
 $string['webpage'] = 'Web page';
 $string['week'] = 'Week';
+$string['weeks'] = 'weeks';
 $string['weekhide'] = 'Hide this week from {$a}';
 $string['weeklyoutline'] = 'Weekly outline';
 $string['weekshow'] = 'Show this week to {$a}';
@@ -1827,6 +1811,7 @@ $string['whattocallzip'] = 'What do you want to call the zip file?';
 $string['whattodo'] = 'What to do';
 $string['windowclosing'] = 'This window should close automatically. If not, please close it now.';
 $string['withchosenfiles'] = 'With chosen files';
+$string['withdisablednote'] = '{$a} (disabled)';
 $string['withoutuserdata'] = 'without user data';
 $string['withselectedusers'] = 'With selected users...';
 $string['withselectedusers_help'] = '* Send message - For sending a message to one or more participants

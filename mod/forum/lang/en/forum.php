@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityoverview'] = 'There are new forum posts';
 $string['addanewdiscussion'] = 'Add a new discussion topic';
 $string['addanewquestion'] = 'Add a new question';
 $string['addanewtopic'] = 'Add a new topic';
@@ -179,7 +180,6 @@ $string['forums'] = 'Forums';
 $string['forum:splitdiscussions'] = 'Split discussions';
 $string['forum:startdiscussion'] = 'Start new discussions';
 $string['forumsubjecthidden'] = 'Subject (hidden)';
-$string['forum:throttlingapplies'] = 'Throttling applies';
 $string['forumtracked'] = 'Unread posts are being tracked';
 $string['forumtrackednot'] = 'Unread posts are not being tracked';
 $string['forumtype'] = 'Forum type';

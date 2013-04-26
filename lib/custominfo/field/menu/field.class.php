@@ -83,7 +83,7 @@ class profile_field_menu extends custominfo_field_base {
         if (!$mform->elementExists($this->inputname)) {
             return;
         }
-        if ($this->is_locked() and !has_capability($this->capability, get_context_instance(CONTEXT_SYSTEM))) {
+        if ($this->is_locked() and !has_capability($this->capability, context_system::instance())) {
             $mform->hardFreeze($this->inputname);
             $mform->setConstant($this->inputname, $this->datakey);
         }

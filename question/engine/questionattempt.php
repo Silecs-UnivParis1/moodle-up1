@@ -49,7 +49,7 @@ class question_attempt {
     const USE_RAW_DATA = 'use raw data';
 
     /**
-     * @var string special value used by manual grading because {@link PARAM_NUMBER}
+     * @var string special value used by manual grading because {@link PARAM_FLOAT}
      * converts '' to 0.
      */
     const PARAM_MARK = 'parammark';

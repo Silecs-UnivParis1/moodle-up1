@@ -38,11 +38,13 @@ $lesson = new lesson($DB->get_record('lesson', array('id' => $cm->instance), '*'
 
 require_login($course, false, $cm);
 
-$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+$context = context_module::instance($cm->id);
 require_capability('mod/lesson:manage', $context);
 
 $ufields = user_picture::fields('u'); // These fields are enough
 $params = array("lessonid" => $lesson->id);
+list($sort, $sortparams) = users_order_by_sql('u');
+$params = array_merge($params, $sortparams);
 // TODO: Improve this. Fetching all students always is crazy!
 if (!empty($cm->groupingid)) {
     $params["groupingid"] = $cm->groupingid;
@@ -53,14 +55,14 @@ if (!empty($cm->groupingid)) {
                     INNER JOIN {groupings_groups} gg ON gm.groupid = gg.groupid
                 WHERE a.lessonid = :lessonid AND
                       gg.groupingid = :groupingid
-                ORDER BY u.lastname";
+                ORDER BY $sort";
 } else {
     $sql = "SELECT DISTINCT $ufields
             FROM {user} u,
                  {lesson_attempts} a
             WHERE a.lessonid = :lessonid and
                   u.id = a.userid
-            ORDER BY u.lastname";
+            ORDER BY $sort";
 }
 
 if (! $students = $DB->get_records_sql($sql, $params)) {
@@ -95,7 +97,7 @@ if (! $times = $DB->get_records('lesson_timer', array('lessonid' => $lesson->id)
 }
 
 if ($nothingtodisplay) {
-    echo $lessonoutput->header($lesson, $cm, $action);
+    echo $lessonoutput->header($lesson, $cm, $action, false, null, get_string('nolessonattempts', 'lesson'));
     echo $OUTPUT->notification(get_string('nolessonattempts', 'lesson'));
     echo $OUTPUT->footer();
     exit();
@@ -161,9 +163,9 @@ if ($action === 'delete') {
     /**************************************************************************
     this action is for default view and overview view
     **************************************************************************/
-    echo $lessonoutput->header($lesson, $cm, $action);
+    echo $lessonoutput->header($lesson, $cm, $action, false, null, get_string('overview', 'lesson'));
 
-    $course_context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $course_context = context_course::instance($course->id);
     if (has_capability('gradereport/grader:view', $course_context) && has_capability('moodle/grade:viewall', $course_context)) {
         $seeallgradeslink = new moodle_url('/grade/report/grader/index.php', array('id'=>$course->id));
         $seeallgradeslink = html_writer::link($seeallgradeslink, get_string('seeallcoursegrades', 'grades'));
@@ -387,9 +389,9 @@ if ($action === 'delete') {
     4.  Print out the object which contains all the try info
 
 **************************************************************************/
-    echo $lessonoutput->header($lesson, $cm, $action);
+    echo $lessonoutput->header($lesson, $cm, $action, false, null, get_string('detailedstats', 'lesson'));
 
-    $course_context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $course_context = context_course::instance($course->id);
     if (has_capability('gradereport/grader:view', $course_context) && has_capability('moodle/grade:viewall', $course_context)) {
         $seeallgradeslink = new moodle_url('/grade/report/grader/index.php', array('id'=>$course->id));
         $seeallgradeslink = html_writer::link($seeallgradeslink, get_string('seeallcoursegrades', 'grades'));
@@ -451,7 +453,7 @@ if ($action === 'delete') {
         $page = $lessonpages[$pageid];
         $answerpage = new stdClass;
         $data ='';
-        
+
         $answerdata = new stdClass;
         // Set some defaults for the answer data.
         $answerdata->score = NULL;
@@ -472,7 +474,7 @@ if ($action === 'delete') {
         if (empty($userid)) {
             // there is no userid, so set these vars and display stats.
             $answerpage->grayout = 0;
-            $useranswer = NULL;    
+            $useranswer = NULL;
         } elseif ($useranswers = $DB->get_records("lesson_attempts",array("lessonid"=>$lesson->id, "userid"=>$userid, "retry"=>$try,"pageid"=>$page->id), "timeseen")) {
             // get the user's answer for this page
             // need to find the right one

@@ -46,9 +46,9 @@ $user = $DB->get_record('user', array('id'=>$id), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id'=>$courseid), '*', MUST_EXIST);
 $currentuser = ($user->id == $USER->id);
 
-$systemcontext = get_context_instance(CONTEXT_SYSTEM);
-$coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
-$usercontext   = get_context_instance(CONTEXT_USER, $user->id, IGNORE_MISSING);
+$systemcontext = context_system::instance();
+$coursecontext = context_course::instance($course->id);
+$usercontext   = context_user::instance($user->id, IGNORE_MISSING);
 
 // Require login first
 if (isguestuser($user)) {

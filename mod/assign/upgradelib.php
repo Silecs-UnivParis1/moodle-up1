@@ -89,7 +89,16 @@ class assign_upgrade_manager {
         $data->allowsubmissionsfromdate = $oldassignment->timeavailable;
         $data->grade = $oldassignment->grade;
         $data->submissiondrafts = $oldassignment->resubmit;
-        $data->preventlatesubmissions = $oldassignment->preventlate;
+        $data->requiresubmissionstatement = 0;
+        $data->cutoffdate = 0;
+        // New way to specify no late submissions.
+        if ($oldassignment->preventlate) {
+            $data->cutoffdate = $data->duedate;
+        }
+        $data->teamsubmission = 0;
+        $data->requireallteammemberssubmit = 0;
+        $data->teamsubmissiongroupingid = 0;
+        $data->blindmarking = 0;
 
         $newassignment = new assign(null, null, null);
 
@@ -157,6 +166,10 @@ class assign_upgrade_manager {
             }
 
             // Upgrade availability data.
+            $DB->set_field('course_modules_avail_fields',
+                           'coursemoduleid',
+                           $newcoursemodule->id,
+                           array('coursemoduleid'=>$oldcoursemodule->id));
             $DB->set_field('course_modules_availability',
                            'coursemoduleid',
                            $newcoursemodule->id,
@@ -350,12 +363,7 @@ class assign_upgrade_manager {
             return false;
         }
 
-        $mod = new stdClass();
-        $mod->course = $newcm->course;
-        $mod->section = $section->section;
-        $mod->coursemodule = $newcm->id;
-        $mod->id = $newcm->id;
-        $newcm->section = add_mod_to_section($mod, $cm);
+        $newcm->section = course_add_cm_to_section($newcm->course, $newcm->id, $section->section);
 
         // make sure visibility is set correctly (in particular in calendar)
         // note: allow them to set it even without moodle/course:activityvisibility

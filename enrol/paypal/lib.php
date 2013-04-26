@@ -80,7 +80,7 @@ class enrol_paypal_plugin extends enrol_plugin {
              throw new coding_exception('Invalid enrol instance type!');
         }
 
-        $context = get_context_instance(CONTEXT_COURSE, $instance->courseid);
+        $context = context_course::instance($instance->courseid);
         if (has_capability('enrol/paypal:config', $context)) {
             $managelink = new moodle_url('/enrol/paypal/edit.php', array('courseid'=>$instance->courseid, 'id'=>$instance->id));
             $instancesnode->add($this->get_instance_name($instance), $managelink, navigation_node::TYPE_SETTING);
@@ -98,13 +98,14 @@ class enrol_paypal_plugin extends enrol_plugin {
         if ($instance->enrol !== 'paypal') {
             throw new coding_exception('invalid enrol instance!');
         }
-        $context = get_context_instance(CONTEXT_COURSE, $instance->courseid);
+        $context = context_course::instance($instance->courseid);
 
         $icons = array();
 
         if (has_capability('enrol/paypal:config', $context)) {
             $editlink = new moodle_url("/enrol/paypal/edit.php", array('courseid'=>$instance->courseid, 'id'=>$instance->id));
-            $icons[] = $OUTPUT->action_icon($editlink, new pix_icon('i/edit', get_string('edit'), 'core', array('class'=>'icon')));
+            $icons[] = $OUTPUT->action_icon($editlink, new pix_icon('t/edit', get_string('edit'), 'core',
+                    array('class' => 'smallicon')));
         }
 
         return $icons;
@@ -116,7 +117,7 @@ class enrol_paypal_plugin extends enrol_plugin {
      * @return moodle_url page url
      */
     public function get_newinstance_link($courseid) {
-        $context = get_context_instance(CONTEXT_COURSE, $courseid, MUST_EXIST);
+        $context = context_course::instance($courseid, MUST_EXIST);
 
         if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/paypal:config', $context)) {
             return NULL;
@@ -151,7 +152,7 @@ class enrol_paypal_plugin extends enrol_plugin {
         }
 
         $course = $DB->get_record('course', array('id'=>$instance->courseid));
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+        $context = context_course::instance($course->id);
 
         $shortname = format_string($course->shortname, true, array('context' => $context));
         $strloginto = get_string("loginto", "", $shortname);

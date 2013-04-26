@@ -97,12 +97,12 @@ function report_log_print_mnet_selector_form($hostid, $course, $selecteduser=0, 
         $showcourses = 1;
     }
 
-    $sitecontext = get_context_instance(CONTEXT_SYSTEM);
+    $sitecontext = context_system::instance();
 
     // Context for remote data is always SITE
     // Groups for remote data are always OFF
     if ($hostid == $CFG->mnet_localhost_id) {
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+        $context = context_course::instance($course->id);
 
         /// Setup for group handling.
         if ($course->groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
@@ -143,7 +143,7 @@ function report_log_print_mnet_selector_form($hostid, $course, $selecteduser=0, 
 
     // If looking at a different host, we're interested in all our site users
     if ($hostid == $CFG->mnet_localhost_id && $course->id != SITEID) {
-        $courseusers = get_enrolled_users($context, '', $selectedgroup, 'u.id, u.firstname, u.lastname, u.idnumber', 'lastname ASC, firstname ASC', $limitfrom, $limitnum);
+        $courseusers = get_enrolled_users($context, '', $selectedgroup, 'u.id, u.firstname, u.lastname, u.idnumber', null, $limitfrom, $limitnum);
     } else {
         // this may be a lot of users :-(
         $courseusers = $DB->get_records('user', array('deleted'=>0), 'lastaccess DESC', 'id, firstname, lastname, idnumber', $limitfrom, $limitnum);
@@ -226,13 +226,12 @@ function report_log_print_mnet_selector_form($hostid, $course, $selecteduser=0, 
 /// Casting $course->modinfo to string prevents one notice when the field is null
     if ($modinfo = unserialize((string)$course->modinfo)) {
         $section = 0;
-        $sections = get_all_sections($course->id);
         foreach ($modinfo as $mod) {
             if ($mod->mod == "label") {
                 continue;
             }
             if ($mod->section > 0 and $section <> $mod->section) {
-                $activities["section/$mod->section"] = '--- '.get_section_name($course, $sections[$mod->section]).' ---';
+                $activities["section/$mod->section"] = '--- '.get_section_name($course, $mod->section).' ---';
             }
             $section = $mod->section;
             $mod->name = strip_tags(format_string($mod->name, true));
@@ -409,8 +408,8 @@ function report_log_print_selector_form($course, $selecteduser=0, $selecteddate=
         $showcourses = 1;
     }
 
-    $sitecontext = get_context_instance(CONTEXT_SYSTEM);
-    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $sitecontext = context_system::instance();
+    $context = context_course::instance($course->id);
 
     /// Setup for group handling.
     if ($course->groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
@@ -445,7 +444,7 @@ function report_log_print_selector_form($course, $selecteduser=0, $selecteddate=
     $limitfrom = empty($showusers) ? 0 : '';
     $limitnum  = empty($showusers) ? COURSE_MAX_USERS_PER_DROPDOWN + 1 : '';
 
-    $courseusers = get_enrolled_users($context, '', $selectedgroup, 'u.id, u.firstname, u.lastname', 'lastname ASC, firstname ASC', $limitfrom, $limitnum);
+    $courseusers = get_enrolled_users($context, '', $selectedgroup, 'u.id, u.firstname, u.lastname', null, $limitfrom, $limitnum);
 
     if (count($courseusers) < COURSE_MAX_USERS_PER_DROPDOWN && !$showusers) {
         $showusers = 1;
@@ -479,13 +478,12 @@ function report_log_print_selector_form($course, $selecteduser=0, $selecteddate=
 /// Casting $course->modinfo to string prevents one notice when the field is null
     if ($modinfo = unserialize((string)$course->modinfo)) {
         $section = 0;
-        $sections = get_all_sections($course->id);
         foreach ($modinfo as $mod) {
             if ($mod->mod == "label") {
                 continue;
             }
             if ($mod->section > 0 and $section <> $mod->section) {
-                $activities["section/$mod->section"] = '--- '.get_section_name($course, $sections[$mod->section]).' ---';
+                $activities["section/$mod->section"] = '--- '.get_section_name($course, $mod->section).' ---';
             }
             $section = $mod->section;
             $mod->name = strip_tags(format_string($mod->name, true));

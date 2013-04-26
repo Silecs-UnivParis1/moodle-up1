@@ -105,34 +105,34 @@ $THEME->layouts = array(
     'popup' => array(
         'file' => 'embedded.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true, 'noblocks'=>true, 'nonavbar'=>true),
+        'options' => array('nofooter'=>true, 'noblocks'=>true, 'nonavbar'=>true, 'nocourseheaderfooter'=>true),
     ),
     'frametop' => array(
         'file' => 'general.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true),
+        'options' => array('nofooter'=>true, 'nocoursefooter'=>true),
     ),
     'maintenance' => array(
         'file' => 'general.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true, 'nonavbar'=>true),
+        'options' => array('nofooter'=>true, 'nonavbar'=>true, 'nocourseheaderfooter'=>true),
     ),
     'embedded' => array(
         'file' => 'embedded.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true, 'nonavbar'=>true),
+        'options' => array('nofooter'=>true, 'nonavbar'=>true, 'nocourseheaderfooter'=>true),
     ),
     // Should display the content and basic headers only.
     'print' => array(
         'file' => 'general.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true, 'nonavbar'=>false, 'noblocks'=>true),
+        'options' => array('nofooter'=>true, 'nonavbar'=>false, 'noblocks'=>true, 'nocourseheaderfooter'=>true),
     ),
      // The pagelayout used when a redirection is occuring.
     'redirect' => array(
         'file' => 'embedded.php',
         'regions' => array(),
-        'options' => array('nofooter'=>true, 'nonavbar'=>true, 'nocustommenu'=>true),
+        'options' => array('nofooter'=>true, 'nonavbar'=>true, 'nocustommenu'=>true, 'nocourseheaderfooter'=>true),
     ),
      // The pagelayout used for reports
     'report' => array(
@@ -158,7 +158,7 @@ if ($thisdevice == "default" || $thisdevice == "tablet" || optional_param('mymob
 $THEME->javascripts = array(
     'jquery-1.7.1.min',
     'custom',
-    'jquery.mobile-1.1.0'
+    'jquery.mobile-1.1.1'
 );
 
 // Sets a custom render factory to use with the theme, used when working with custom renderers.

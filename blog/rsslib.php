@@ -119,7 +119,7 @@ function blog_rss_add_http_header($context, $title, $filtertype, $filterselect=0
 function blog_rss_get_params($filters) {
     $thingid = $rsscontext = $filtertype = null;
 
-    $sitecontext = get_context_instance(CONTEXT_SYSTEM);
+    $sitecontext = context_system::instance();
 
     if (!$filters) {
         $thingid = SITEID;
@@ -128,14 +128,14 @@ function blog_rss_get_params($filters) {
     } else if (array_key_exists('course', $filters)) {
         $thingid = $filters['course'];
 
-        $coursecontext = get_context_instance(CONTEXT_COURSE, $thingid);
+        $coursecontext = context_course::instance($thingid);
         $rsscontext = $coursecontext;
 
         $filtertype = 'course';
     } else if (array_key_exists('user', $filters)) {
         $thingid = $filters['user'];
 
-        $usercontext = get_context_instance(CONTEXT_USER, $thingid);
+        $usercontext = context_user::instance($thingid);
         $rsscontext = $usercontext;
 
         $filtertype = 'user';
@@ -158,7 +158,7 @@ function blog_rss_get_params($filters) {
 function blog_rss_get_feed($context, $args) {
     global $CFG, $SITE, $DB;
 
-    if (empty($CFG->bloglevel)) {
+    if (empty($CFG->enableblogs)) {
         debugging('Blogging disabled on this site, RSS feeds are not available');
         return null;
     }
@@ -175,7 +175,7 @@ function blog_rss_get_feed($context, $args) {
         }
     }
 
-    $sitecontext = get_context_instance(CONTEXT_SYSTEM);
+    $sitecontext = context_system::instance();
     if (!has_capability('moodle/blog:view', $sitecontext)) {
         return null;
     }
@@ -254,10 +254,10 @@ function blog_rss_get_feed($context, $args) {
             break;
         case 'course':
             $info = $DB->get_field('course', 'fullname', array('id'=>$id));
-            $info = format_string($info, true, array('context' => get_context_instance(CONTEXT_COURSE, $id)));
+            $info = format_string($info, true, array('context' => context_course::instance($id)));
             break;
         case 'site':
-            $info = format_string($SITE->fullname, true, array('context' => get_context_instance(CONTEXT_COURSE, SITEID)));
+            $info = format_string($SITE->fullname, true, array('context' => context_course::instance(SITEID)));
             break;
         case 'group':
             $group = groups_get_group($id);

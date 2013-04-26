@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(__FILE__)) . '/config.php');
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/formslib.php');
 
@@ -504,7 +504,7 @@ abstract class repository {
         if (is_object($context)) {
             $this->context = $context;
         } else {
-            $this->context = get_context_instance_by_id($context);
+            $this->context = context::instance_by_id($context);
         }
         $this->instance = $DB->get_record('repository_instances', array('id'=>$this->id));
         $this->readonly = $readonly;
@@ -707,7 +707,7 @@ abstract class repository {
     public static function draftfile_exists($itemid, $filepath, $filename) {
         global $USER;
         $fs = get_file_storage();
-        $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
+        $usercontext = context_user::instance($USER->id);
         if ($fs->get_file($usercontext->id, 'user', 'draft', $itemid, $filepath, $filename)) {
             return true;
         } else {
@@ -766,9 +766,11 @@ abstract class repository {
      *      attributes of the new file
      * @param int $maxbytes maximum allowed size of file, -1 if unlimited. If size of file exceeds
      *      the limit, the file_exception is thrown.
+     * @param int $areamaxbytes the maximum size of the area. A file_exception is thrown if the
+     *      new file will reach the limit.
      * @return array The information about the created file
      */
-    public function copy_to_area($source, $filerecord, $maxbytes = -1) {
+    public function copy_to_area($source, $filerecord, $maxbytes = -1, $areamaxbytes = FILE_AREA_MAX_BYTES_UNLIMITED) {
         global $USER;
         $fs = get_file_storage();
 
@@ -791,6 +793,10 @@ abstract class repository {
         $stored_file = self::get_moodle_file($source);
         if ($maxbytes != -1 && $stored_file->get_filesize() > $maxbytes) {
             throw new file_exception('maxbytes');
+        }
+        // Validate the size of the draft area.
+        if (file_is_draft_area_limit_reached($draftitemid, $areamaxbytes, $stored_file->get_filesize())) {
+            throw new file_exception('maxareabytes');
         }
 
         if (repository::draftfile_exists($draftitemid, $new_filepath, $new_filename)) {
@@ -1135,11 +1141,17 @@ abstract class repository {
             return;
         }
 
-        // do NOT mess with permissions here, the calling party is responsible for making
-        // sure the scanner engine can access the files!
-
+        $clamparam = ' --stdout ';
+        // If we are dealing with clamdscan, clamd is likely run as a different user
+        // that might not have permissions to access your file.
+        // To make clamdscan work, we use --fdpass parameter that passes the file
+        // descriptor permissions to clamd, which allows it to scan given file
+        // irrespective of directory and file permissions.
+        if (basename($CFG->pathtoclam) == 'clamdscan') {
+            $clamparam .= '--fdpass ';
+        }
         // execute test
-        $cmd = escapeshellcmd($CFG->pathtoclam).' --stdout '.escapeshellarg($thefile);
+        $cmd = escapeshellcmd($CFG->pathtoclam).$clamparam.escapeshellarg($thefile);
         exec($cmd, $output, $return);
 
         if ($return == 0) {
@@ -1239,7 +1251,7 @@ abstract class repository {
             $fileinfo = null;
             $params = file_storage::unpack_reference($reference, true);
             if (is_array($params)) {
-                $context = get_context_instance_by_id($params['contextid']);
+                $context = context::instance_by_id($params['contextid'], IGNORE_MISSING);
                 if ($context) {
                     $browser = get_file_browser();
                     $fileinfo = $browser->get_file_info($context, $params['component'], $params['filearea'], $params['itemid'], $params['filepath'], $params['filename']);
@@ -1785,7 +1797,7 @@ abstract class repository {
         $filepath   = clean_param($params['filepath'], PARAM_PATH);
         $filearea   = clean_param($params['filearea'], PARAM_AREA);
         $component  = clean_param($params['component'], PARAM_COMPONENT);
-        $context    = get_context_instance_by_id($contextid);
+        $context    = context::instance_by_id($contextid);
         $file_info  = $browser->get_file_info($context, $component, $filearea, $fileitemid, $filepath, $filename);
         if (!empty($file_info)) {
             $filesize = $file_info->get_filesize();
@@ -2401,7 +2413,7 @@ abstract class repository {
     public static function overwrite_existing_draftfile($itemid, $filepath, $filename, $newfilepath, $newfilename) {
         global $USER;
         $fs = get_file_storage();
-        $user_context = get_context_instance(CONTEXT_USER, $USER->id);
+        $user_context = context_user::instance($USER->id);
         if ($file = $fs->get_file($user_context->id, 'user', 'draft', $itemid, $filepath, $filename)) {
             if ($tempfile = $fs->get_file($user_context->id, 'user', 'draft', $itemid, $newfilepath, $newfilename)) {
                 // delete existing file to release filename
@@ -2427,7 +2439,7 @@ abstract class repository {
     public static function delete_tempfile_from_draft($draftitemid, $filepath, $filename) {
         global $USER;
         $fs = get_file_storage();
-        $user_context = get_context_instance(CONTEXT_USER, $USER->id);
+        $user_context = context_user::instance($USER->id);
         if ($file = $fs->get_file($user_context->id, 'user', 'draft', $draftitemid, $filepath, $filename)) {
             $file->delete();
             return true;
@@ -2605,7 +2617,7 @@ final class repository_instance_form extends moodleform {
         $mform->addElement('hidden', 'edit',  ($this->instance) ? $this->instance->id : 0);
         $mform->setType('edit', PARAM_INT);
         $mform->addElement('hidden', 'new',   $this->plugin);
-        $mform->setType('new', PARAM_FORMAT);
+        $mform->setType('new', PARAM_ALPHANUMEXT);
         $mform->addElement('hidden', 'plugin', $this->plugin);
         $mform->setType('plugin', PARAM_PLUGIN);
         $mform->addElement('hidden', 'typeid', $this->typeid);
@@ -2852,13 +2864,13 @@ function initialise_filepicker($args) {
         $disable_types = $args->disable_types;
     }
 
-    $user_context = get_context_instance(CONTEXT_USER, $USER->id);
+    $user_context = context_user::instance($USER->id);
 
     list($context, $course, $cm) = get_context_info_array($context->id);
     $contexts = array($user_context, get_system_context());
     if (!empty($course)) {
         // adding course context
-        $contexts[] = get_context_instance(CONTEXT_COURSE, $course->id);
+        $contexts[] = context_course::instance($course->id);
     }
     $externallink = (int)get_config(null, 'repositoryallowexternallinks');
     $repositories = repository::get_instances(array(
