@@ -13,11 +13,24 @@ require_once($CFG->dirroot.'/course/lib.php');
 
 
 class courselist_common{
+
+    public static function get_courses_from_pseudopath($pseudopath) {
+
+        if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
+            $cat = (int) $matches[1];
+            $crs = courselist_cattools::get_descendant_courses($cat);
+            $courses = array_combine($crs, $crs); //
+        } else { // at least one ROF item (component)
+            $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
+            $courses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
+        }
+        return $courses;
+    }
+
     public static function html_course_table($pseudopath) {
         global $DB;
-        $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
-        $courses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
 
+        $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         $res = '<table class="generaltable" style="width: 100%;">' . "\n" ;
         $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
             . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
@@ -30,9 +43,7 @@ class courselist_common{
     }
 
     public static function html_course_list($pseudopath) {
-        $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
-        $courses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
-
+        $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         $res = "<ul>\n" ;
         foreach (courselist_roftools::sort_courses($courses) as $crsid) {
             $rofpathid = $courses[$crsid];
