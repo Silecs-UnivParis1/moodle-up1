@@ -7,6 +7,9 @@
  */
 
 require_once($CFG->dirroot . "/course/lib.php");
+// for listpages...
+require_once($CFG->dirroot . "/lib/resourcelib.php");
+require_once($CFG->dirroot . "/mod/page/lib.php");
 
 // Classes d'équivalence des diplômes pour les catégories
 function equivalent_diplomas() {
@@ -115,3 +118,85 @@ function type_simplifie($typedip, $idxEqv) {
         return 'Autres';
     }
 }
+
+
+
+
+function listpages_templates() {
+    $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
+    $tpl['intro'] = '<p>L\'espace que vous cherchez n\'est pas listé sur cette page ? ' .
+        'Avez-vous pensé à le trouver du côté des ' .
+        '“<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?</p>';
+
+    $tpl['contenttab'] = '<div class="tabtree">'
+        . '<ul class="tabrow0">'
+        . '<li class="first onerow here selected"><a class="nolink"><span>{vue}</span></a>'
+        . '<div class="tabrow1 empty"></div>'
+        . '</li>'
+        . '<li>{sisterpagelink}</li>'
+        . '</ul>'
+        . '</div>';
+    $tpl['contentmain'] = '<h3>Espaces de cours de {niveaulmda}</h3>'
+        . '<p>[courselist format={format} node={node}]</p>'
+        . '<p> </p>';
+    $tpl['contentfoot'] = ''
+        . '<p><span style="font-size: x-small;">Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours. Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel, approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.</span></p>'
+        . '<p><span style="font-size: small;"><span style="font-size: x-small;">Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l\'Université Paris 1 Panthéon-Sorbonne, sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l\'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.</span><a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a></span></p>';
+    return $tpl;
+
+}
+
+function listpages_create() {
+    global $DB;
+
+    $rootcat = $DB->get_field('course_categories', 'id', array('idnumber' => '2:UP1', 'depth' => 2), MUST_EXIST);
+
+    $itercategories = $DB->get_records('course_categories', array('visible' => 1, 'parent' => $rootcat));
+    foreach ($itercategories as $category) {
+        echo "Creating page for " . $category->name . "\n";
+        $created = listpages_create_for($category);
+    }
+}
+
+function listpages_create_for($category) {
+    global $DB;
+
+    $vues = array(
+        'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
+        'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
+    );
+
+    $template = listpages_templates();
+    $catniveaux = $DB->get_records('course_categories', array('parent' => $category->id));
+
+    foreach ($vues as $vue) {
+        echo "    " . $vue['name'] . "\n";
+
+        $pagedata = new stdClass();
+        $pagedata->course = 1;
+        $pagedata->introformat = FORMAT_MOODLE; //1
+        $pagedata->legacyfiles = 0;
+        $pagedata->display = RESOURCELIB_DISPLAY_AUTO; //5
+        $pagedata->revision = 1;
+        // $pagedata->timemodified = time();
+
+        $pagedata->name = str_replace('{compname}', $category->name, $template['name']);
+        $pagedata->name = str_replace('{vue}', $vue['name'], $pagedata->name);
+        $pagedata->intro = $template['intro'];
+
+        $pagedata->content = str_replace('{vue}', $vue['name'], $template['contenttab']);
+        //todo sisterpagelink
+
+        foreach ($catniveaux as $niveaulmda) {
+            $node = '/cat' . $niveaulmda->id . '/' . substr($category->idnumber, 2);
+            $nivcontent = str_replace('{niveaulmda}', $category->name, $template['contentmain']);
+            $nivcontent = str_replace('{node}', $node, $nivcontent);
+            $nivcontent = str_replace('{node}', $node, $nivcontent);
+            $pagedata->content .= $nivcontent;
+        }
+        $pagedata->content .= $template['contentfoot'];
+
+        $pageid = page_add_instance($pagedata);
+    }
+}
+
