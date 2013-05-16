@@ -197,6 +197,8 @@ $CFG->admin = 'admin';
 // These variables define DEFAULT block variables for new courses
 // If this one is set it overrides all others and is the only one used.
 //      $CFG->defaultblocks_override = 'participants,activity_modules,search_forums,course_list:news_items,calendar_upcoming,recent_activity';
+$CFG->defaultblocks_override = 'course_opennow:search_forums,news_items,calendar_upcoming,recent_activity';
+
 //
 // These variables define the specific settings for defined course formats.
 // They override any settings defined in the formats own config file.
