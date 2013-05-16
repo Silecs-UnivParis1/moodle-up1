@@ -2,7 +2,6 @@
 include_once realpath(dirname( __FILE__ ).DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR."common.php";
 include_once LIB_DIR."Course.php";
 include_once LIB_DIR."User.php";
-
 class RSS {
 	function __construct( $course_id ){
 		global $CFG, $DB;
@@ -87,15 +86,22 @@ class RSS {
 	}
 }
 
-$course_id = intval( $_GET['id'] );
-// if course id not valid exit
 
-if( empty($course_id) ) {
-	print_r("Invalid id.");
-	exit;
+// check the options and initialize RSS
+
+if( empty($_GET['id']) and empty($_GET['shortname'])) {
+	die("Please specify the Course id or the Course shortname as url options.");
+} else if(empty($_GET['id']) and !empty($_GET['shortname'])) {
+	global $DB, $CFG;
+	$course = $DB->get_record('course', array('shortname' => $_GET['shortname']), $fields='id');
+	if($course == false) {
+		die("A course with this shortname does not exist. Please specify the correct shortname.");
+	} else {
+		$course_id = $course->id;
+	}
+} else {
+	$course_id = intval( $_GET['id'] );
 }
 
 $rss = new RSS( $course_id );
-/*
-*/
 ?>

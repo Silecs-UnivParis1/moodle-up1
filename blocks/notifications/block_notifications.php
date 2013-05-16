@@ -25,6 +25,7 @@ class block_notifications extends block_base {
 			"block_notifications_email_channel" => 1,
 			"block_notifications_sms_channel" => 1,
 			"block_notifications_rss_channel" => 1,
+			"block_notifications_rss_shortname_url_param" => 0,
 			"block_notifications_frequency" => 12,
 			"block_notifications_email_notification_preset" => 1,
 			"block_notifications_sms_notification_preset" => 1
@@ -37,6 +38,7 @@ class block_notifications extends block_base {
 		unset($CFG->block_notifications_email_channel);
 		unset($CFG->block_notifications_sms_channel);
 		unset($CFG->block_notifications_rss_channel);
+		unset($CFG->block_notifications_rss_shortname_url_param);
 		unset($CFG->block_notifications_frequency);
 		unset($CFG->block_notifications_email_notification_preset);
 		unset($CFG->block_notifications_sms_notification_preset);
@@ -205,7 +207,11 @@ class block_notifications extends block_base {
 				//$this->content->text.= '<br />';
 			}
 			if ( $CFG->block_notifications_rss_channel == 1 and $course_registration->notify_by_rss == 1 ) {
-				$this->content->text.= "<a target='_blank' href='$CFG->wwwroot/blocks/notifications/lib/RSS.php?id=$COURSE->id'>";
+				if ( isset($course_registration->rss_shortname_url_param) and $course_registration->rss_shortname_url_param == 1 ) {
+					$this->content->text.= "<a target='_blank' href='$CFG->wwwroot/blocks/notifications/lib/RSS.php?shortname=$COURSE->shortname'>";
+				} else {
+					$this->content->text.= "<a target='_blank' href='$CFG->wwwroot/blocks/notifications/lib/RSS.php?id=$COURSE->id'>";
+				}
 				$this->content->text.= "<img src='$CFG->wwwroot/blocks/notifications/images/RSS-icon.png' ";
 				$this->content->text.= "alt='rss icon' ";
 				$this->content->text.= "title='".get_string('rss_icon_tooltip', 'block_notifications')."' />";

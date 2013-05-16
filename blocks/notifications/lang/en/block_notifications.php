@@ -24,6 +24,7 @@ $string['rss_icon_tooltip'] = 'The notification of new content via RSS is enable
 $string['email'] = 'e-mail';
 $string['sms'] = 'SMS';
 $string['rss'] = 'RSS';
+$string['rss_by_shortname'] = 'Identify the course RSS by using the shortname url option; The default is the course id.';
 $string['notification_frequency'] = 'Checking new contents frequency in hours:';
 $string['notification_frequency_comment'] = 'Checking of the new contents in courses will be performed every number of hours specified here. This value can be overwritten by course settings.';
 $string['mailsubject'] = 'Updates on course';

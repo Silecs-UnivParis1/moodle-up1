@@ -1,4 +1,7 @@
 <?php
+/////////////////////////////////////////////////////
+// GLOBAL SETTINGS
+////////////////////////////////////////////////////
 include_once realpath( dirname( __FILE__ ).DIRECTORY_SEPARATOR ).DIRECTORY_SEPARATOR."common.php";
 include_once LIB_DIR."AbstractSMS.php";
 if(file_exists(LIB_DIR."SMS.php")) {
@@ -20,6 +23,8 @@ if ( $ADMIN->fulltree ) {
 	}
 
 	$settings->add( new admin_setting_configcheckbox('block_notifications_rss_channel', get_string('rss', 'block_notifications'), '', 1) );
+	
+	$settings->add( new admin_setting_configcheckbox('block_notifications_rss_shortname_url_param', get_string('rss_by_shortname', 'block_notifications'), '', 0) );
 
 	$options = array();
 	for( $i=1; $i<25; ++$i ) {

@@ -11,9 +11,32 @@ class Course {
 		$course=new Object();
 		$course->course_id = $course_id;
 		$course->last_notification_time = $starting_time;
-		$course->notify_by_email = 1;
-		$course->notify_by_sms = 1;
-		$course->notify_by_rss = 1;
+
+		if( isset($CFG->block_notifications_email_channel) ) {
+			$course->notify_by_email = $CFG->block_notifications_email_channel;
+		} else {
+			$course->notify_by_email = 0;
+		}
+
+		if( isset($CFG->block_notifications_sms_channel) ) {
+			$course->notify_by_sms = $CFG->block_notifications_sms_channel;
+		} else {
+			$course->notify_by_sms = 0;
+		}
+
+		if( isset($CFG->block_notifications_rss_channel) ) {
+			$course->notify_by_rss = $CFG->block_notifications_rss_channel;
+		} else {
+			$course->notify_by_rss = 0;
+		}
+
+		$course->rss_shortname_url_param = 0;
+		if( isset($CFG->block_notifications_rss_shortname_url_param) ) {
+			$course->rss_shortname_url_param = $CFG->block_notifications_rss_shortname_url_param;
+		} else {
+			$course->rss_shortname_url_param = 0;
+		}
+
 		if( isset($CFG->block_notifications_frequency) ) {
 			$course->notification_frequency = $CFG->block_notifications_frequency * 3600;
 		} else {
@@ -62,7 +85,9 @@ class Course {
 		$course->notify_by_rss = 0;
 		if( isset($settings->notify_by_rss) and $settings->notify_by_rss == 1 ) { $course->notify_by_rss = 1; }
 
-		//var_dump($settings);
+		$course->rss_shortname_url_param = 0;
+		if( isset($settings->rss_shortname_url_param) and $settings->rss_shortname_url_param == 1 ) { $course->rss_shortname_url_param = 1; }
+
 		if( isset($settings->notification_frequency) ) {
 			$course->notification_frequency = $settings->notification_frequency % 25 * 3600;
 		}

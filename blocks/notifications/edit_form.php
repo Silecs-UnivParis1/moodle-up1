@@ -35,12 +35,18 @@ class block_notifications_edit_form extends block_edit_form {
 
 		if( $CFG->block_notifications_rss_channel == 1 ) {
         	$mform->addElement( 'checkbox', 'notify_by_rss', get_string('notify_by_rss', 'block_notifications') );
+        	$mform->addElement( 'checkbox', 'rss_shortname_url_param', get_string('rss_by_shortname', 'block_notifications') );
 		} else {
         	$mform->addElement( 'advcheckbox', 'notify_by_rss', get_string('notify_by_rss', 'block_notifications'), null, $attributes );
+        	$mform->addElement( 'advcheckbox', 'rss_shortname_url_param', get_string('rss_by_shortname', 'block_notifications'), null, $attributes );
 		}
 
 		if ( isset($course_notification_setting->notify_by_rss) and $course_notification_setting->notify_by_rss == 1 ) {
         	$mform->setDefault( 'notify_by_rss', 1 );
+		}
+
+		if ( isset($course_notification_setting->rss_shortname_url_param) and $course_notification_setting->rss_shortname_url_param == 1 ) {
+        	$mform->setDefault( 'rss_shortname_url_param', 1 );
 		}
 
 		if(
@@ -78,6 +84,7 @@ class block_notifications_edit_form extends block_edit_form {
 		$block_config->notify_by_email = file_get_submitted_draft_itemid( 'notify_by_email' );
 		$block_config->notify_by_sms = file_get_submitted_draft_itemid( 'notify_by_sms' );
 		$block_config->notify_by_rss = file_get_submitted_draft_itemid( 'notify_by_rss' );
+		$block_config->rss_shortname_url_param = file_get_submitted_draft_itemid( 'rss_shortname_url_param' );
 		$block_config->notification_frequency = file_get_submitted_draft_itemid( 'notification_frequency' );
 		$block_config->email_notification_preset = file_get_submitted_draft_itemid( 'email_notification_preset' );
 		$block_config->sms_notification_preset = file_get_submitted_draft_itemid( 'sms_notification_preset' );

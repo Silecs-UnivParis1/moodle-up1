@@ -24,6 +24,7 @@ $string['rss_icon_tooltip'] = 'La notifica via RSS &egrave; abilitata. Clicca su
 $string['email'] = 'e-mail';
 $string['sms'] = 'SMS';
 $string['rss'] = 'RSS';
+$string['rss_by_shortname'] = 'Identifica il RSS del corso usando shortname come opzione url; La scelta predefinita è l\'id del corso';
 $string['notification_frequency'] = 'Frequenza di controllo nuovi contenuti in ore:';
 $string['notification_frequency_comment'] = 'Il controllo di nuovi contenuti nei corsi verr&agrave; eseguito ogni numero di ore specificato. Questo valore pu&ograve; essere cambiato al livello delle impostazioni del corso.';
 $string['mailsubject'] = 'Aggiornamenti sul corso';
