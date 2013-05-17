@@ -866,7 +866,7 @@ class core_wizard {
         } else {
             $mgv .= '2. Si nécessaire, authentifiez-vous avec votre compte Paris 1. ' . "\n";
         }
-        $mgv .= '3. Cliquez sur l\'icône "coche verte" située dans la colonne "Modifier" ;' . "\n";
+        $mgv .= '3. Cliquez sur l\'icône "coche verte" située dans la colonne "Actions" ;' . "\n";
         $mgv .= '4. '.fullname($this->user).' sera automatiquement prévenu-e par courriel de votre approbation.'  . "\n\n";
         $mgv .= 'Vous trouverez à cette adresse ' . $urlguide . ' des informations sur le processus d\'approbation des espaces '
              . 'nouvellement créés.' . "\n\n";

@@ -8,14 +8,14 @@
 
 // documentation http://docs.moodle.org/dev/Events_API#Handling_an_event
 
-require_once("../config.php");
+require_once("../../config.php");
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->libdir.'/textlib.class.php');
 
 
 /**
- * This function is called by handlers course_created and course_updated to
- * resort the courses under the same parent category with respect to fullname
+ * This function is called by handlers course_created and course_updated (in ./db/events.php)
+ * to resort the courses under the same parent category with respect to fullname
  * @param object $eventdata : course db object
  */
 function handle_course_modified($eventdata) {

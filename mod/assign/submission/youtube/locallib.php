@@ -240,6 +240,12 @@ class assign_submission_youtube extends assign_submission_plugin {
         $submissionid = $submission ? $submission->id : 0;
         if ($submission) {
             $youtubesubmission = $this->get_youtube_submission($submission->id);
+			//if we have a submission already, lets display it for the student
+			if($youtubesubmission){
+				$ytplayersize =  get_config('assignsubmission_youtube', 'displaysize_single');
+				$ytplayer = $this->fetch_youtube_player($youtubesubmission->youtubeid,$ytplayersize);
+				$mform->addElement('static', 'currentsubmission', get_string('currentsubmission','assignsubmission_youtube'),$ytplayer);
+			}
         }
 
 		//determine a video title
@@ -350,6 +356,8 @@ class assign_submission_youtube extends assign_submission_plugin {
 		$mform->addElement('static', 'description', '',$mediadata);	
 		$mform->addElement('hidden','youtubeid','',array('id'=>'id_youtubeid'));
 		$mform->addElement('hidden','manualurl','',array('id'=>'id_manualurl'));
+		$mform->setType('youtubeid', PARAM_TEXT); 
+		$mform->setType('manualurl', PARAM_TEXT); 
 		
 		//create tabs
 		//configure our options array
@@ -493,6 +501,9 @@ class assign_submission_youtube extends assign_submission_plugin {
      */
     public function fetch_youtube_player($videoid,$size) {
 		global $PAGE, $CFG;
+		
+		//if we don't have a video id, we return an empty string
+		if(empty($videoid)){return "";}
 		
 		$PAGE->requires->js(new moodle_url('http://www.youtube.com/iframe_api'));
 		
