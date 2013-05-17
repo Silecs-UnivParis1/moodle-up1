@@ -33,7 +33,7 @@ function equivalent_diplomas() {
 function high_level_categories() {
     return
         array(
-            array('name' => 'Année 2012-2013', 'idnumber' => '1:2012-2013'),
+            array('name' => 'Année 2013-2014', 'idnumber' => '1:2013-2014'),
             array('name' => 'Paris 1', 'idnumber' => '2:UP1'),
         );
 }
