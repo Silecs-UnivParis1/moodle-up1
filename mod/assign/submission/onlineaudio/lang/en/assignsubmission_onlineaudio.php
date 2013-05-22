@@ -37,3 +37,9 @@ $string['confirmdeletefile'] = 'Are you sure you want to delete the file <strong
 $string['upload'] = 'Upload';
 $string['uploaderror'] = 'Error uploading recording.';
 $string['maxfilesreached'] = 'You already have the maximum number of recordings allowed for this assignment.';
+
+$string['defaultname'] = 'Default name';
+$string['allownameoverride'] = 'Allow name override';
+$string['nodefaultname'] = 'No default name';
+$string['defaultname1'] = 'Default name 1';
+$string['defaultname2'] = 'Default name 2';

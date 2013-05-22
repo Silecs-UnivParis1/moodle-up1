@@ -642,7 +642,7 @@ class assign_submission_youtube extends assign_submission_plugin {
      * @param stdClass $submission The submission
      * @return array - return an array of files indexed by filename
      */
-    public function get_files(stdClass $submission) {
+    public function get_files(stdClass $submission, stdClass $user) {
         $result = array();
 		//how to handle this?
         return $result;

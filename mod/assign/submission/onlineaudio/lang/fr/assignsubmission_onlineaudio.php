@@ -37,3 +37,10 @@ $string['confirmdeletefile'] = 'Êtes vous certain de vouloir supprimer le fichi
 $string['upload'] = 'Envoyer';
 $string['uploaderror'] = 'Erreur pendant l\'envoi de l\'enregistrement.';
 $string['maxfilesreached'] = 'Vous avez déjà atteint le nombre maximal de remises pour ce devoir.';
+
+$string['defaultname'] = 'Nom par défaut';
+$string['allownameoverride'] = 'Autoriser écrasement du nom';
+$string['nodefaultname'] = 'Pas de nom par défaut';
+$string['defaultname1'] = 'Nom par défaut 1';
+$string['defaultname2'] = 'Nom par défaut 2'; 
+
