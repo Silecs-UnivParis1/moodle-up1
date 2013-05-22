@@ -37,3 +37,11 @@ $string['confirmdeletefile'] = 'Are you sure you want to delete the file <strong
 $string['upload'] = 'Upload';
 $string['uploaderror'] = 'Error uploading recording.';
 $string['maxfilesreached'] = 'You already have the maximum number of recordings allowed for this assignment.';
+
+$string['defaultname'] = 'Default filename pattern';
+$string['nodefaultname'] = 'None (blank)';
+$string['defaultname1'] = 'username_assignment_course_date';
+$string['defaultname2'] = 'fullname_assignment_course_date';
+$string['allownameoverride'] = 'Allow students to change filename';
+$string['defaultname_help'] = 'Default filename pattern';
+$string['allownameoverride_help'] = 'Allow students to change filename';
