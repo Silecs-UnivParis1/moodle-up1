@@ -37,3 +37,12 @@ $string['confirmdeletefile'] = 'Êtes vous certain de vouloir supprimer le fichi
 $string['upload'] = 'Envoyer';
 $string['uploaderror'] = 'Erreur pendant l\'envoi de l\'enregistrement.';
 $string['maxfilesreached'] = 'Vous avez déjà atteint le nombre maximal de remises pour ce devoir.';
+
+$string['defaultname'] = 'Motif de fichier par défaut';
+$string['nodefaultname'] = 'Aucun (vide)';
+$string['defaultname1'] = 'username_assignment_course_date';
+$string['defaultname2'] = 'fullname_assignment_course_date';
+$string['allownameoverride'] = 'Permettre aux étudiants de modifier le nom de fichier';
+$string['defaultname_help'] = 'Motif de fichier par défaut';
+$string['allownameoverride_help'] = 'Permettre aux étudiants de modifier le nom de fichier';
+
