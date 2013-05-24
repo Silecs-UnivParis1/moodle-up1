@@ -23,26 +23,34 @@
  */
 
 
+$string['pluginname'] = 'Enregistrement audio en-ligne';
+$string['recording'] = 'Enregistrement audio en-ligne';
+
+$string['enabled'] = 'Enregistrement audio en-ligne';
+$string['enabled_help'] = 'S\'il est activé, les étudiants sont autorisés à remettre leurs devoirs sous forme d\'enregistrement audio.';
+
 $string['configmaxbytes'] = 'Taille limite de fichier';
-$string['enabled'] = 'Enregistrement audio en ligne';
-$string['enabled_help'] = 'Ce plugin autorise la remise de devoirs sous la forme d\'enregistrements audio.';
-$string['recording'] = 'Enregistrement audio en ligne';
 $string['maxbytes'] = 'Taille limite de fichier';
+
 $string['maxfilessubmission'] = 'Nombre maximal d\'enregistrements';
-$string['maxfilessubmission_help'] = 'Si le plugin est activé, chaque étudiant sera autorisé à remettre au maximum ce nombre d\'enregistrements.';
-$string['pluginname'] = 'Enregistrement audio en ligne';
+$string['maxfilessubmission_help'] = 'Si le plugin est activé, chaque étudiant sera autorisé à remettre au maximum ce nombre d\'enregistrements.'
+
+$string['defaultname'] = 'Motif de fichier par défaut';
+$string['defaultname_help'] = 'Ce paramètre permet de pré-remplir le nom de fichier à partir d\'un motif. '
+    . 'Le nom pré-rempli peut être contrôlé en fixant à "Non" le paramètre "Autoriser les étudiants à changer le nom".';
+
+$string['nodefaultname'] = 'Aucun (vide)';
+$string['defaultname1'] = 'username_assignment_course_date';
+$string['defaultname2'] = 'fullname_assignment_course_date';
+
+$string['allownameoverride'] = 'Autoriser les étudiants à changer le nom du fichier';
+$string['allownameoverride_help'] = 'S\'il est activé, les étudiants sont autorisés à changer le nom du fichier par défaut comme ils le veulent. '
+    . 'Ce paramètre est sans effet si "Motif de fichier par défaut" est fixé à "Aucun (vide)", puisqu\'un nom doit être spécifié';
+
 $string['countfiles'] = '{$a} fichiers';
 $string['nosuchfile'] = 'Aucun fichier correspondant.';
 $string['confirmdeletefile'] = 'Êtes vous certain de vouloir supprimer le fichier <strong>{$a}</strong>?';
 $string['upload'] = 'Envoyer';
 $string['uploaderror'] = 'Erreur pendant l\'envoi de l\'enregistrement.';
 $string['maxfilesreached'] = 'Vous avez déjà atteint le nombre maximal de remises pour ce devoir.';
-
-$string['defaultname'] = 'Motif de fichier par défaut';
-$string['nodefaultname'] = 'Aucun (vide)';
-$string['defaultname1'] = 'username_assignment_course_date';
-$string['defaultname2'] = 'fullname_assignment_course_date';
-$string['allownameoverride'] = 'Permettre aux étudiants de modifier le nom de fichier';
-$string['defaultname_help'] = 'Motif de fichier par défaut';
-$string['allownameoverride_help'] = 'Permettre aux étudiants de modifier le nom de fichier';
 
