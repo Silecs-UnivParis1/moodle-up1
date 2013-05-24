@@ -23,25 +23,30 @@
  */
 
 
-$string['configmaxbytes'] = 'Maximum file size';
+$string['pluginname'] = 'Online audio recording';
+$string['recording'] = 'Online audio recording';
+
 $string['enabled'] = 'Online audio recording';
 $string['enabled_help'] = 'If enabled, students are able to make audio recordings as their submission.';
-$string['recording'] = 'Online audio recording';
+
+$string['configmaxbytes'] = 'Maximum file size';
 $string['maxbytes'] = 'Maximum file size';
+
 $string['maxfilessubmission'] = 'Maximum number of recordings';
 $string['maxfilessubmission_help'] = 'If online audio recordings are enabled, each student will be able to submit up to this number of recordings.';
-$string['pluginname'] = 'Online audio recording';
+
+$string['defaultname'] = 'Default filename pattern';
+$string['defaultname_help'] = 'This option can be used to pre-fill the filename based on a pattern.  The pre-filled filename can be enforced by setting "Allow students to change filename" to "No".';
+$string['nodefaultname'] = 'None (blank)';
+$string['defaultname1'] = 'username_assignment_course_date';
+$string['defaultname2'] = 'fullname_assignment_course_date';
+
+$string['allownameoverride'] = 'Allow students to change filename';
+$string['allownameoverride_help'] = 'If enabled, students can override the default file name with one of their own choosing.  This option has no effect if the "Default file name pattern" is set to "None (blank)" as a name must be specified.';
+
 $string['countfiles'] = '{$a} files';
 $string['nosuchfile'] = 'No such file was found.';
 $string['confirmdeletefile'] = 'Are you sure you want to delete the file <strong>{$a}</strong>?';
 $string['upload'] = 'Upload';
 $string['uploaderror'] = 'Error uploading recording.';
 $string['maxfilesreached'] = 'You already have the maximum number of recordings allowed for this assignment.';
-
-$string['defaultname'] = 'Default filename pattern';
-$string['nodefaultname'] = 'None (blank)';
-$string['defaultname1'] = 'username_assignment_course_date';
-$string['defaultname2'] = 'fullname_assignment_course_date';
-$string['allownameoverride'] = 'Allow students to change filename';
-$string['defaultname_help'] = 'Default filename pattern';
-$string['allownameoverride_help'] = 'Allow students to change filename';
