@@ -39,6 +39,8 @@ div.box.generalbox {
     cursor: pointer;
 }
 
+.hide-form .loginbox > *,
+.hide-form .signuppanel,
 .hide-form .loginpanel {
     display: none;
 }
