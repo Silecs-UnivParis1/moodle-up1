@@ -31,6 +31,8 @@
         <FIELD NAME="subnb" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sub" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="localname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -63,6 +65,8 @@
         <FIELD NAME="oneparent" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="refperson" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="localname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -85,6 +89,8 @@
         <FIELD NAME="oneparent" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="refperson" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timesync" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="localname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="19" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
