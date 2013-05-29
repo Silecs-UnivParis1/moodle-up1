@@ -8,7 +8,7 @@
 
 // documentation http://docs.moodle.org/dev/Events_API#Handling_an_event
 
-require_once("../../config.php");
+require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->libdir.'/textlib.class.php');
 
