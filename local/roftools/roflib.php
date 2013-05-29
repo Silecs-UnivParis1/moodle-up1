@@ -71,6 +71,20 @@ function rof_get_record($rofid) {
     return array($record, $top);
 }
 
+/**
+ * for a ROF object in (component, program, course), returns the localname if defined, otherwise the official name
+ * @param type $rofid
+ * @return string combined name
+ */
+function rof_get_combined_name($rofid) {
+    list($record, $top) = rof_get_record($rofid);
+    if ($record->localname) {
+        return $record->localname;
+    } else {
+        return $record->name;
+    }
+}
+
 
 /**
  * returns link to view rofid
