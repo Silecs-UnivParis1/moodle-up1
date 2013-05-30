@@ -27,11 +27,12 @@ if ( ! $record ) {
 } else {
 
     echo '<div>';
-    echo '<span><b>Nom effectif</b> ' . rof_get_combined_name($rofid) . '</span>';
+    echo '<div><span><b>Nom effectif</b> ' . rof_get_combined_name($rofid) . '</span><br />';
+    echo '<span>S\'il est défini, le nom local supplante le nom officiel de l\'élément ROF lors d\'une création par l\'assistant.</span></div>';
     /**/
     echo '<form action="update_localname.php" method="POST">';
     echo '<label for="localname">Nom local </label>';
-    echo '<input type="text" name="localname" id="localname" size="80" />';
+    echo '<input type="text" value="' . $record->localname . '" name="localname" id="localname" size="80" />';
     echo '<input type="hidden" name="rofid" value="' . $rofid . '"/>';
     echo '</form>';
     echo '</div>';
