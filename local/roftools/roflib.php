@@ -120,12 +120,12 @@ function rof_typeDiplome_ordered_list() {
 function rof_view_record($rofid) {
 
     $res = array();
-    list($dbprog, $stop) = rof_get_record($rofid);
-    if ( ! $dbprog ) {
+    list($dbrof, $stop) = rof_get_record($rofid);
+    if ( ! $dbrof ) {
         echo "Mauvais identifiant (rofid) : $rofid.";
         return false;
     }
-    foreach (get_object_vars($dbprog) as $key => $value) {
+    foreach (get_object_vars($dbrof) as $key => $value) {
         if ($key == 'courses' || $key == 'sub') {
             $links = join(',', array_map('rof_rofid_link', explode(',', $value)));
             $res[] = array($key, $links);

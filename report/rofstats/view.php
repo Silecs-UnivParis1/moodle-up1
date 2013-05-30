@@ -1,7 +1,7 @@
 <?php
 
 define('NO_OUTPUT_BUFFERING', true);
-require('../../config.php');
+require(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot.'/report/rofstats/locallib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
@@ -19,18 +19,25 @@ $url = "$CFG->wwwroot/report/rofstats/index.php";
 
 $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
 
-echo '<span><b>Nom effectif</b> ' . rof_get_combined_name($rofid) . '</span>';
 
-echo '<div>';
-echo '<form action="update_localname.php" method="POST">';
-echo '<label for="localname">Nom local </label>';
-echo '<input type="text" name="localname" id="localname" size="80" />';
-echo '<input type="hidden" name="rofid" value="' . $rofid . '"/>';
-echo '</form>';
-echo '</div>';
-echo '<p></p>';
+list($record, $top) = rof_get_record($rofid);
+if ( ! $record ) {
+    echo "Mauvais identifiant (rofid) : $rofid.";
 
-if (rof_view_record($rofid)) {
+} else {
+
+    echo '<div>';
+    echo '<span><b>Nom effectif</b> ' . rof_get_combined_name($rofid) . '</span>';
+    /**/
+    echo '<form action="update_localname.php" method="POST">';
+    echo '<label for="localname">Nom local </label>';
+    echo '<input type="text" name="localname" id="localname" size="80" />';
+    echo '<input type="hidden" name="rofid" value="' . $rofid . '"/>';
+    echo '</form>';
+    echo '</div>';
+    echo '<p></p>';
+
+    rof_view_record($rofid);
     if ($table == 'rof_program' || $table == 'rof_course') {
 
         echo "<h3>Chemins</h3>\n";
