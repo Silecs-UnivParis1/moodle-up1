@@ -40,7 +40,14 @@ function xmldb_local_rof_sync_upgrade($oldversion) {
             $dbman->add_field($table, $field1);
             $dbman->add_field($table, $field2);
         }
-
+/*  revert SQL
+     ALTER TABLE rof_component DROP localname;
+     ALTER TABLE rof_component DROP timemodified;
+     ALTER TABLE rof_program   DROP localname;
+     ALTER TABLE rof_program   DROP timemodified;
+     ALTER TABLE rof_course    DROP localname;
+     ALTER TABLE rof_course    DROP timemodified;
+ */
 
     }
 
