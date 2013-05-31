@@ -1,0 +1,9 @@
+.cache {
+	display: none;
+}
+#fgroup_id_radioar div.fitemtitle div.fgrouplabel,
+#fgroup_id_msgar div.fitemtitle div.fgrouplabel,
+div.fitemtitle
+ {
+    color: #AA0000;
+}
