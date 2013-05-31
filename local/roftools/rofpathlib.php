@@ -110,7 +110,7 @@ function rof_get_combined_path($rofidpath) {
     $res = array();
     foreach ($rofidpath as $rofid) {
         list($record, $ignore) = rof_get_record($rofid);
-        $res[$rofid] = $record->name;
+        $res[$rofid] = ($record->localname?$record->localname:$record->name);
     }
     return $res;
 }
