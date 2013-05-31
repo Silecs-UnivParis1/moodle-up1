@@ -85,6 +85,16 @@ function rof_get_combined_name($rofid) {
     }
 }
 
+/**
+ * returns the localname if defined (not null nor empty), otherwise the reference name
+ * @param string $localname
+ * @param string $refname
+ * @return string
+ */
+function rof_combined_name($localname, $refname) {
+    return ($localname ? $localname : $refname);
+}
+
 
 /**
  * returns link to view rofid
