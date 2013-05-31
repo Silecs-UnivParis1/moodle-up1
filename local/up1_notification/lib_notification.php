@@ -22,7 +22,7 @@ function get_notification_message($formdata, $params) {
     }
 
     //interpolation variables si besoin
-    $message->body = str_replace('[[course_name]]', $params['course_name'], $message->body);
+    $message->body = str_replace('[[nom_cours]]', $params['course_name'], $message->body);
     $message->body = str_replace('[[nbr_rep]]', $params['nbr_rep'], $message->body);
     $message->body = str_replace('[[nbr_non_rep]]', $params['nbr_non_rep'], $message->body);
 
