@@ -82,6 +82,16 @@ if (has_capability('mod/feedback:viewreports', $context)) {
                                 $nonrespondenturl->out(),
                                 get_string('show_nonrespondents', 'feedback'));
     }
+
+    //silecs
+    if ($DB->get_records('config_plugins', array('plugin' => 'local_up1_notification'))) {
+        $url_params = array('id'=>$usedid);
+        $notificationurl = new moodle_url('/local/up1_notification/notification.php', $url_params);
+        $row[] = new tabobject('notification',
+            $notificationurl->out(),
+            'Notifications');
+    }
+    // fin silecs
 }
 
 if (count($row) > 1) {
