@@ -70,6 +70,16 @@ $PAGE->requires->js_init_code('
             }
         });
     }
+
+    (function(){
+        var options = document.getElementById("login-other").getElementsByTagName("option");
+        for (var i = 0; i < options.length ; i++) {
+            if (options[i].value == "' . SHIBB_DEFAULT_IDP . '") {
+                options[i].style.setProperty("display", "none", "");
+                options[i].parentNode.removeChild(options[i]);
+            }
+        }
+    })();
 ');
 
 
