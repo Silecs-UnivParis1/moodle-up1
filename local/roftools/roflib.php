@@ -71,6 +71,30 @@ function rof_get_record($rofid) {
     return array($record, $top);
 }
 
+/**
+ * for a ROF object in (component, program, course), returns the localname if defined, otherwise the official name
+ * @param type $rofid
+ * @return string combined name
+ */
+function rof_get_combined_name($rofid) {
+    list($record, $top) = rof_get_record($rofid);
+    if ($record->localname) {
+        return $record->localname;
+    } else {
+        return $record->name;
+    }
+}
+
+/**
+ * returns the localname if defined (not null nor empty), otherwise the reference name
+ * @param string $localname
+ * @param string $refname
+ * @return string
+ */
+function rof_combined_name($localname, $refname) {
+    return ($localname ? $localname : $refname);
+}
+
 
 /**
  * returns link to view rofid
@@ -106,12 +130,12 @@ function rof_typeDiplome_ordered_list() {
 function rof_view_record($rofid) {
 
     $res = array();
-    list($dbprog, $stop) = rof_get_record($rofid);
-    if ( ! $dbprog ) {
+    list($dbrof, $stop) = rof_get_record($rofid);
+    if ( ! $dbrof ) {
         echo "Mauvais identifiant (rofid) : $rofid.";
         return false;
     }
-    foreach (get_object_vars($dbprog) as $key => $value) {
+    foreach (get_object_vars($dbrof) as $key => $value) {
         if ($key == 'courses' || $key == 'sub') {
             $links = join(',', array_map('rof_rofid_link', explode(',', $value)));
             $res[] = array($key, $links);
@@ -215,11 +239,12 @@ function rof_get_metadata($rofobject) {
     $res['Identification']['up1rofpathid'] = '/' . join('/', $rofidpath);
 
     $program = $DB->get_record('rof_program', array('rofid' => $rofidpath[1])); //diplome (en général)
-    $res['Diplome']['up1diplome'] = $program->name;
+    $prog_name = rof_get_combined_name($rofidpath[1]);
+    $res['Diplome']['up1diplome'] = $prog_name;
     $res['Diplome']['up1acronyme'] = $program->acronyme;
     $res['Diplome']['up1mention'] = $program->mention;
     $res['Diplome']['up1specialite'] = $program->specialite;
-    if ( preg_match('/^.* parcours (.*)$/', $program->name, $matches) ) {
+    if ( preg_match('/^.* parcours (.*)$/', $prog_name, $matches) ) {
         $res['Diplome']['up1parcours'] = $matches[1];
     }
     $res['Diplome']['up1type']    = rof_constant_metadata('typeDiplome', $program->typedip);
@@ -230,7 +255,7 @@ function rof_get_metadata($rofobject) {
     $res['Diplome']['up1langue']  = rof_constant_metadata('langueDiplome', $program->languedip);
 
     if (isset($rofnamepath[2])) {
-        $res['Indexation']['up1subprogram'] = $rofnamepath[2]; //valeur de subprogram
+        $res['Indexation']['up1subprogram'] = rof_get_combined_name($rofidpath[2]); //subprogram name
         $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
         $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
     }
@@ -238,25 +263,26 @@ function rof_get_metadata($rofobject) {
     $elp = array_pop($rofidpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
     if ($course) {
+        $course_name = rof_get_combined_name($elp);
         $res['Indexation']['up1composition'] = $course->composition;
         $res['Identification']['up1complement'] = $course->composition;
-        $res['Identification']['up1nom'] = $course->name;
+        $res['Identification']['up1nom'] = $course_name;
         $res['Identification']['up1rofid'] = $course->rofid;
-        $res['Identification']['up1rofname'] = $course->name;
+        $res['Identification']['up1rofname'] = $course_name;
         $res['Identification']['up1code'] = $course->code;
-        $res['Identification']['up1nomnorme'] = $course->code .' - '. $course->name .' - '. $course->composition;
+        $res['Identification']['up1nomnorme'] = $course->code .' - '. $course_name .' - '. $course->composition;
         $res['Identification']['up1abregenorme'] = $course->code .' - '. $course->composition;
         $res['Cycle de vie - création']['up1responsable'] = $course->refperson;
     } else { // Les valeurs du diplôme si pertinent
         $defaultcourse = '';
         $res['Indexation']['up1composition'] = $defaultcourse;
         $res['Identification']['up1complement'] = $defaultcourse;
-        $res['Identification']['up1nom'] = $program->name;
+        $res['Identification']['up1nom'] = $prog_name;
         $res['Identification']['up1rofid'] = $program->rofid;
-        $res['Identification']['up1rofname'] = $program->name;
+        $res['Identification']['up1rofname'] = $prog_name;
         $res['Identification']['up1code'] = $defaultcourse;
-        $res['Identification']['up1nomnorme'] = $program->rofid .' - '. $program->name;
-        $res['Identification']['up1abregenorme'] = $program->rofid .' - '. $program->name;
+        $res['Identification']['up1nomnorme'] = $program->rofid .' - '. $prog_name;
+        $res['Identification']['up1abregenorme'] = $program->rofid .' - '. $prog_name;
         $res['Cycle de vie - création']['up1responsable'] = $defaultcourse;
     }
     return $res;
