@@ -229,11 +229,12 @@ function rof_get_metadata($rofobject) {
     $res['Identification']['up1rofpathid'] = '/' . join('/', $rofidpath);
 
     $program = $DB->get_record('rof_program', array('rofid' => $rofidpath[1])); //diplome (en général)
-    $res['Diplome']['up1diplome'] = $program->name;
+    $prog_name = rof_get_combined_name($rofidpath[1]);
+    $res['Diplome']['up1diplome'] = $prog_name;
     $res['Diplome']['up1acronyme'] = $program->acronyme;
     $res['Diplome']['up1mention'] = $program->mention;
     $res['Diplome']['up1specialite'] = $program->specialite;
-    if ( preg_match('/^.* parcours (.*)$/', $program->name, $matches) ) {
+    if ( preg_match('/^.* parcours (.*)$/', $prog_name, $matches) ) {
         $res['Diplome']['up1parcours'] = $matches[1];
     }
     $res['Diplome']['up1type']    = rof_constant_metadata('typeDiplome', $program->typedip);
@@ -244,7 +245,7 @@ function rof_get_metadata($rofobject) {
     $res['Diplome']['up1langue']  = rof_constant_metadata('langueDiplome', $program->languedip);
 
     if (isset($rofnamepath[2])) {
-        $res['Indexation']['up1subprogram'] = $rofnamepath[2]; //valeur de subprogram
+        $res['Indexation']['up1subprogram'] = rof_get_combined_name($rofidpath[2]); //subprogram name
         $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
         $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
     }
@@ -252,25 +253,26 @@ function rof_get_metadata($rofobject) {
     $elp = array_pop($rofidpath);
     $course = $DB->get_record('rof_course', array('rofid' => $elp));
     if ($course) {
+        $course_name = rof_get_combined_name($elp);
         $res['Indexation']['up1composition'] = $course->composition;
         $res['Identification']['up1complement'] = $course->composition;
-        $res['Identification']['up1nom'] = $course->name;
+        $res['Identification']['up1nom'] = $course_name;
         $res['Identification']['up1rofid'] = $course->rofid;
-        $res['Identification']['up1rofname'] = $course->name;
+        $res['Identification']['up1rofname'] = $course_name;
         $res['Identification']['up1code'] = $course->code;
-        $res['Identification']['up1nomnorme'] = $course->code .' - '. $course->name .' - '. $course->composition;
+        $res['Identification']['up1nomnorme'] = $course->code .' - '. $course_name .' - '. $course->composition;
         $res['Identification']['up1abregenorme'] = $course->code .' - '. $course->composition;
         $res['Cycle de vie - création']['up1responsable'] = $course->refperson;
     } else { // Les valeurs du diplôme si pertinent
         $defaultcourse = '';
         $res['Indexation']['up1composition'] = $defaultcourse;
         $res['Identification']['up1complement'] = $defaultcourse;
-        $res['Identification']['up1nom'] = $program->name;
+        $res['Identification']['up1nom'] = $prog_name;
         $res['Identification']['up1rofid'] = $program->rofid;
-        $res['Identification']['up1rofname'] = $program->name;
+        $res['Identification']['up1rofname'] = $prog_name;
         $res['Identification']['up1code'] = $defaultcourse;
-        $res['Identification']['up1nomnorme'] = $program->rofid .' - '. $program->name;
-        $res['Identification']['up1abregenorme'] = $program->rofid .' - '. $program->name;
+        $res['Identification']['up1nomnorme'] = $program->rofid .' - '. $prog_name;
+        $res['Identification']['up1abregenorme'] = $program->rofid .' - '. $prog_name;
         $res['Cycle de vie - création']['up1responsable'] = $defaultcourse;
     }
     return $res;
