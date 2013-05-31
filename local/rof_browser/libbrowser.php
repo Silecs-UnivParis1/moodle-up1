@@ -28,11 +28,11 @@ function treeComponent () {
 			$list .= '<li class="' . $listStyle . '">';
 			$list .= '<span class="selected-deep2 curser-point" data_deep="2" '
 				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
-				. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
+				. htmlspecialchars(($c->localname?$c->localname:$c->name), ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?rofid='.$c->number.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
 		} else {
-			$list .= '<li class="' . $listStyle . '"><span>' . htmlspecialchars($c->name)
+			$list .= '<li class="' . $listStyle . '"><span>' . htmlspecialchars(($c->localname?$c->localname:$c->name))
 				. '</span></li>';
 		}
 	}
@@ -60,7 +60,7 @@ function print_rof() {
             $list .= '<option data_deep="2" '
 			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
 			. '>'
-			. htmlspecialchars($c->name, ENT_QUOTES, 'UTF-8')
+			. htmlspecialchars(($c->localname?$c->localname:$c->name), ENT_QUOTES, 'UTF-8')
 			. '</option>';
 		}
 	}
@@ -208,12 +208,13 @@ class rof_browser {
 				. $titleElem . '" data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
 				. '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbEnf . ')</span></li>';
+				. htmlentities(($sp->localname?$sp->localname:$sp->name), ENT_QUOTES, 'UTF-8')
+                . ' (' . $nbEnf . ')</span></li>';
 		} else {
 			$element .= '<li class="' . $listStyle . '"><span title="'
 				. $titleElem . '" data_path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
-                . htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . '</span></li>';
+                . htmlentities(($sp->localname?$sp->localname:$sp->name), ENT_QUOTES, 'UTF-8') . '</span></li>';
 		}
 		return $element;
 	}
@@ -325,7 +326,7 @@ class rof_browser {
             $coden = trim('deep'.$this->niveau);
             $id = $coden.'_'.$this->rofid;
             $idElem = $id . '-elem';
-            $intitule = htmlentities( $this->elemPere->name, ENT_QUOTES, 'UTF-8');
+            $intitule = htmlentities(($this->elemPere->localname?$this->elemPere->localname:$this->elemPere->name), ENT_QUOTES, 'UTF-8');
 
 			$listeTitle = 'type:'.$this->elemPere->typedip.', domaine:'.$this->elemPere->domainedip
 			.', nature:'.$this->elemPere->naturedip.', cycle:'.$this->elemPere->cycledip.', rythme: '
@@ -460,7 +461,7 @@ class rof_browser {
         }
 
 		$data_path = $this->path . '_' . $sp->rofid;
-		$intitule = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
+		$intitule = htmlentities(($sp->localname?$sp->localname:$sp->name), ENT_QUOTES, 'UTF-8');
 
 		$nbEnf = $nbSub + $nbCourses;
 
@@ -518,7 +519,7 @@ class rof_browser {
             $coden = trim('deep'.$niveau);
             $id = $coden.'_'.$sp->rofid;
             $idElem = $id . '-elem';
-            $labelelem = htmlentities($sp->name, ENT_QUOTES, 'UTF-8');
+            $labelelem = htmlentities(($sp->localname?$sp->localname:$sp->name), ENT_QUOTES, 'UTF-8');
 
             if (isset($sp->code)) {
                 $titleElem .= 'code apogée : ' . $sp->code;
