@@ -24,7 +24,7 @@ function rof_get_course_first_path($rofid) {
         // $table = rofGetTable($currofid);
         // $record = $DB->get_record($table, array('rofid' => $currofid), '*', IGNORE_MISSING);
         $rofpath[] = $currofid;
-        $namepath[] = $record->name;
+        $namepath[] = rof_combined_name($record->localname, $record->name);
         if ( ! $stop ) {
             $parents = explode(',', $record->parents);
             $currofid = $parents[0];
@@ -91,7 +91,7 @@ function rof_get_course_all_pathnames($pathlist) {
         $pathname = array();
         foreach ($path as $rofid) {
             list($record, $stop) = rof_get_record($rofid);
-            $pathname[] = $record->name;
+            $pathname[] = rof_combined_name($record->localname, $record->name);
         }
         $res[] = array_combine($path, $pathname);
     }
@@ -110,7 +110,7 @@ function rof_get_combined_path($rofidpath) {
     $res = array();
     foreach ($rofidpath as $rofid) {
         list($record, $ignore) = rof_get_record($rofid);
-        $res[$rofid] = ($record->localname?$record->localname:$record->name);
+        $res[$rofid] = rof_combined_name($record->localname, $record->name);
     }
     return $res;
 }
