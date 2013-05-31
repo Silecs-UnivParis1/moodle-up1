@@ -178,14 +178,14 @@ function wizard_get_generateur($course) {
                 $r1 = trim($trofid[0]);
                 if (substr($r1, 0, 5) == 'UP1-P') {
                     $rof = $DB->get_record('rof_program',  array('rofid' => $r1));
-                    if ($rof && ($rof->name == $course->profile_field_up1rofname) ) {
+                    if ($rof && ($rof->name == $course->profile_field_up1rofname || $rof->localname == $course->profile_field_up1rofname) ) {
                         return $case;
                     } else {
                         return 0;
                     }
                 }elseif (substr($r1, 0, 5) == 'UP1-C') {
                     $rof = $DB->get_record('rof_course',  array('rofid' => $r1));
-                    if ($rof && ($rof->name == $course->profile_field_up1rofname) ) {
+                    if ($rof && ($rof->name == $course->profile_field_up1rofname || $rof->localname == $course->profile_field_up1rofname) ) {
                         if ($rof->code == $course->profile_field_up1code) {
                             return $case;
                         } else {
