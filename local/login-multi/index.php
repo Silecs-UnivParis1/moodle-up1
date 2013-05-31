@@ -43,20 +43,29 @@ $PAGE->requires->js_init_code('
     var localLoginShown = true;
     function toggleLocalLogin() {
         if (localLoginShown) {
-            document.getElementsByClassName("local-login")[0].className = "box generalbox local-login hide-form";
+            document.getElementById("local-login").firstChild.className = "box generalbox local-login hide-form";
             document.getElementById("toggle-local").innerHTML = "&#x25BD;";
         } else {
-            document.getElementsByClassName("local-login")[0].className = "box generalbox local-login";
+            document.getElementById("local-login").firstChild.className = "box generalbox local-login";
             document.getElementById("toggle-local").innerHTML = "&#x25B3;";
         }
         localLoginShown = !localLoginShown;
     }
     toggleLocalLogin();
-    document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
+    var normalListener = true;
+    if (typeof document.addEventListener == "function") {
+        document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
+    } else {
+        document.getElementById("toggle-local").attachEvent("onclick", toggleLocalLogin); // Hmmm, IE8!
+        normalListener = false;
+    }
 
-    var checkboxes = document.getElementsByClassName("shibb_remember");
+    var checkboxes = document.getElementsByTagName("input");
     for (var i=0; i < checkboxes.length; i++) {
-        checkboxes[i].addEventListener("click", function(){
+        if (checkboxes[i].className != "shibb_remember") {
+            continue;
+        }
+        var fun = function(){
             if (this.checked) {
                 var cookie = "shibb_remember=" + this.name;
                 if (this.name == "always") {
@@ -68,14 +77,21 @@ $PAGE->requires->js_init_code('
             } else {
                 document.cookie = "shibb_remember=;expires=Thu, 01 Jan 1970 00:00:01 GMT";
             }
-        });
+        };
+        if (normalListener) {
+            checkboxes[i].addEventListener("click", fun);
+        } else {
+            checkboxes[i].attachEvent("onclick", fun);
+        }
     }
 
     (function(){
         var options = document.getElementById("login-other").getElementsByTagName("option");
         for (var i = 0; i < options.length ; i++) {
             if (options[i].value == "' . SHIBB_DEFAULT_IDP . '") {
-                options[i].style.setProperty("display", "none", "");
+                if (typeof options[i].style.setProperty == "function") {
+                    options[i].style.setProperty("display", "none", "");
+                }
                 options[i].parentNode.removeChild(options[i]);
             }
         }
@@ -141,11 +157,13 @@ echo $OUTPUT->heading("Les identifiants d'un autre établissement", 3);
 <?php
 echo $OUTPUT->box_end();
 
+echo '<div id="local-login">';
 echo $OUTPUT->box_start('generalbox local-login');
 echo '<div id="toggle-local">&#x25BD;</div>';
 echo $OUTPUT->heading("Un compte invité", 3);
 display_local_login();
 echo $OUTPUT->box_end();
+echo "</div>";
 
 echo $OUTPUT->footer();
 
