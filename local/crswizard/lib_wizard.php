@@ -518,7 +518,7 @@ function wizard_preselected_rof() {
             $tabrof = rof_get_combined_path(explode('_', $rof['path']));
             $chemin = substr(rof_format_path($tabrof, 'name', false, ' > '), 3);
             $liste[] = array(
-                    "label" => ($object->localname?$object->localname:$object->name),
+                    "label" => rof_combined_name($object->localname, $object->name),
                     "value" => $rofid,
                     "path" => $rof['path'],
                     "nature" => $rof['nature'],
@@ -688,7 +688,7 @@ function wizard_prepare_rattachement_second($form2) {
                 }
                 if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
                     $rofobjet =  $form2['all-rof'][$rofid]['object'];
-                    $rof2['rofname'][] = ($rofobjet->localname?$rofobjet->localname:$rofobjet->name);
+                    $rof2['rofname'][] = rof_combined_name($rofobjet->localname, $rofobjet->name);
                 }
             }
         }
