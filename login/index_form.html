@@ -66,7 +66,7 @@ if (!empty($CFG->loginpasswordautocomplete)) {
         <div class="desc">
           <?php print_string("someallowguest") ?>
         </div>
-        <form action="index.php" method="post" id="guestlogin">
+        <form action="<?php echo $CFG->httpswwwroot; ?>/login/index.php" method="post" id="guestlogin">
           <div class="guestform">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
