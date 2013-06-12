@@ -41,10 +41,12 @@ function get_notification_message($formdata, $params) {
 function send_notification_complete_users($responses, $msg) {
     global $DB;
     $ids = '';
-    foreach ($responses as $response) {
-        $ids .= $response->userid . ',';
+    if ($responses && count($responses)) {
+        foreach ($responses as $response) {
+            $ids .= $response->userid . ',';
+        }
+        $ids = substr($ids, 0, -1);
     }
-    $ids = substr($ids, 0, -1);
     return notification_send_all_email($ids, $msg);
 }
 
@@ -57,10 +59,12 @@ function send_notification_complete_users($responses, $msg) {
 function send_notification_incomplete_users($idusers, $msg) {
     global $DB;
     $ids = '';
-    foreach ($idusers as $id) {
-        $ids .= $id . ',';
+    if ($idusers && count($idusers)) {
+        foreach ($idusers as $id) {
+            $ids .= $id . ',';
+        }
+        $ids = substr($ids, 0, -1);
     }
-    $ids = substr($ids, 0, -1);
     return notification_send_all_email($ids, $msg);
 }
 
@@ -72,16 +76,16 @@ function send_notification_incomplete_users($idusers, $msg) {
  */
 function notification_send_all_email($ids, $msg) {
     global $DB;
-    if ($ids == '') {
-        $ids = 0;
-    }
-    $sql = "SELECT firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
-    $users = $DB->get_records_sql($sql);
     $nb = 0;
-    foreach ($users as $user) {
-        $res = notification_send_email($user->email, $msg->subject, $msg->body);
-        if ($res) {
-            ++$nb;
+    if ($ids != '') {
+        $sql = "SELECT firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
+        $users = $DB->get_records_sql($sql);
+
+        foreach ($users as $user) {
+            $res = notification_send_email($user->email, $msg->subject, $msg->body);
+            if ($res) {
+                ++$nb;
+            }
         }
     }
     return get_result_action($nb, $msg->info);
