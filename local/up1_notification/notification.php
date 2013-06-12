@@ -51,6 +51,9 @@ if ($mform->is_cancelled()) {
 $completedscount = feedback_get_completeds_group_count($feedback);
 $incompletecount = feedback_count_incomplete_users($cm);
 
+$completedscount = ($completedscount?$completedscount:0);
+$incompletecount = ($incompletecount?$incompletecount:0);
+
 $params = array('nbr_rep' => $completedscount, 'nbr_non_rep' => $incompletecount);
 $params['course_name'] = $course->fullname;
 
