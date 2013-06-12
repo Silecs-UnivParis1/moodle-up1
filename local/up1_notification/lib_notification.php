@@ -72,6 +72,9 @@ function send_notification_incomplete_users($idusers, $msg) {
  */
 function notification_send_all_email($ids, $msg) {
     global $DB;
+    if ($ids == '') {
+        $ids = 0;
+    }
     $sql = "SELECT firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
     $users = $DB->get_records_sql($sql);
     $nb = 0;
