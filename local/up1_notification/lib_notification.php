@@ -9,6 +9,7 @@
 function get_notification_message($formdata, $params) {
     $message = new object();
     $message->type = $formdata->message;
+    $sitename = '[' . format_string(get_site()->shortname) . '] ';
     if ($formdata->message && $formdata->message==1) {
         //relance
         $message->info = get_string('word_relance', 'local_up1_notification');
@@ -21,6 +22,7 @@ function get_notification_message($formdata, $params) {
         $message->body = $formdata->msginvitationbody;
     }
 
+    $message->subject = $sitename . $message->subject;
     //interpolation variables si besoin
     $message->body = str_replace('[[nom_cours]]', $params['course_name'], $message->body);
     $message->body = str_replace('[[nbr_rep]]', $params['nbr_rep'], $message->body);
