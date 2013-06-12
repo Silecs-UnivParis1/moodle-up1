@@ -24,9 +24,10 @@ function get_notification_message($formdata, $params) {
 
     $message->subject = $sitename . $message->subject;
     //interpolation variables si besoin
-    $message->body = str_replace('[[nom_cours]]', $params['course_name'], $message->body);
+    $message->subject = str_replace('[[nom_feedback]]', $params['nom_feedback'], $message->subject);
     $message->body = str_replace('[[nbr_rep]]', $params['nbr_rep'], $message->body);
     $message->body = str_replace('[[nbr_non_rep]]', $params['nbr_non_rep'], $message->body);
+    $message->body = str_replace('[[lien_feedback]]', $params['lien_feedback'], $message->body);
 
     return $message;
 }

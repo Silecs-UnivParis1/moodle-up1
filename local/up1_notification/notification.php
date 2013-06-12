@@ -55,7 +55,8 @@ $completedscount = ($completedscount?$completedscount:0);
 $incompletecount = ($incompletecount?$incompletecount:0);
 
 $params = array('nbr_rep' => $completedscount, 'nbr_non_rep' => $incompletecount);
-$params['course_name'] = $course->fullname;
+$params['nom_feedback'] = format_string($feedback->name);
+$params['lien_feedback'] = $CFG->wwwroot . '/mod/feedback/view.php?id=' . $id;
 
 if ($formdata) {
     // select msg
@@ -80,10 +81,6 @@ $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-notif
 echo $OUTPUT->header();
 
 require('../../mod/feedback/tabs.php');
-
-
-
-
 
 echo $OUTPUT->box_start('feedback_info');
 echo '<span class="feedback_info">';
