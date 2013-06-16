@@ -97,6 +97,11 @@ function report_rofstats_persons_not_empty() {
     return $res;
 }
 
+/**
+ * 
+ * @global type $DB
+ * @return array(array(string)) : table rows 
+ */
 function report_rofstats_hybrid_programs() {
     global $DB;
     $res = array();
@@ -110,6 +115,35 @@ function report_rofstats_hybrid_programs() {
             $program->subnb,
             $program->coursesnb
         );
+    }
+    return $res;
+}
+
+
+/**
+ * list the ROF cached objects (components, programs, courses) with a local name 
+ * (different from official name)
+ * @global type $DB
+ * @return array(array(string)) : table rows 
+ */
+function report_rofstats_localname_not_empty() {
+    global $DB;
+    $res = array();
+    $objects = array('component', 'program', 'course');
+
+    foreach ($objects as $object) {
+        $sql = "SELECT rofid, name, localname FROM {rof_" . $object ."} WHERE localname != '' ";
+        $items = $DB->get_records_sql($sql);
+
+        foreach ($items as $item) {
+            $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $item->rofid));
+            $res[] = array (
+                $object,
+                html_writer::link($url, $item->rofid),
+                $item->name,
+                $item->localname
+            );
+        }
     }
     return $res;
 }

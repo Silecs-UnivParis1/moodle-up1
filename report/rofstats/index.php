@@ -66,6 +66,13 @@ $table->head = array('Programme', 'Titre', 'ss-prog.', 'cours');
 $table->data = report_rofstats_hybrid_programs();
 echo html_writer::table($table);
 
+echo "<h3>Noms locaux</h3>\n";
+$table = new html_table();
+$table->head = array('Objet', 'ROFid', 'Nom ROF', 'Nom local');
+$table->data = report_rofstats_localname_not_empty();
+echo html_writer::table($table);
+
+
 /*  $table->head  = array($strissue, $strstatus, $strdesc, $strconfig);
     $table->size  = array('30%', '10%', '50%', '10%' );
     $table->align = array('left', 'left', 'left', 'left');
