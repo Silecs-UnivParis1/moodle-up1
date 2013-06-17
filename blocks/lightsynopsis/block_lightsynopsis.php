@@ -22,13 +22,24 @@ class block_lightsynopsis extends block_base {
         return $this->content;
         }
 
-
         $format = course_get_format($this->page->course);
         $course = $format->get_course();
 
-
         $this->content         =  new stdClass;
-        $this->content->text   = 'We are in course #' . $course->id;
+        $this->content->text  = up1_meta_get_list($course->id, 'up1composante', false, ' / ', false) . '<br />';
+        $this->content->text .= up1_meta_get_list($course->id, 'up1mention', false, ' / ', true) . '<br />';
+        $this->content->text .= up1_meta_get_list($course->id, 'up1niveau', false, ' / ', true) . '<br />';
+
+        $cdate = usergetdate($course->startdate);
+        $this->content->text .= 'Créé le ' . $cdate['mday'].'/'.$cdate['mon'].'/'.$cdate['year'];
+        $avalider = up1_meta_get_text($course->id, 'up1avalider', false);
+        $datevalid = up1_meta_get_text($course->id, 'datevalid', false);
+        if ($avalider == 1 && $datevalid == 0) {
+            $this->content->text .= "(en attente d'approbation)";
+        }
+        $this->content->text .= '<br />';
+        $this->content->text .= 'Enseignants : ' . courselist_format::format_teachers($course, 'span', 'teachers', 3) . '<br />';
+        $this->content->text .= courselist_format::format_icons($course, 'span', 'icons');
         //$this->content->footer = 'Footer here...';
 
     return $this->content;
