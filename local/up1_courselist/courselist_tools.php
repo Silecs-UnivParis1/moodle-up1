@@ -127,15 +127,26 @@ class courselist_format {
         return $crslink;
     }
 
-    public static function format_teachers($dbcourse, $element, $class) {
+    /**
+     * format teachers : returns an abbreviated list with a title representing full list
+     * @global type $DB
+     * @param type $dbcourse course db record
+     * @param type $element html element, ex. "td" or "span" or ...
+     * @param type $class html class
+     * @param type $number number of teachers to display (1 or more)
+     * @return string
+     */
+    public static function format_teachers($dbcourse, $element, $class, $number=1) {
         global $DB;
         $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $teachers = get_role_users($role->id, $context);
-        $firstteacher = fullname(current($teachers)) . (count($teachers) > 1 ? ', …' : '');
+
+        $dispteachers = array_slice($teachers, 0, $number);
+        $headteachers = join(', ', array_map('fullname', $dispteachers)) . (count($teachers) > $number ? ', …' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
         $fullteachers = '<' . $element . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
-                . $firstteacher
+                . $headteachers
                 . '</' . $element . '>';
         return $fullteachers;
     }

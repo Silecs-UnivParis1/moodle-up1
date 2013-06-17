@@ -35,6 +35,30 @@ function up1_meta_get_text($courseid, $field, $error=false) {
 }
 
 /**
+ * return a multiple metadata up1 as a formatted list ; ex. "UFR02-... / UFR04-..."
+ * @param int $courseid
+ * @param string $field UP1 metadata text, ex. composante
+ * @param bool $error : if set, throw an exception if $field isn't found ; otherwise return an empty string
+ * @param string $separator
+ * @param bool $prefix if set, prefixes the list by the field name, ex. "Niveau : L1 / L2"
+ */
+function up1_meta_get_list($courseid, $field, $error=false, $separator=' / ', $prefix = false) {
+    global $DB;
+
+    $text = up1_meta_get_text($courseid, $field, $error);
+    $items = explode(';', $text);
+    $res = join($separator, $items);
+    if ( $res ) {
+        if ($prefix) {
+            $fieldname = $DB->get_field('custom_info_field', 'name', array('shortname' => $field), MUST_EXIST);
+            $res = $fieldname . ' : ' . $res;
+        }
+        return $res;
+    }
+}
+
+
+/**
  * return a metadata up1 as date
  * @global type $DB
  * @param int $courseid
