@@ -10,6 +10,7 @@ require_once($CFG->dirroot . "/course/lib.php");
 // for listpages...
 require_once($CFG->dirroot . "/lib/resourcelib.php");
 require_once($CFG->dirroot . "/mod/page/lib.php");
+require_once($CFG->dirroot . "/mod/page/tests/generator/lib.php");
 
 // Classes d'équivalence des diplômes pour les catégories
 function equivalent_diplomas() {
@@ -120,8 +121,20 @@ function type_simplifie($typedip, $idxEqv) {
 }
 
 
+//**** Listpages creation
+// affected tables :
+// * page (course=1)
+// * course_modules (course=1, module=15, instance->page, section->course_sections ?, idnumber='')
+// * course_sections (course=1, section=1, summary='<p>Section descr...</p>', sequence->course_modules)
 
 
+
+// {compname} = component name ex. 02-Économie
+// {vue} = tableau | arborescence
+// {sisterpagelink} = link to page arbre if current page = tableau, and reverse
+// {niveaulmda} ex. Master
+// {format} = table | tree
+// {node} = course_list node
 function listpages_templates() {
     $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
     $tpl['intro'] = '<p>L\'espace que vous cherchez n\'est pas listé sur cette page ? ' .
@@ -146,6 +159,10 @@ function listpages_templates() {
 
 }
 
+/**
+ * create the 2 automatic list pages for each of the "official" Component course-categories
+ * @global type $DB
+ */
 function listpages_create() {
     global $DB;
 
@@ -158,6 +175,11 @@ function listpages_create() {
     }
 }
 
+/**
+ * create the 2 automatic list pages for the given course category
+ * @param DBrecord $category record from table 'course_categories'
+ * @global type $DB
+ */
 function listpages_create_for($category) {
     global $DB;
 
@@ -167,6 +189,7 @@ function listpages_create_for($category) {
     );
 
     $template = listpages_templates();
+    // 4th depth subcategories (Licence, Master, ...)
     $catniveaux = $DB->get_records('course_categories', array('parent' => $category->id));
 
     foreach ($vues as $vue) {
@@ -196,7 +219,12 @@ function listpages_create_for($category) {
         }
         $pagedata->content .= $template['contentfoot'];
 
-        $pageid = page_add_instance($pagedata);
+        // see mod/page/tests/generator/lib.php l.89
+        $options = array();
+        $pagegen = new mod_page_generator();
+        $pagedata->coursemodule = $pagegen->precreate_course_module(1, $options);
+        $pageid = page_add_instance($pagedata, null);
+        return $pagegen->post_add_instance($pageid, $pagedata->coursemodule);
     }
 }
 
