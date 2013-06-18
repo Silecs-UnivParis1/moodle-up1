@@ -36,9 +36,10 @@ function get_notification_message($formdata, $params) {
  * Envoi une notification au user ayant déjà répondu au feedback
  * @param array $responses
  * @param object $msg
+ * @param array $infolog informations pour le log pour les envois de mails
  * @return string : message interface
  */
-function send_notification_complete_users($responses, $msg) {
+function send_notification_complete_users($responses, $msg, $infolog) {
     global $DB;
     $ids = '';
     if ($responses && count($responses)) {
@@ -47,16 +48,17 @@ function send_notification_complete_users($responses, $msg) {
         }
         $ids = substr($ids, 0, -1);
     }
-    return notification_send_all_email($ids, $msg);
+    return notification_send_all_email($ids, $msg, $infolog);
 }
 
 /**
  * Envoi une notification au user n'ayant pas encore répondu au feedback
  * @param array $idusers
  * @param object $msg
+ * @param array $infolog informations pour le log pour les envois de mails
  * @return string : message interface
  */
-function send_notification_incomplete_users($idusers, $msg) {
+function send_notification_incomplete_users($idusers, $msg, $infolog) {
     global $DB;
     $ids = '';
     if ($idusers && count($idusers)) {
@@ -65,16 +67,17 @@ function send_notification_incomplete_users($idusers, $msg) {
         }
         $ids = substr($ids, 0, -1);
     }
-    return notification_send_all_email($ids, $msg);
+    return notification_send_all_email($ids, $msg, $infolog);
 }
 
 /**
  * Envoi une notification au user dont l'identifiant apparait dans $ids
  * @param string $ids : liste des identifiants user (format : id1,id2,id3
  * @param object $msg
+ * @param array $infolog informations pour le log pour les envois de mails
  * @return string : message interface
  */
-function notification_send_all_email($ids, $msg) {
+function notification_send_all_email($ids, $msg, $infolog) {
     global $DB;
     $nb = 0;
     if ($ids != '') {
@@ -88,23 +91,32 @@ function notification_send_all_email($ids, $msg) {
             }
         }
     }
-    return get_result_action($nb, $msg->info);
+    $infolog['nb'] = $nb;
+    $infolog['typemsg'] = $msg->info;
+
+    return get_result_action($infolog);
 }
 
 /**
  * construit le message d'interface après l'envoi groupé de notification
- * @param int $nb : nombre de notification envoyé
- * @param string $type : type de notification envoyée
+ * @param array $infolog informations pour le log pour les envois de mails
  * @return string message interface
  */
-function get_result_action($nb, $type) {
+function get_result_action($infolog) {
     $s = '';
-    if ($nb == 0) {
+
+    if ($infolog['nb'] == 0) {
         return get_string('nopostssend', 'local_up1_notification');
-    } elseif ($nb > 1) {
+    } elseif ($infolog['nb'] > 1) {
         $s = 's';
     }
-    return $nb . ' message' . $s . ' de type "' . $type . '" envoyé' . $s;
+
+    $message = $infolog['nb'] . ' message' . $s . ' de type "' . $infolog['typemsg'] . '" envoyé' . $s;
+    //log
+    add_to_log($infolog['courseid'], 'up1_notification', 'send notification',
+        $infolog['cmurl'], $message . ' ('. $infolog['public'] .')', $infolog['cmid'], $infolog['userid']);
+
+    return $message;
 }
 
 /**
