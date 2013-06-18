@@ -214,7 +214,8 @@ function listpages_create_for($category) {
         $pagedata->printintro = 1; /** @todo Check format */
         $pagedata->section = 1;
         $pagedata->course = $courseId;
-        $pagedata->introformat = FORMAT_MOODLE;
+        $pagedata->introformat = FORMAT_HTML;
+        $pagedata->contentformat = FORMAT_HTML;
         $pagedata->legacyfiles = 0;
         $pagedata->display = RESOURCELIB_DISPLAY_AUTO;
         $pagedata->revision = 1;
