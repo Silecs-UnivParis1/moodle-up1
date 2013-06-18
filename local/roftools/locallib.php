@@ -358,3 +358,20 @@ EOL;
         return $content;
     }
 }
+
+function delete_pages($firstpage, $lastpage) {
+    global $DB;
+
+    $firstcm = $DB->get_field('course_modules', 'id', array('instance' => $firstpage), MUST_EXIST);
+    $lastcm  = $DB->get_field('course_modules', 'id', array('instance' => $lastpage), MUST_EXIST);
+
+    $where = "id <= ". $lastpage . " AND id >= " . $firstpage;
+    $DB->delete_records_select('page', $where, null);
+
+    $where = "id <= ". $lastcm . " AND id >= " . $firstcm;
+    $DB->delete_records_select('course_modules', $where, null);
+
+    $wherecs = "course = 1 AND section = 1 AND sequence LIKE '%," . $lastcm . "'";
+    $DB->delete_record_select('page', $wherecs, null);
+    
+}
