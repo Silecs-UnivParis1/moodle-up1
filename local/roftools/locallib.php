@@ -6,10 +6,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+global $CFG;
+
 require_once($CFG->dirroot . "/course/lib.php");
 // for listpages...
 require_once($CFG->dirroot . "/lib/resourcelib.php");
 require_once($CFG->dirroot . "/mod/page/lib.php");
+require_once($CFG->dirroot . "/course/lib.php");
+
+/* @var $DB moodle_database */
 
 // Classes d'équivalence des diplômes pour les catégories
 function equivalent_diplomas() {
@@ -33,8 +38,14 @@ function equivalent_diplomas() {
 function high_level_categories() {
     return
         array(
-            array('name' => 'Année 2013-2014', 'idnumber' => '1:2013-2014'),
-            array('name' => 'Paris 1', 'idnumber' => '2:UP1'),
+            array(
+                'name' => get_config('local_roftools', 'rof_year_name'),
+                'idnumber' => get_config('local_roftools', 'rof_year_code')
+                ),
+            array(
+                'name' =>  get_config('local_roftools', 'rof_etab_name'),
+                'idnumber' => get_config('local_roftools', 'rof_etab_code'),
+                ),
         );
 }
 
@@ -63,7 +74,9 @@ function create_rof_categories($verb=0) {
     // Crée les niveaux issus du ROF : composantes (3) et types-diplômes simplifiés (4)
     $components = $DB->get_records('rof_component');
     foreach ($components as $component) {
-        if ($verb > 0) echo "\n$component->number $component->name \n";
+        if ($verb > 0) {
+            echo "\n$component->number $component->name \n";
+        }
         $newcategory = new stdClass();
         $newcategory->name = $component->name;
         $newcategory->idnumber = '3:' . $component->number;
@@ -71,14 +84,19 @@ function create_rof_categories($verb=0) {
         $category = create_course_category($newcategory);
         $compCatId = $category->id;
         fix_course_sortorder();
-        $sql = 'SELECT * FROM {rof_program} WHERE rofid IN ' . serialized_to_sql($component->sub);
-        $programs = $DB->get_records_sql($sql);
+        list ($inSql, $inParams) = $DB->get_in_or_equal($component->sub);
+        $sql = 'SELECT * FROM {rof_program} WHERE rofid ' . $inSql;
+        $programs = $DB->get_records_sql($sql, $inParams);
 
         $diplomeCat = array();
         foreach ($programs as $program) {
-            if ($verb >= 1) echo '.';
-            if ($verb >= 2) echo " $program->rofid ";
-            $typesimple = type_simplifie($program->typedip, $idxEqv);
+            if ($verb >= 1) {
+                echo '.';
+            }
+            if ($verb >= 2) {
+                echo " $program->rofid ";
+            }
+            $typesimple = simplifyType($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
 
@@ -88,31 +106,28 @@ function create_rof_categories($verb=0) {
                 $newcategory->name = $classeDiplome;
                 $newcategory->idnumber = '4:' . $component->number .'/'. $classeDiplome;
                 $newcategory->parent = $compCatId;
-                if ($verb >= 1) echo " $classeDiplome";
+                if ($verb >= 1) {
+                    echo " $classeDiplome";
+                }
                 $category = create_course_category($newcategory);
                 // $progCatId = $category->id;
                 fix_course_sortorder();
             }
         } // $dipOrdre
-        if ($verb >= 2) echo "\n";
+        if ($verb >= 2) {
+            echo "\n";
+        }
     } // $components
 
 }
 
 /**
- * turns a serialized list into one suitable for SQL IN request, ex.
- * "A,B,C" -> "'A','B','C'"
- */
-function serialized_to_sql($serial) {
-    return "('" . implode("', '", explode(",", $serial)) ."')";
-}
-
-/**
  * returns a simplified category for the diploma, ex. 'L2' -> 'Licences'
  * @param string $typedip
+ * @return string
  */
-function type_simplifie($typedip, $idxEqv) {
-    if (array_key_exists($typedip, $idxEqv)) {
+function simplifyType($typedip, $idxEqv) {
+    if (isset($idxEqv[$typedip])) {
         return $idxEqv[$typedip];
     } else {
         return 'Autres';
@@ -120,32 +135,18 @@ function type_simplifie($typedip, $idxEqv) {
 }
 
 
+//**** Listpages creation
+// affected tables :
+// * page (course=1)
+// * course_modules (course=1, module=15, instance->page, section->course_sections ?, idnumber='')
+// * course_sections (course=1, section=1, summary='<p>Section descr...</p>', sequence->course_modules)
 
 
-function listpages_templates() {
-    $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
-    $tpl['intro'] = '<p>L\'espace que vous cherchez n\'est pas listé sur cette page ? ' .
-        'Avez-vous pensé à le trouver du côté des ' .
-        '“<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?</p>';
 
-    $tpl['contenttab'] = '<div class="tabtree">'
-        . '<ul class="tabrow0">'
-        . '<li class="first onerow here selected"><a class="nolink"><span>{vue}</span></a>'
-        . '<div class="tabrow1 empty"></div>'
-        . '</li>'
-        . '<li>{sisterpagelink}</li>'
-        . '</ul>'
-        . '</div>';
-    $tpl['contentmain'] = '<h3>Espaces de cours de {niveaulmda}</h3>'
-        . '<p>[courselist format={format} node={node}]</p>'
-        . '<p> </p>';
-    $tpl['contentfoot'] = ''
-        . '<p><span style="font-size: x-small;">Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours. Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel, approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.</span></p>'
-        . '<p><span style="font-size: small;"><span style="font-size: x-small;">Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l\'Université Paris 1 Panthéon-Sorbonne, sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l\'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.</span><a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a></span></p>';
-    return $tpl;
-
-}
-
+/**
+ * create the 2 automatic list pages for each of the "official" Component course-categories
+ * @global moodle_database $DB
+ */
 function listpages_create() {
     global $DB;
 
@@ -154,49 +155,224 @@ function listpages_create() {
     $itercategories = $DB->get_records('course_categories', array('visible' => 1, 'parent' => $rootcat));
     foreach ($itercategories as $category) {
         echo "Creating page for " . $category->name . "\n";
-        $created = listpages_create_for($category);
+        listpages_create_for($category);
     }
 }
 
+/**
+ * Create the 2 automatic list pages for the given course category
+ *
+ * @global moodle_database $DB
+ * @param DBrecord $category record from table 'course_categories'
+ */
 function listpages_create_for($category) {
     global $DB;
 
-    $vues = array(
-        'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
-        'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
+    $url = array();
+    $views = array(
+        'tableau' => array('code' => 'tableau', 'name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
+        'arborescence' => array('code' => 'arborescence','name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
     );
+    $courseId = 1;
+    $modulePage = $DB->get_field('modules', 'id', array('name' => 'page'));
 
-    $template = listpages_templates();
-    $catniveaux = $DB->get_records('course_categories', array('parent' => $category->id));
+    course_create_sections_if_missing($courseId, 1);
 
-    foreach ($vues as $vue) {
-        echo "    " . $vue['name'] . "\n";
+    $template = new ListpagesTemplates($category);
+    $template->sisterpagelink = ''; /** @todo sisterpagelink */
+
+    $cmsId = array();
+    foreach ($views as $viewcode => $view) {
+        $template->view = $view;
+
+        $newcm = new stdClass();
+        $newcm->course = $courseId;
+        $newcm->module = $modulePage;
+        $newcm->instance = 0; // not known yet, will be updated later (this is similar to restore code)
+        $newcm->visible = 1;
+        $newcm->visibleold = 1;
+        $newcm->groupmode = 0;
+        $newcm->groupingid = 0;
+        $newcm->groupmembersonly = 0;
+        $newcm->completion = 0;
+        $newcm->completiongradeitemnumber = NULL;
+        $newcm->completionview = 0;
+        $newcm->completionexpected = 0;
+        $newcm->availablefrom = 0;
+        $newcm->availableuntil = 0;
+        $newcm->showavailability = 0;
+        $newcm->showdescription = 0;
+        /**
+         * @todo Optimize with a direct DB action, then call rebuild_course_cache() once the loop has ended.
+         */
+        $cmid = add_course_module($newcm);
+        $cmsId[$viewcode] = $cmid;
 
         $pagedata = new stdClass();
-        $pagedata->course = 1;
-        $pagedata->introformat = FORMAT_MOODLE; //1
+        $pagedata->coursemodule  = $cmid;
+        $pagedata->printheading = 1; /** @todo Check format */
+        $pagedata->printintro = 1; /** @todo Check format */
+        $pagedata->section = 1;
+        $pagedata->course = $courseId;
+        $pagedata->introformat = FORMAT_HTML;
+        $pagedata->contentformat = FORMAT_HTML;
         $pagedata->legacyfiles = 0;
-        $pagedata->display = RESOURCELIB_DISPLAY_AUTO; //5
+        $pagedata->display = RESOURCELIB_DISPLAY_AUTO;
         $pagedata->revision = 1;
-        // $pagedata->timemodified = time();
+        $pagedata->name = $template->getName();
+        $pagedata->intro = $template->getIntro();
+        $pagedata->content = $template->getContent();
 
-        $pagedata->name = str_replace('{compname}', $category->name, $template['name']);
-        $pagedata->name = str_replace('{vue}', $vue['name'], $pagedata->name);
-        $pagedata->intro = $template['intro'];
+        page_add_instance($pagedata);
+        course_add_cm_to_section($courseId, $cmid, $pagedata->section);
 
-        $pagedata->content = str_replace('{vue}', $vue['name'], $template['contenttab']);
-        //todo sisterpagelink
-
-        foreach ($catniveaux as $niveaulmda) {
-            $node = '/cat' . $niveaulmda->id . '/' . substr($category->idnumber, 2);
-            $nivcontent = str_replace('{niveaulmda}', $category->name, $template['contentmain']);
-            $nivcontent = str_replace('{node}', $node, $nivcontent);
-            $nivcontent = str_replace('{node}', $node, $nivcontent);
-            $pagedata->content .= $nivcontent;
+        $url = new moodle_url('/mod/page/view.php', array('id' => $cmid));
+        echo "    {$view['name']} : $url\n";
+    }
+    // update crossed links
+    foreach ($view as $viewcode => $view) {
+        foreach ($cmsId as $othercode => $cmId) {
+            if ($othercode !== $viewcode) {
+                $otherUrl = new moodle_url('/mod/page/view.php', array('id' => $cmId));
+                $DB->execute(
+                        "UPDATE {page} SET content = REPLACE(content, '{link-$othercode}', ?)",
+                        array($otherUrl->out(true))
+                );
+            }
         }
-        $pagedata->content .= $template['contentfoot'];
-
-        $pageid = page_add_instance($pagedata);
     }
 }
 
+/**
+ * Return an array of templates.
+ *
+ * @return array of templates
+ */
+class ListpagesTemplates
+{
+// {format} = table | tree
+
+    /** @var string tableau | arborescence */
+    public $view;
+    /** @var string link to page arbre if current page = tableau, and reverse */
+    public $sisterpagelink;
+
+    private $category;
+    /** @var string component name ex. 02-Économie */
+    private $compname;
+    /** @var array 4th depth subcategories (Licence, Master, ...) */
+    private $niveauxLmda;
+
+    private static $tpl_name = 'Espaces de cours de {compname} ({vue})';
+    private static $tpl_intro = <<<EOL
+<p>
+    L'espace que vous cherchez n'est pas listé sur cette page ?
+    Avez-vous pensé à le trouver du côté des
+    “<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?
+</p>
+EOL;
+    private static $tpl_contenttab = array(
+        'tableau' => <<< EOL
+<div class="tabtree">
+    <ul class="tabrow0">
+        <li class="first onerow here selected">
+            <a class="nolink"><span>{vue}</span></a>
+            <div class="tabrow1 empty"></div>
+        </li>
+        <li class="last onerow"><a href="{link-arborescence}">Vue arborescente</a></li>
+    </ul>
+</div>
+EOL
+        ,
+        'arborescence' => <<< EOL
+<div class="tabtree">
+    <ul class="tabrow0">
+        <li class="first onerow"><a href="{link-tableau}">Vue tableau</a></li>
+        <li class="last onerow here selected">
+            <a class="nolink"><span>{vue}</span></a>
+            <div class="tabrow1 empty"></div>
+        </li>
+    </ul>
+</div>
+EOL
+    );
+    private static $tpl_contentmain = <<< EOL
+<h3>Espaces de cours de {niveaulmda}</h3>
+<p>
+    [courselist format={format} node={node}]
+</p>
+<p></p>
+EOL;
+    private static $tpl_contentfoot = <<< EOL
+<p>
+    <span style="font-size: x-small;">
+        Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours.
+        Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel,
+        approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.
+    </span>
+</p>
+<p>
+    <span style="font-size: x-small;">
+        Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l'Université Paris 1 Panthéon-Sorbonne,
+        sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.
+    </span>
+    <span style="font-size: small;">
+        <a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a>
+    </span>
+</p>
+EOL;
+
+    public function __construct($category) {
+        $this->setCategory($category);
+    }
+
+    public function setCategory($category) {
+        global $DB;
+        $this->category = $category;
+        $this->compname = $category->name;
+        $this->niveauxLmda = $DB->get_records('course_categories', array('parent' => $category->id));
+    }
+
+    public function getName() {
+        return str_replace(
+                array('{compname}', '{vue}'),
+                array($this->compname, $this->view['name']),
+                self::$tpl_name
+        );
+    }
+
+    public function getIntro() {
+        return self::$tpl_intro;
+    }
+
+    public function getContent() {
+        $content = str_replace('{vue}', $this->view['name'], self::$tpl_contenttab[$this->view['code']]);
+        foreach ($this->niveauxLmda as $niveau) {
+            $node = '/cat' . $niveau->id;
+            $content .= str_replace(
+                    array('{niveaulmda}', '{node}', '{format}'),
+                    array($niveau->name, $node, $this->view['format']),
+                    self::$tpl_contentmain
+            );
+        }
+        $content .= self::$tpl_contentfoot;
+        return $content;
+    }
+}
+
+function delete_pages($firstpage, $lastpage) {
+    global $DB;
+
+    $firstcm = $DB->get_field('course_modules', 'id', array('instance' => $firstpage), MUST_EXIST);
+    $lastcm  = $DB->get_field('course_modules', 'id', array('instance' => $lastpage), MUST_EXIST);
+
+    $where = "id <= ". $lastpage . " AND id >= " . $firstpage;
+    $DB->delete_records_select('page', $where, null);
+
+    $where = "id <= ". $lastcm . " AND id >= " . $firstcm;
+    $DB->delete_records_select('course_modules', $where, null);
+
+    $wherecs = "course = 1 AND section = 1 AND sequence LIKE '%," . $lastcm . "'";
+    $DB->delete_record_select('page', $wherecs, null);
+    
+}

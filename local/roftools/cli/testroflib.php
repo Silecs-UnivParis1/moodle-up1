@@ -12,9 +12,9 @@ echo rof_format_path(rof_get_course_first_path($argv[1]), 'combined') . "\n\n";
 // rof_insert_paths_statistics(0);
 $path = array('27', 'UP1-PROG37797', 'UP1-PROG25375');
 $cpath = array(
-'27' => '27-Mathématiques et Informatique',
-'UP1-PROG37797' => 'Licence Informatique (MIAGE classique)',
-'UP1-PROG25375' => 'Semestre 5 L3'
+    '27' => '27-Mathématiques et Informatique',
+    'UP1-PROG37797' => 'Licence Informatique (MIAGE classique)',
+    'UP1-PROG25375' => 'Semestre 5 L3'
 );
 
 /*

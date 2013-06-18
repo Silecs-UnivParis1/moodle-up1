@@ -30,7 +30,7 @@ class course_wizard_confirm extends moodleform {
         $form2 = $SESSION->wizard['form_step2'];
         if (isset($form2['rattachement1']) ) {
             $idratt1 = $form2['rattachement1'];
-            $mform->addElement('text', 'category',  get_string('categoryblockE3', 'local_crswizard') . ' : ');
+            $mform->addElement('text', 'category',  get_string('categoryblockE3', 'local_crswizard') . ' : ', 'size="100"');
             $mform->setConstant('category' , $displaylist[$idratt1] . ' / ' . $form2['fullname']);
         } else {
             $mform->addElement('select', 'category', get_string('categoryblockE3', 'local_crswizard') . ' : ', $displaylist);
@@ -41,7 +41,7 @@ class course_wizard_confirm extends moodleform {
             $first = true;
             foreach ($SESSION->wizard['form_step3']['rattachements'] as $pathid) {
                 $select = $mform->createElement('text', "rattachements$pathid",
-                    ($first? get_string('labelE7ratt2', 'local_crswizard') : ''));
+                    ($first? get_string('labelE7ratt2', 'local_crswizard') : ''), 'size="100"');
                 $select->setValue($paths[$pathid]);
                 $mform->addElement($select);
                 $first = false;
@@ -65,9 +65,9 @@ class course_wizard_confirm extends moodleform {
             }
         }
 
-        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="100"');
 
-        $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="20"');
+        $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="40"');
 
         /** @todo display the summary correctly, with Moodle's conversion functions */
         $htmlsummary = '<div class="fitemtitle"><div class="fstaticlabel"><label>'
