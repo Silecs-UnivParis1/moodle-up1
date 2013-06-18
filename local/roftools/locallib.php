@@ -10,7 +10,7 @@ require_once($CFG->dirroot . "/course/lib.php");
 // for listpages...
 require_once($CFG->dirroot . "/lib/resourcelib.php");
 require_once($CFG->dirroot . "/mod/page/lib.php");
-// require_once($CFG->dirroot . "/mod/page/tests/generator/lib.php");
+require_once($CFG->dirroot . "/course/lib.php");
 
 /* @var $DB moodle_database */
 
@@ -88,7 +88,7 @@ function create_rof_categories($verb=0) {
             if ($verb >= 2) {
                 echo " $program->rofid ";
             }
-            $typesimple = type_simplifie($program->typedip, $idxEqv);
+            $typesimple = simplifyType($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
 
@@ -114,19 +114,12 @@ function create_rof_categories($verb=0) {
 }
 
 /**
- * turns a serialized list into one suitable for SQL IN request, ex.
- * "A,B,C" -> "'A','B','C'"
- */
-function serialized_to_sql($serial) {
-    return "('" . implode("', '", explode(",", $serial)) . "')";
-}
-
-/**
  * returns a simplified category for the diploma, ex. 'L2' -> 'Licences'
  * @param string $typedip
+ * @return string
  */
-function type_simplifie($typedip, $idxEqv) {
-    if (array_key_exists($typedip, $idxEqv)) {
+function simplifyType($typedip, $idxEqv) {
+    if (isset($idxEqv[$typedip])) {
         return $idxEqv[$typedip];
     } else {
         return 'Autres';
@@ -148,6 +141,11 @@ function type_simplifie($typedip, $idxEqv) {
 // {niveaulmda} ex. Master
 // {format} = table | tree
 // {node} = course_list node
+/**
+ * Return an array of templates.
+ *
+ * @return array of templates
+ */
 function listpages_templates() {
     $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
     $tpl['intro'] = <<<EOL
@@ -215,14 +213,15 @@ function listpages_create() {
 }
 
 /**
- * create the 2 automatic list pages for the given course category
- * @param DBrecord $category record from table 'course_categories'
+ * Create the 2 automatic list pages for the given course category
+ *
  * @global type $DB
+ * @param DBrecord $category record from table 'course_categories'
  */
 function listpages_create_for($category) {
     global $DB;
 
-    $vues = array(
+    $views = array(
         'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
         'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
     );
@@ -231,24 +230,22 @@ function listpages_create_for($category) {
     // 4th depth subcategories (Licence, Master, ...)
     $catniveaux = $DB->get_records('course_categories', array('parent' => $category->id));
 
-    foreach ($vues as $vue) {
-        echo "    " . $vue['name'] . "\n";
+    foreach ($views as $view) {
+        echo "    " . $view['name'] . "\n";
 
         $pagedata = new stdClass();
         $pagedata->course = 1;
-        $pagedata->introformat = FORMAT_MOODLE; //1
+        $pagedata->introformat = FORMAT_MOODLE;
         $pagedata->legacyfiles = 0;
-        $pagedata->display = RESOURCELIB_DISPLAY_AUTO; //5
+        $pagedata->display = RESOURCELIB_DISPLAY_AUTO;
         $pagedata->revision = 1;
         // $pagedata->timemodified = time();
-
         $pagedata->name = str_replace('{compname}', $category->name, $template['name']);
-        $pagedata->name = str_replace('{vue}', $vue['name'], $pagedata->name);
+        $pagedata->name = str_replace('{vue}', $view['name'], $pagedata->name);
         $pagedata->intro = $template['intro'];
 
-        $pagedata->content = str_replace('{vue}', $vue['name'], $template['contenttab']);
+        $pagedata->content = str_replace('{vue}', $view['name'], $template['contenttab']);
         //todo sisterpagelink
-
         foreach ($catniveaux as $niveaulmda) {
             $node = '/cat' . $niveaulmda->id . '/' . substr($category->idnumber, 2);
             $nivcontent = str_replace('{niveaulmda}', $category->name, $template['contentmain']);
@@ -258,12 +255,14 @@ function listpages_create_for($category) {
         }
         $pagedata->content .= $template['contentfoot'];
 
-        // see mod/page/tests/generator/lib.php l.89
+        /*
         $options = array();
         $pagegen = new mod_page_generator();
         $pagedata->coursemodule = $pagegen->precreate_course_module(1, $options);
         $pageid = page_add_instance($pagedata, null);
         return $pagegen->post_add_instance($pageid, $pagedata->coursemodule);
+         *
+         */
     }
 }
 
