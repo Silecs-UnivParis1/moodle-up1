@@ -64,7 +64,9 @@ function create_rof_categories($verb=0) {
     // Crée les niveaux issus du ROF : composantes (3) et types-diplômes simplifiés (4)
     $components = $DB->get_records('rof_component');
     foreach ($components as $component) {
-        if ($verb > 0) echo "\n$component->number $component->name \n";
+        if ($verb > 0) {
+            echo "\n$component->number $component->name \n";
+        }
         $newcategory = new stdClass();
         $newcategory->name = $component->name;
         $newcategory->idnumber = '3:' . $component->number;
@@ -77,8 +79,12 @@ function create_rof_categories($verb=0) {
 
         $diplomeCat = array();
         foreach ($programs as $program) {
-            if ($verb >= 1) echo '.';
-            if ($verb >= 2) echo " $program->rofid ";
+            if ($verb >= 1) {
+                echo '.';
+            }
+            if ($verb >= 2) {
+                echo " $program->rofid ";
+            }
             $typesimple = type_simplifie($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
@@ -89,13 +95,17 @@ function create_rof_categories($verb=0) {
                 $newcategory->name = $classeDiplome;
                 $newcategory->idnumber = '4:' . $component->number .'/'. $classeDiplome;
                 $newcategory->parent = $compCatId;
-                if ($verb >= 1) echo " $classeDiplome";
+                if ($verb >= 1) {
+                    echo " $classeDiplome";
+                }
                 $category = create_course_category($newcategory);
                 // $progCatId = $category->id;
                 fix_course_sortorder();
             }
         } // $dipOrdre
-        if ($verb >= 2) echo "\n";
+        if ($verb >= 2) {
+            echo "\n";
+        }
     } // $components
 
 }
@@ -105,7 +115,7 @@ function create_rof_categories($verb=0) {
  * "A,B,C" -> "'A','B','C'"
  */
 function serialized_to_sql($serial) {
-    return "('" . implode("', '", explode(",", $serial)) ."')";
+    return "('" . implode("', '", explode(",", $serial)) . "')";
 }
 
 /**
@@ -137,24 +147,50 @@ function type_simplifie($typedip, $idxEqv) {
 // {node} = course_list node
 function listpages_templates() {
     $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
-    $tpl['intro'] = '<p>L\'espace que vous cherchez n\'est pas listé sur cette page ? ' .
-        'Avez-vous pensé à le trouver du côté des ' .
-        '“<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?</p>';
+    $tpl['intro'] = <<<EOL
+<p>
+    L'espace que vous cherchez n'est pas listé sur cette page ?
+    Avez-vous pensé à le trouver du côté des
+    “<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?
+</p>
+EOL;
 
-    $tpl['contenttab'] = '<div class="tabtree">'
-        . '<ul class="tabrow0">'
-        . '<li class="first onerow here selected"><a class="nolink"><span>{vue}</span></a>'
-        . '<div class="tabrow1 empty"></div>'
-        . '</li>'
-        . '<li>{sisterpagelink}</li>'
-        . '</ul>'
-        . '</div>';
-    $tpl['contentmain'] = '<h3>Espaces de cours de {niveaulmda}</h3>'
-        . '<p>[courselist format={format} node={node}]</p>'
-        . '<p> </p>';
-    $tpl['contentfoot'] = ''
-        . '<p><span style="font-size: x-small;">Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours. Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel, approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.</span></p>'
-        . '<p><span style="font-size: small;"><span style="font-size: x-small;">Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l\'Université Paris 1 Panthéon-Sorbonne, sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l\'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.</span><a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a></span></p>';
+    $tpl['contenttab'] = <<< EOL
+<div class="tabtree">
+    <ul class="tabrow0">
+        <li class="first onerow here selected">
+            <a class="nolink"><span>{vue}</span></a>
+            <div class="tabrow1 empty"></div>
+        </li>
+        <li>{sisterpagelink}</li>
+    </ul>
+</div>
+EOL;
+    $tpl['contentmain'] = <<< EOL
+<h3>Espaces de cours de {niveaulmda}</h3>
+<p>
+    [courselist format={format} node={node}]
+</p>
+<p></p>
+EOL;
+    $tpl['contentfoot'] = <<< EOL
+<p>
+    <span style="font-size: x-small;">
+        Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours.
+        Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel,
+        approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.
+    </span>
+</p>
+<p>
+    <span style="font-size: x-small;">
+        Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l'Université Paris 1 Panthéon-Sorbonne,
+        sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.
+    </span>
+    <span style="font-size: small;">
+        <a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a>
+    </span>
+</p>
+EOL;
     return $tpl;
 
 }
