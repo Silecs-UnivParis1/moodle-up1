@@ -49,7 +49,6 @@ var getTree = function (options) {
 	    current[lastElem] = val;
         first_option = false;
     });
-    //if (console && console.log) console.log($.toJSON(root)); // jquery-json plugin
     return root;
 };
 
@@ -86,7 +85,7 @@ var buildSelectLine = function(subselect, depth) {
     }
     line.append($('<div class="felement fselect">').append(subselect));
     return line;
-}
+};
 
 var setSubselects = function (selectsDiv, onchange, root, wanted) {
     var tree = root;
@@ -146,6 +145,10 @@ $.fn.transformIntoSubselects = function (cfg) {
         var theSelect = $(this);
         var valuesSelected = theSelect.val();
         if (theSelect.attr('multiple')) {
+            // workaround MDL-30940
+            var sname = theSelect.attr('name').toString().replace(/\[\]$/, '');
+            $('input[type="hidden"][name="' + sname + '"]').remove();
+            // init
             if (!valuesSelected) {
                 valuesSelected = [0];
             }
@@ -158,7 +161,7 @@ $.fn.transformIntoSubselects = function (cfg) {
                 .children().first().append(button);
         }
         transformIntoSubselects(theSelect);
-        if (typeof valuesSelected != 'string' && valuesSelected.length > 1) {
+        if ((typeof valuesSelected !== 'string') && valuesSelected.length > 1) {
             for (var i=1; i < valuesSelected.length; i++) {
                 duplicator.apply(this, [valuesSelected[i]]);
             }
@@ -168,7 +171,7 @@ $.fn.transformIntoSubselects = function (cfg) {
         }
     });
     return $(this);
-}
+};
 
 var build_duplicator = function (sel, config) {
     var root = sel.parent().parent();
@@ -185,8 +188,8 @@ var build_duplicator = function (sel, config) {
         //select.attr('name', select.attr('name').replace('[0]', '[' + num + ']'));
         select.attr('id', select.attr('id') + '_' + num);
         root.siblings().last().before(inserted);
-        inserted.find('select').first().transformIntoSubselects(config)
-    }
-}
+        inserted.find('select').first().transformIntoSubselects(config);
+    };
+};
 
 })(jQuery);

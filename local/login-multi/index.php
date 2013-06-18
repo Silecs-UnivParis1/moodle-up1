@@ -55,6 +55,7 @@ $PAGE->requires->js_init_code('
     var normalListener = true;
     if (typeof document.addEventListener == "function") {
         document.getElementById("toggle-local").addEventListener("click", toggleLocalLogin, true);
+        document.getElementById("local-login-title").addEventListener("click", toggleLocalLogin, true);
     } else {
         document.getElementById("toggle-local").attachEvent("onclick", toggleLocalLogin); // Hmmm, IE8!
         normalListener = false;
@@ -160,7 +161,7 @@ echo $OUTPUT->box_end();
 echo '<div id="local-login">';
 echo $OUTPUT->box_start('generalbox local-login');
 echo '<div id="toggle-local">&#x25BD;</div>';
-echo $OUTPUT->heading("Un compte invité", 3);
+echo $OUTPUT->heading("Un compte invité", 3, 'main', 'local-login-title');
 display_local_login();
 echo $OUTPUT->box_end();
 echo "</div>";

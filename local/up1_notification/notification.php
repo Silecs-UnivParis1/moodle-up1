@@ -13,6 +13,8 @@ require_once('notification_form.php');
 $courseid = optional_param('courseid', false, PARAM_INT);
 $id = required_param('id', PARAM_INT);
 
+$infolog = array();
+
 // faire pleins de vérif
 
 if (! $cm = get_coursemodule_from_id('feedback', $id)) {
@@ -30,9 +32,15 @@ if ($course->id == SITEID AND !$courseid) {
     $courseid = SITEID;
 }
 
+$infolog['courseid'] = $cm->course;
+$infolog['cmid'] = $cm->id;
+
 $current_tab =  'notification';
 
 $url = new moodle_url('/local/up1_notification/notification.php', array('id'=>$id));
+$infolog['cmurl'] = $url;
+$infolog['userid'] = $USER->id;
+
 $PAGE->set_url($url);
 $context = context_module::instance($cm->id);
 require_login($course, true, $cm);
@@ -59,17 +67,25 @@ $params['nom_feedback'] = format_string($feedback->name);
 $params['lien_feedback'] = $CFG->wwwroot . '/mod/feedback/view.php?id=' . $id;
 
 if ($formdata) {
+    //copie msg user
+    if (isset($formdata->copie)) {
+        $infolog['copie'] = 1;
+        $infolog['useremail'] = $USER->email;
+        $infolog['userfullname'] = fullname($USER);
+    }
     // select msg
     $msg = get_notification_message($formdata, $params);
     //envoyer message
     if ($formdata->destinataire && $formdata->destinataire==1) {
         //répondant
+        $infolog['public'] = 'répondant';
         $responses = feedback_get_completeds_group($feedback);
-        $msgresult = send_notification_complete_users($responses, $msg);
+        $msgresult = send_notification_complete_users($responses, $msg, $infolog);
     } else {
         // non-répondant
+        $infolog['public'] = 'non-répondant';
         $idusers = feedback_get_incomplete_users($cm);
-        $msgresult = send_notification_incomplete_users($idusers, $msg);
+        $msgresult = send_notification_incomplete_users($idusers, $msg, $infolog);
     }
 }
 $PAGE->set_heading(format_string($course->fullname));
