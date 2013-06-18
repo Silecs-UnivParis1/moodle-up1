@@ -155,7 +155,9 @@ function listpages_create() {
     $itercategories = $DB->get_records('course_categories', array('visible' => 1, 'parent' => $rootcat));
     foreach ($itercategories as $category) {
         echo "Creating page for " . $category->name . "\n";
-        listpages_create_for($category);
+        $url = listpages_create_for($category);
+        echo "    " . $url['tableau'];
+        echo "    " . $url['arborescence'];
     }
 }
 
@@ -164,10 +166,12 @@ function listpages_create() {
  *
  * @global moodle_database $DB
  * @param DBrecord $category record from table 'course_categories'
+ * @return array $url = array('tableau' => ..., 'arborescence' => ...)
  */
 function listpages_create_for($category) {
     global $DB;
 
+    $url = array();
     $views = array(
         'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
         'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
@@ -180,10 +184,10 @@ function listpages_create_for($category) {
     $template = new ListpagesTemplates($category);
     $template->sisterpagelink = ''; /** @todo sisterpagelink */
 
-    foreach ($views as $view) {
+    foreach ($views as $viewcode => $view) {
         echo "    " . $view['name'] . "\n";
 
-        $template->vue = $view['name'];
+        $template->view = $view;
 
         $newcm = new stdClass();
         $newcm->course = $courseId;
@@ -221,10 +225,11 @@ function listpages_create_for($category) {
         $pagedata->intro = $template->getIntro();
         $pagedata->content = $template->getContent();
 
-        page_add_instance($pagedata);
-
+        $pageid = page_add_instance($pagedata);
         course_add_cm_to_section($courseId, $cmid, $pagedata->section);
+        $url[$viewcode] = new moodle_url('/mod/page/view.php', array('id' => $cmid));
     }
+    return $url;
 }
 
 /**
@@ -237,7 +242,7 @@ class ListpagesTemplates
 // {format} = table | tree
 
     /** @var string tableau | arborescence */
-    public $vue;
+    public $view;
     /** @var string link to page arbre if current page = tableau, and reverse */
     public $sisterpagelink;
 
@@ -308,7 +313,7 @@ EOL;
     public function getName() {
         return str_replace(
                 array('{compname}', '{vue}'),
-                array($this->compname, $this->vue),
+                array($this->compname, $this->view['name']),
                 self::$tpl_name
         );
     }
@@ -318,12 +323,12 @@ EOL;
     }
 
     public function getContent() {
-        $content = str_replace('{vue}', $this->vue, self::$tpl_contenttab);
+        $content = str_replace('{vue}', $this->view['name'], self::$tpl_contenttab);
         foreach ($this->niveauxLmda as $niveau) {
             $node = '/cat' . $niveau->id . '/' . $this->catCode;
             $content .= str_replace(
-                    array('{niveaulmda}', '{node}'),
-                    array($this->category->name, $node),
+                    array('{niveaulmda}', '{node}', '{format}'),
+                    array($this->category->name, $node, $this->view['format']),
                     self::$tpl_contentmain
             );
         }
