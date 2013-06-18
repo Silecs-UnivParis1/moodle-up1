@@ -12,6 +12,7 @@ $string['item_invitation'] = 'Invitation';
 $string['item_nonrepondant'] = 'non répondants';
 $string['item_relance'] = 'Relance';
 $string['item_repondant'] = 'répondants';
+$string['label_copie'] = 'M\'envoyer une copie du message';
 $string['label_destinataire'] = 'Destinataire *';
 $string['label_envoyer'] = 'Envoyer';
 $string['label_message'] = 'Type message *';

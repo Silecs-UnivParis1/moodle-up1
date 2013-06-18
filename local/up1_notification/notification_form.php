@@ -49,6 +49,8 @@ class local_up1_notification_notification_form extends moodleform {
         $mform->setType('msgrelancebody', PARAM_TEXT);
         $mform->setDefault('msgrelancebody', get_string('msgrelancebody', 'local_up1_notification'));
 
+        $mform->addElement('checkbox', 'copie', get_string('label_copie', 'local_up1_notification'));
+
         //-------------------------------------------------------------------------------
         // buttons
       //  $this->add_action_buttons(true, 'Envoyer');

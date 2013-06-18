@@ -90,6 +90,10 @@ function notification_send_all_email($ids, $msg, $infolog) {
                 ++$nb;
             }
         }
+        //copie USER
+        if (isset($infolog['copie']) && isset($infolog['useremail'])) {
+            notification_send_email($infolog['useremail'], $msg->subject, $msg->body);
+        }
     }
     $infolog['nb'] = $nb;
     $infolog['typemsg'] = $msg->info;
@@ -112,6 +116,9 @@ function get_result_action($infolog) {
     }
 
     $message = $infolog['nb'] . ' message' . $s . ' de type "' . $infolog['typemsg'] . '" envoyé' . $s;
+    if (isset($infolog['copie']) && isset($infolog['useremail'])) {
+        $message .= "  " . "+ copie à " . $infolog['userfullname'];
+    }
     //log
     add_to_log($infolog['courseid'], 'up1_notification', 'send notification',
         $infolog['cmurl'], $message . ' ('. $infolog['public'] .')', $infolog['cmid'], $infolog['userid']);

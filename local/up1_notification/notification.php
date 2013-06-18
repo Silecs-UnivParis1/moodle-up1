@@ -67,6 +67,12 @@ $params['nom_feedback'] = format_string($feedback->name);
 $params['lien_feedback'] = $CFG->wwwroot . '/mod/feedback/view.php?id=' . $id;
 
 if ($formdata) {
+    //copie msg user
+    if (isset($formdata->copie)) {
+        $infolog['copie'] = 1;
+        $infolog['useremail'] = $USER->email;
+        $infolog['userfullname'] = fullname($USER);
+    }
     // select msg
     $msg = get_notification_message($formdata, $params);
     //envoyer message
