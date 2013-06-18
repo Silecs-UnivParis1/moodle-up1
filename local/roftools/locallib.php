@@ -179,11 +179,27 @@ function listpages_create_for($category) {
 
         $template->vue = $view['name'];
 
-        $cm = getDefaultCourseModule($courseId, $modulePage);
+        $newcm = new stdClass();
+        $newcm->course = $courseId;
+        $newcm->module = $modulePage;
+        $newcm->instance = 0; // not known yet, will be updated later (this is similar to restore code)
+        $newcm->visible = 1;
+        $newcm->visibleold = 1;
+        $newcm->groupmode = 0;
+        $newcm->groupingid = 0;
+        $newcm->groupmembersonly = 0;
+        $newcm->completion = 0;
+        $newcm->completiongradeitemnumber = NULL;
+        $newcm->completionview = 0;
+        $newcm->completionexpected = 0;
+        $newcm->availablefrom = 0;
+        $newcm->availableuntil = 0;
+        $newcm->showavailability = 0;
+        $newcm->showdescription = 0;
         /**
          * @todo Optimize with a direct DB action, then call rebuild_course_cache() once the loop has ended.
          */
-        $cmid = add_course_module($cm);
+        $cmid = add_course_module($newcm);
 
         $pagedata = new stdClass();
         $pagedata->coursemodule  = $cmid;
@@ -202,27 +218,6 @@ function listpages_create_for($category) {
         page_add_instance($pagedata);
 
         course_add_cm_to_section($courseId, $cmid, $pagedata->section);
-    }
-
-    function getDefaultCourseModule($courseId, $moduleId) {
-        $newcm = new stdClass();
-        $newcm->course = $courseId;
-        $newcm->module = $moduleId;
-        $newcm->instance = 0; // not known yet, will be updated later (this is similar to restore code)
-        $newcm->visible = 1;
-        $newcm->visibleold = 1;
-        $newcm->groupmode = 0;
-        $newcm->groupingid = 0;
-        $newcm->groupmembersonly = 0;
-        $newcm->completion = 0;
-        $newcm->completiongradeitemnumber = NULL;
-        $newcm->completionview = 0;
-        $newcm->completionexpected = 0;
-        $newcm->availablefrom = 0;
-        $newcm->availableuntil = 0;
-        $newcm->showavailability = 0;
-        $newcm->showdescription = 0;
-        return $newcm;
     }
 }
 
@@ -298,6 +293,7 @@ EOL;
 
     public function setCategory($category) {
         global $DB;
+        $this->category = $category;
         $this->compname = $category->name;
         $this->niveauxLmda = $DB->get_records('course_categories', array('parent' => $category->id));
         $this->catCode = substr($this->category->idnumber, 2);
