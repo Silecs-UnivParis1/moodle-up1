@@ -155,9 +155,7 @@ function listpages_create() {
     $itercategories = $DB->get_records('course_categories', array('visible' => 1, 'parent' => $rootcat));
     foreach ($itercategories as $category) {
         echo "Creating page for " . $category->name . "\n";
-        $url = listpages_create_for($category);
-        echo "    " . $url['tableau'];
-        echo "    " . $url['arborescence'];
+        listpages_create_for($category);
     }
 }
 
@@ -166,15 +164,14 @@ function listpages_create() {
  *
  * @global moodle_database $DB
  * @param DBrecord $category record from table 'course_categories'
- * @return array $url = array('tableau' => ..., 'arborescence' => ...)
  */
 function listpages_create_for($category) {
     global $DB;
 
     $url = array();
     $views = array(
-        'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
-        'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
+        'tableau' => array('code' => 'tableau', 'name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
+        'arborescence' => array('code' => 'arborescence','name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
     );
     $courseId = 1;
     $modulePage = $DB->get_field('modules', 'id', array('name' => 'page'));
@@ -184,9 +181,8 @@ function listpages_create_for($category) {
     $template = new ListpagesTemplates($category);
     $template->sisterpagelink = ''; /** @todo sisterpagelink */
 
+    $cmsId = array();
     foreach ($views as $viewcode => $view) {
-        echo "    " . $view['name'] . "\n";
-
         $template->view = $view;
 
         $newcm = new stdClass();
@@ -210,6 +206,7 @@ function listpages_create_for($category) {
          * @todo Optimize with a direct DB action, then call rebuild_course_cache() once the loop has ended.
          */
         $cmid = add_course_module($newcm);
+        $cmsId[$viewcode] = $cmid;
 
         $pagedata = new stdClass();
         $pagedata->coursemodule  = $cmid;
@@ -225,11 +222,24 @@ function listpages_create_for($category) {
         $pagedata->intro = $template->getIntro();
         $pagedata->content = $template->getContent();
 
-        $pageid = page_add_instance($pagedata);
+        page_add_instance($pagedata);
         course_add_cm_to_section($courseId, $cmid, $pagedata->section);
-        $url[$viewcode] = new moodle_url('/mod/page/view.php', array('id' => $cmid));
+
+        $url = new moodle_url('/mod/page/view.php', array('id' => $cmid));
+        echo "    {$view['name']} : $url\n";
     }
-    return $url;
+    // update crossed links
+    foreach ($view as $viewcode => $view) {
+        foreach ($cmsId as $othercode => $cmId) {
+            if ($othercode !== $viewcode) {
+                $otherUrl = new moodle_url('/mod/page/view.php', array('id' => $cmId));
+                $DB->execute(
+                        "UPDATE {page} SET content = REPLACE(content, '{link-$othercode}', ?)",
+                        array($otherUrl->out(true))
+                );
+            }
+        }
+    }
 }
 
 /**
@@ -261,17 +271,31 @@ class ListpagesTemplates
     “<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?
 </p>
 EOL;
-    private static $tpl_contenttab = <<< EOL
+    private static $tpl_contenttab = array(
+        'tableau' => <<< EOL
 <div class="tabtree">
     <ul class="tabrow0">
         <li class="first onerow here selected">
             <a class="nolink"><span>{vue}</span></a>
             <div class="tabrow1 empty"></div>
         </li>
-        <li>{sisterpagelink}</li>
+        <li class="last onerow"><a href="{link-arborescence}">Vue arborescente</a></li>
     </ul>
 </div>
-EOL;
+EOL
+        ,
+        'arborescence' => <<< EOL
+<div class="tabtree">
+    <ul class="tabrow0">
+        <li class="first onerow"><a href="{link-tableau}">Vue tableau</a></li>
+        <li class="last onerow here selected">
+            <a class="nolink"><span>{vue}</span></a>
+            <div class="tabrow1 empty"></div>
+        </li>
+    </ul>
+</div>
+EOL
+    );
     private static $tpl_contentmain = <<< EOL
 <h3>Espaces de cours de {niveaulmda}</h3>
 <p>
@@ -323,7 +347,7 @@ EOL;
     }
 
     public function getContent() {
-        $content = str_replace('{vue}', $this->view['name'], self::$tpl_contenttab);
+        $content = str_replace('{vue}', $this->view['name'], self::$tpl_contenttab[$this->view['code']]);
         foreach ($this->niveauxLmda as $niveau) {
             $node = '/cat' . $niveau->id . '/' . $this->catCode;
             $content .= str_replace(
