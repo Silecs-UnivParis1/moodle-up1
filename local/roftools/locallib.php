@@ -6,6 +6,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+global $CFG;
+
 require_once($CFG->dirroot . "/course/lib.php");
 // for listpages...
 require_once($CFG->dirroot . "/lib/resourcelib.php");
@@ -135,70 +137,9 @@ function simplifyType($typedip, $idxEqv) {
 
 
 
-// {compname} = component name ex. 02-Économie
-// {vue} = tableau | arborescence
-// {sisterpagelink} = link to page arbre if current page = tableau, and reverse
-// {niveaulmda} ex. Master
-// {format} = table | tree
-// {node} = course_list node
-/**
- * Return an array of templates.
- *
- * @return array of templates
- */
-function listpages_templates() {
-    $tpl['name'] = 'Espaces de cours de {compname} ({vue})';
-    $tpl['intro'] = <<<EOL
-<p>
-    L'espace que vous cherchez n'est pas listé sur cette page ?
-    Avez-vous pensé à le trouver du côté des
-    “<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?
-</p>
-EOL;
-
-    $tpl['contenttab'] = <<< EOL
-<div class="tabtree">
-    <ul class="tabrow0">
-        <li class="first onerow here selected">
-            <a class="nolink"><span>{vue}</span></a>
-            <div class="tabrow1 empty"></div>
-        </li>
-        <li>{sisterpagelink}</li>
-    </ul>
-</div>
-EOL;
-    $tpl['contentmain'] = <<< EOL
-<h3>Espaces de cours de {niveaulmda}</h3>
-<p>
-    [courselist format={format} node={node}]
-</p>
-<p></p>
-EOL;
-    $tpl['contentfoot'] = <<< EOL
-<p>
-    <span style="font-size: x-small;">
-        Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours.
-        Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel,
-        approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.
-    </span>
-</p>
-<p>
-    <span style="font-size: x-small;">
-        Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l'Université Paris 1 Panthéon-Sorbonne,
-        sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.
-    </span>
-    <span style="font-size: small;">
-        <a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a>
-    </span>
-</p>
-EOL;
-    return $tpl;
-
-}
-
 /**
  * create the 2 automatic list pages for each of the "official" Component course-categories
- * @global type $DB
+ * @global moodle_database $DB
  */
 function listpages_create() {
     global $DB;
@@ -208,14 +149,14 @@ function listpages_create() {
     $itercategories = $DB->get_records('course_categories', array('visible' => 1, 'parent' => $rootcat));
     foreach ($itercategories as $category) {
         echo "Creating page for " . $category->name . "\n";
-        $created = listpages_create_for($category);
+        listpages_create_for($category);
     }
 }
 
 /**
  * Create the 2 automatic list pages for the given course category
  *
- * @global type $DB
+ * @global moodle_database $DB
  * @param DBrecord $category record from table 'course_categories'
  */
 function listpages_create_for($category) {
@@ -230,12 +171,13 @@ function listpages_create_for($category) {
 
     course_create_sections_if_missing($courseId, 1);
 
-    $template = listpages_templates();
-    // 4th depth subcategories (Licence, Master, ...)
-    $catniveaux = $DB->get_records('course_categories', array('parent' => $category->id));
+    $template = new ListpagesTemplates($category);
+    $template->sisterpagelink = ''; /** @todo sisterpagelink */
 
     foreach ($views as $view) {
         echo "    " . $view['name'] . "\n";
+
+        $template->vue = $view['name'];
 
         $newcm = new stdClass();
         $newcm->course = $courseId;
@@ -269,23 +211,116 @@ function listpages_create_for($category) {
         $pagedata->legacyfiles = 0;
         $pagedata->display = RESOURCELIB_DISPLAY_AUTO;
         $pagedata->revision = 1;
-        $pagedata->name = str_replace('{compname}', $category->name, $template['name']);
-        $pagedata->name = str_replace('{vue}', $view['name'], $pagedata->name);
-        $pagedata->intro = $template['intro'];
+        $pagedata->name = $template->getName();
+        $pagedata->intro = $template->getIntro();
+        $pagedata->content = $template->getContent();
 
-        $pagedata->content = str_replace('{vue}', $view['name'], $template['contenttab']);
-        //todo sisterpagelink
-        foreach ($catniveaux as $niveaulmda) {
-            $node = '/cat' . $niveaulmda->id . '/' . substr($category->idnumber, 2);
-            $nivcontent = str_replace('{niveaulmda}', $category->name, $template['contentmain']);
-            $nivcontent = str_replace('{node}', $node, $nivcontent);
-            $nivcontent = str_replace('{node}', $node, $nivcontent);
-            $pagedata->content .= $nivcontent;
-        }
-        $pagedata->content .= $template['contentfoot'];
+        page_add_instance($pagedata);
 
-        $instance = page_add_instance($pagedata);
         course_add_cm_to_section($courseId, $cmid, $pagedata->section);
     }
 }
 
+/**
+ * Return an array of templates.
+ *
+ * @return array of templates
+ */
+class ListpagesTemplates
+{
+// {format} = table | tree
+
+    /** @var string tableau | arborescence */
+    public $vue;
+    /** @var string link to page arbre if current page = tableau, and reverse */
+    public $sisterpagelink;
+
+    private $category;
+    /** @var string component name ex. 02-Économie */
+    private $compname;
+    /** @var array 4th depth subcategories (Licence, Master, ...) */
+    private $niveauxLmda;
+    private $catCode;
+
+    private static $tpl_name = 'Espaces de cours de {compname} ({vue})';
+    private static $tpl_intro = <<<EOL
+<p>
+    L'espace que vous cherchez n'est pas listé sur cette page ?
+    Avez-vous pensé à le trouver du côté des
+    “<a title="EPI" href="http://epi.univ-paris1.fr">anciens EPI</a>” ?
+</p>
+EOL;
+    private static $tpl_contenttab = <<< EOL
+<div class="tabtree">
+    <ul class="tabrow0">
+        <li class="first onerow here selected">
+            <a class="nolink"><span>{vue}</span></a>
+            <div class="tabrow1 empty"></div>
+        </li>
+        <li>{sisterpagelink}</li>
+    </ul>
+</div>
+EOL;
+    private static $tpl_contentmain = <<< EOL
+<h3>Espaces de cours de {niveaulmda}</h3>
+<p>
+    [courselist format={format} node={node}]
+</p>
+<p></p>
+EOL;
+    private static $tpl_contentfoot = <<< EOL
+<p>
+    <span style="font-size: x-small;">
+        Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours.
+        Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel,
+        approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.
+    </span>
+</p>
+<p>
+    <span style="font-size: x-small;">
+        Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l'Université Paris 1 Panthéon-Sorbonne,
+        sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.
+    </span>
+    <span style="font-size: small;">
+        <a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a>
+    </span>
+</p>
+EOL;
+
+    public function __construct($category) {
+        $this->setCategory($category);
+    }
+
+    public function setCategory($category) {
+        global $DB;
+        $this->compname = $category->name;
+        $this->niveauxLmda = $DB->get_records('course_categories', array('parent' => $category->id));
+        $this->catCode = substr($this->category->idnumber, 2);
+    }
+
+    public function getName() {
+        return str_replace(
+                array('{compname}', '{vue}'),
+                array($this->compname, $this->vue),
+                self::$tpl_name
+        );
+    }
+
+    public function getIntro() {
+        return self::$tpl_intro;
+    }
+
+    public function getContent() {
+        $content = str_replace('{vue}', $this->vue, self::$tpl_contenttab);
+        foreach ($this->niveauxLmda as $niveau) {
+            $node = '/cat' . $niveau->id . '/' . $this->catCode;
+            $content .= str_replace(
+                    array('{niveaulmda}', '{node}'),
+                    array($this->category->name, $node),
+                    self::$tpl_contentmain
+            );
+        }
+        $content .= self::$tpl_contentfoot;
+        return $content;
+    }
+}
