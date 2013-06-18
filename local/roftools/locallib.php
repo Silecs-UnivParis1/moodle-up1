@@ -225,6 +225,10 @@ function listpages_create_for($category) {
         'tableau' => array('name' => 'vue tableau', 'format' => 'table', 'sister' => +1),
         'arborescence' => array('name' => 'vue arborescence', 'format' => 'tree', 'sister' => -1),
     );
+    $courseId = 1;
+    $modulePage = $DB->get_field('modules', 'id', array('name' => 'page'));
+
+    course_create_sections_if_missing($courseId, 1);
 
     $template = listpages_templates();
     // 4th depth subcategories (Licence, Master, ...)
@@ -233,13 +237,38 @@ function listpages_create_for($category) {
     foreach ($views as $view) {
         echo "    " . $view['name'] . "\n";
 
+        $newcm = new stdClass();
+        $newcm->course = $courseId;
+        $newcm->module = $modulePage;
+        $newcm->instance = 0; // not known yet, will be updated later (this is similar to restore code)
+        $newcm->visible = 1;
+        $newcm->visibleold = 1;
+        $newcm->groupmode = 0;
+        $newcm->groupingid = 0;
+        $newcm->groupmembersonly = 0;
+        $newcm->completion = 0;
+        $newcm->completiongradeitemnumber = NULL;
+        $newcm->completionview = 0;
+        $newcm->completionexpected = 0;
+        $newcm->availablefrom = 0;
+        $newcm->availableuntil = 0;
+        $newcm->showavailability = 0;
+        $newcm->showdescription = 0;
+        /**
+         * @todo Optimize with a direct DB action, then call rebuild_course_cache() once the loop has ended.
+         */
+        $cmid = add_course_module($newcm);
+
         $pagedata = new stdClass();
-        $pagedata->course = 1;
+        $pagedata->coursemodule  = $cmid;
+        $pagedata->printheading = 0; /** @todo Check format */
+        $pagedata->printintro= 0; /** @todo Check format */
+        $pagedata->section = 1;
+        $pagedata->course = $courseId;
         $pagedata->introformat = FORMAT_MOODLE;
         $pagedata->legacyfiles = 0;
         $pagedata->display = RESOURCELIB_DISPLAY_AUTO;
         $pagedata->revision = 1;
-        // $pagedata->timemodified = time();
         $pagedata->name = str_replace('{compname}', $category->name, $template['name']);
         $pagedata->name = str_replace('{vue}', $view['name'], $pagedata->name);
         $pagedata->intro = $template['intro'];
@@ -255,14 +284,8 @@ function listpages_create_for($category) {
         }
         $pagedata->content .= $template['contentfoot'];
 
-        /*
-        $options = array();
-        $pagegen = new mod_page_generator();
-        $pagedata->coursemodule = $pagegen->precreate_course_module(1, $options);
-        $pageid = page_add_instance($pagedata, null);
-        return $pagegen->post_add_instance($pageid, $pagedata->coursemodule);
-         *
-         */
+        $instance = page_add_instance($pagedata);
+        course_add_cm_to_section($courseId, $cmid, $pagedata->section);
     }
 }
 
