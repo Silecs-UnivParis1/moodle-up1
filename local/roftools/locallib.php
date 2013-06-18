@@ -210,8 +210,8 @@ function listpages_create_for($category) {
 
         $pagedata = new stdClass();
         $pagedata->coursemodule  = $cmid;
-        $pagedata->printheading = 0; /** @todo Check format */
-        $pagedata->printintro= 0; /** @todo Check format */
+        $pagedata->printheading = 1; /** @todo Check format */
+        $pagedata->printintro = 1; /** @todo Check format */
         $pagedata->section = 1;
         $pagedata->course = $courseId;
         $pagedata->introformat = FORMAT_MOODLE;
@@ -261,7 +261,6 @@ class ListpagesTemplates
     private $compname;
     /** @var array 4th depth subcategories (Licence, Master, ...) */
     private $niveauxLmda;
-    private $catCode;
 
     private static $tpl_name = 'Espaces de cours de {compname} ({vue})';
     private static $tpl_intro = <<<EOL
@@ -331,7 +330,6 @@ EOL;
         $this->category = $category;
         $this->compname = $category->name;
         $this->niveauxLmda = $DB->get_records('course_categories', array('parent' => $category->id));
-        $this->catCode = substr($this->category->idnumber, 2);
     }
 
     public function getName() {
@@ -349,10 +347,10 @@ EOL;
     public function getContent() {
         $content = str_replace('{vue}', $this->view['name'], self::$tpl_contenttab[$this->view['code']]);
         foreach ($this->niveauxLmda as $niveau) {
-            $node = '/cat' . $niveau->id . '/' . $this->catCode;
+            $node = '/cat' . $niveau->id;
             $content .= str_replace(
                     array('{niveaulmda}', '{node}', '{format}'),
-                    array($this->category->name, $node, $this->view['format']),
+                    array($niveau->name, $node, $this->view['format']),
                     self::$tpl_contentmain
             );
         }
