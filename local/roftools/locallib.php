@@ -12,6 +12,8 @@ require_once($CFG->dirroot . "/lib/resourcelib.php");
 require_once($CFG->dirroot . "/mod/page/lib.php");
 // require_once($CFG->dirroot . "/mod/page/tests/generator/lib.php");
 
+/* @var $DB moodle_database */
+
 // Classes d'équivalence des diplômes pour les catégories
 function equivalent_diplomas() {
 
@@ -74,8 +76,9 @@ function create_rof_categories($verb=0) {
         $category = create_course_category($newcategory);
         $compCatId = $category->id;
         fix_course_sortorder();
-        $sql = 'SELECT * FROM {rof_program} WHERE rofid IN ' . serialized_to_sql($component->sub);
-        $programs = $DB->get_records_sql($sql);
+        list ($inSql, $inParams) = $DB->get_in_or_equal($component->sub);
+        $sql = 'SELECT * FROM {rof_program} WHERE rofid ' . $inSql;
+        $programs = $DB->get_records_sql($sql, $inParams);
 
         $diplomeCat = array();
         foreach ($programs as $program) {
