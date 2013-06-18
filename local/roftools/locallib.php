@@ -10,7 +10,7 @@ require_once($CFG->dirroot . "/course/lib.php");
 // for listpages...
 require_once($CFG->dirroot . "/lib/resourcelib.php");
 require_once($CFG->dirroot . "/mod/page/lib.php");
-require_once($CFG->dirroot . "/mod/page/tests/generator/lib.php");
+// require_once($CFG->dirroot . "/mod/page/tests/generator/lib.php");
 
 // Classes d'équivalence des diplômes pour les catégories
 function equivalent_diplomas() {
