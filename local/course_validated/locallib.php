@@ -413,7 +413,7 @@ function message_notification_validation ($crsid) {
 
 
     $res['subject'] =
-        $site->shortname . " "
+        '[' . $site->shortname . "] "
         . "Validation espace n° " . $crsid . " : "
         . up1_meta_get_text($crsid, 'nomnorme', false);
 
