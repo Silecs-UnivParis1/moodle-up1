@@ -38,8 +38,14 @@ function equivalent_diplomas() {
 function high_level_categories() {
     return
         array(
-            array('name' => 'Année 2013-2014', 'idnumber' => '1:2013-2014'),
-            array('name' => 'Paris 1', 'idnumber' => '2:UP1'),
+            array(
+                'name' => get_config('local_roftools', 'rof_year_name'),
+                'idnumber' => get_config('local_roftools', 'rof_year_code')
+                ),
+            array(
+                'name' =>  get_config('local_roftools', 'rof_etab_name'),
+                'idnumber' => get_config('local_roftools', 'rof_etab_code'),
+                ),
         );
 }
 
