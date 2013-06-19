@@ -14,6 +14,8 @@ require_once($CFG->dirroot.'/course/lib.php');
 
 class courselist_common{
 
+    //** @todo validate_pseudopath 
+
     public static function get_courses_from_pseudopath($pseudopath) {
 
         if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
@@ -31,25 +33,35 @@ class courselist_common{
         global $DB;
 
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
-        $res = '<table class="generaltable" style="width: 100%;">' . "\n" ;
-        $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
-            . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
-        foreach (courselist_roftools::sort_courses($courses) as $crsid) {
-            $rofpathid = $courses[$crsid];
-            $res .= courselist_format::format_entry($crsid, true, 'table') . "\n";
+        if ($courses) {
+            $res = '<table class="generaltable" style="width: 100%;">' . "\n" ;
+            $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
+                . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
+            foreach (courselist_roftools::sort_courses($courses) as $crsid) {
+                $rofpathid = $courses[$crsid];
+                $res .= courselist_format::format_entry($crsid, true, 'table') . "\n";
+            }
+            $res .= "</table>\n";
+        } else { // no course
+            $res = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
+" . '</b></p>';
         }
-        $res .= "</table>\n";
         return $res;
     }
 
     public static function html_course_list($pseudopath) {
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
-        $res = "<ul>\n" ;
-        foreach (courselist_roftools::sort_courses($courses) as $crsid) {
-            $rofpathid = $courses[$crsid];
-            $res .= courselist_format::format_entry($crsid, true, 'list') . "\n";
+        if ($courses) {
+            $res = "<ul>\n" ;
+            foreach (courselist_roftools::sort_courses($courses) as $crsid) {
+                $rofpathid = $courses[$crsid];
+                $res .= courselist_format::format_entry($crsid, true, 'list') . "\n";
+            }
+            $res .= "</ul>\n";
+        } else { // no course
+            $res = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
+" . '</b></p>';
         }
-        $res .= "</ul>\n";
         return $res;
     }
 
