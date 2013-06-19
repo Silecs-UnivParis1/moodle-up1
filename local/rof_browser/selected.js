@@ -110,6 +110,10 @@ jQuery(function () {
         if (typeof selected[name] != 'undefined' && selected[name] == 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
+            /** patch si uniquement rattachements secondaires (cours hybrides) **/
+            if (! $('#items-selected1').size()) {
+               reference[0] = 0;
+            }
             /** rattachement de reference **/
             var rattachement = '#items-selected2';
             var tabItem = '';
