@@ -190,9 +190,7 @@ class courselist_format {
     }
 
      public static function format_level($dbcourse, $element, $sep) {
-        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
-        $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
-        $niveau = ( isset($convertannee[$niveauannee]) ? $convertannee[$niveauannee] : 'A' );
+        $niveau = up1_meta_get_text($dbcourse->id, 'niveau', false);
         $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
         return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
                . '<' . $element . '>' . $semestre. '</' . $element . '>';

@@ -97,6 +97,7 @@ function rof_get_metadata($rofobject) {
         $res['Indexation']['up1subprogram'] = rof_get_combined_name($rofidpath[2]); //subprogram name
         $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
         $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
+        $res['Indexation']['up1niveau'] = rof_guess_level($res['Indexation']['up1niveauannee']);
     }
 
     $elp = array_pop($rofidpath);
@@ -172,4 +173,15 @@ function rof_guess_year($semestreint, $typedip) {
     } else {
         return '';
     }
+}
+
+/**
+ * convert a year (1 to 6) into a level code (L1 to D)
+ * @param type $year
+ * @return type
+ */
+function rof_guess_level($year) {
+    $convertyear = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D', 'D', 'D');
+    $level = ( isset($convertannee[$year]) ? $convertannee[$year] : 'A' );
+    return $level;
 }
