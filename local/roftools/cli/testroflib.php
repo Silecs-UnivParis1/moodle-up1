@@ -21,7 +21,7 @@ $cpath = array(
 $catid = rof_rofpath_to_category($path);
 echo "$catid";
 $categorie = $DB->get_record('course_categories', array('id' => $catid));
-var_dump ($categorie);
+print_r ($categorie);
 */
 
 
@@ -37,13 +37,13 @@ echo "\n\n" . rof_get_code_or_rofid('UP1-C99999');
 echo "\n\n" . rof_get_code_or_rofid('UP1-PROG37797');
 echo "\n\n" ;
 
-print_r(rof_get_menu_constant("composante"));
-print_r(rof_get_menu_constant("composante", false));
+// print_r(rof_get_menu_constant("composante"));
+// print_r(rof_get_menu_constant("composante", false));
 
-echo "rof_get_metadata (3)" ;
-//var_dump(rof_get_metadata('UP1-PROG25375'));
-//var_dump(rof_get_metadata($path));
-//var_dump(rof_get_metadata($cpath));
-//var_dump(rof_get_metadata('UP1-C25379'));
+echo "rof_get_metadata (4)" ;
+print_r(rof_get_metadata('UP1-PROG25375'));
+//print_r(rof_get_metadata($path));
+//print_r(rof_get_metadata($cpath));
+//print_r(rof_get_metadata('UP1-C25379'));
 
 return 0;
