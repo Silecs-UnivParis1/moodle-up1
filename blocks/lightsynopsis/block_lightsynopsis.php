@@ -24,27 +24,39 @@ class block_lightsynopsis extends block_base {
 
         $format = course_get_format($this->page->course);
         $course = $format->get_course();
-
-        $this->content         =  new stdClass;
-        $this->content->text  = up1_meta_get_list($course->id, 'up1composante', false, ' / ', false) . '<br />';
-        $this->content->text .= up1_meta_get_list($course->id, 'up1mention', false, ' / ', true) . '<br />';
-        $this->content->text .= up1_meta_get_list($course->id, 'up1niveau', false, ' / ', true) . '<br />';
-
-        $cdate = usergetdate($course->startdate);
-        $this->content->text .= 'Créé le ' . $cdate['mday'].'/'.$cdate['mon'].'/'.$cdate['year'];
         $avalider = up1_meta_get_text($course->id, 'up1avalider', false);
         $datevalid = up1_meta_get_text($course->id, 'datevalid', false);
-        if ($avalider == 1 && $datevalid == 0) {
-            $this->content->text .= "(en attente d'approbation)";
-        }
-        $this->content->text .= '<br />';
-        $this->content->text .= 'Enseignants : ' . courselist_format::format_teachers($course, 'span', 'teachers', 3) . '<br />';
-        $this->content->text .= courselist_format::format_icons($course, 'span', 'icons');
+        $cdate = usergetdate($course->startdate);
+        $dispdate = 'Créé le ' . $cdate['mday'].'/'.$cdate['mon'].'/'.$cdate['year']
+                . (($avalider == 1 && $datevalid == 0) ? " (en attente d'approbation)" : '');
+
+        $this->content         =  new stdClass;
+        $this->content->text  = 'Composante : '
+            . $this->br(up1_meta_get_list($course->id, 'up1composante', false, ' / ', false))
+            . $this->br(up1_meta_get_list($course->id, 'up1mention', false, ' / ', true))
+            . $this->br(up1_meta_get_list($course->id, 'up1niveau', false, ' / ', true))
+            . $this->br('Enseignants : ' . courselist_format::format_teachers($course, 'span', 'teachers', 3))
+            . $this->br($dispdate .' '.  courselist_format::format_icons($course, 'span', 'icons'));
+
+        // $this->content->text .= courselist_format::format_icons($course, 'span', 'icons');
         //$this->content->footer = 'Footer here...';
 
     return $this->content;
   }
 
+
+    /**
+     * return the input string followed by a newline (<br />) if not empty, or empty string otherwise.
+     * @param type $text
+     * @return string
+     */
+    public function br($text) {
+        if ($text) {
+            return $text . '<br />';
+        } else {
+            return '';
+        }
+    }
 
     public function instance_allow_multiple() {
         return false;
