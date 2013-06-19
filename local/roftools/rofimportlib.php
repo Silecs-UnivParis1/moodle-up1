@@ -47,6 +47,8 @@ function rof_get_metadata_concat($rofobjects, $separator=';') {
  */
 function rof_get_metadata($rofobject) {
     global $DB;
+
+    $refcomponents = $DB->get_records_menu('rof_component', null, '', 'number, name');
     $res = array('Identification' => array(),
                  'Indexation' => array(),
                  'Diplome' => array(),
@@ -68,7 +70,7 @@ function rof_get_metadata($rofobject) {
             $rofnamepath = array_values($rofobject);
             $rofidpath = array_keys($rofobject);
         }
-    } else {
+    } else { // si on reçoit un ROFid seul, on récupère son premier chemin (arbitraire)
         $combinedpath = rof_get_course_first_path($rofobject);
         $rofnamepath = array_values($combinedpath);
         $rofidpath = array_keys($combinedpath);
@@ -98,6 +100,9 @@ function rof_get_metadata($rofobject) {
         $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
         $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
         $res['Indexation']['up1niveau'] = rof_guess_level($res['Indexation']['up1niveauannee']);
+        $eqvDiplomas = equivalent_diplomas();
+        $res['Indexation']['up1niveaulmda'] = $eqvDiplomas[$program->typedip];
+        $res['Indexation']['up1composante'] = $refcomponents[$rofidpath[0]];
     }
 
     $elp = array_pop($rofidpath);
