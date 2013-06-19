@@ -14,17 +14,22 @@ require_once($CFG->dirroot . '/local/up1_courselist/courselist_tools.php');
 class filter_coursetree extends moodle_text_filter {
 
     public function filter($text, array $options = array()) {
-        while ( preg_match( '#\[courselist format=([a-z]+) node=(/[\w/-]*)\]#', $text, $matches) ) {
+        while ( preg_match( '#\[courselist format=([^ ]+) node=(/[^ ]*)\]#', $text, $matches) ) {
             $format = $matches[1];
             $node = $matches[2];
             $replace = $matches[0];
 
             switch ($format) {
                 case 'tree':
-                    $widget =  new moodle_url('/local/mwscoursetree/widget.js');
-                    $script = '<script type="text/javascript" src="' . $widget . '"></script>';
-                    $div = '<div class="coursetree" data-root="' . $node .'"></div>';
-                    $replace = $script . $div;
+                    if (courselist_common::get_courses_from_pseudopath($node)) {
+                        $widget =  new moodle_url('/local/mwscoursetree/widget.js');
+                        $script = '<script type="text/javascript" src="' . $widget . '"></script>';
+                        $div = '<div class="coursetree" data-root="' . $node .'"></div>';
+                        $replace = $script . $div;
+                    } else {
+                        $replace = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
+" . '</b></p>';
+                    }
                     break;
                 case 'table':
                     $replace = courselist_common::html_course_table($node);

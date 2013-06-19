@@ -14,6 +14,8 @@ require_once($CFG->dirroot.'/course/lib.php');
 
 class courselist_common{
 
+    //** @todo validate_pseudopath 
+
     public static function get_courses_from_pseudopath($pseudopath) {
 
         if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
