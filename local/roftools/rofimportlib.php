@@ -12,6 +12,34 @@
 defined('MOODLE_INTERNAL') || die;
 
 /**
+ * concatenate informations from multiple rofobjects into a single associative (tree) array
+ * by calling repeatedly rof_get_metadata
+ * @param type $rofobjects array(mixed)
+ */
+function rof_get_metadata_concat($rofobjects, $separator=';') {
+    if (! $rofobjects) {
+        return array();
+    }
+    if ( count($rofobjects) == 1 ) {
+        return rof_get_metadata($rofobjects[0]);
+    }
+    $rofobject=array_shift($rofobjects);
+    $metadata = rof_get_metadata($rofobject);
+    
+    foreach ($rofobjects as $rofobject) {
+        $metadataiter = rof_get_metadata($rofobject);
+        foreach ($metadataiter as $catname => $items) {
+            foreach ($items as $key => $value) {
+                //$concatitem = $metadata[$catname][$key];
+                $metadata[$catname][$key] .= $separator . $metadataiter[$catname][$key];
+            } // key
+        } // catname
+    } // rofobject
+    return $metadata;
+}
+
+
+/**
  * turn rof information from a rofobject into loosely formatted (up1) course metadata
  * @global type $DB
  * @param mixed $rofobject = rofid (string) OR rofidpath (array(rofid)) OR combined path (array(rofid => rofname))

@@ -42,6 +42,10 @@ echo "\n\n" ;
 
 echo "rof_get_metadata (4)" ;
 print_r(rof_get_metadata('UP1-PROG25375'));
+echo "*****\n";
+print_r(rof_get_metadata_concat(array('UP1-PROG25375')));
+echo "*****\n";
+print_r(rof_get_metadata_concat(array('UP1-C36772', 'UP1-C36773')));
 //print_r(rof_get_metadata($path));
 //print_r(rof_get_metadata($cpath));
 //print_r(rof_get_metadata('UP1-C25379'));
