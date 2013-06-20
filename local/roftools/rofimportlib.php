@@ -87,6 +87,8 @@ function rof_get_metadata($rofobject) {
     $res['Diplome']['up1specialite'] = $program->specialite;
     if ( preg_match('/^.* parcours (.*)$/', $prog_name, $matches) ) {
         $res['Diplome']['up1parcours'] = $matches[1];
+    } else {
+        $res['Diplome']['up1parcours'] = '';
     }
     $res['Diplome']['up1type']    = rof_constant_metadata('typeDiplome', $program->typedip);
     $res['Diplome']['up1domaine'] = rof_constant_metadata('domaineDiplome', $program->domainedip);
@@ -95,7 +97,7 @@ function rof_get_metadata($rofobject) {
     $res['Diplome']['up1rythme']  = rof_constant_metadata('publicDiplome', $program->rythmedip);
     $res['Diplome']['up1langue']  = rof_constant_metadata('langueDiplome', $program->languedip);
 
-    if (isset($rofnamepath[2])) {
+    if (isset($rofnamepath[2])) { // subprogram = semestre
         $res['Indexation']['up1subprogram'] = rof_get_combined_name($rofidpath[2]); //subprogram name
         $res['Indexation']['up1semestre'] = rof_guess_semester($rofnamepath[2]);
         $res['Indexation']['up1niveauannee'] = rof_guess_year($res['Indexation']['up1semestre'], $program->typedip);
@@ -103,6 +105,13 @@ function rof_get_metadata($rofobject) {
         $eqvDiplomas = equivalent_diplomas();
         $res['Indexation']['up1niveaulmda'] = $eqvDiplomas[$program->typedip];
         $res['Indexation']['up1composante'] = $refcomponents[$rofidpath[0]];
+    } else {
+        $res['Indexation']['up1subprogram'] = '';
+        $res['Indexation']['up1semestre'] = '';
+        $res['Indexation']['up1niveauannee'] = '';
+        $res['Indexation']['up1niveau'] = '';
+        $res['Indexation']['up1niveaulmda'] = '';
+        $res['Indexation']['up1composante'] = '';
     }
 
     $elp = array_pop($rofidpath);
