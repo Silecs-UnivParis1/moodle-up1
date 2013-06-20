@@ -667,7 +667,7 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
 /**
  * Retourne le rofid, rofpathid et rofname des rattachements secondaires
  * @param array() $form2
- * @return array() $rof2 - rofid, rofpathid et rofname
+ * @return array() $rof2 - rofid, rofpathid, rofname et tabpath
  */
 function wizard_prepare_rattachement_second($form2) {
     $rof2 = array();
@@ -682,6 +682,9 @@ function wizard_prepare_rattachement_second($form2) {
                     $rof2['rofpathid'][] = '/' . $path;
 
                     $tabpath = explode('_', $rofpath);
+                    // nouvelle politique de rattachement secondaire
+                    $rof2['tabpath'][] = $tabpath;
+
                     $tabrof = rof_get_combined_path($tabpath);
                     $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
                     $rof2['rofchemin'][] = $chemin;
@@ -914,12 +917,14 @@ class core_wizard {
         if (isset($this->formdata['wizardcase']) && $this->formdata['wizardcase']=='2') {
             $rof1 = wizard_prepare_rattachement_rof_moodle($form2);
             $this->set_param_rof1($rof1);
-            $this->set_rof_shortname($rof1['idnumber']);
-            // metadonnee de rof1
-            $this->set_metadata_rof1($rof1['tabpath']);
+
             // rattachement secondaire
             $this->set_metadata_rof2();
+            // metadonnee de rof1 et 2
+            $tabrofpath = $this->get_tabrofpath($rof1['tabpath'], $this->formdata['rof2_tabpath']);
+            $this->set_metadata_rof($tabrofpath);
 
+            $this->set_rof_shortname($rof1['idnumber']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
             $this->mydata->profile_field_up1complement = trim($form2['complement']);
@@ -964,8 +969,8 @@ class core_wizard {
         if ( array_key_exists('idcat', $rof1) && $rof1['idcat'] != false) {
             $this->mydata->category = $rof1['idcat'];
             $this->set_wizard_session($rof1['idcat'], 'rattachement1', 'form_step2');
-            $this->mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
-            $this->mydata->profile_field_up1composante = $rof1['up1composante'];
+            //$this->mydata->profile_field_up1niveaulmda = $rof1['up1niveaulmda'];
+            //$this->mydata->profile_field_up1composante = $rof1['up1composante'];
         }
         $this->mydata->idnumber = $rof1['idnumber'];
     }
@@ -1010,8 +1015,8 @@ class core_wizard {
      * principal ROF aux metadonnées de cours
      * @param array $tabpath
      */
-    private function set_metadata_rof1($tabpath) {
-        $mdrof1 = rof_get_metadata($tabpath);
+    private function set_metadata_rof($tabpath) {
+        $mdrof1 = rof_get_metadata_concat($tabpath);
         foreach ($mdrof1 as $data) {
             if (count($data)) {
                 foreach($data as $label => $value) {
@@ -1040,7 +1045,27 @@ class core_wizard {
             foreach($rof2['rofname'] as $rofname) {
                 $this->mydata->formdata['form_step2']['rofname_second'][] = $rofname;
             }
+            $this->formdata['rof2_tabpath'] = $rof2['tabpath'];
+        } else {
+            $this->formdata['rof2_tabpath'] = array();
         }
+    }
+
+    /**
+     * Construit le tabeau tabpath pour la fonction set_metadata_rof
+     * (cf fonction rof_get_metadata_concat)
+     * @param array $rof1tabpath
+     * @param array $rof2tabpath (tableau de tableau)
+     * @return array $tabpath (tableau de tableau)
+     */
+    private function get_tabrofpath($rof1tabpath, $rof2tabpath) {
+        $tabpath[] = $rof1tabpath;
+        if (count($rof2tabpath)) {
+            foreach ($rof2tabpath as $rof2_tabpath) {
+                $tabpath[] = $rof2_tabpath;
+            }
+        }
+        return $tabpath;
     }
 
     /**
@@ -1402,11 +1427,13 @@ class core_wizard {
                 $this->formdata['modif']['identification'] = true;
             }
             $this->set_param_rof1($rof1);
-            $this->set_rof_shortname($rof1['idnumber']);
-            // metadonnee de rof1
-            $this->set_metadata_rof1($rof1['tabpath']);
             // rattachement secondaire
             $this->set_metadata_rof2();
+            $tabrofpath = $this->get_tabrofpath($rof1['tabpath'], $this->formdata['rof2_tabpath']);
+            // metadonnee de rof1 et rof2
+            $this->set_metadata_rof($tabrofpath);
+
+            $this->set_rof_shortname($rof1['idnumber']);
             $this->mydata->profile_field_up1complement = trim($form2['complement']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();

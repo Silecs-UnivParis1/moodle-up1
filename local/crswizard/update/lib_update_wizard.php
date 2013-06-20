@@ -176,17 +176,22 @@ function wizard_get_generateur($course) {
             if ($case == 2) {
                 $trofid = explode(';', $course->profile_field_up1rofid);
                 $r1 = trim($trofid[0]);
-                if (substr($r1, 0, 5) == 'UP1-P') {
-                    $rof = $DB->get_record('rof_program',  array('rofid' => $r1));
-                    if ($rof && ($rof->name == $course->profile_field_up1rofname || $rof->localname == $course->profile_field_up1rofname) ) {
+                $tablerof = (substr($r1, 0, 5) == 'UP1-P' ? 'rof_program' : 'rof_course');
+                $rof = $DB->get_record($tablerof,  array('rofid' => $r1));
+                if (!$rof) {
+                    return 0;
+                } else {
+                    return $case;
+                }
+                /**
+                $posname = strripos(trim($course->profile_field_up1rofname), trim($rof->name));
+                $poslocalname = strripos(trim($course->profile_field_up1rofname), trim($rof->localname));
+                if ($posname ===0 || $lengthlocalname == $poslocalname) {
+                    if (substr($r1, 0, 5) == 'UP1-P') {
                         return $case;
-                    } else {
-                        return 0;
-                    }
-                }elseif (substr($r1, 0, 5) == 'UP1-C') {
-                    $rof = $DB->get_record('rof_course',  array('rofid' => $r1));
-                    if ($rof && ($rof->name == $course->profile_field_up1rofname || $rof->localname == $course->profile_field_up1rofname) ) {
-                        if ($rof->code == $course->profile_field_up1code) {
+                    } elseif (substr($r1, 0, 5) == 'UP1-C') {
+                        $poscode = strripos(trim($course->profile_field_up1code), trim($rof->code));
+                        if ($poscode====0) {
                             return $case;
                         } else {
                             return 0;
@@ -194,9 +199,10 @@ function wizard_get_generateur($course) {
                     } else {
                         return 0;
                     }
-                } else {// si pas de $rof
-                    return 0;
+                } else {
+                   return 0;
                 }
+                **/
             } elseif($case == 3) {
                 //verifier si categorie est une feuille
                 $nbsel = $DB->count_records('course_categories', array('id' => $course->category));
