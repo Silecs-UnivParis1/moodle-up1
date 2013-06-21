@@ -45,6 +45,8 @@ echo "\n\n" ;
 // print_r(rof_get_menu_constant("composante"));
 // print_r(rof_get_menu_constant("composante", false));
 
+// bad data test (multiple U4)
+// print_r(rof_get_metadata('UP1-PROG20152'));
 
 $bug = array(
         array('01', 'UP1-PROG28576'),
