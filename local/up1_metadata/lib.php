@@ -36,6 +36,7 @@ function up1_meta_get_text($courseid, $field, $error=false) {
 
 /**
  * return a multiple metadata up1 as a formatted list ; ex. "UFR02-... / UFR04-..."
+ * identic values are merged
  * @param int $courseid
  * @param string $field UP1 metadata text, ex. composante
  * @param bool $error : if set, throw an exception if $field isn't found ; otherwise return an empty string
@@ -46,7 +47,7 @@ function up1_meta_get_list($courseid, $field, $error=false, $separator=' / ', $p
     global $DB;
 
     $text = up1_meta_get_text($courseid, $field, $error);
-    $items = explode(';', $text);
+    $items = array_unique(explode(';', $text));
     $res = join($separator, $items);
     if ( $res ) {
         if ($prefix) {

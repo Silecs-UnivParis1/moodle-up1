@@ -21,7 +21,11 @@ class courselist_common{
         if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
             $cat = (int) $matches[1];
             $crs = courselist_cattools::get_descendant_courses($cat);
-            $courses = array_combine($crs, $crs); //
+            if ($crs) {
+                $courses = array_combine($crs, $crs); //
+            } else {
+                $courses = array();
+            }
         } else { // at least one ROF item (component)
             $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
             $courses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
@@ -190,9 +194,7 @@ class courselist_format {
     }
 
      public static function format_level($dbcourse, $element, $sep) {
-        $convertannee = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D');
-        $niveauannee = up1_meta_get_text($dbcourse->id, 'niveauannee', false);
-        $niveau = ( isset($convertannee[$niveauannee]) ? $convertannee[$niveauannee] : 'A' );
+        $niveau = up1_meta_get_text($dbcourse->id, 'niveau', false);
         $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
         return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
                . '<' . $element . '>' . $semestre. '</' . $element . '>';

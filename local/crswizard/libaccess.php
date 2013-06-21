@@ -170,6 +170,20 @@ function wizard_has_rofreferenceeditor_permission($courseid, $userid) {
 }
 
 /**
+ * Vérifie si $userid à la capacité local/crswizard:rofreferenceedito sur $courseid
+ * @param int $courseid
+ * @param int $userid
+ * @return boolean
+ */
+function wizard_has_hybridattachment_permission($courseid, $userid) {
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $courseid);
+    if ( has_capability('local/crswizard:hybridattachment', $coursecontext, $userid) ) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * vérifie si le cours peut être modifié par l'assistant allégé
  * @param int $courseid
  * @return boolean

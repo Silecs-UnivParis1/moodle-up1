@@ -143,13 +143,17 @@ function html_rows_status($course) {
 
 
 function html_table_rattachements($course) {
-    echo "\n\n" . '<table class="generaltable">' . "\n";
-    $parity = 1;
 
-    $pathids = explode(';', up1_meta_get_text($course->id, 'rofpathid'));
-    $n = count($pathids);
+    $rofpathid = up1_meta_get_text($course->id, 'rofpathid');
+    if ($rofpathid == '') {
+        echo "<p>Aucun rattachement ROF pour cet espace de cours.</p>";
+        return true;
+    }
+    $pathids = explode(';', $rofpathid);
     $res = '';
     $pathprefix = get_category_path(get_config('local_crswizard','cas2_default_etablissement'));
+    echo "\n\n" . '<table class="generaltable">' . "\n";
+    $parity = 1;
     foreach ($pathids as $pathid) {
         $parity = 1 - $parity;
         $patharray = array_filter(explode('/', $pathid));
