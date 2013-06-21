@@ -21,7 +21,11 @@ class courselist_common{
         if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
             $cat = (int) $matches[1];
             $crs = courselist_cattools::get_descendant_courses($cat);
-            $courses = array_combine($crs, $crs); //
+            if ($crs) {
+                $courses = array_combine($crs, $crs); //
+            } else {
+                $courses = array();
+            }
         } else { // at least one ROF item (component)
             $rofpath = strstr(substr($pseudopath, 1), '/'); // drop first component -category- of pseudopath
             $courses = courselist_roftools::get_courses_from_parent_rofpath($rofpath);
