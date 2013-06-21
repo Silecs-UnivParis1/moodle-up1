@@ -28,6 +28,8 @@ require('../../../config.php');
 require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
+global $DB, $PAGE, $OUTPUT;
+
 $id = required_param('id', PARAM_INT);       // course id
 $layout = optional_param('layout', 'report', PARAM_ALPHA); // default layout=report
 if ($layout != 'popup') {
