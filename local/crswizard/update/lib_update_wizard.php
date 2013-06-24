@@ -143,21 +143,27 @@ function wizard_get_keys($courseid, $coursetimecreated) {
     return $list;
 }
 
-function wizard_rof_connection($up1rofpathid) {
+/**
+ * construit
+ * @param array $up1rofpathid
+ * @param bool $case2
+ * @param string $form_step
+ */
+function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_step2') {
     global $SESSION;
     $tabpath = explode(';', trim($up1rofpathid));
     foreach ($tabpath as $pos => $path) {
         $rofid = substr(strrchr($path, '/'), 1);
         $newpath = strtr($path, '/', '_');
-        if ($pos == 0 ) {
-            $SESSION->wizard['form_step2']['item']['p'][] = $rofid;
-             $SESSION->wizard['form_step2']['path'][$rofid] = substr($newpath, 1);
+        if ($case2 && $pos == 0) {
+            $SESSION->wizard[$form_step]['item']['p'][] = $rofid;
+             $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
         } else {
-            $SESSION->wizard['form_step2']['item']['s'][] = $rofid;
+            $SESSION->wizard[$form_step]['item']['s'][] = $rofid;
             if (substr($newpath, 0, 1) == '_') {
-                $SESSION->wizard['form_step2']['path'][$rofid] = substr($newpath, 1);
+                $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
             } else {
-                $SESSION->wizard['form_step2']['path'][$rofid] = $newpath;
+                $SESSION->wizard[$form_step]['path'][$rofid] = $newpath;
             }
         }
     }

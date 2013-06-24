@@ -408,16 +408,17 @@ function wizard_get_validators() {
 
 /**
  * Construit le tableau des objets pédagogiques du rof sélectionnés
+ * @param string $form_step
  * @return array
  */
-function wizard_get_rof() {
+function wizard_get_rof($form_step = 'form_step2') {
     global $DB, $SESSION;
-    if (!isset($SESSION->wizard['form_step2']['item'])) {
+    if (!isset($SESSION->wizard[$form_step]['item'])) {
         return false;
     }
     $list = array();
-    $formRof = $SESSION->wizard['form_step2']['item'];
-    $rofPath = $SESSION->wizard['form_step2']['path'];
+    $formRof = $SESSION->wizard[$form_step]['item'];
+    $rofPath = $SESSION->wizard[$form_step]['path'];
     foreach ($formRof as $key => $rof) {
         foreach ($rof as $r) {
             $list[$r]['nature'] = $key;
@@ -504,16 +505,17 @@ function wizard_preselected_users() {
 
 /*
  * construit la liste des objets pédagogiques du rof sélectionnés encodée en json
+ * @param string $form_step
  * @return string
  */
-function wizard_preselected_rof() {
+function wizard_preselected_rof($form_step = 'form_step2') {
     global $SESSION;
-    if (!isset($SESSION->wizard['form_step2']['all-rof'])) {
+    if (!isset($SESSION->wizard[$form_step]['all-rof'])) {
         return '[]';
     }
     $liste = array();
-    if (!empty($SESSION->wizard['form_step2']['all-rof'])) {
-        foreach ($SESSION->wizard['form_step2']['all-rof'] as $rofid => $rof) {
+    if (!empty($SESSION->wizard[$form_step]['all-rof'])) {
+        foreach ($SESSION->wizard[$form_step]['all-rof'] as $rofid => $rof) {
             $object = $rof['object'];
             $tabrof = rof_get_combined_path(explode('_', $rof['path']));
             $chemin = substr(rof_format_path($tabrof, 'name', false, ' > '), 3);
@@ -1030,9 +1032,10 @@ class core_wizard {
     /**
      * assigne les informations des rattachements
      * secondaires ROF aux metadonnées de cours
+     * @param string $form_step
      */
-    private function set_metadata_rof2() {
-        $form2 = $this->formdata['form_step2'];
+    private function set_metadata_rof2($form_step = 'form_step2') {
+        $form2 = $this->formdata[$form_step];
         $rof2 = wizard_prepare_rattachement_second($form2);
         if (count($rof2)) {
             $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
