@@ -118,6 +118,13 @@ switch ($stepin) {
         break;
     case 3:
         if ($wizardcase == 3) {
+            $hybridattachment_permission = false;
+            $idcourse = 1;
+            if (isset($SESSION->wizard['idcourse'])) {
+                $idcourse = $SESSION->wizard['idcourse'];
+            }
+            $hybridattachment_permission = wizard_has_hybridattachment_permission($idcourse, $USER->id);
+
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
@@ -125,15 +132,28 @@ switch ($stepin) {
                 $data->user_name = $SESSION->wizard['form_step3']['user_name'];
                 $data->user_login = $SESSION->wizard['form_step3']['user_login'];
                 $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
+                if ($hybridattachment_permission === false) {
+                    $init_course_form3 = $SESSION->wizard['init_course']['form_step3'];
+                    $data->item = (isset($init_course_form3['item']) ? $init_course_form3['item'] : array());
+                    $data->path = (isset($init_course_form3['path']) ? $init_course_form3['path'] : array());
+                } else {
+                    $data->item = (isset($_POST['item']) ? $_POST['item'] : array());
+                    $data->path = (isset($_POST['path']) ? $_POST['path'] : array());
+                }
 
                 $data->rattachements = array_unique(array_filter($data->rattachements));
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
+                $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
                 redirect($CFG->wwwroot . '/local/crswizard/update/index.php?stepin=' . $stepgo);
             }
             $steptitle = get_string('upcoursedescription', 'local_crswizard');
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/../js/include-for-rattachements.js'));
+            if ($hybridattachment_permission) {
+                $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
+                $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'), true);
+            }
         } elseif ($wizardcase == 2) {
             $SESSION->wizard['navigation']['stepin'] = 5;
             $SESSION->wizard['navigation']['suite'] = 6;
