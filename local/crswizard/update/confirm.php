@@ -48,17 +48,23 @@ class course_wizard_confirm extends moodleform {
             }
         }
 
-        // rattachement secondaire - cas 2
+        // rattachement secondaire - cas 2 + hybride
         if (isset($form2['rattachement2'])) {
             $rof2 = $form2['rattachement2'];
             if(count($rof2)) {
-                $etab = $displaylist[$form2['category']];
+                $racine = '';
+                if ($SESSION->wizard['wizardcase'] == 2) {
+                    $racine = $displaylist[$form2['category']];
+                } elseif ($SESSION->wizard['wizardcase'] == 3) {
+                    $tabcategories = get_list_category($form2['category']);
+                    $racine = $tabcategories[0] . ' / ' . $tabcategories[1];
+                }
                 $htmlrof2 = '<div class="fitem"><div class="fitemtitle">'
                     . '<div class="fstaticlabel"><label>'
                     . get_string('labelE7ratt2', 'local_crswizard')
                     . '</label></div></div>';
                 foreach ($rof2 as $chemin) {
-                    $htmlrof2 .= '<div class="felement fstatic">' . $etab . ' / ' . $chemin . '</div>';
+                    $htmlrof2 .= '<div class="felement fstatic">' . $racine . ' / ' . $chemin . '</div>';
                 }
                 $htmlrof2 .= '</div>';
                 $mform->addElement('html', $htmlrof2);

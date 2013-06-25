@@ -104,6 +104,12 @@ switch ($stepin) {
         break;
     case 3:
         if ($wizardcase == 3) {
+            $hybridattachment_permission = false;
+            $idcourse = 1;
+            if (isset($SESSION->wizard['idcourse'])) {
+                $idcourse = $SESSION->wizard['idcourse'];
+            }
+            $hybridattachment_permission = wizard_has_hybridattachment_permission($idcourse, $USER->id);
             if (!isset($SESSION->wizard['form_step3'])) {
                 $SESSION->wizard['form_step3']['user_name'] = fullname($USER);
                 $SESSION->wizard['form_step3']['user_login'] = $USER->username;
@@ -117,8 +123,13 @@ switch ($stepin) {
                 $data->user_login = $SESSION->wizard['form_step3']['user_login'];
                 $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
 
+                $data->item =  (isset($_POST['item']) ? $_POST['item'] : array());
+                $data->path =  (isset($_POST['path']) ? $_POST['path'] : array());
+
                 $data->rattachements = array_unique(array_filter($data->rattachements));
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
+                $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
+
                 redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
             }
 
@@ -126,6 +137,12 @@ switch ($stepin) {
             $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
             $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
             $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-rattachements.js'));
+
+            if ($hybridattachment_permission) {
+                $PAGE->requires->css(new moodle_url('/local/rof_browser/browser.css'));
+                $PAGE->requires->js(new moodle_url('/local/rof_browser/selected.js'), true);
+            }
+
         } elseif ($wizardcase == 2) {
             if (isset($_POST['step'])) {
                 $SESSION->wizard['form_step' . $stepin] = $_POST;

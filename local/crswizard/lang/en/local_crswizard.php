@@ -14,7 +14,8 @@ $string['crswizard:creator'] = 'Create a course with the wizard';
 $string['crswizard:validator'] = 'Validate a course created with the wizard';
 $string['crswizard:supervalidator'] = 'Validate ANY course created with the wizard';
 $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the wizard, local context';
-$string['crswizard:rofreferenceeditor'] = 'Modifier les rattachemeents au ROF d\'un cours';
+$string['crswizard:rofreferenceeditor'] = 'Modifier les rattachements au ROF d\'un cours';
+$string['crswizard:hybridattachment'] = 'Ajouter/modifier des rattachements au ROF dans cours hybrides';
 
 $string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
     . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
