@@ -15,6 +15,7 @@ $string['crswizard:validator'] = 'Approuver un cours créé avec l\'assistant';
 $string['crswizard:supervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant';
 $string['crswizard:localsupervalidator'] = 'Approuver n\'importe quel cours créé avec l\'assistant, contexte local';
 $string['crswizard:rofreferenceeditor'] = 'Modifier les rattachemeents au ROF d\'un cours';
+$string['crswizard:hybridattachment'] = 'Ajouter/modifier des rattachements au ROF dans cours hybrides';
 
 $string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
     . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
