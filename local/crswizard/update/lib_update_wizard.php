@@ -56,6 +56,12 @@ function wizard_get_course($id) {
             $SESSION->wizard['form_step3']['user_name'] = fullname($user);
             $SESSION->wizard['form_step3']['user_login'] = $user->username;
             $SESSION->wizard['form_step3']['requestdate'] = $course->timecreated;
+
+            wizard_rof_connection($course->profile_field_up1rofpathid, false, 'form_step3');
+
+            $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
+            $SESSION->wizard['init_course']['form_step3']['item'] = $SESSION->wizard['form_step3']['item'];
+            $SESSION->wizard['init_course']['form_step3']['path'] = $SESSION->wizard['form_step3']['path'];
         }
 
         //inscription cohortes
@@ -157,13 +163,20 @@ function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_st
         $newpath = strtr($path, '/', '_');
         if ($case2 && $pos == 0) {
             $SESSION->wizard[$form_step]['item']['p'][] = $rofid;
-             $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
+            $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
         } else {
             $SESSION->wizard[$form_step]['item']['s'][] = $rofid;
             if (substr($newpath, 0, 1) == '_') {
                 $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
             } else {
                 $SESSION->wizard[$form_step]['path'][$rofid] = $newpath;
+            }
+            if ($case2 == FALSE && $rofid !== FALSE) {
+                $rofpath = $SESSION->wizard[$form_step]['path'][$rofid];
+                $tabpath = explode('_', $rofpath);
+                $tabrof = rof_get_combined_path($tabpath);
+                $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
+                $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $chemin;
             }
         }
     }

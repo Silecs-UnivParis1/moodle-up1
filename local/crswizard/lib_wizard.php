@@ -938,6 +938,11 @@ class core_wizard {
         } else { // cas 3
             $this->mydata->course_nom_norme = $form2['fullname'];
             $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
+            //rattachement hybride
+            $this->set_metadata_rof2('form_step3');
+            if (count($this->formdata['rof2_tabpath'])) {
+                $this->set_metadata_rof($this->formdata['rof2_tabpath']);
+            }
             $this->set_categories_connection();
         }
 
@@ -947,7 +952,6 @@ class core_wizard {
 
         // cours doit être validé
         $this->set_metadata_cycle_life();
-
         return $this->mydata;
     }
 
@@ -1480,6 +1484,11 @@ class core_wizard {
 
         } else { // cas 3
             $this->mydata->course_nom_norme = $form2['fullname'];
+            //rattachement hybride
+            $this->set_metadata_rof2('form_step3');
+            if (count($this->formdata['rof2_tabpath'])) {
+                $this->set_metadata_rof($this->formdata['rof2_tabpath']);
+            }
             $this->set_categories_connection();
 
             // log update rattach
