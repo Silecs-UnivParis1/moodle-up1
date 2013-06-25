@@ -421,6 +421,9 @@ function wizard_get_rof($form_step = 'form_step2') {
     $rofPath = $SESSION->wizard[$form_step]['path'];
     foreach ($formRof as $key => $rof) {
         foreach ($rof as $r) {
+            if ($r === FALSE ) {
+                return $list;
+            }
             $list[$r]['nature'] = $key;
             if (array_key_exists($r, $rofPath)) {
                 $list[$r]['path'] = $rofPath[$r];
@@ -678,7 +681,7 @@ function wizard_prepare_rattachement_second($form2) {
         if (isset($allrof['s']) && count($allrof['s'])) {
             foreach($allrof['s'] as $rofid) {
                 $rof2['rofid'][] = $rofid;
-                if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
+                if ($rofid !== FALSE && isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
                     $rofpath = $form2['path'][$rofid];
                     $path = strtr($rofpath, '_', '/');
                     $rof2['rofpathid'][] = '/' . $path;
@@ -691,7 +694,7 @@ function wizard_prepare_rattachement_second($form2) {
                     $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
                     $rof2['rofchemin'][] = $chemin;
                 }
-                if (isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
+                if ($rofid !== FALSE && isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
                     $rofobjet =  $form2['all-rof'][$rofid]['object'];
                     $rof2['rofname'][] = rof_combined_name($rofobjet->localname, $rofobjet->name);
                 }
@@ -957,6 +960,8 @@ class core_wizard {
         $this->mydata->profile_field_up1niveaulmda = '';
         $this->mydata->profile_field_up1diplome = '';
         $this->mydata->profile_field_up1generateur = '';
+        $this->mydata->profile_field_up1categoriesbis = '';
+        $this->mydata->profile_field_up1composante = '';
     }
 
     private function set_metadata_cycle_life() {
@@ -1038,17 +1043,25 @@ class core_wizard {
         $form2 = $this->formdata[$form_step];
         $rof2 = wizard_prepare_rattachement_second($form2);
         if (count($rof2)) {
-            $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
-            foreach($rof2['rofid'] as $rofid) {
-                $this->mydata->profile_field_up1rofid .= ';' . $rofid;
+            if (isset($rof2['rofchemin'])) {
+                $this->set_wizard_session($rof2['rofchemin'], 'rattachement2', 'form_step2');
             }
-            foreach($rof2['rofpathid'] as $rofpath) {
-                $this->mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+            if (isset($rof2['rofid'])) {
+                foreach($rof2['rofid'] as $rofid) {
+                    $this->mydata->profile_field_up1rofid .= ';' . $rofid;
+                }
             }
-            foreach($rof2['rofname'] as $rofname) {
-                $this->mydata->formdata['form_step2']['rofname_second'][] = $rofname;
+            if (isset($rof2['rofpathid'])) {
+                foreach($rof2['rofpathid'] as $rofpath) {
+                    $this->mydata->profile_field_up1rofpathid .= ';' . $rofpath;
+                }
             }
-            $this->formdata['rof2_tabpath'] = $rof2['tabpath'];
+            if (isset($rof2['rofname'])) {
+                foreach($rof2['rofname'] as $rofname) {
+                    $this->mydata->formdata['form_step2']['rofname_second'][] = $rofname;
+                }
+            }
+            $this->formdata['rof2_tabpath'] = (isset($rof2['tabpath']) ? $rof2['tabpath'] : array());
         } else {
             $this->formdata['rof2_tabpath'] = array();
         }
@@ -1081,14 +1094,19 @@ class core_wizard {
             $ratt = wizard_get_rattachement_fieldup1($this->mydata->rattachements, $tabcategories);
             if (count($ratt)) {
                 foreach ($ratt as $fieldname => $value) {
-                    $this->mydata->$fieldname = $value;
+                    if (isset($this->mydata->$fieldname) && trim($this->mydata->$fieldname) != '') {
+                        $this->mydata->$fieldname .= ';';
+                    }
+                    $this->mydata->$fieldname .= $value;
                 }
             }
             if (count($this->mydata->rattachements)) {
                 $first = true;
                 foreach ($this->mydata->rattachements as $rattachement) {
-                    $this->mydata->profile_field_up1categoriesbis .= ($first ? '' : ';') . $rattachement;
-                    $first = false;
+                    if (isset($this->mydata->profile_field_up1categoriesbis) && trim($this->mydata->profile_field_up1categoriesbis) != '') {
+                        $this->mydata->profile_field_up1categoriesbis .= ';';
+                    }
+                    $this->mydata->profile_field_up1categoriesbis .= $rattachement;
                 }
             }
         }
@@ -1212,13 +1230,19 @@ class core_wizard {
             }
             $mg .=  "\n";
         }
-        // cas 2
+        // rattachements secondaires
         if (isset($form2['rattachement2']) && count($form2['rattachement2'])) {
             $mg .= get_string('labelE7ratt2', 'local_crswizard') . ' : ';
-            $etab = $displaylist[$form2['category']];
+            $racine = '';
+            if ($this->formdata['wizardcase'] == 2) {
+                $racine = $displaylist[$form2['category']];
+            } elseif ($this->formdata['wizardcase'] == 3) {
+                $tabcategories = get_list_category($form2['category']);
+                $racine = $tabcategories[0] . ' / ' . $tabcategories[1];
+            }
             $first = true;
             foreach ($form2['rattachement2'] as $formsecond) {
-                $mg .= ($first ? '' : ', ') . $etab . ' / ' . $formsecond;
+                $mg .= ($first ? '' : ', ') . $racine . ' / ' . $formsecond;
                 $first = false;
             }
             $mg .=  "\n";
