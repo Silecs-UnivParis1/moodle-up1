@@ -210,8 +210,6 @@ function rof_links_constants($baseurl) {
  */
 function rof_constant_metadata($element, $rawdata) {
     global $DB;
-var_dump($element);
-var_dump($rawdata);
     return '[' . $rawdata. '] '.
             $DB->get_field('rof_constant', 'value',
                     array('element' => $element, 'dataimport' => $rawdata),
