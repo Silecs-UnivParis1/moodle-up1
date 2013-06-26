@@ -42,7 +42,7 @@ function rof_get_metadata_concat($rofobjects, $separator=';') {
 /**
  * turn rof information from a rofobject into loosely formatted (up1) course metadata
  * @global type $DB
- * @param mixed $rofobject = rofid (string) OR rofidpath (array(rofid)) OR combined path (array(rofid => rofname))
+ * @param mixed $rofobject = rofid (string) OR rofidpath (array(rofid)))
  * @return array
  */
 function rof_get_metadata($rofobject) {
@@ -60,16 +60,9 @@ function rof_get_metadata($rofobject) {
 
     // $rofobject conversion into $rofnamepath + $rofidpath
     if ( is_array($rofobject) ) {
-        $keys = array_keys($rofobject);
-        $values = array_values($rofobject);
-        if ($keys[0] == '0') { // simple array
-            $rofidpath = $values;
-            $combinedpath = rof_get_combined_path($values);
-            $rofnamepath = array_values($combinedpath);
-        } else {    //associative array
-            $rofnamepath = array_values($rofobject);
-            $rofidpath = array_keys($rofobject);
-        }
+        $rofidpath = array_values($rofobject); // to ensure reindexation, from 0
+        $combinedpath = rof_get_combined_path($rofidpath);
+        $rofnamepath = array_values($combinedpath);
     } else { // si on reçoit un ROFid seul, on récupère son premier chemin (arbitraire)
         $combinedpath = rof_get_course_first_path($rofobject);
         $rofnamepath = array_values($combinedpath);

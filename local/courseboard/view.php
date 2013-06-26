@@ -45,19 +45,23 @@ echo "<li>No identification : " . (!empty($course->idnumber) ? $course->idnumber
 echo "</ul>\n";
 
 // ROF data
-$rofids = up1_meta_get_text($crsid, 'up1rofid');
+$rofpathids = up1_meta_get_text($crsid, 'up1rofpathid');
 $rofdata = array();
-if ($rofids) {
+if ($rofpathids) {
     /// Vérification de l'existence dans le cache ROF : probablement inutile
     // $insql = "('" . join("', '", explode(';', $rofids)) . "')";
     // $sql = "SELECT rofid FROM {rof_course} rc WHERE rofid IN " . $insql;
     // $rofcourses = $DB->get_fieldset_sql($sql);
-    $rofcourses = explode(';', $rofids);
-    $rofdata = array_map('rof_get_metadata', $rofcourses);
+    $rofpaths = explode(';', $rofpathids);
+    $rattachements = array();
+    foreach ($rofpaths as $rofpath) {
+        $rattachements[] = array_filter(explode('/', $rofpath));
+    }
+    $rofdata = array_map('rof_get_metadata', $rattachements);
 
 } else {
-    $rofcourses = FALSE;
-    $rofids = FALSE;
+    $rattachements = FALSE;
+    $rofpathids = FALSE;
     echo "<h3>Pas de ROF</h3>\n";
     echo "<p>Aucun cours correspondant n'existe dans le ROF avec ce code <b>$course->idnumber</b>.</p>\n";
 }
@@ -65,9 +69,10 @@ if ($rofids) {
 
 print_table_course_vs_rof($crsid, $rofdata);
 
-if ($rofcourses) {
+if ($rattachements) {
     echo "<h3>Tous les chemins du rattachement principal : </h3>\n";
-    $allPaths = rof_get_course_all_paths($rofcourses[0]);
+    $rattachementleaf = array_pop($rattachements[0]);
+    $allPaths = rof_get_course_all_paths($rattachementleaf);
     $allPathnames = rof_get_course_all_pathnames($allPaths);
     echo '<ol>';
     foreach ($allPathnames as $pathname) {
