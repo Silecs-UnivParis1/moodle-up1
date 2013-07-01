@@ -35,6 +35,30 @@ function up1_meta_get_text($courseid, $field, $error=false) {
 }
 
 /**
+ * return an html string <span title="...">...</span> for easy display of multiple metadata values
+ * displays the main value, while the title tooltip displays the whole list on mouseover
+ * @param int $courseid
+ * @param string $field UP1 metadata text, ex. composante
+ * @param bool $error : if set, throw an exception if $field isn't found ; otherwise return an empty string
+ * @param bool $prefix if set, prefixes each item of the list with the given string
+ * @return (html) string
+ */
+function up1_meta_html_multi($courseid, $field, $error=false, $prefix = '') {
+    $text = up1_meta_get_text($courseid, $field, $error);
+    $items = array_filter(array_unique(explode(';', $text)));
+
+    if (count($items) == 0) {
+        return '';
+    }
+    if (count($items) == 1) {
+        return '<span>' . $prefix . $items[0] . '</span>';
+    }
+    $brief = $prefix . $items[0] . ' +';
+    $long = $prefix . join(', ' . $prefix, $items);
+    return '<span title="' . $long . '">' . $brief . '</span>';
+}
+
+/**
  * return a multiple metadata up1 as a formatted list ; ex. "UFR02-... / UFR04-..."
  * identic values are merged
  * @param int $courseid

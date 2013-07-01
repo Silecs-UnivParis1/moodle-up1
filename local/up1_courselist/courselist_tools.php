@@ -194,8 +194,8 @@ class courselist_format {
     }
 
      public static function format_level($dbcourse, $element, $sep) {
-        $niveau = up1_meta_get_text($dbcourse->id, 'niveau', false);
-        $semestre = 'S' . up1_meta_get_text($dbcourse->id, 'semestre', false);
+        $niveau = up1_meta_html_multi($dbcourse->id, 'niveau', false, '');
+        $semestre = up1_meta_html_multi($dbcourse->id, 'semestre', false, 'S.');
         return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
                . '<' . $element . '>' . $semestre. '</' . $element . '>';
     }
