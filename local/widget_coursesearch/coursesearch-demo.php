@@ -12,6 +12,13 @@ $PAGE->set_title('Démo de la recherche de cours');
 //$PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'));
 //$PAGE->requires->js(new moodle_url('/local/jquery/jquery-ui.js'));
 $PAGE->requires->js(new moodle_url('/local/widget_coursesearch/coursesearch.js'));
+$PAGE->requires->js_init_code('
+jQuery("#widget-coursesearch").coursesearch(
+    {
+        "fields": "*" // default: every category and every field
+        // "fields": { "Identification": ["up1code", ...], "Diplome": "*" }, ...
+    }
+);');
 
 $PAGE->set_pagelayout('admin');
 

@@ -5,6 +5,8 @@
 
 var rootUrl = findScriptUrl('coursesearch.js');
 
+var initParams;
+
 if (window.jQuery === undefined) {
     loadJs(rootUrl + "../jquery/jquery.js");
     loadJs(rootUrl + "../jquery/jquery-ui.js", true);
@@ -32,10 +34,10 @@ function loadJs(url, last) {
     if (last !== undefined) {
         if (script_tag.readyState) {
             script_tag.onreadystatechange = function () {
-                if (this.readyState == 'complete' || this.readyState == 'loaded') {
+                if (this.readyState === 'complete' || this.readyState === 'loaded') {
                     onLoad();
                 }
-            }
+            };
         }
     } else {
         script_tag.onload = onLoad;
@@ -43,8 +45,13 @@ function loadJs(url, last) {
 }
 
 function onLoad() {
+    jQuery.fn.coursesearch = function (params) {
+        initParams = params;
+    };
+
     jQuery(function () {
-        $('.widget-coursesearch').load(rootUrl + 'ajax.php');
+        console.log(initParams);
+        $('.widget-coursesearch').load(rootUrl + 'ajax.php', initParams);
         $('.widget-coursesearch').on('submit', 'form', searchMoodleCourses);
         $('.widget-coursesearch').on('click', 'input[name="submitbutton"]', searchMoodleCourses);
         $('.widget-coursesearch').on('click', '.paging > a', function (event) {

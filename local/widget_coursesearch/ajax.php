@@ -29,6 +29,12 @@ $searchconfig = array(
         )
     )
 );
+if (isset($_REQUEST['fieldsjson'])) {
+    $searchconfig['fields'] = json_decode($_REQUEST['fieldsjson'], true);
+} else if (isset($_REQUEST['fields'])) {
+    $searchconfig['fields'] = $_REQUEST['fields'];
+}
+
 $form = new course_batch_search_form(null, $searchconfig, 'get');
 $data = $form->get_data();
 $totalcount = 0;
@@ -84,7 +90,7 @@ function print_navigation_bar($totalcount, $page, $perpage, $search) {
         echo "</p></center>";
     } else if ($perpage === 99999) {
         $defaultperpage = 10;
-        // If user has course:create or category:manage capability the show 30 records.
+        // If user has course:create or category:manage capability then show 30 records.
         $capabilities = array('moodle/course:create', 'moodle/category:manage');
         if (has_any_capability($capabilities, context_system::instance())) {
             $defaultperpage = 30;
