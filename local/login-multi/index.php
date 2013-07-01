@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config.php';
 
-/* @var $PAGE page_base */
+/* @var $PAGE moodle_page */
 /* @var $OUTPUT core_renderer */
 
 global $CFG, $PAGE, $OUTPUT, $USER;

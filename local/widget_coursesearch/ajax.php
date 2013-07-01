@@ -7,6 +7,9 @@ require_once($CFG->dirroot . '/course/batch_lib.php');
 
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
+$topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
+$topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
+$enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 $searchconfig = array(
@@ -29,7 +32,20 @@ $searchconfig = array(
         )
     )
 );
+if (isset($_REQUEST['fieldsjson'])) {
+    $searchconfig['fields'] = json_decode($_REQUEST['fieldsjson'], true);
+} else if (isset($_REQUEST['fields'])) {
+    $searchconfig['fields'] = $_REQUEST['fields'];
+}
+
 $form = new course_batch_search_form(null, $searchconfig, 'get');
+$form->set_data(
+        (object) array(
+            'topcategory' => $topcategory,
+            'topnode' => $topnode,
+            'enrolled' => $enrolled,
+        )
+);
 $data = $form->get_data();
 $totalcount = 0;
 $courses = null;
@@ -84,7 +100,7 @@ function print_navigation_bar($totalcount, $page, $perpage, $search) {
         echo "</p></center>";
     } else if ($perpage === 99999) {
         $defaultperpage = 10;
-        // If user has course:create or category:manage capability the show 30 records.
+        // If user has course:create or category:manage capability then show 30 records.
         $capabilities = array('moodle/course:create', 'moodle/category:manage');
         if (has_any_capability($capabilities, context_system::instance())) {
             $defaultperpage = 30;
