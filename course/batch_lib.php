@@ -6,6 +6,8 @@
 
 require_once($CFG->libdir.'/custominfo/lib.php');
 
+/* @var $DB moodle_database */
+
 /**
  * A list of courses that match a search
  *
@@ -98,6 +100,17 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     }
     if (!empty($criteria->createdbefore)) {
         $searchcond[] = "c.timecreated <= " . ((int) $criteria->createdbefore);
+    }
+    if (!empty($criteria->category)) {
+        $category = $DB->get_record('course_categories', array('id' => $criteria->category));
+        if ($category) {
+            $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("$category->path/%"));
+            if ($subcats) {
+                list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED);
+                $searchcond[] = "category $inSql";
+                $params = $params + $inParams;
+            }
+        }
     }
 
     // custominfo fields
