@@ -86,6 +86,8 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         }
     }
 
+    $searchjoin = array();
+
     // other course settings
     if (property_exists($criteria, 'visible')) {
         $searchcond[] = "c.visible >= " . ((int) $criteria->visible);
@@ -102,12 +104,12 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     if (!empty($criteria->createdbefore)) {
         $searchcond[] = "c.timecreated <= " . ((int) $criteria->createdbefore);
     }
-    if (!empty($criteria->category)) {
-        $category = $DB->get_record('course_categories', array('id' => $criteria->category));
+    if (!empty($criteria->topcategory)) {
+        $category = $DB->get_record('course_categories', array('id' => $criteria->topcategory));
         if ($category) {
             $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("$category->path/%"));
             if ($subcats) {
-                list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED);
+                list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED, "paramcat");
                 $searchcond[] = "c.category $inSql";
                 $params = $params + $inParams;
             }
@@ -116,15 +118,29 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     if (!empty($criteria->topnode)) {
         $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->topnode);
         if ($coursesId) {
-            list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED);
+            list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED, "paramnode");
             $searchcond[] = "c.id $inSql";
-            $params = $params + $inParams;
+            $params = array_merge($params, $inParams);
         }
+    }
+    if (!empty($criteria->enrolled)) {
+        if (empty($criteria->enrolledroles)) {
+            $criteria->enrolledroles = array(3);
+        }
+        list ($inSql, $inParams) = $DB->get_in_or_equal($criteria->enrolledroles, SQL_PARAMS_NAMED, "paramrole");
+        $searchjoin[] = "JOIN {context} context ON (context.instanceid = c.id AND context.contextlevel = " . CONTEXT_COURSE . ") "
+                . "JOIN {role_assignments} ra ON (context.id = ra.contextid) "
+                . "JOIN {user} u ON (u.id = ra.userid)";
+        $searchcond[] = '('
+                . $DB->sql_like("CONCAT(u.firstname,' ',u.lastname)", ":uname", false, false)
+                . " AND ra.roleid $inSql"
+                . ')';
+        $params['uname'] = "%{$criteria->enrolled}%";
+        $params = array_merge($params, $inParams);
     }
 
     // custominfo fields
     $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
-    $searchjoin = array();
     if ($fields) {
         $i = 0;
         foreach ($fields as $field) {
