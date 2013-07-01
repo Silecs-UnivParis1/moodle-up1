@@ -91,7 +91,10 @@ class course_batch_search_form extends moodleform {
 
         $this->add_action_buttons(false, get_string('go'));
 
-        $mform->addElement('hidden', 'fieldsjson');
+        if (!empty($this->_customdata['fields'])) {
+            $mform->addElement('hidden', 'fieldsjson');
+            $mform->setDefault('fields', $this->_customdata['fields']);
+        }
     }
 
     /// perform some extra moodle validation
