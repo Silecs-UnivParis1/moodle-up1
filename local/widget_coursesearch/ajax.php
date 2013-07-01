@@ -7,8 +7,9 @@ require_once($CFG->dirroot . '/course/batch_lib.php');
 
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
-$category  = optional_param('category', 0, PARAM_INT); // category where to search for courses
-$topnode   = optional_param('topnode', 0, PARAM_INT);  // category where to search for courses
+$topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
+$topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
+$enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 $searchconfig = array(
@@ -40,8 +41,9 @@ if (isset($_REQUEST['fieldsjson'])) {
 $form = new course_batch_search_form(null, $searchconfig, 'get');
 $form->set_data(
         (object) array(
-            'category' => $category,
+            'topcategory' => $topcategory,
             'topnode' => $topnode,
+            'enrolled' => $enrolled,
         )
 );
 $data = $form->get_data();
