@@ -38,7 +38,7 @@ class course_batch_search_form extends moodleform {
 
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');
-        if (empty($this->_customdata['fields'])) {
+        if (empty($this->_customdata['fields']) || $this->_customdata['fields'] === '*') {
             $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
         } else {
             list ($sqlin, $sqlparams) = $DB->get_in_or_equal(array_keys($this->_customdata['fields']));
@@ -50,10 +50,9 @@ class course_batch_search_form extends moodleform {
                 $categories = array();
             }
         }
-        $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
         if ($categories) {
             foreach ($categories as $category) {
-                if (isset($this->_customdata['fields'][$category->name])) {
+                if (isset($this->_customdata['fields'][$category->name]) && $this->_customdata['fields'][$category->name] !== '*') {
                     $fields = array();
                     if (!empty($this->_customdata['fields'][$category->name])) {
                         list ($sqlin, $sqlparams) = $DB->get_in_or_equal($this->_customdata['fields'][$category->name]);
@@ -91,6 +90,8 @@ class course_batch_search_form extends moodleform {
         }
 
         $this->add_action_buttons(false, get_string('go'));
+
+        $mform->addElement('hidden', 'fieldsjson');
     }
 
     /// perform some extra moodle validation
