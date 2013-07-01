@@ -4,7 +4,8 @@
  * @license http://www.gnu.org/licenses/gpl-2.0.html  GNU GPL v2
  */
 
-require_once($CFG->libdir.'/custominfo/lib.php');
+require_once $CFG->libdir . '/custominfo/lib.php';
+require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
 /* @var $DB moodle_database */
 
@@ -107,9 +108,17 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
             $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("$category->path/%"));
             if ($subcats) {
                 list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED);
-                $searchcond[] = "category $inSql";
+                $searchcond[] = "c.category $inSql";
                 $params = $params + $inParams;
             }
+        }
+    }
+    if (!empty($criteria->topnode)) {
+        $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->topnode);
+        if ($coursesId) {
+            list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED);
+            $searchcond[] = "c.id $inSql";
+            $params = $params + $inParams;
         }
     }
 

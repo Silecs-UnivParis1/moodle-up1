@@ -15,7 +15,8 @@ $PAGE->requires->js(new moodle_url('/local/widget_coursesearch/coursesearch.js')
 $PAGE->requires->js_init_code('
 jQuery("#widget-coursesearch").coursesearch(
     {
-        //"category": 22,
+        //category: 22,
+        //topnode: "",
         "fields": "*" // default: every category and every field
         // "fields": { "Identification": ["up1code", ...], "Diplome": "*" }, ...
     }

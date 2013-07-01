@@ -7,7 +7,8 @@ require_once($CFG->dirroot . '/course/batch_lib.php');
 
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
-$category  = optional_param('category', 0, PARAM_INT);     // category where to search for courses
+$category  = optional_param('category', 0, PARAM_INT); // category where to search for courses
+$topnode   = optional_param('topnode', 0, PARAM_INT);  // category where to search for courses
 
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 $searchconfig = array(
@@ -40,6 +41,7 @@ $form = new course_batch_search_form(null, $searchconfig, 'get');
 $form->set_data(
         (object) array(
             'category' => $category,
+            'topnode' => $topnode,
         )
 );
 $data = $form->get_data();
