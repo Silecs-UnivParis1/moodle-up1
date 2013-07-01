@@ -188,7 +188,7 @@ function rof_guess_year($semestreint, $typedip) {
  * @return type
  */
 function rof_guess_level($year) {
-    $convertyear = array ('?', 'L1', 'L2', 'L3', 'M1', 'M2', 'D', 'D', 'D');
-    $level = ( isset($convertannee[$year]) ? $convertannee[$year] : 'A' );
+    $convertyear = array ('0', 'L1', 'L2', 'L3', 'M1', 'M2', 'D', 'D', 'D');
+    $level = ( isset($convertyear[$year]) ? $convertyear[$year] : 'A' );
     return $level;
 }
