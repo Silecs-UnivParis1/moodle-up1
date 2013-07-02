@@ -6,10 +6,8 @@ require_once($CFG->dirroot . '/course/batch_form.php');
 require_once($CFG->dirroot . '/course/batch_lib.php');
 require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
-global $OUTPUT, $PAGE;
+global $PAGE;
 
-$page      = optional_param('page', 0, PARAM_INT);     // which page to show
-$perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
 $topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
 $topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
 $enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
