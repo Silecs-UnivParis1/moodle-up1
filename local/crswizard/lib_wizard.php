@@ -1502,6 +1502,9 @@ class core_wizard {
             }
             if (count(array_diff($old, $new)) || count(array_diff($new, $old))) {
                 $this->formdata['modif']['attach'] = true;
+                if (count($new) == 0) {
+                    $this->mydata->profile_field_up1categoriesbis = '';
+                }
             }
 
             //log
