@@ -158,22 +158,35 @@ EOL;
      * @return string formatted label
      */
     public function format_entry($courseid, $leaf = true) {
-        global $DB;
+        $dbcourse = $DB->get_record('course', array('id' => (int) $courseid));
+        if (empty($dbcourse)) {
+            return '';
+        }
+        return $this->format_course($dbcourse, $leaf);
+    }
+
+    /**
+     * Return a formated course label.
+     *
+     * @param stdClass $course
+     * @param boolean $leaf (opt) true
+     * @return string formatted label
+     */
+    public function format_course($course, $leaf = true) {
         $teachers = '';
         $icons = '';
-        $dbcourse = $DB->get_record('course', array('id' => $courseid));
 
         // compute the elements
         if ($this->format == 'table'|| $this->format == 'list') {
-            $code = self::format_code($dbcourse);
-            $level = self::format_level($dbcourse);
+            $code = self::format_code($course);
+            $level = self::format_level($course);
 
         }
         if ($this->format == 'table' || $this->format == 'tree') {
-            $teachers = self::format_teachers($dbcourse, 'coursetree-teachers');
-            $icons = self::format_icons($dbcourse, 'coursetree-icons');
+            $teachers = self::format_teachers($course, 'coursetree-teachers');
+            $icons = self::format_icons($course, 'coursetree-icons');
         }
-        $crslink = self::format_name($dbcourse, 'coursetree-' . ($leaf ? "name" : "dir")) ;
+        $crslink = self::format_name($course, 'coursetree-' . ($leaf ? "name" : "dir")) ;
 
         // renders the line
         switch ($this->format) {
