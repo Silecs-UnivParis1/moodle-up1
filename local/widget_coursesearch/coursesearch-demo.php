@@ -18,6 +18,7 @@ jQuery("#widget-coursesearch").coursesearch(
         //topcategory: 22,
         //topnode: "",
         // enrolled: "Dupond",
+        fieldset: "Recherche principale",
         "fields": "*" // default: every category and every field
         // "fields": { "Identification": ["up1code", ...], "Diplome": "*" }, ...
     }

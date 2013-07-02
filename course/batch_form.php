@@ -19,6 +19,10 @@ class course_batch_search_form extends moodleform {
 
         $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 
+        if (!empty($this->_customdata['fieldset'])) {
+            $mform->addElement('header', 'main_settings', format_string($this->_customdata['fieldset']));
+        }
+
         $mform->addElement('text', 'search', get_string('searchcourses'), 'maxlength="254" size="50"');
         $mform->addElement('text', 'enrolled', get_string('defaultcourseteacher'), 'maxlength="254" size="50"');
 

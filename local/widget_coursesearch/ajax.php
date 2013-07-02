@@ -13,10 +13,12 @@ $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
 $topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
 $topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
 $enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+$fieldset  = optional_param('fieldset', '', PARAM_TEXT); // legend of the main fieldset
 
 $PAGE->set_context(context_system::instance());
 
 $searchconfig = array(
+    'fieldset' => $fieldset,
     'fields' => array(
         'Identification' => array(
             'up1nomnorme',
