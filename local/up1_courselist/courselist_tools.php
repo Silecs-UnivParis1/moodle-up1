@@ -37,12 +37,13 @@ class courselist_common {
      * Builds a HTML table listing each course in the pseudopath.
      *
      * @param string $pseudopath
+     * @param string $format table|list
      * @return string HTML of the table.
      */
-    public static function html_course_table($pseudopath) {
+    public static function list_courses_html($pseudopath, $format) {
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         if ($courses) {
-            $courseformatter = new courselist_format('table');
+            $courseformatter = new courselist_format($format);
             $res = $courseformatter->get_header();
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
                 // $rofpathid = $courses[$crsid];
@@ -54,27 +55,6 @@ class courselist_common {
         }
         return $res;
     }
-
-    /**
-     * @todo merge this with html_course_table() with just one more parameter
-     */
-    public static function html_course_list($pseudopath) {
-        $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
-        if ($courses) {
-            $courseformatter = new courselist_format('list');
-            $res = $courseformatter->get_header();
-            foreach (courselist_roftools::sort_courses($courses) as $crsid) {
-                //$rofpathid = $courses[$crsid];
-                $res .= $courseformatter->format_entry($crsid, true) . "\n";
-            }
-            $res .= $courseformatter->get_footer() . "\n";
-        } else { // no course
-            $res = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
-" . '</b></p>';
-        }
-        return $res;
-    }
-
 
     public static function has_multiple_rattachements($crsid) {
         $catbis = up1_meta_get_text($crsid, 'up1categoriesbis', false);
