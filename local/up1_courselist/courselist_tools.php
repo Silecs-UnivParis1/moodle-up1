@@ -12,7 +12,7 @@ require_once($CFG->dirroot . "/local/roftools/roflib.php");
 require_once($CFG->dirroot.'/course/lib.php');
 
 
-class courselist_common{
+class courselist_common {
 
     //** @todo validate_pseudopath 
 
@@ -33,22 +33,36 @@ class courselist_common{
         return $courses;
     }
 
+    /**
+     * Builds a HTML table listing each course in the pseudopath.
+     *
+     * @param string $pseudopath
+     * @return string HTML of the table.
+     */
     public static function html_course_table($pseudopath) {
-        global $DB;
-
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         if ($courses) {
-            $res = '<table class="generaltable" style="width: 100%;">' . "\n" ;
-            $res .= '<tr> <th>Code</th> <th title="Niveau">Niv.</th> <th title ="Semestre">Sem.</th> '
-                . "<th>Nom de l'espace de cours</th> <th>Enseignants</th> <th>&nbsp;</th></tr>";
+            $res = <<<EOL
+<table class="generaltable" style="width: 100%;">
+<thead>
+    <tr>
+        <th>Code</th>
+        <th title="Niveau">Niv.</th>
+        <th title="Semestre">Sem.</th>
+        <th>Nom de l'espace de cours</th>
+        <th>Enseignants</th>
+        <th>&nbsp;</th>
+    </tr>
+</thead>
+<tbody>
+EOL;
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
-                $rofpathid = $courses[$crsid];
+                // $rofpathid = $courses[$crsid];
                 $res .= courselist_format::format_entry($crsid, true, 'table') . "\n";
             }
-            $res .= "</table>\n";
+            $res .= "</tbody></table>\n";
         } else { // no course
-            $res = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
-" . '</b></p>';
+            $res = "<p><b>Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.</b></p>";
         }
         return $res;
     }
@@ -58,7 +72,7 @@ class courselist_common{
         if ($courses) {
             $res = "<ul>\n" ;
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
-                $rofpathid = $courses[$crsid];
+                //$rofpathid = $courses[$crsid];
                 $res .= courselist_format::format_entry($crsid, true, 'list') . "\n";
             }
             $res .= "</ul>\n";
@@ -87,22 +101,22 @@ class courselist_common{
 
 class courselist_format {
     /**
-     * format course label
-     * @param int $crsid
+     * Return a formated course label.
+     *
+     * @param int $courseid
      * @param boolean $leaf opt, true
      * @param string $format = 'tree' | 'table' | 'list'
      * @return string formatted label
      */
-    public static function format_entry($crsid, $leaf = true, $format = 'tree') {
+    public static function format_entry($courseid, $leaf = true, $format = 'tree') {
         global $DB;
         $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
         $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
         $cellelem = $cellelems[$format];
         $sep = $seps[$format];
-        $first = '';
         $teachers = '';
         $icons = '';
-        $dbcourse = $DB->get_record('course', array('id' => $crsid));
+        $dbcourse = $DB->get_record('course', array('id' => $courseid));
 
         // compute the elements
         if ($format == 'table'|| $format == 'list') {
@@ -110,11 +124,11 @@ class courselist_format {
             $level = self::format_level($dbcourse, $cellelem, $sep);
 
         }
-        $crslink = self::format_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir"), $format) ;
-        if ($format == 'table'|| $format == 'tree') {
+        if ($format == 'table' || $format == 'tree') {
             $teachers = self::format_teachers($dbcourse, $cellelem, 'coursetree-teachers');
             $icons = self::format_icons($dbcourse, $cellelem, 'coursetree-icons');
         }
+        $crslink = self::format_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir"), $format) ;
 
         // renders the line
         switch ($format) {
@@ -129,7 +143,7 @@ class courselist_format {
         }
     }
 
-    public static function format_name($dbcourse, $element, $class, $format) {
+    private static function format_name($dbcourse, $element, $class, $format) {
         global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
@@ -152,7 +166,7 @@ class courselist_format {
      * @param type $number number of teachers to display (1 or more)
      * @return string
      */
-    public static function format_teachers($dbcourse, $element, $class, $number=1) {
+    private static function format_teachers($dbcourse, $element, $class, $number=1) {
         global $DB;
         $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
@@ -167,7 +181,7 @@ class courselist_format {
         return $fullteachers;
     }
 
-    public static function format_icons($dbcourse, $element, $class) {
+    private static function format_icons($dbcourse, $element, $class) {
         global $OUTPUT;
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
         $icons = '<' .$element. ' class="' . $class. '" style="text-align: right;">';
@@ -185,7 +199,7 @@ class courselist_format {
         return $icons;
     }
 
-    public static function format_code($dbcourse, $element, $sep) {
+    private static function format_code($dbcourse, $element, $sep) {
         $code = strstr($dbcourse->idnumber, '-', true);
         if (courselist_common::has_multiple_rattachements($dbcourse->id)) {
             $code .= '<span title="Rattachement multiple">&nbsp;+</span>';
@@ -193,7 +207,7 @@ class courselist_format {
         return   '<' . $element . '>' . $code . '</' . $element . '>' ;
     }
 
-     public static function format_level($dbcourse, $element, $sep) {
+     private static function format_level($dbcourse, $element, $sep) {
         $niveau = up1_meta_html_multi($dbcourse->id, 'niveau', false, '');
         $semestre = up1_meta_html_multi($dbcourse->id, 'semestre', false, 'S.');
         return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
