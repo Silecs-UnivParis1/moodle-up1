@@ -35,6 +35,7 @@ class course_batch_search_form extends moodleform {
         $displaylist = array();
         $parentlist = array();
         make_categories_list($displaylist, $parentlist);
+        $displaylist = array_merge(array('' => ''), $displaylist);
         $mform->addElement('select', 'category', get_string('category'), $displaylist);
 
         // Next the customisable fields
