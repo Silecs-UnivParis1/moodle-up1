@@ -25,6 +25,7 @@ class course_batch_search_form extends moodleform {
 
         $mform->addElement('text', 'search', get_string('searchcourses'), 'maxlength="254" size="50"');
         $mform->addElement('text', 'enrolled', get_string('defaultcourseteacher'), 'maxlength="254" size="50"');
+        $mform->addElement('hidden', 'enrolledroles');
 
         $mform->addElement('date_selector', 'startdateafter', get_string('startdate') . ' &gt;');
         $mform->setDefault('startdateafter', mktime(12, 0, 0, 1, 1, date('Y') - 1));

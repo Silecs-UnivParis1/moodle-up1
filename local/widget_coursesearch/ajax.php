@@ -41,6 +41,15 @@ if (isset($_REQUEST['fieldsjson'])) {
 } else if (isset($_REQUEST['fields'])) {
     $searchconfig['fields'] = $_REQUEST['fields'];
 }
+if (isset($_REQUEST['enrolledroles'])) {
+    if (is_array($_REQUEST['enrolledroles'])) {
+        $enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);
+    } else {
+        $enrolledroles = explode(',', optional_param('enrolledroles', '', PARAM_SEQUENCE));
+    }
+} else if (isset($_REQUEST['fields'])) {
+    $enrolledroles = array(3);
+}
 
 $form = new course_batch_search_form(null, $searchconfig, 'get');
 $form->set_data(
@@ -48,6 +57,7 @@ $form->set_data(
             'topcategory' => $topcategory,
             'topnode' => $topnode,
             'enrolled' => $enrolled,
+            'enrolledroles' => $enrolledroles,
         )
 );
 $data = $form->get_data();
