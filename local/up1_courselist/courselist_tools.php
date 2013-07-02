@@ -42,42 +42,32 @@ class courselist_common {
     public static function html_course_table($pseudopath) {
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         if ($courses) {
-            $res = <<<EOL
-<table class="generaltable" style="width: 100%;">
-<thead>
-    <tr>
-        <th>Code</th>
-        <th title="Niveau">Niv.</th>
-        <th title="Semestre">Sem.</th>
-        <th>Nom de l'espace de cours</th>
-        <th>Enseignants</th>
-        <th>&nbsp;</th>
-    </tr>
-</thead>
-<tbody>
-EOL;
             $courseformatter = new courselist_format('table');
+            $res = $courseformatter->get_header();
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
                 // $rofpathid = $courses[$crsid];
                 $res .= $courseformatter->format_entry($crsid, true) . "\n";
             }
-            $res .= "</tbody></table>\n";
+            $res .= $courseformatter->get_footer() . "\n";
         } else { // no course
             $res = "<p><b>Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.</b></p>";
         }
         return $res;
     }
 
+    /**
+     * @todo merge this with html_course_table() with just one more parameter
+     */
     public static function html_course_list($pseudopath) {
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         if ($courses) {
-            $res = "<ul>\n" ;
             $courseformatter = new courselist_format('list');
+            $res = $courseformatter->get_header();
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
                 //$rofpathid = $courses[$crsid];
                 $res .= $courseformatter->format_entry($crsid, true) . "\n";
             }
-            $res .= "</ul>\n";
+            $res .= $courseformatter->get_footer() . "\n";
         } else { // no course
             $res = '<p><b>' . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.
 " . '</b></p>';
@@ -105,6 +95,10 @@ class courselist_format {
     private $format = 'tree';
     private $cellelem;
     private $sep;
+    private $header;
+    private $footer;
+
+    private $role;
 
     /**
      * Constructor.
@@ -112,13 +106,48 @@ class courselist_format {
      * @param string $format = 'tree' | 'table' | 'list'
      */
     public function __construct($format = 'tree') {
+        global $DB;
+
         $this->format = $format;
 
-        $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
-        $this->cellelem = $cellelems[$this->format];
+        switch ($this->format) {
+            case 'tree':
+                $this->cellelem = 'span';
+                $this->sep = '';
+                $this->header = '';
+                $this->footer = '';
+                break;
+            case 'table':
+                $this->cellelem = 'td';
+                $this->sep = '';
+                $this->header = <<<EOL
+<table class="generaltable" style="width: 100%;">
+<thead>
+    <tr>
+        <th>Code</th>
+        <th title="Niveau">Niv.</th>
+        <th title="Semestre">Sem.</th>
+        <th>Nom de l'espace de cours</th>
+        <th>Enseignants</th>
+        <th>&nbsp;</th>
+    </tr>
+</thead>
+<tbody>
+EOL;
+                $this->footer = '</tbody></table>';
+                break;
+            case 'list':
+                $this->cellelem = 'span';
+                $this->sep = ' - ';
+                $this->header = '<ul>';
+                $this->footer = '</ul>';
+                break;
+            default:
+                throw new Exception("coding error");
 
-        $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
-        $this->sep = $seps[$this->format];
+        }
+
+        $this->role = $DB->get_record('role', array('shortname' => 'editingteacher'));
     }
 
     /**
@@ -159,6 +188,14 @@ class courselist_format {
         }
     }
 
+    public function get_header() {
+        return $this->header;
+    }
+
+    public function get_footer() {
+        return $this->footer;
+    }
+
     private function format_name($dbcourse, $class) {
         global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
@@ -182,11 +219,9 @@ class courselist_format {
      * @param integer $number number of teachers to display (1 or more)
      * @return string
      */
-    private function format_teachers($dbcourse, $class, $number=1) {
-        global $DB;
+    public function format_teachers($dbcourse, $class, $number=1) {
         $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
-        $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $teachers = get_role_users($role->id, $context);
+        $teachers = get_role_users($this->role->id, $context);
 
         $dispteachers = array_slice($teachers, 0, $number);
         $headteachers = join(', ', array_map('fullname', $dispteachers)) . (count($teachers) > $number ? ', …' : '');
@@ -197,7 +232,7 @@ class courselist_format {
         return $fullteachers;
     }
 
-    private function format_icons($dbcourse, $class) {
+    public function format_icons($dbcourse, $class) {
         global $OUTPUT;
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
         $icons = '<' .$this->cellelem. ' class="' . $class. '" style="text-align: right;">';
