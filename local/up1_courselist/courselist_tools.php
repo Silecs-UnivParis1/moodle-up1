@@ -212,7 +212,7 @@ EOL;
     private function format_name($dbcourse, $class) {
         global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
-        $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
+        $crsname = get_course_display_name_for_list($dbcourse); // could be completed with ROF $name ?
         $rmicon = '';
         if ($this->format == 'tree'  &&  courselist_common::has_multiple_rattachements($dbcourse->id)) {
             $rmicon .= $OUTPUT->render(new pix_icon('t/add', 'Rattachement multiple'));
