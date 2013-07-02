@@ -28,21 +28,16 @@ if ($search) {
 }
 
 if (empty($courses)) {
-    if (is_array($courses)) {
+    if ($search) {
         echo "Aucun cours ne correspond aux critères.";
     }
 } else {
-    echo '<table border="0" cellspacing="2" cellpadding="4"><thead><tr>';
-    echo '<th class="header" scope="col">Cours</th>';
-    echo '</tr></thead><tbody>';
+    $courseformatter = new courselist_format('table');
+    echo $courseformatter->get_header();
     foreach ($courses as $course) {
-        echo '<tr>';
-        $coursename = get_course_display_name_for_list($course);
-        $url = new moodle_url('/course/view.php?id=' . $course->id);
-        echo '<td><a href="' . $url . '">'. clean_text($coursename) .'</a></td>';
-        echo "</tr>";
+        echo $courseformatter->format_course($course, true) . "\n";
     }
-    echo '</tbody></table>';
+    echo $courseformatter->get_footer() . "\n";
 }
 
 function isoDateToTs($date) {
