@@ -20,6 +20,7 @@ class course_batch_search_form extends moodleform {
         $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
 
         $mform->addElement('text', 'search', get_string('searchcourses'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'enrolled', get_string('defaultcourseteacher'), 'maxlength="254" size="50"');
 
         $mform->addElement('date_selector', 'startdateafter', get_string('startdate') . ' &gt;');
         $mform->setDefault('startdateafter', mktime(12, 0, 0, 1, 1, date('Y') - 1));
@@ -93,7 +94,6 @@ class course_batch_search_form extends moodleform {
 
         $mform->addElement('hidden', 'topcategory');
         $mform->addElement('hidden', 'topnode');
-        $mform->addElement('hidden', 'enrolled');
         if (!empty($this->_customdata['fields'])) {
             $mform->addElement('hidden', 'fieldsjson');
             $mform->setDefault('fields', $this->_customdata['fields']);
