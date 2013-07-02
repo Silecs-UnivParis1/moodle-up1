@@ -4,6 +4,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/batch_form.php');
 require_once($CFG->dirroot . '/course/batch_lib.php');
+require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
@@ -64,17 +65,12 @@ if (empty($courses)) {
         echo "Aucun cours ne correspond aux critères.";
     }
 } else {
-    echo '<table border="0" cellspacing="2" cellpadding="4"><tr>';
-    echo '<th class="header" scope="col">Cours correspondant : ' . $totalcount . '</th>';
-    echo '</tr>';
+    $courseformatter = new courselist_format('table');
+    echo $courseformatter->get_header();
     foreach ($courses as $course) {
-        echo '<tr>';
-        $coursename = get_course_display_name_for_list($course);
-        $url = new moodle_url('/course/view.php?id=' . $course->id);
-        echo '<td><a href="' . $url . '">'. format_string($coursename) .'</a></td>';
-        echo "</tr>";
+        echo $courseformatter->format_course($course, true) . "\n";
     }
-    echo '</table>';
+    echo $courseformatter->get_footer() . "\n";
     print_navigation_bar($totalcount, $page, $perpage, $data);
 }
 
