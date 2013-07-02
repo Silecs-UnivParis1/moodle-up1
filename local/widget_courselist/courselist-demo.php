@@ -26,7 +26,7 @@ jQuery(document).ready(function () {
             "startdateafter": '2008-09-01',
             format: "list",
             custom: {
-                "DemandeurId": "4"
+                // "UP1DemandeurId": "4"
             }
     });
 });

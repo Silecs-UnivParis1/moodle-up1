@@ -29,10 +29,11 @@ if ($format !== 'list') {
     $format = 'table';
 }
 
-if (isset($_GET['custom'])) {
+if (!empty($_GET['custom'])) {
     foreach ($_GET['custom'] as $name => $value) {
         if (is_string($value)) {
-            $search->{'profile_field_' . $name} = trim($value);
+            $fname = 'profile_field_' . strtolower($name);
+            $search->$fname = trim($value);
         }
     }
 }
