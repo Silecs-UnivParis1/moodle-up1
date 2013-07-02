@@ -56,9 +56,10 @@ class courselist_common {
 </thead>
 <tbody>
 EOL;
+            $courseformatter = new courselist_format('table');
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
                 // $rofpathid = $courses[$crsid];
-                $res .= courselist_format::format_entry($crsid, true, 'table') . "\n";
+                $res .= $courseformatter->format_entry($crsid, true) . "\n";
             }
             $res .= "</tbody></table>\n";
         } else { // no course
@@ -71,9 +72,10 @@ EOL;
         $courses = courselist_common::get_courses_from_pseudopath($pseudopath);
         if ($courses) {
             $res = "<ul>\n" ;
+            $courseformatter = new courselist_format('list');
             foreach (courselist_roftools::sort_courses($courses) as $crsid) {
                 //$rofpathid = $courses[$crsid];
-                $res .= courselist_format::format_entry($crsid, true, 'list') . "\n";
+                $res .= $courseformatter->format_entry($crsid, true) . "\n";
             }
             $res .= "</ul>\n";
         } else { // no course
@@ -100,38 +102,52 @@ EOL;
 
 
 class courselist_format {
+    private $format = 'tree';
+    private $cellelem;
+    private $sep;
+
+    /**
+     * Constructor.
+     *
+     * @param string $format = 'tree' | 'table' | 'list'
+     */
+    public function __construct($format = 'tree') {
+        $this->format = $format;
+
+        $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
+        $this->cellelem = $cellelems[$this->format];
+
+        $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
+        $this->sep = $seps[$this->format];
+    }
+
     /**
      * Return a formated course label.
      *
      * @param int $courseid
      * @param boolean $leaf opt, true
-     * @param string $format = 'tree' | 'table' | 'list'
      * @return string formatted label
      */
-    public static function format_entry($courseid, $leaf = true, $format = 'tree') {
+    public function format_entry($courseid, $leaf = true) {
         global $DB;
-        $cellelems = array('tree' => 'span', 'table' => 'td', 'list' => 'span');
-        $seps = array('tree' => '', 'table' => '', 'list' => ' - ');
-        $cellelem = $cellelems[$format];
-        $sep = $seps[$format];
         $teachers = '';
         $icons = '';
         $dbcourse = $DB->get_record('course', array('id' => $courseid));
 
         // compute the elements
-        if ($format == 'table'|| $format == 'list') {
-            $code = self::format_code($dbcourse, $cellelem, $sep);
-            $level = self::format_level($dbcourse, $cellelem, $sep);
+        if ($this->format == 'table'|| $this->format == 'list') {
+            $code = self::format_code($dbcourse);
+            $level = self::format_level($dbcourse);
 
         }
-        if ($format == 'table' || $format == 'tree') {
-            $teachers = self::format_teachers($dbcourse, $cellelem, 'coursetree-teachers');
-            $icons = self::format_icons($dbcourse, $cellelem, 'coursetree-icons');
+        if ($this->format == 'table' || $this->format == 'tree') {
+            $teachers = self::format_teachers($dbcourse, 'coursetree-teachers');
+            $icons = self::format_icons($dbcourse, 'coursetree-icons');
         }
-        $crslink = self::format_name($dbcourse, $cellelem, 'coursetree-' . ($leaf ? "name" : "dir"), $format) ;
+        $crslink = self::format_name($dbcourse, 'coursetree-' . ($leaf ? "name" : "dir")) ;
 
         // renders the line
-        switch ($format) {
+        switch ($this->format) {
             case 'tree':
                 return $crslink . $teachers . $icons ;
                 break;
@@ -143,30 +159,30 @@ class courselist_format {
         }
     }
 
-    private static function format_name($dbcourse, $element, $class, $format) {
+    private function format_name($dbcourse, $class) {
         global $OUTPUT;
         $urlCourse = new moodle_url('/course/view.php', array('id' => $dbcourse->id));
         $crsname = $dbcourse->fullname; // could be completed with ROF $name ?
         $rmicon = '';
-        if ($format == 'tree'  &&  courselist_common::has_multiple_rattachements($dbcourse->id)) {
+        if ($this->format == 'tree'  &&  courselist_common::has_multiple_rattachements($dbcourse->id)) {
             $rmicon .= $OUTPUT->render(new pix_icon('t/add', 'Rattachement multiple'));
         }
-        $crslink = '<' . $element. ' class="' . $class . '">'
+        $crslink = '<' . $this->cellelem. ' class="' . $class . '">'
                 . html_writer::link($urlCourse, $crsname) . '&nbsp;' . $rmicon
-                . '</' . $element . '>';
+                . '</' . $this->cellelem . '>';
         return $crslink;
     }
 
     /**
      * format teachers : returns an abbreviated list with a title representing full list
-     * @global type $DB
-     * @param type $dbcourse course db record
-     * @param type $element html element, ex. "td" or "span" or ...
-     * @param type $class html class
-     * @param type $number number of teachers to display (1 or more)
+     *
+     * @global moodle_database $DB
+     * @param stdClass $dbcourse course db record
+     * @param string $class html class
+     * @param integer $number number of teachers to display (1 or more)
      * @return string
      */
-    private static function format_teachers($dbcourse, $element, $class, $number=1) {
+    private function format_teachers($dbcourse, $class, $number=1) {
         global $DB;
         $context = get_context_instance(CONTEXT_COURSE, $dbcourse->id);
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
@@ -175,16 +191,16 @@ class courselist_format {
         $dispteachers = array_slice($teachers, 0, $number);
         $headteachers = join(', ', array_map('fullname', $dispteachers)) . (count($teachers) > $number ? ', …' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
-        $fullteachers = '<' . $element . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
+        $fullteachers = '<' . $this->cellelem . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
                 . $headteachers
-                . '</' . $element . '>';
+                . '</' . $this->cellelem . '>';
         return $fullteachers;
     }
 
-    private static function format_icons($dbcourse, $element, $class) {
+    private function format_icons($dbcourse, $class) {
         global $OUTPUT;
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
-        $icons = '<' .$element. ' class="' . $class. '" style="text-align: right;">';
+        $icons = '<' .$this->cellelem. ' class="' . $class. '" style="text-align: right;">';
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
@@ -195,23 +211,23 @@ class courselist_format {
             $icons .= $OUTPUT->render(new pix_icon('t/block', 'Fermé aux étudiants'));
         }
         $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
-        $icons .= '</' . $element . '>';
+        $icons .= '</' . $this->cellelem . '>';
         return $icons;
     }
 
-    private static function format_code($dbcourse, $element, $sep) {
+    private function format_code($dbcourse) {
         $code = strstr($dbcourse->idnumber, '-', true);
         if (courselist_common::has_multiple_rattachements($dbcourse->id)) {
             $code .= '<span title="Rattachement multiple">&nbsp;+</span>';
         }
-        return   '<' . $element . '>' . $code . '</' . $element . '>' ;
+        return   '<' . $this->cellelem . '>' . $code . '</' . $this->cellelem . '>' ;
     }
 
-     private static function format_level($dbcourse, $element, $sep) {
+     private function format_level($dbcourse) {
         $niveau = up1_meta_html_multi($dbcourse->id, 'niveau', false, '');
         $semestre = up1_meta_html_multi($dbcourse->id, 'semestre', false, 'S.');
-        return   '<' . $element . '>' . $niveau . '</' . $element . '>' . $sep
-               . '<' . $element . '>' . $semestre. '</' . $element . '>';
+        return   '<' . $this->cellelem . '>' . $niveau . '</' . $this->cellelem . '>' . $this->sep
+               . '<' . $this->cellelem . '>' . $semestre. '</' . $this->cellelem . '>';
     }
 }
 
