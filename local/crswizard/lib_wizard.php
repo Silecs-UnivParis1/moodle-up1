@@ -1491,7 +1491,7 @@ class core_wizard {
             }
             $this->set_categories_connection();
 
-            // log update rattach
+            // log update rattach orthodoxe
             $old = array();
             if (isset($initc['profile_field_up1categoriesbis']) && $initc['profile_field_up1categoriesbis'] != '') {
                 $old = explode(';', $initc['profile_field_up1categoriesbis']);
@@ -1504,6 +1504,22 @@ class core_wizard {
                 $this->formdata['modif']['attach'] = true;
                 if (count($new) == 0) {
                     $this->mydata->profile_field_up1categoriesbis = '';
+                }
+            }
+
+            // log update rattach hybride
+            $oldhyb = array();
+            if (isset($initc['profile_field_up1rofid']) && $initc['profile_field_up1rofid'] != '') {
+                $oldhyb = explode(';', $initc['profile_field_up1rofid']);
+            }
+            $newhyb = array();
+            if (isset($this->formdata['form_step3']['item']['s'])) {
+                $newhyb = $this->formdata['form_step3']['item']['s'];
+            }
+            if (count(array_diff($oldhyb, $newhyb)) || count(array_diff($newhyb, $oldhyb))) {
+                $this->formdata['modif']['attach'] = true;
+                if (count($newhyb) == 0) {
+                    $this->formdata['modif']['attach2null'] = 1;
                 }
             }
 
@@ -1566,6 +1582,22 @@ class core_wizard {
         update_course($this->mydata);
         $custominfo_data = custominfo_data::type('course');
         $cleandata = $this->customfields_wash($this->mydata);
+
+        // suppression total rattachement hybride
+        if (isset($this->formdata['modif']['attach2null']) && $this->formdata['modif']['attach2null'] == 1) {
+            $catsuppr = array('Identification', 'Diplome', 'Indexation');
+            $custominfo_data->setCategoriesByNames($catsuppr);
+            $fields = $custominfo_data->getFields(true);
+            foreach ($fields as $tabfield) {
+                foreach ($tabfield as $f) {
+                    $name = 'profile_field_'.$f->shortname;
+                    if (isset($cleandata->$name) == FALSE) {
+                        $cleandata->$name = '';
+                    }
+                }
+            }
+        }
+
         $custominfo_data->save_data($cleandata);
         $modif = $this->update_myenrol_cohort();
         if ($modif) {
