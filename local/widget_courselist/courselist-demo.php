@@ -24,7 +24,9 @@ jQuery(document).ready(function () {
     jQuery("#widget-courselist").courselist({
             "search": "",
             "startdateafter": '2008-09-01',
-            format: "list",
+            //format: "list", // default: "table"
+            //enrolled: "Dupont",
+            //enrolledroles: [3],
             custom: {
                 // "UP1DemandeurId": "4"
             }
