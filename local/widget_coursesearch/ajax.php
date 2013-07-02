@@ -57,7 +57,7 @@ $form->set_data(
             'topcategory' => $topcategory,
             'topnode' => $topnode,
             'enrolled' => $enrolled,
-            'enrolledroles' => $enrolledroles,
+            'enrolledroles' => join(',', $enrolledroles),
         )
 );
 $data = $form->get_data();
