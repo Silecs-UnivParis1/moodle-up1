@@ -24,8 +24,9 @@ jQuery(document).ready(function () {
     jQuery("#widget-courselist").courselist({
             "search": "",
             "startdateafter": '2008-09-01',
-            "Cycle de vie - création": {
-                "Demandeur Id": "4"
+            format: "list",
+            custom: {
+                "DemandeurId": "4"
             }
     });
 });

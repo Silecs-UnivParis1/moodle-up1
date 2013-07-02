@@ -10,9 +10,24 @@ global $OUTPUT, $PAGE;
 $perpage = 10;
 $search = new stdClass();
 
+$format = optional_param('format', 'table', PARAM_ALPHA);
 $search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
 $search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
 $search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
+$search->enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+if (isset($_REQUEST['enrolledroles'])) {
+    if (is_array($_REQUEST['enrolledroles'])) {
+        $search->enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);
+    } else {
+        $search->enrolledroles = explode(',', optional_param('enrolledroles', '', PARAM_SEQUENCE));
+    }
+} else if (isset($_REQUEST['fields'])) {
+    $search->enrolledroles = array(3);
+}
+
+if ($format !== 'list') {
+    $format = 'table';
+}
 
 if (isset($_GET['custom'])) {
     foreach ($_GET['custom'] as $name => $value) {
@@ -36,7 +51,7 @@ if (empty($courses)) {
         echo "Aucun cours ne correspond aux critères.";
     }
 } else {
-    $courseformatter = new courselist_format('table');
+    $courseformatter = new courselist_format($format);
     echo $courseformatter->get_header();
     foreach ($courses as $course) {
         echo $courseformatter->format_course($course, true) . "\n";
