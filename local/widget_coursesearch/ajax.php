@@ -6,13 +6,16 @@ require_once($CFG->dirroot . '/course/batch_form.php');
 require_once($CFG->dirroot . '/course/batch_lib.php');
 require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
+global $OUTPUT, $PAGE;
+
 $page      = optional_param('page', 0, PARAM_INT);     // which page to show
 $perpage   = optional_param('perpage', 10, PARAM_INT); // how many per page
 $topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
 $topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
 $enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 
-$PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
+$PAGE->set_context(context_system::instance());
+
 $searchconfig = array(
     'fields' => array(
         'Identification' => array(
@@ -57,7 +60,7 @@ if ($data) {
         $data->sesskey = sesskey();
         $data->_qf__course_batch_search_form = 1;
     }
-    $courses = get_courses_batch_search($data, "c.fullname ASC", $page, $perpage, $totalcount);
+    $courses = get_courses_batch_search($data, "c.fullname ASC", 0, 9999, $totalcount);
 }
 
 if (empty($courses)) {
@@ -71,38 +74,6 @@ if (empty($courses)) {
         echo $courseformatter->format_course($course, true) . "\n";
     }
     echo $courseformatter->get_footer() . "\n";
-    print_navigation_bar($totalcount, $page, $perpage, $data);
 }
 
 $form->display();
-
-/**
- * Print a list navigation bar
- * Display page numbers, and a link for displaying all entries
- * @param int $totalcount number of entry to display
- * @param int $page page number
- * @param int $perpage number of entry per page
- * @param string $search
- */
-function print_navigation_bar($totalcount, $page, $perpage, $search) {
-    global $OUTPUT;
-    $encodedsearch = http_build_query((array) $search);
-    echo $OUTPUT->paging_bar($totalcount, $page, $perpage, "?$encodedsearch&perpage=$perpage");
-    return; // disable "show all"
-    // display
-    if ($perpage != 99999 && $totalcount > $perpage) {
-        echo "<center><p>";
-        echo "<a href=\"search.php?$encodedsearch&amp;perpage=99999\">".get_string("showall", "", $totalcount)."</a>";
-        echo "</p></center>";
-    } else if ($perpage === 99999) {
-        $defaultperpage = 10;
-        // If user has course:create or category:manage capability then show 30 records.
-        $capabilities = array('moodle/course:create', 'moodle/category:manage');
-        if (has_any_capability($capabilities, context_system::instance())) {
-            $defaultperpage = 30;
-        }
-        echo "<center><p>";
-        echo "<a href=\"search.php?$encodedsearch&amp;perpage=".$defaultperpage."\">".get_string("showperpage", "", $defaultperpage)."</a>";
-        echo "</p></center>";
-    }
-}
