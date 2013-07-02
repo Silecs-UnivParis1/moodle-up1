@@ -158,6 +158,8 @@ EOL;
      * @return string formatted label
      */
     public function format_entry($courseid, $leaf = true) {
+        global $DB;
+
         $dbcourse = $DB->get_record('course', array('id' => (int) $courseid));
         if (empty($dbcourse)) {
             return '';
