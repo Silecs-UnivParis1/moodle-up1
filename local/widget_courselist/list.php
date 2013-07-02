@@ -3,11 +3,13 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/batch_lib.php');
+require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
-$perpage = 20;
+global $OUTPUT, $PAGE;
+
+$perpage = 10;
 $search = new stdClass();
 
-$page = optional_param('page', 0, PARAM_INTEGER);
 $search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
 $search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
 $search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
@@ -20,11 +22,13 @@ if (isset($_GET['custom'])) {
     }
 }
 
+$PAGE->set_context(context_system::instance());
+
 $totalcount = 0;
 $courses = null;
 if ($search) {
     $search->visible = 1;
-    $courses = get_courses_batch_search($search, "c.fullname ASC", $page, $perpage, $totalcount);
+    $courses = get_courses_batch_search($search, "c.fullname ASC", 0, 9999, $totalcount);
 }
 
 if (empty($courses)) {
