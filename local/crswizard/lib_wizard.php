@@ -670,6 +670,35 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
 }
 
 /**
+ * renvoie la liste des identifiants catégorie moodle des rattachements secondaires
+ * @param array() $form
+ * @return string $rofidmoodle : identifiants séparés par des ;
+ */
+function wizard_get_idcat_rof_secondaire($form) {
+    global $DB;
+    $rofidmoodle = '';
+    if (isset($form['item']) && count($form['item'])) {
+        $allrof = $form['item'];
+        if (isset($allrof['s']) && count($allrof['s'])) {
+            foreach ($allrof['s'] as $rofid) {
+                if (isset($form['path']) && array_key_exists($rofid, $form['path'])) {
+                    $rofpath = $form['path'][$rofid];
+                    $tabpath = explode('_', $rofpath);
+                    $idcategory = rof_rofpath_to_category($tabpath);
+                    if ($idcategory) {
+                        $rofidmoodle .= $idcategory . ';';
+                    }
+                }
+            }
+        }
+    }
+    if ($rofidmoodle != '' && substr($rofidmoodle, -1) == ';') {
+        $rofidmoodle = substr($rofidmoodle, 0, -1);
+    }
+    return $rofidmoodle;
+}
+
+/**
  * Retourne le rofid, rofpathid et rofname des rattachements secondaires
  * @param array() $form2
  * @return array() $rof2 - rofid, rofpathid, rofname et tabpath
@@ -929,6 +958,9 @@ class core_wizard {
             $tabrofpath = $this->get_tabrofpath($rof1['tabpath'], $this->formdata['rof2_tabpath']);
             $this->set_metadata_rof($tabrofpath);
 
+            // id cacegory moodle rattachements secondaires
+            $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($form2);
+
             $this->set_rof_shortname($rof1['idnumber']);
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
@@ -940,6 +972,9 @@ class core_wizard {
             $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
             //rattachement hybride
             $this->set_metadata_rof2('form_step3');
+            // id cacegory moodle rattachements secondaires
+            $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($this->formdata['form_step3']);
+
             if (count($this->formdata['rof2_tabpath'])) {
                 $this->set_metadata_rof($this->formdata['rof2_tabpath']);
             }
@@ -1469,6 +1504,9 @@ class core_wizard {
             $this->set_rof_fullname();
             $this->set_rof_nom_norm();
 
+            // id cacegory moodle rattachements secondaires
+            $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($form2);
+
             // log update attach
             $new = array();
             if (isset($this->formdata['form_step2']['item']['s'])) {
@@ -1506,6 +1544,9 @@ class core_wizard {
                     $this->mydata->profile_field_up1categoriesbis = '';
                 }
             }
+
+            // id cacegory moodle rattachements secondaires
+            $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($this->formdata['form_step3']);
 
             // log update rattach hybride
             $oldhyb = array();
