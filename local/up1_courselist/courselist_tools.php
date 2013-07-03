@@ -282,8 +282,9 @@ class courselist_cattools {
      */
     public static function get_descendant_courses($catid) {
         $r1 = self::get_descendant_courses_from_category($catid);
-        $r2 = self::get_descendant_courses_from_catbis($catid);
-        return array_unique(array_merge($r1, $r2));
+        $r2 = self::get_descendant_courses_from_catbis($catid, 'up1categoriesbis');
+        $r3 = self::get_descendant_courses_from_catbis($catid, 'up1categoriesbisrof');
+        return array_unique(array_merge($r1, $r2, $r3));
     }
 
     /**
@@ -306,9 +307,10 @@ class courselist_cattools {
      * recherche les rattachements secondaires des catégories (up1categoriesbis)
      * @global moodle_database $DB
      * @param int $catid
+     * @param string $metadatacat 'up1categoriesbis' or 'up1categoriesbisrof'
      * @return array array(int crsid)
      */
-    protected static function get_descendant_courses_from_catbis($catid) {
+    protected static function get_descendant_courses_from_catbis($catid, $metadatacat) {
         global $DB;
 
         $sql = "SELECT cid.objectid, c2.path FROM {course_categories} c1 "
@@ -316,7 +318,7 @@ class courselist_cattools {
                 . "JOIN {custom_info_data} cid ON ((CONCAT(';',data,';') LIKE CONCAT('%;',c2.id,';%'))) "
                 . "WHERE c1.id = ? AND cid.fieldid = ? AND objectname='course' ";
 
-        $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbis'));
+        $fieldid = $DB->get_field('custom_info_field', 'id', array('shortname' => $metadatacat));
         $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
         return $res;
     }
