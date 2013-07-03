@@ -226,12 +226,16 @@ switch ($stepin) {
             $messages['mgvalidator'] .= "\n\n\nErreur lors de la demande :\n" . $errorMsg;
             $messages['mgcreator'] .= "\n\n\nErreur lors de la demande :\n" . $errorMsg;
         }
-
         // envoi des notification - messagerie interne
         $corewizard->send_message_notification($corewizard->course->id, $messages['mgcreator'], $messages['mgvalidator']);
 
         unset($SESSION->wizard);
-        redirect(new moodle_url('/'));
+        $msgredirect = get_string('msgredirect', 'local_crswizard');
+        $urlredirect = new moodle_url('/');
+        if (wizard_has_edit_course($corewizard->course->id, $USER->id)) {
+            $urlredirect = new moodle_url('/course/view.php',array('id' => $corewizard->course->id));
+        }
+        redirect($urlredirect, $msgredirect, 5);
         break;
 }
 
