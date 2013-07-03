@@ -12,6 +12,7 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once(__DIR__ . '/../datalib.php');
 require_once(__DIR__ . '/../insertlib.php');
+require_once(__DIR__ . '/../../roftools/roflib.php');
 
 function xmldb_local_up1_metadata_upgrade($oldversion) {
     global $CFG, $DB;
@@ -26,6 +27,11 @@ function xmldb_local_up1_metadata_upgrade($oldversion) {
         echo "<br />\n<br />\n";
         echo "Création des champs :<br />\n";
         insert_metadata_fields($metadata, 'course');
+    }
+
+    if ( $oldversion < 2013070301 ) { // initialisation de categoriesbisrof
+        echo "Initialisation de categoriesbisrof :<br />\n";
+        update_categoriesbisrof();
     }
 
 
