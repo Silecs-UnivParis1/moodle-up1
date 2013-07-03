@@ -106,8 +106,7 @@ jQuery(function () {
         chemin = createChemin(path, visited);
         chemin = chemin.substr(3);
 
-        var name = 'select_'+rofid;
-        if (typeof selected[name] != 'undefined' && selected[name] == 1) {
+        if (typeof selected['select_'+path] != 'undefined' && selected['select_'+path] == 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
             /** patch si uniquement rattachements secondaires (cours hybrides) **/
@@ -122,9 +121,9 @@ jQuery(function () {
             } else {
                 tabItem = 'item[p][]';
                 var rattachement = '#items-selected1';
-                reference[0] = name;
+                reference[0] = 'select_'+path;
             }
-            selected[name] = 1;
+            selected['select_'+path] = 1;
 			$(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
 		}
 
@@ -132,9 +131,10 @@ jQuery(function () {
 
 	$("#items-selected").on("click", ".selected-remove", function(event) {
 		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
-            var rofid = $(this).siblings('input[type=hidden]').val();
-            selected['select_'+rofid] = 0;
-            if (reference[0]=='select_'+rofid) {
+            var rofid = $(this).siblings('input[type=hidden]').eq(0).val();
+            var rofpath = $(this).siblings('input[type=hidden]').eq(1).val();
+            selected['select_'+rofpath] = 0;
+            if (reference[0]=='select_'+rofpath) {
                 reference.splice(0, 1);
             }
 			$(this).parent('div.item-selected').remove();
@@ -210,8 +210,7 @@ jQuery(function () {
         if (typeof item.chemin != 'undefined') {
             chemin = item.chemin;
         }
-        var name = 'select_'+rofid;
-        selected[name] = 1;
+        selected['select_'+path] = 1;
 
         var rattachement = '#items-selected2';
         var tabItem = '';
@@ -221,9 +220,9 @@ jQuery(function () {
         } else {
             tabItem = 'item[p][]';
             var rattachement = '#items-selected1';
-            reference[0] = name;
+            reference[0] = 'select_'+path;
         }
-        selected[name] = 1;
+        selected['select_'+path] = 1;
         $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path, readonly));
     }
 
