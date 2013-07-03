@@ -3,12 +3,12 @@
 
     var scriptTag = document.createElement('script');
     scriptTag.setAttribute("type","text/javascript");
-    scriptTag.setAttribute("src", rootUrl + 'jquery.dataTables.min.js');
+    scriptTag.setAttribute("src", rootUrl + '../jquery/jquery.dataTables.min.js');
     (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(scriptTag);
     var linkTag = document.createElement('link');
     linkTag.setAttribute("type","text/css");
     linkTag.setAttribute("rel","stylesheet");
-    linkTag.setAttribute("href", rootUrl + 'jquery.dataTables.css');
+    linkTag.setAttribute("href", rootUrl + '../jquery/jquery.dataTables.css');
     (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
 
     jQuery.fn.courselist = function(criteria) {

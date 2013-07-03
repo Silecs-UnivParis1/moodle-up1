@@ -204,3 +204,17 @@ function wizard_update_course($courseid) {
         }
     return false;
 }
+
+/**
+ * vérifie si $userid à la capacité moodle/course:update sur $courseid
+ * @param int $courseid
+ * @param int $userid
+ * @return boolean
+ */
+function wizard_has_edit_course($courseid, $userid) {
+    $coursecontext = get_context_instance(CONTEXT_COURSE, $courseid);
+    if ( has_capability('moodle/course:update', $coursecontext, $userid) ) {
+        return true;
+    }
+    return false;
+}

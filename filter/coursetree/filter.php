@@ -32,10 +32,10 @@ class filter_coursetree extends moodle_text_filter {
                     }
                     break;
                 case 'table':
-                    $replace = courselist_common::html_course_table($node);
+                    $replace = courselist_common::list_courses_html($node, 'table');
                     break;
                 case 'list':
-                    $replace = courselist_common::html_course_list($node);
+                    $replace = courselist_common::list_courses_html($node, 'list');
                     break;
                 default:
                     $replace = '[courselist : FORMAT ' . $format . ' INCONNU]';

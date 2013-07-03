@@ -3,46 +3,61 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/batch_lib.php');
+require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 
-$perpage = 20;
+global $OUTPUT, $PAGE;
+
+$perpage = 10;
 $search = new stdClass();
 
-$page = optional_param('page', 0, PARAM_INTEGER);
+$format = optional_param('format', 'table', PARAM_ALPHA);
 $search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
 $search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
 $search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
+$search->enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+if (isset($_REQUEST['enrolledroles'])) {
+    if (is_array($_REQUEST['enrolledroles'])) {
+        $search->enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);
+    } else {
+        $search->enrolledroles = explode(',', optional_param('enrolledroles', '', PARAM_SEQUENCE));
+    }
+} else if (isset($_REQUEST['fields'])) {
+    $search->enrolledroles = array(3);
+}
 
-if (isset($_GET['custom'])) {
+if ($format !== 'list') {
+    $format = 'table';
+}
+
+if (!empty($_GET['custom'])) {
     foreach ($_GET['custom'] as $name => $value) {
         if (is_string($value)) {
-            $search->{'profile_field_' . $name} = trim($value);
+            $fname = 'profile_field_' . strtolower($name);
+            $search->$fname = trim($value);
         }
     }
 }
+
+$PAGE->set_context(context_system::instance());
 
 $totalcount = 0;
 $courses = null;
 if ($search) {
     $search->visible = 1;
-    $courses = get_courses_batch_search($search, "c.fullname ASC", $page, $perpage, $totalcount);
+    $courses = get_courses_batch_search($search, "c.fullname ASC", 0, 9999, $totalcount);
 }
 
 if (empty($courses)) {
-    if (is_array($courses)) {
+    if ($search) {
         echo "Aucun cours ne correspond aux critères.";
     }
 } else {
-    echo '<table border="0" cellspacing="2" cellpadding="4"><thead><tr>';
-    echo '<th class="header" scope="col">Cours</th>';
-    echo '</tr></thead><tbody>';
+    $courseformatter = new courselist_format($format);
+    echo $courseformatter->get_header();
     foreach ($courses as $course) {
-        echo '<tr>';
-        $coursename = get_course_display_name_for_list($course);
-        $url = new moodle_url('/course/view.php?id=' . $course->id);
-        echo '<td><a href="' . $url . '">'. clean_text($coursename) .'</a></td>';
-        echo "</tr>";
+        echo $courseformatter->format_course($course, true) . "\n";
     }
-    echo '</tbody></table>';
+    echo $courseformatter->get_footer() . "\n";
 }
 
 function isoDateToTs($date) {

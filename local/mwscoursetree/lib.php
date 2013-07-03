@@ -137,9 +137,13 @@ class course_tree {
 
 
     protected function get_entry_from_course($crsid, $depth) {
+        static $courseformatter = false;
+        if (!$courseformatter) {
+            $courseformatter = new courselist_format('tree');
+        }
         return array(
             'id' => null,
-            'label' => courselist_format::format_entry($crsid),
+            'label' => $courseformatter->format_entry($crsid),
             'load_on_demand' => false,
             'depth' => $depth,
         );
@@ -185,6 +189,7 @@ class course_tree {
         }
 // var_dump($prenodes);
 
+        $courseformatter = new courselist_format('tree');
         $items = array();
         foreach (array_unique($prenodes) as $node) {
             $arrofpath = explode('/', $node);
@@ -195,7 +200,7 @@ class course_tree {
             $item['load_on_demand'] = !empty($unfold[$node]);
             if (isset($directcourse[$node]) && $directcourse[$node]) {
                 foreach ($directcourse[$node] as $crsid) {
-                    $item['label'] = courselist_format::format_entry($crsid, !$item['load_on_demand']);
+                    $item['label'] = $courseformatter->format_entry($crsid, !$item['load_on_demand']);
                     $item['id'] = $node . '/' . $crsid;
                     $item['depth'] = $depth;
                     $items[] = $item;

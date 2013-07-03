@@ -30,7 +30,8 @@ function up1_course_metadata() {
             'niveaulmda' => array('name' => 'Niveau LMDA', 'datatype' => 'text', 'locked' => 0,  'init' => null),
             'niveauannee' => array('name' => 'Niveau année', 'datatype' => 'text', 'locked' => 0,  'init' => null),
             'composition' => array('name' => 'Composition', 'datatype' => 'text', 'locked' => 0),
-            'categoriesbis' => array('name' => 'Catégories de cours supplémentaires', 'datatype' => 'text', 'locked' => 0,  'init' => ''),
+            'categoriesbis' => array('name' => 'Catégories de cours supplémentaires hors ROF', 'datatype' => 'text', 'locked' => 0,  'init' => ''),
+            'categoriesbisrof' => array('name' => 'Catégories de cours supplémentaires rattachements ROF', 'datatype' => 'text', 'locked' => 0,  'init' => ''),
         ),
         'Diplome' => array(
             'diplome' => array('name' => 'Diplôme', 'datatype' => 'text', 'locked' => 0,  'init' => null),

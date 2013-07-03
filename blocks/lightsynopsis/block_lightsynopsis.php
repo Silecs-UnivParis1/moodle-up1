@@ -30,15 +30,14 @@ class block_lightsynopsis extends block_base {
         $dispdate = 'Créé le ' . $cdate['mday'].'/'.$cdate['mon'].'/'.$cdate['year']
                 . (($avalider == 1 && $datevalid == 0) ? " (en attente d'approbation)" : '');
 
-        $this->content         =  new stdClass;
+        $this->content =  new stdClass;
+        $courseformatter = new courselist_format('list');
         $this->content->text  = 'Composante : '
             . $this->br(up1_meta_get_list($course->id, 'up1composante', false, ' / ', false))
             . $this->br(up1_meta_get_list($course->id, 'up1mention', false, ' / ', true))
             . $this->br(up1_meta_get_list($course->id, 'up1niveau', false, ' / ', true))
-            . $this->br('Enseignants : ' . courselist_format::format_teachers($course, 'span', 'teachers', 3))
-            . $this->br($dispdate .' '.  courselist_format::format_icons($course, 'span', 'icons'));
-
-        // $this->content->text .= courselist_format::format_icons($course, 'span', 'icons');
+            . $this->br('Enseignants : ' . $courseformatter->format_teachers($course, 'teachers', 3))
+            . $this->br($dispdate .' '.  $courseformatter->format_icons($course, 'icons'));
         //$this->content->footer = 'Footer here...';
 
     return $this->content;

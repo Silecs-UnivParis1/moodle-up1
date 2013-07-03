@@ -25,11 +25,11 @@ echo "<p></p>";
 
 
 echo "<h2>Table des cours</h2>";
-$table  = courselist_common::html_course_table($node);
+$table  = courselist_common::list_courses_html($node, 'table');
 echo $table;
 
 echo "<h2>Liste des cours</h2>";
-$list = courselist_common::html_course_list($node);
+$list = courselist_common::list_courses_html($node, 'list');
 echo $list;
 
 
