@@ -67,3 +67,40 @@ function up1_course_metadata() {
     );
     return $res;
 }
+
+
+
+/**
+ * Updates the newly created categoriesbisrof metadata when this field has just benn created
+ */
+function update_categoriesbisrof() {
+    global $DB;
+
+    $dataid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1rofpathid'), MUST_EXIST);
+    $rofpathids = $DB->get_records('custom_info_data', array('fieldid' => $dataid));
+
+    $catbisrofid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1categoriesbisrof'), MUST_EXIST);
+
+    foreach ($rofpathids as $rofpathid) {
+        // echo $rofpathid->objectid ." => ". $rofpathid->data ."\n" ;
+        $rofpaths = explode(';', $rofpathid->data);
+        $categoriesbisrof = array();
+        if (count($rofpaths) >= 2) { //rattachements ROF secondaires
+            echo "course " . $rofpathid->objectid ." => ";
+            // echo $rofpathid->data ."\n    " ;
+            foreach (array_slice($rofpaths, 1) as $rofpath) {
+                $myrofpath = array_values(array_filter(explode('/', $rofpath)));
+                $mycat = rof_rofpath_to_category($myrofpath);
+                $categoriesbisrof[] = $mycat;
+                // echo "cat=" . $mycat . "  ";
+            }
+            $data = join(';', $categoriesbisrof);
+            echo "up1categoriesbisrof = $data <br />\n";
+            $record = $DB->get_record('custom_info_data', 
+                    array('fieldid' => $catbisrofid, 'objectid' => $rofpathid->objectid, 'objectname' => 'course'));
+            $record->data = $data;
+            $DB->update_record('custom_info_data', $record);
+        }
+    }
+}
+
