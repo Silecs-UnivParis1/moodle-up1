@@ -101,7 +101,7 @@ class courselist_format {
                 $this->cellelem = 'td';
                 $this->sep = '';
                 $this->header = <<<EOL
-<table class="generaltable" style="width: 100%;">
+<table class="generaltable sortable" style="width: 100%;">
 <thead>
     <tr>
         <th>Code</th>
