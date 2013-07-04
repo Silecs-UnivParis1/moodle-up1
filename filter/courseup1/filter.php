@@ -37,11 +37,13 @@ class filter_courseup1 extends moodle_text_filter {
                     break;
                 case 'table':
                 case 'list':
+                    $jsurl = new moodle_url('/local/jquery/init.dataTables.js');
+                    $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>';
                     if (isset($params['node']) && count($params) === 2) {
                         // simple case, static HTML
-                        $replace = courselist_common::list_courses_html($params['node'], $format);
+                        $replace = courselist_common::list_courses_html($params['node'], $format) . $jsscript;
                     } else {
-                        $replace = widget_courselist_query($format, (object) $params);
+                        $replace = widget_courselist_query($format, (object) $params) . $jsscript;
                     }
                     break;
                 default:
