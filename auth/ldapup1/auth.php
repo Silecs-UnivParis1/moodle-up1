@@ -240,9 +240,10 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         $table = new xmldb_table('tmp_extuser');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('mnethostid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null);
         $table->add_field('accountstatus', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_index('username', XMLDB_INDEX_UNIQUE, array('username'));
+        $table->add_index('username', XMLDB_INDEX_UNIQUE, array('mnethostid', 'username'));
 
         print_string('creatingtemptable', 'auth_ldapup1', 'tmp_extuser');
         $dbman->create_temp_table($table);
@@ -338,7 +339,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         if ($do_updates and !empty($updatekeys)) { // run updates only if relevant
             $users = $DB->get_records_sql('SELECT u.username, u.id
                                              FROM {user} u
-                                             JOIN {tmp_extuser} te ON (u.username = te.username)
+                                             JOIN {tmp_extuser} te ON (u.username = te.username AND u.mnethostid = e.mnethostid)
                                             WHERE u.deleted = 0 AND u.auth = ? ',
                                           array('shibboleth'));
             if (!empty($users)) {
@@ -378,7 +379,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         // note: we do not care about deleted accounts anymore, this feature was replaced by suspending to nologin auth plugin
         $sql = 'SELECT e.id, e.username
                   FROM {tmp_extuser} e
-                  LEFT JOIN {user} u ON (e.username = u.username)
+                  LEFT JOIN {user} u ON (e.username = u.username AND u.mnethostid = e.mnethostid)
                  WHERE u.id IS NULL';
         $add_users = $DB->get_records_sql($sql);
 
@@ -443,10 +444,10 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
             $logmsg .= '0 added.  ';
         }
 
-/// User suspension
+/// User suspension (originally: user removal)
             $sql = "SELECT u.*
                       FROM {user} u
-                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username)
+                      LEFT JOIN {tmp_extuser} e ON (u.username = e.username AND u.mnethostid = e.mnethostid)
                      WHERE u.auth = ? AND u.deleted = 0 AND e.accountstatus = ?";
             $remove_users = $DB->get_records_sql($sql, array('shibboleth', 'disabled'));
 
@@ -471,7 +472,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
 /// Revive suspended users
             $sql = "SELECT u.id, u.username
                       FROM {user} u
-                      JOIN {tmp_extuser} e ON (u.username = e.username)
+                      JOIN {tmp_extuser} e ON (u.username = e.username AND u.mnethostid = e.mnethostid)
                      WHERE (u.auth = 'nologin' OR u.suspended = 1) AND u.deleted = 0 AND e.accountstatus != 'disabled'";
             $revive_users = $DB->get_records_sql($sql);
 
@@ -579,6 +580,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
 
         $username = textlib::strtolower($username); // usernames are __always__ lowercase.
         $DB->insert_record_raw('tmp_extuser', array('username' => $username,
+                                                    'mnethostid' => $CFG->mnet_localhost_id,
                                                     'accountstatus' => $status), false, true);
         if ($verb >= 1) echo '.';
     }
