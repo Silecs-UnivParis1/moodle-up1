@@ -107,12 +107,14 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     if (!empty($criteria->topcategory)) {
         $category = $DB->get_record('course_categories', array('id' => $criteria->topcategory));
         if ($category) {
-            $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("$category->path/%"));
-            if ($subcats) {
-                list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED, "paramcat");
-                $searchcond[] = "c.category $inSql";
-                $params = $params + $inParams;
+            $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("{$category->path}/%"));
+            if (!$subcats) {
+                $subcats = array();
             }
+            $subcats[] = $category->id;
+            list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED, "paramcat");
+            $searchcond[] = "c.category $inSql";
+            $params = $params + $inParams;
         }
     }
     if (!empty($criteria->topnode)) {
