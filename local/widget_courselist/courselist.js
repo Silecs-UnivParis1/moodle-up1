@@ -8,7 +8,7 @@
     var linkTag = document.createElement('link');
     linkTag.setAttribute("type","text/css");
     linkTag.setAttribute("rel","stylesheet");
-    linkTag.setAttribute("href", rootUrl + '../jquery/jquery.dataTables.css');
+    linkTag.setAttribute("href", rootUrl + '../jquery/css/jquery.dataTables.css');
     (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
 
     jQuery.fn.courselist = function(criteria) {
