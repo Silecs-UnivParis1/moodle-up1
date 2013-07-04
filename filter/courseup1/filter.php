@@ -10,22 +10,24 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(dirname(__DIR__)) . '/config.php');
 require_once($CFG->dirroot . '/local/up1_courselist/courselist_tools.php');
+require_once $CFG->dirroot . '/local/widget_courselist/locallib.php';
 
 
 class filter_courseup1 extends moodle_text_filter {
 
     public function filter($text, array $options = array()) {
-        while ( preg_match( '#\[courselist format=([^ ]+) node=(/[^ ]*)\]#', $text, $matches) ) {
-            $format = $matches[1];
-            $node = $matches[2];
-            $replace = $matches[0];
+        while ( preg_match('#\[course(tree|list|table|search)\s+([^\]]+?)\]#', $text, $matches) ) {
+            list ($replace, $format, $paramstr) = $matches;
+            $params = self::parse_parameters($paramstr);
 
             switch ($format) {
                 case 'tree':
-                    if (courselist_common::get_courses_from_pseudopath($node)) {
-                        $widget =  new moodle_url('/local/mwscoursetree/widget.js');
-                        $script = '<script type="text/javascript" src="' . $widget . '"></script>';
-                        $div = '<div class="coursetree" data-root="' . $node .'"></div>';
+                    if (empty($params['node'])) {
+                        $replace = "<p>Erreur [course$format] : le paramètre requis 'node' n'est pas présent.</p>";
+                    } else if (courselist_common::get_courses_from_pseudopath($params['node'])) {
+                        $widget_url =  new moodle_url('/local/mwscoursetree/widget.js');
+                        $script = '<script type="text/javascript" src="' . $widget_url . '"></script>';
+                        $div = '<div class="coursetree" data-root="' . $params['node'] .'"></div>';
                         $replace = $script . $div;
                     } else {
                         $replace = '<p><b>'
@@ -34,17 +36,51 @@ class filter_courseup1 extends moodle_text_filter {
                     }
                     break;
                 case 'table':
-                    $replace = courselist_common::list_courses_html($node, 'table');
-                    break;
                 case 'list':
-                    $replace = courselist_common::list_courses_html($node, 'list');
+                    if (isset($params['node']) && count($params) === 2) {
+                        // simple case, static HTML
+                        $replace = courselist_common::list_courses_html($params['node'], $format);
+                    } else {
+                        $replace = widget_courselist_query($format, (object) $params);
+                    }
                     break;
                 default:
-                    $replace = '[courselist : FORMAT ' . $format . ' INCONNU]';
+                    $replace = '[course' . $format . ' INCONNU]';
             }
             $text = str_replace($matches[0], $replace, $text);
         }
         return $text;
+    }
+
+    /**
+     * Parses a string containing attributes like « k=v id="hop"  k2='v2'»
+     *
+     * @param string $str
+     * @return array assoc array of parameters
+     */
+    protected static function parse_parameters($str) {
+        $params = array();
+        while ($str) {
+            $str .= " ";
+            $all = '';
+            if (preg_match('/^\s*(\S+?)=([\'"])(.+?)\\1\s/', $str, $m)) {
+                list ($all, $key, , $value) = $m;
+            } else if (preg_match('/^\s*(\S+?)=([^\'"]\S+)\s/', $str, $m)) {
+                list ($all, $key, $value) = $m;
+            }
+            if ($all) {
+                $params[$key] = $value;
+                $str = str_replace($all, '', $str);
+            } else {
+                if (trim($str) !== "") {
+                    // no more parameter found, yet the string isn't empty
+                    return null;
+                } else {
+                    return $params;
+                }
+            }
+        }
+        return $params;
     }
 
 }
