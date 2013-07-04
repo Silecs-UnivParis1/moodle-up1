@@ -21,7 +21,7 @@ if (isset($_REQUEST['enrolledroles'])) {
     } else {
         $search->enrolledroles = explode(',', optional_param('enrolledroles', '', PARAM_SEQUENCE));
     }
-} else if (isset($_REQUEST['fields'])) {
+} else if (isset($_REQUEST['enrolled'])) {
     $search->enrolledroles = array(3);
 }
 
