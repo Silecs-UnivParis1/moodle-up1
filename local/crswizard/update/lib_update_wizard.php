@@ -43,11 +43,7 @@ function wizard_get_course($id) {
             // on peut vérifier si le premier rattachement est cohérent avec le reste des données
             wizard_rof_connection($course->profile_field_up1rofpathid);
             $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
-
             $SESSION->wizard['init_course']['form_step2']['item'] = $SESSION->wizard['form_step2']['item'];
-            $SESSION->wizard['init_course']['form_step2']['path'] = $SESSION->wizard['form_step2']['path'];
-
-
 
         } elseif($SESSION->wizard['wizardcase'] == 3) {
             if (isset($course->profile_field_up1categoriesbis)) {
@@ -64,7 +60,6 @@ function wizard_get_course($id) {
 
             $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
             $SESSION->wizard['init_course']['form_step3']['item'] = $SESSION->wizard['form_step3']['item'];
-            $SESSION->wizard['init_course']['form_step3']['path'] = $SESSION->wizard['form_step3']['path'];
         }
 
         //inscription cohortes
@@ -165,21 +160,15 @@ function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_st
         $rofid = substr(strrchr($path, '/'), 1);
         $newpath = strtr($path, '/', '_');
         if ($case2 && $pos == 0) {
-            $SESSION->wizard[$form_step]['item']['p'][] = $rofid;
-            $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
+            $SESSION->wizard[$form_step]['item']['p'][substr($newpath, 1)] = $rofid;
         } else {
-            $SESSION->wizard[$form_step]['item']['s'][] = $rofid;
+            $idpath = $newpath;
             if (substr($newpath, 0, 1) == '_') {
-                $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
-            } else {
-                $SESSION->wizard[$form_step]['path'][$rofid] = $newpath;
+                 $idpath = substr($newpath, 1);
             }
+            $SESSION->wizard[$form_step]['item']['s'][$idpath] = $rofid;
             if ($case2 == FALSE && $rofid !== FALSE) {
-                $rofpath = $SESSION->wizard[$form_step]['path'][$rofid];
-                $tabpath = explode('_', $rofpath);
-                $tabrof = rof_get_combined_path($tabpath);
-                $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
-                $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $chemin;
+                $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $idpath;
             }
         }
     }

@@ -418,29 +418,44 @@ function wizard_get_rof($form_step = 'form_step2') {
     }
     $list = array();
     $formRof = $SESSION->wizard[$form_step]['item'];
-    $rofPath = $SESSION->wizard[$form_step]['path'];
-    foreach ($formRof as $key => $rof) {
-        foreach ($rof as $r) {
-            if ($r === FALSE ) {
+    foreach ($formRof as $nature => $rof) {
+        foreach ($rof as $rofpath => $rofid) {
+            if ($rofid === FALSE ) {
                 return $list;
             }
-            $list[$r]['nature'] = $key;
-            if (array_key_exists($r, $rofPath)) {
-                $list[$r]['path'] = $rofPath[$r];
-            }
+            $list[$rofpath]['nature'] = $nature;
+            $list[$rofpath]['rofid'] = $rofid;
+            $list[$rofpath]['path'] = $rofpath;
+
             $tabSource = '';
-            if (substr($r, 0, 5) == 'UP1-P') {
+            if (substr($rofid, 0, 5) == 'UP1-P') {
                 $tabSource = 'rof_program';
             } else {
                 $tabSource = 'rof_course';
             }
-            $object = $DB->get_record($tabSource, array('rofid' => $r));
+            $object = $DB->get_record($tabSource, array('rofid' => $rofid));
             if ($object) {
-                $list[$r]['object'] = $object;
+                $list[$rofpath]['object'] = $object;
             }
         }
     }
     return $list;
+}
+
+/**
+ * construit le tableau $form['item'] à partir de $_POST['item']
+ * @param array() $postItem : $_POST['item']
+ * @return array() $form['item']
+ */
+function wizard_get_array_item($postItem) {
+    $tabitem = array();
+    foreach ($postItem as $nature => $rof) {
+        foreach($rof as $path) {
+            $rofid = substr(strrchr($path, '_'), 1);
+            $tabitem[$nature][$path] = $rofid;
+        }
+    }
+    return $tabitem;
 }
 
 /*
@@ -518,13 +533,12 @@ function wizard_preselected_rof($form_step = 'form_step2') {
     }
     $liste = array();
     if (!empty($SESSION->wizard[$form_step]['all-rof'])) {
-        foreach ($SESSION->wizard[$form_step]['all-rof'] as $rofid => $rof) {
+        foreach ($SESSION->wizard[$form_step]['all-rof'] as $rofpath => $rof) {
             $object = $rof['object'];
             $tabrof = rof_get_combined_path(explode('_', $rof['path']));
             $chemin = substr(rof_format_path($tabrof, 'name', false, ' > '), 3);
             $liste[] = array(
                     "label" => rof_combined_name($object->localname, $object->name),
-                    "value" => $rofid,
                     "path" => $rof['path'],
                     "nature" => $rof['nature'],
                     "chemin" => $chemin,
@@ -645,20 +659,18 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
     $rof1 = array();
     if (isset($form2['item']) && count($form2['item'])) {
         $allrof = $form2['item'];
-        if (isset($allrof['p']) && count($allrof['p'])) {
-            $rofid = $allrof['p'][0];
+        if (isset($allrof['p']) && count($allrof['p']) == 1) {
+            $rofpath = key($allrof['p']);
+            $rofid = $allrof['p'][$rofpath];
             $rof1['rofid'] = $rofid;
-            if (isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
-                $rofpath = $form2['path'][$rofid];
-                $tabpath = explode('_', $rofpath);
-                $rof1['tabpath'] = $tabpath;
-                $idcategory = rof_rofpath_to_category($tabpath);
-                if ($idcategory) {
-                    $rof1['idcat'] = $idcategory;
-                    $category = $DB->get_record('course_categories', array('id' => $idcategory));
-                    $rof1['up1niveaulmda'] = $category->name;
-                    $rof1['up1composante'] = $DB->get_field('course_categories', 'name', array('id' => $category->parent));
-                }
+            $tabpath = explode('_', $rofpath);
+            $rof1['tabpath'] = $tabpath;
+            $idcategory = rof_rofpath_to_category($tabpath);
+            if ($idcategory) {
+                $rof1['idcat'] = $idcategory;
+                $category = $DB->get_record('course_categories', array('id' => $idcategory));
+                $rof1['up1niveaulmda'] = $category->name;
+                $rof1['up1composante'] = $DB->get_field('course_categories', 'name', array('id' => $category->parent));
             }
             $rof1['apogee'] = rof_get_code_or_rofid($rofid);
             if ($change == true) {
@@ -680,14 +692,11 @@ function wizard_get_idcat_rof_secondaire($form) {
     if (isset($form['item']) && count($form['item'])) {
         $allrof = $form['item'];
         if (isset($allrof['s']) && count($allrof['s'])) {
-            foreach ($allrof['s'] as $rofid) {
-                if (isset($form['path']) && array_key_exists($rofid, $form['path'])) {
-                    $rofpath = $form['path'][$rofid];
-                    $tabpath = explode('_', $rofpath);
-                    $idcategory = rof_rofpath_to_category($tabpath);
-                    if ($idcategory) {
-                        $rofidmoodle .= $idcategory . ';';
-                    }
+            foreach ($allrof['s'] as $rofpath => $rofid) {
+                $tabpath = explode('_', $rofpath);
+                $idcategory = rof_rofpath_to_category($tabpath);
+                if ($idcategory) {
+                    $rofidmoodle .= $idcategory . ';';
                 }
             }
         }
@@ -700,18 +709,17 @@ function wizard_get_idcat_rof_secondaire($form) {
 
 /**
  * Retourne le rofid, rofpathid et rofname des rattachements secondaires
- * @param array() $form2
+ * @param array() $form
  * @return array() $rof2 - rofid, rofpathid, rofname et tabpath
  */
-function wizard_prepare_rattachement_second($form2) {
+function wizard_prepare_rattachement_second($form) {
     $rof2 = array();
-    if (isset($form2['item']) && count($form2['item'])) {
-        $allrof = $form2['item'];
+    if (isset($form['item']) && count($form['item'])) {
+        $allrof = $form['item'];
         if (isset($allrof['s']) && count($allrof['s'])) {
-            foreach($allrof['s'] as $rofid) {
+            foreach($allrof['s'] as $rofpath => $rofid) {
                 $rof2['rofid'][] = $rofid;
-                if ($rofid !== FALSE && isset($form2['path']) && array_key_exists($rofid, $form2['path'])) {
-                    $rofpath = $form2['path'][$rofid];
+                if ($rofid !== FALSE) {
                     $path = strtr($rofpath, '_', '/');
                     $rof2['rofpathid'][] = '/' . $path;
 
@@ -723,8 +731,8 @@ function wizard_prepare_rattachement_second($form2) {
                     $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
                     $rof2['rofchemin'][] = $chemin;
                 }
-                if ($rofid !== FALSE && isset($form2['all-rof']) && array_key_exists($rofid, $form2['all-rof'])) {
-                    $rofobjet =  $form2['all-rof'][$rofid]['object'];
+                if ($rofid !== FALSE) {
+                    $rofobjet =  $form['all-rof'][$rofpath]['object'];
                     $rof2['rofname'][] = rof_combined_name($rofobjet->localname, $rofobjet->name);
                 }
             }
@@ -1587,10 +1595,11 @@ class core_wizard {
     private function check_first_connection() {
         $check = false;
         $form2 = $this->formdata['form_step2'];
-        if (isset($form2['item']) && count($form2['item'])) {
+        if (isset($form2['item']) && count($form2['item']) == 1) {
             $allrof = $form2['item'];
             if (isset($allrof['p']) && count($allrof['p'])) {
-                $rofid = $allrof['p'][0];
+                $rofpath = key($allrof['p']);
+                $rofid = $allrof['p'][$rofpath];
                 $apogee = rof_get_code_or_rofid($rofid);
                 $up1rofid = trim($this->formdata['init_course']['profile_field_up1rofid']);
                 $rofid = '';
