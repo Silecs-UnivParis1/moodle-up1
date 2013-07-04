@@ -36,6 +36,9 @@ function wizard_get_course($id) {
             $SESSION->wizard['form_step2']['rofyear'] = wizard_get_wizard_get_categoryname($tabpath[1]);
             $SESSION->wizard['form_step2']['complement'] = $course->profile_field_up1complement;
             $SESSION->wizard['form_step2']['fullname'] = $course->profile_field_up1rofname;
+            if (strpos($course->profile_field_up1rofid, ';') && strpos($course->profile_field_up1rofname, ';')) {
+                $SESSION->wizard['form_step2']['fullname'] = substr($course->profile_field_up1rofname, 0, strpos($course->profile_field_up1rofname, ';'));
+            }
 
             // on peut vérifier si le premier rattachement est cohérent avec le reste des données
             wizard_rof_connection($course->profile_field_up1rofpathid);
