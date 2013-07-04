@@ -2,8 +2,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->dirroot . '/course/batch_lib.php');
-require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
+require_once __DIR__ . '/locallib.php';
 
 global $OUTPUT, $PAGE;
 
@@ -42,25 +41,8 @@ if (!empty($_GET['custom'])) {
 
 $PAGE->set_context(context_system::instance());
 
-$totalcount = 0;
-$courses = null;
-if ($search) {
-    $search->visible = 1;
-    $courses = get_courses_batch_search($search, "c.fullname ASC", 0, 9999, $totalcount);
-}
+echo widget_courselist_query($format, $search);
 
-if (empty($courses)) {
-    if ($search) {
-        echo "Aucun cours ne correspond aux critères.";
-    }
-} else {
-    $courseformatter = new courselist_format($format);
-    echo $courseformatter->get_header();
-    foreach ($courses as $course) {
-        echo $courseformatter->format_course($course, true) . "\n";
-    }
-    echo $courseformatter->get_footer() . "\n";
-}
 
 function isoDateToTs($date) {
     if (preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {

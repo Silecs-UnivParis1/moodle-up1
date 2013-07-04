@@ -1,0 +1,46 @@
+<?php
+
+/* 
+ * @license http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
+ */
+
+require_once($CFG->dirroot . '/course/batch_lib.php');
+require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
+
+/**
+ * Returns the HTML that lists the courses that match the criteria.
+ *
+ * @param string $format "table" | "list"
+ * @param stdClass $criteria
+ * @return string HTML
+ */
+function widget_courselist_query($format, $criteria) {
+    $courses = null;
+    if ($criteria) {
+        $criteria->visible = 1;
+        $totalcount = 0;
+
+        // 'search', 'startdateafter', 'startdatebefore', 'createdafter', 'createdbefore',
+        // 'topcategory', 'topnode', 'enrolled', 'enrolledroles'
+        if (empty($criteria->search)) {
+            $criteria->search = '';
+        }
+
+        $courses = get_courses_batch_search($criteria, "c.fullname ASC", 0, 9999, $totalcount);
+    }
+
+    if (empty($courses)) {
+        if ($criteria) {
+            return "<p>Aucun cours ne correspond aux critères.</p>";
+        }
+        return '';
+    } else {
+        $courseformatter = new courselist_format($format);
+        $html = $courseformatter->get_header();
+        foreach ($courses as $course) {
+            $html .= $courseformatter->format_course($course, true) . "\n";
+        }
+        $html .= $courseformatter->get_footer() . "\n";
+        return $html;
+    }
+}
