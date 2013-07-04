@@ -124,15 +124,14 @@ jQuery(function () {
                 reference[0] = 'select_'+path;
             }
             selected['select_'+path] = 1;
-			$(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
+			$(rattachement).append(addElem(path, chemin, intitule, tabItem));
 		}
 
 	});
 
 	$("#items-selected").on("click", ".selected-remove", function(event) {
 		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
-            var rofid = $(this).siblings('input[type=hidden]').eq(0).val();
-            var rofpath = $(this).siblings('input[type=hidden]').eq(1).val();
+            var rofpath = $(this).siblings('input[type=hidden]').eq(0).val();
             selected['select_'+rofpath] = 0;
             if (reference[0]=='select_'+rofpath) {
                 reference.splice(0, 1);
@@ -141,16 +140,15 @@ jQuery(function () {
 		}
 	});
 
-    function addElem(rofid, chemin, intitule, tabItem, path, readonly) {
+    function addElem(path, chemin, intitule, tabItem, readonly) {
         var suppr = '<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>';
         if (readonly==true) {
             suppr = '';
         }
-        var elem = '<div class="item-selected" id="select_'+rofid+'">'
+        var elem = '<div class="item-selected" id="select_'+path+'">'
 				+suppr
 				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
-				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
-                +'<input type="hidden" name="path['+rofid+']" value="'+path+'"/>';
+				+'<input type="hidden" name="'+tabItem+'" value="'+path+'"/>'
 				+'</div>';
         return elem;
     };
@@ -170,7 +168,7 @@ jQuery(function () {
 
     var defaultSettings = {
         readonly: false,
-        preSelected: [] // [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "03_UP1-PROG35376", "nature": "p"}, ]
+        preSelected: [] // [{"label": "Licence Administration publique", "path": "03_UP1-PROG35376", "nature": "p"}, ]
     };
 
      $.fn.autocompleteRof = function (options) {
@@ -202,8 +200,6 @@ jQuery(function () {
     }
 
     function buildSelectedBlock(item, readonly) {
-
-        var rofid = item.value;
 		var path =  item.path;
 		var intitule = item.label;
         var chemin = '';
@@ -223,7 +219,7 @@ jQuery(function () {
             reference[0] = 'select_'+path;
         }
         selected['select_'+path] = 1;
-        $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path, readonly));
+        $(rattachement).append(addElem(path, chemin, intitule, tabItem, readonly));
     }
 
 });
