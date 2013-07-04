@@ -14,6 +14,8 @@ $format = optional_param('format', 'table', PARAM_ALPHA);
 $search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
 $search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
 $search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
+$search->topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
+$search->topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
 $search->enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 if (isset($_REQUEST['enrolledroles'])) {
     if (is_array($_REQUEST['enrolledroles'])) {
