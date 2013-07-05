@@ -21,7 +21,7 @@ function widget_courselist_query($format, $criteria) {
         $totalcount = 0;
 
         // 'search', 'startdateafter', 'startdatebefore', 'createdafter', 'createdbefore',
-        // 'topcategory', 'topnode', 'enrolled', 'enrolledroles'
+        // 'topcategory', 'node', 'enrolled', 'enrolledroles'
         if (empty($criteria->search)) {
             $criteria->search = '';
         }

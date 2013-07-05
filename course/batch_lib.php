@@ -117,8 +117,8 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
             $params = $params + $inParams;
         }
     }
-    if (!empty($criteria->topnode)) {
-        $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->topnode);
+    if (!empty($criteria->node)) {
+        $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->node);
         if ($coursesId) {
             list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED, "paramnode");
             $searchcond[] = "c.id $inSql";

@@ -9,7 +9,7 @@ require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 global $PAGE;
 
 $topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
-$topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
+$node   = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses
 $enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 $fieldset  = optional_param('fieldset', '', PARAM_TEXT); // legend of the main fieldset
 
@@ -55,7 +55,7 @@ $form = new course_batch_search_form(null, $searchconfig, 'get');
 $form->set_data(
         (object) array(
             'topcategory' => $topcategory,
-            'topnode' => $topnode,
+            'node' => $node,
             'enrolled' => $enrolled,
             'enrolledroles' => join(',', $enrolledroles),
         )

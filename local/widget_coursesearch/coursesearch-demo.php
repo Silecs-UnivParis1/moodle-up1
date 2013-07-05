@@ -16,7 +16,7 @@ $PAGE->requires->js_init_code('
 jQuery("#widget-coursesearch").coursesearch(
     {
         //topcategory: 22,
-        //topnode: "",
+        //node: "",
         // enrolled: "Dupond",
         fieldset: "Recherche principale",
         "fields": "*" // default: every category and every field
