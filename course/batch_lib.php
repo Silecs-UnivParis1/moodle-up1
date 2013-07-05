@@ -158,13 +158,24 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     }
 
     // custominfo fields
-    $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
-    if ($fields) {
-        $i = 0;
-        foreach ($fields as $field) {
-            $formfield = custominfo_field_factory('course', $field->datatype, $field->id, null);
-            if (!empty($criteria->{$formfield->inputname})) {
+    $inputFields = array();
+    foreach ($criteria as $c => $v) {
+        if (preg_match('/^profile_field_(.+)$/', $c, $m) && $v !== '') {
+            $inputFields[$m[1]] = $v;
+        }
+    }
+    if ($inputFields) {
+        $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
+        if ($fields) {
+            $i = 0;
+            foreach ($fields as $field) {
+                // hack to speed up things
+                if (empty($inputFields[$field->shortname])) {
+                    continue;
+                }
                 $i++;
+                // normal behaviour
+                $formfield = custominfo_field_factory('course', $field->datatype, $field->id, null);
                 $formfield->edit_data($criteria);
                 $searchjoin[] = "JOIN {custom_info_data} d$i "
                     ."ON (d$i.objectid = c.id AND d$i.objectname='course' AND d$i.fieldid={$field->id})";
