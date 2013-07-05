@@ -240,13 +240,17 @@ class rof_browser {
 		$nivEnf = (int)$this->niveau  + 1;
 		$sort = '';
 
-		list($pere, $stop) = rof_get_record($this->rofid);
+		list($pere, ) = rof_get_record($this->rofid);
+
+        if ($pere === false) {
+            return "<div>Not found</div>";
+        }
 
 		if ($this->niveau == 2) {
 			$sub = subToString($pere->sub);
 			$sort = " ORDER BY FIND_IN_SET(typedip, '" . rof_typeDiplome_ordered_list() . "') ";
 
-			if($this->format) {
+			if ($this->format) {
 				if ($this->typedip) {
                     $mydip = '';
                     if ($this->typedip=='divers') {
