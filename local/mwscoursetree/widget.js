@@ -107,7 +107,6 @@
                 });
             });
             $(window).resize(function () {
-                console.log('resize');
                 $('.coursetree-name').each(function() {
                     var n = $(this);
                     var w = n.closest('.jqtree-title').parent().width() - n.siblings('.coursetree-teachers').first().width() - n.siblings('.coursetree-icons').first().width() - 20;
