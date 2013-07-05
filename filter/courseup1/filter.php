@@ -67,7 +67,7 @@ class filter_courseup1 extends moodle_text_filter {
             $all = '';
             if (preg_match('/^\s*(\S+?)=([\'"])(.+?)\\1\s/', $str, $m)) {
                 list ($all, $key, , $value) = $m;
-            } else if (preg_match('/^\s*(\S+?)=([^\'"]\S+)\s/', $str, $m)) {
+            } else if (preg_match('/^\s*(\S+?)=([^\'"]\S*)\s/', $str, $m)) {
                 list ($all, $key, $value) = $m;
             }
             if ($all) {
