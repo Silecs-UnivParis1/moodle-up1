@@ -93,16 +93,28 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         $searchcond[] = "c.visible >= " . ((int) $criteria->visible);
     }
     if (!empty($criteria->startdateafter)) {
-        $searchcond[] = "c.startdate >= " . ((int) $criteria->startdateafter);
+        $time = isoDateToTs($criteria->startdateafter);
+        if ($time) {
+            $searchcond[] = "c.startdate >= " . $time;
+        }
     }
     if (!empty($criteria->startdatebefore)) {
-        $searchcond[] = "c.startdate <= " . ((int) $criteria->startdatebefore);
+        $time = isoDateToTs($criteria->startdatebefore);
+        if ($time) {
+            $searchcond[] = "c.startdate <= " . $time;
+        }
     }
     if (!empty($criteria->createdafter)) {
-        $searchcond[] = "c.timecreated >= " . ((int) $criteria->createdafter);
+        $time = isoDateToTs($criteria->createdafter);
+        if ($time) {
+            $searchcond[] = "c.timecreated >= " . $time;
+        }
     }
     if (!empty($criteria->createdbefore)) {
-        $searchcond[] = "c.timecreated <= " . ((int) $criteria->createdbefore);
+        $time = isoDateToTs($criteria->createdbefore);
+        if ($time) {
+            $searchcond[] = "c.timecreated <= " . $time;
+        }
     }
     if (!empty($criteria->topcategory)) {
         $category = $DB->get_record('course_categories', array('id' => $criteria->topcategory));
@@ -205,4 +217,11 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     // array, and an updated $totalcount
     $totalcount = $c;
     return $courses;
+}
+
+function isoDateToTs($date) {
+    if (preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {
+        return make_timestamp($m[1], $m[2], $m[3]);
+    }
+    return (int) $date;
 }
