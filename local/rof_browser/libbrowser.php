@@ -28,8 +28,8 @@ function treeComponent () {
 		if ($c->sub != '') {
 			$nbProg = nbSub($c->sub);
 			$list .= '<li class="' . $listStyle . '">';
-			$list .= '<span class="selected-deep2 curser-point" data_deep="2" '
-				. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '">'
+			$list .= '<span class="selected-deep2 curser-point" data-deep="2" '
+				. 'id="' . $id . '" data-path="' . $data_path . '" data-rofid="' . $data_rofid . '">'
 				. htmlspecialchars(rof_combined_name($c->localname, $c->name), ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</span>';
 		//	$list .= '<a href="roffinal.php?rofid='.$c->number.'&amp;niveau=2">' . htmlentities($c->name, ENT_QUOTES, 'UTF-8') . ' (' . $nbProg . ')</a>';
 			$list .= '</li>';
@@ -53,15 +53,15 @@ function print_rof() {
      $list = '<div>Rechercher un élément pédagogique dans l\'offre de formation de l\'établissement</div>';
 	$list .= '<div class="select-elem">';
 	$list .= '<select class="selectmenu" id="select-2">';
-	$list .= '<option selected="selected" data_deep="2">Sélectionner la composante</option>';
+	$list .= '<option selected="selected" data-deep="2">Sélectionner la composante</option>';
 	foreach ($components as $c) {
         $id = 'deep2_' . $c->number;
 		$idElem = $id . '-elem';
 		$data_path = $c->number;
 		$data_rofid = $c->number;
 		if ($c->sub != '') {
-            $list .= '<option data_deep="2" '
-			. 'id="' . $id . '" data_path="' . $data_path . '" data_rofid="' . $data_rofid . '"'
+            $list .= '<option data-deep="2" '
+			. 'id="' . $id . '" data-path="' . $data_path . '" data-rofid="' . $data_rofid . '"'
 			. '>'
 			. htmlspecialchars(rof_combined_name($c->localname, $c->name), ENT_QUOTES, 'UTF-8')
 			. '</option>';
@@ -213,14 +213,14 @@ class rof_browser {
 				. htmlentities($sp->name, ENT_QUOTES, 'UTF-8') . ', ' . $sp->rofid . ' ('.$nbEnf.') </span>';**/
 			$element .= '<li class="' . $listStyle . '"><span class="selected-'
 				. $coden . ' curser-point" id="'. $id . '" title="'
-				. $titleElem . '" data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
-				. '" data_path="' . $data_path . '">'
+				. $titleElem . '" data-deep="' . $niveau . '" data-rofid="' . $sp->rofid
+				. '" data-path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
 				. htmlentities(rof_combined_name($sp->localname, $sp->name), ENT_QUOTES, 'UTF-8')
                 . ' (' . $nbEnf . ')</span></li>';
 		} else {
 			$element .= '<li class="' . $listStyle . '"><span title="'
-				. $titleElem . '" data_path="' . $data_path . '">'
+				. $titleElem . '" data-path="' . $data_path . '">'
                 . html_writer::link($detUrl, '( i )') . "  "
                 . htmlentities(rof_combined_name($sp->localname, $sp->name), ENT_QUOTES, 'UTF-8') . '</span></li>';
 		}
@@ -347,8 +347,8 @@ class rof_browser {
                 $classsel = '';
             }
             $list .= '<div class="dip-sel">'
-                . '<span class="expanded collapse" data_deep="'.$this->niveau.'" data_path="'
-                . $this->path . '" data_rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
+                . '<span class="expanded collapse" data-deep="'.$this->niveau.'" data-path="'
+                . $this->path . '" data-rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
                 . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
                 . '<span class="' . $classsel . '" title="Sélectionner" id="'
                 . $idElem . '"></span>'
@@ -383,7 +383,7 @@ class rof_browser {
 		if ($nbSubList) {
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu" id="select-' . $nivEnf . '">';
-			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Sélectionner le diplôme</option>';
+			$list .= '<option selected="selected" data-deep="' . $nivEnf . '">Sélectionner le diplôme</option>';
 				foreach ($subList as $id => $sl) {
 					$list .= $this->print_option($sl, $nivEnf);
 				}
@@ -413,21 +413,21 @@ class rof_browser {
 
 			$list = '<div class="select-elem">';
 			$list .= '<select class="selectmenu select-typedip" id="select-' . $nivEnf . '-typedip">';
-			$list .= '<option selected="selected" data_deep="' . $nivEnf . '">Sélectionner le type de diplôme</option>';
+			$list .= '<option selected="selected" data-deep="' . $nivEnf . '">Sélectionner le type de diplôme</option>';
             foreach ($this->constant_diplome as $code => $label) {
                 if (array_key_exists($code, $listdipint)) {
-                    $list .= '<option data_deep="' . $nivEnf . '" data_path="'
-                        . $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
-                        . $rofid . '_' . $code . '" data_typedip="' . $code . '">'
+                    $list .= '<option data-deep="' . $nivEnf . '" data-path="'
+                        . $rofid . '" data-rofid="' . $rofid . '" id="deep2_'
+                        . $rofid . '_' . $code . '" data-typedip="' . $code . '">'
                         . $label . '</option>';
                 }
             }
             if ($divers) {
                 $code = 'divers';
                 $label = 'Divers';
-                $list .= '<option data_deep="' . $nivEnf . '" data_path="'
-                    . $rofid . '" data_rofid="' . $rofid . '" id="deep2_'
-                    . $rofid . '_' . $code . '" data_typedip="' . $code . '">'
+                $list .= '<option data-deep="' . $nivEnf . '" data-path="'
+                    . $rofid . '" data-rofid="' . $rofid . '" id="deep2_'
+                    . $rofid . '_' . $code . '" data-typedip="' . $code . '">'
                     . $label . '</option>';
             }
 			$list .= '</select>';
@@ -495,8 +495,8 @@ class rof_browser {
         }
 		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
-			. 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
-			. '" data_path="' . $data_path . '">' . $collapse . '</span>'
+			. 'data-deep="' . $niveau . '" data-rofid="' . $sp->rofid
+			. '" data-path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
             . $spancomp
 			. '<span class="' . $classsel . '" title="Sélectionner" id="'
@@ -545,8 +545,8 @@ class rof_browser {
             }
 
             $data_path = $this->path . '_' . $sp->rofid;
-            $element .= '<option ' . 'data_deep="' . $niveau . '" data_rofid="' . $sp->rofid
-			. '" id="' . $id . '" data_path="' . $data_path . '" '
+            $element .= '<option ' . 'data-deep="' . $niveau . '" data-rofid="' . $sp->rofid
+			. '" id="' . $id . '" data-path="' . $data_path . '" '
 			. 'title="' . $titleElem . '" >'
 			. $labelelem . '</span>'
 			. '</option>';
