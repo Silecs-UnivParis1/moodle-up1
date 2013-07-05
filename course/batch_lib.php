@@ -141,7 +141,11 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         if (empty($criteria->enrolledroles)) {
             $criteria->enrolledroles = array(3);
         }
-        list ($inSql, $inParams) = $DB->get_in_or_equal($criteria->enrolledroles, SQL_PARAMS_NAMED, "paramrole");
+        $roles = $criteria->enrolledroles;
+        if (is_string($criteria->enrolledroles)) {
+            $roles = explode(',', $roles);
+        }
+        list ($inSql, $inParams) = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, "paramrole");
         $searchjoin[] = "JOIN {context} context ON (context.instanceid = c.id AND context.contextlevel = " . CONTEXT_COURSE . ") "
                 . "JOIN {role_assignments} ra ON (context.id = ra.contextid) "
                 . "JOIN {user} u ON (u.id = ra.userid)";
