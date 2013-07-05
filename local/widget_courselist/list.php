@@ -11,10 +11,10 @@ $search = new stdClass();
 
 $format = optional_param('format', 'table', PARAM_ALPHA);
 $search->search          = optional_param('search', '', PARAM_RAW_TRIMMED);
-$search->startdateafter  = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
-$search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
-$search->createdafter    = isoDateToTs(optional_param('createdafter', '', PARAM_RAW_TRIMMED));
-$search->createdbefore   = isoDateToTs(optional_param('createdbefore', '', PARAM_RAW_TRIMMED));
+$search->startdateafter  = optional_param('startdateafter', '', PARAM_RAW_TRIMMED);
+$search->startdatebefore = optional_param('startdatebefore', '', PARAM_RAW_TRIMMED);
+$search->createdafter    = optional_param('createdafter', '', PARAM_RAW_TRIMMED);
+$search->createdbefore   = optional_param('createdbefore', '', PARAM_RAW_TRIMMED);
 $search->category        = optional_param('category', 0, PARAM_INT); // category where to search for courses
 $search->topcategory     = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses (recursively)
 $search->node            = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses (recursively)
@@ -45,11 +45,3 @@ if (!empty($_GET['custom'])) {
 $PAGE->set_context(context_system::instance());
 
 echo widget_courselist_query($format, $search);
-
-
-function isoDateToTs($date) {
-    if (preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {
-        return make_timestamp($m[1], $m[2], $m[3]);
-    }
-    return false;
-}
