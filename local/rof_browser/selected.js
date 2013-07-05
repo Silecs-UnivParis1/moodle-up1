@@ -6,9 +6,9 @@ jQuery(function () {
     $('div.item-select').load(rootUrl + 'ajax.php');
 
     $('div.item-select').on("change", ".selectmenu", function(event) {
-        var readonly = 0;
+        var readonly = false;
         if ( $('#choose-item-select').hasClass("readonly") ) {
-            readonly = 1;
+            readonly = true;
         }
 		var id = $(this).attr('id');
 		$('#'+id+' ~ *').remove();
@@ -17,7 +17,7 @@ jQuery(function () {
 		var codeid = select.attr('id');
 
 		if (codeid) {
-			var niv = select.attr('data-deep');
+			var niv = parseInt(select.attr('data-deep'));
 			var rofid = select.attr('data-rofid');
 			var path = select.attr('data-path');
 			if (niv < 3) {
@@ -40,14 +40,14 @@ jQuery(function () {
 	});
 
     $('div.item-select').on("click", ".collapse", function(event) {
-        var readonly = 0;
+        var readonly = false;
         if ( $('#choose-item-select').hasClass("readonly") ) {
-            readonly = 1;
+            readonly = true;
         }
         if ($(this).parent(".dip-sel").size()) {
             return false;
         }
-		var niv = $(this).attr('data-deep');
+		var niv = ParseInt($(this).attr('data-deep'));
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data-rofid');
 		var path = $(this).attr('data-path');
