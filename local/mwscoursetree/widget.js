@@ -4,7 +4,7 @@
 (function() {
 
     var rootUrl = findScriptUrl('widget.js');
-   var ieWait = 2; // number of scripts, for IE < 9
+    var ieWait = 2; // number of scripts, for IE < 9
 
     if (window.jQuery === undefined) {
         loadJs(rootUrl + "../jquery/jquery.js");
@@ -62,8 +62,15 @@
     }
 
     function onLoad() {
-        jQuery(function () {
-            $('head').append('<link rel="stylesheet" href="' + rootUrl + 'assets/jqtree.css">');
+        var linkTag = document.createElement('link');
+        linkTag.setAttribute("type","text/css");
+        linkTag.setAttribute("rel","stylesheet");
+        linkTag.setAttribute("href", rootUrl + 'assets/jqtree.css');
+        (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
+
+        (function () {
+            var $ = this.jQuery;
+
             var teachersWidth = 0;
             var iconsWidth = 0;
             $('.coursetree').each(function(){
@@ -107,7 +114,7 @@
                     $(this).width(w);
                 });
             });
-        });
+        })(window);
     }
 
 })();

@@ -74,7 +74,9 @@ initDataTables = false;
         linkTag.setAttribute("href", rootUrl + 'css/jquery.dataTables.css');
         (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
 
-        jQuery(function () {
+        (function () {
+            var $ = this.jQuery;
+
             $('table.sortable:not(.dataTable)').dataTable({
                 "oLanguage": {
                     "sProcessing":     "Traitement en cours...",
@@ -99,7 +101,7 @@ initDataTables = false;
                     }
                 }
             });
-        })();
+        })(window);
     }
 
 })();
