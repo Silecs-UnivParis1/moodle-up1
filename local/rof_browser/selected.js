@@ -6,9 +6,9 @@ jQuery(function () {
     $('div.item-select').load(rootUrl + 'ajax.php');
 
     $('div.item-select').on("change", ".selectmenu", function(event) {
-        var readonly = 0;
+        var readonly = false;
         if ( $('#choose-item-select').hasClass("readonly") ) {
-            readonly = 1;
+            readonly = true;
         }
 		var id = $(this).attr('id');
 		$('#'+id+' ~ *').remove();
@@ -17,17 +17,17 @@ jQuery(function () {
 		var codeid = select.attr('id');
 
 		if (codeid) {
-			var niv = select.attr('data_deep');
-			var rofid = select.attr('data_rofid');
-			var path = select.attr('data_path');
+			var niv = parseInt(select.attr('data-deep'));
+			var rofid = select.attr('data-rofid');
+			var path = select.attr('data-path');
 			if (niv < 3) {
 				var format = 1;
 			} else {
 				var format = 0;
 			}
 
-            var typedip = select.attr('data_typedip');
-            if (typeof typedip == 'undefined')  {
+            var typedip = select.attr('data-typedip');
+            if (typeof typedip === 'undefined')  {
                 visited[rofid] = select.text();
             }
 
@@ -40,26 +40,26 @@ jQuery(function () {
 	});
 
     $('div.item-select').on("click", ".collapse", function(event) {
-        var readonly = 0;
+        var readonly = false;
         if ( $('#choose-item-select').hasClass("readonly") ) {
-            readonly = 1;
+            readonly = true;
         }
         if ($(this).parent(".dip-sel").size()) {
             return false;
         }
-		var niv = $(this).attr('data_deep');
+		var niv = parseInt($(this).attr('data-deep'));
 		var codeid = $(this).attr('id');
-		var rofid = $(this).attr('data_rofid');
-		var path = $(this).attr('data_path');
+		var rofid = $(this).attr('data-rofid');
+		var path = $(this).attr('data-path');
 
-        if (typeof visited[rofid] == 'undefined') {
+        if (typeof visited[rofid] === 'undefined') {
             var intitule = $(this).siblings('span.intitule').text();
             visited[rofid] = intitule;
         }
 
 		var plus = $(this).text();
 		$(this).empty();
-		if (plus==' + ') {
+		if (plus === ' + ') {
             $(this).removeClass('collapsed');
             $(this).addClass('expanded');
 			plus = ' - ';
@@ -73,14 +73,14 @@ jQuery(function () {
 		$(this).append(plus);
 
 		var fr = $(this).parent('.elem-li').siblings('ul').size();
-		if (fr == 0) {
-		// creation liste ul
+		if (fr === 0) {
+            // creation liste ul
 			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path, readonly: readonly},  function(data){
 				$("#"+codeid+'-elem').parent('.elem-li').after(data);
 			}, 'html');
 		}
 		else {
-			if (niv==2) {
+			if (niv === 2) {
 				var ulEnf = '.cont-deep'+niv;
 				$(this).siblings(ulEnf).toggleClass('rof-hidden');
 			} else {
@@ -93,11 +93,11 @@ jQuery(function () {
 
 
 	$('div.item-select').on("click", ".element", function(event) {
-		var rofid = $(this).prevAll('span.collapse').attr('data_rofid');
-		var path =  $(this).prevAll('span.collapse').attr('data_path');
+		var rofid = $(this).prevAll('span.collapse').attr('data-rofid');
+		var path =  $(this).prevAll('span.collapse').attr('data-path');
 		var intitule = $(this).prevAll('span.intitule').text();
 
-        if (typeof visited[rofid] == 'undefined') {
+        if (typeof visited[rofid] === 'undefined') {
             var intitule = $(this).siblings('span.intitule').text();
             visited[rofid] = intitule;
         }
@@ -106,7 +106,7 @@ jQuery(function () {
         chemin = createChemin(path, visited);
         chemin = chemin.substr(3);
 
-        if (typeof selected['select_'+path] != 'undefined' && selected['select_'+path] == 1) {
+        if (typeof selected['select_'+path] !== 'undefined' && selected['select_'+path] === 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
             /** patch si uniquement rattachements secondaires (cours hybrides) **/
@@ -124,33 +124,31 @@ jQuery(function () {
                 reference[0] = 'select_'+path;
             }
             selected['select_'+path] = 1;
-			$(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path));
+			$(rattachement).append(addElem(path, chemin, intitule, tabItem));
 		}
 
 	});
 
 	$("#items-selected").on("click", ".selected-remove", function(event) {
 		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
-            var rofid = $(this).siblings('input[type=hidden]').eq(0).val();
-            var rofpath = $(this).siblings('input[type=hidden]').eq(1).val();
+            var rofpath = $(this).siblings('input[type=hidden]').eq(0).val();
             selected['select_'+rofpath] = 0;
-            if (reference[0]=='select_'+rofpath) {
+            if (reference[0] === 'select_'+rofpath) {
                 reference.splice(0, 1);
             }
 			$(this).parent('div.item-selected').remove();
 		}
 	});
 
-    function addElem(rofid, chemin, intitule, tabItem, path, readonly) {
+    function addElem(path, chemin, intitule, tabItem, readonly) {
         var suppr = '<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>';
-        if (readonly==true) {
+        if (readonly === true) {
             suppr = '';
         }
-        var elem = '<div class="item-selected" id="select_'+rofid+'">'
+        var elem = '<div class="item-selected" id="select_'+path+'">'
 				+suppr
 				+'<div class="intitule-selected" title="'+chemin+'">'+intitule+'</div>'
-				+'<input type="hidden" name="'+tabItem+'" value="'+rofid+'"/>'
-                +'<input type="hidden" name="path['+rofid+']" value="'+path+'"/>';
+				+'<input type="hidden" name="'+tabItem+'" value="'+path+'"/>'
 				+'</div>';
         return elem;
     };
@@ -161,7 +159,7 @@ jQuery(function () {
         var tableau=path.split(regtab);
         for (var i=0; i<tableau.length; i++) {
             var c = tableau[i];
-            if (typeof visited[c] != 'undefined') {
+            if (typeof visited[c] !== 'undefined') {
                 chemin = chemin+' > '+visited[c];
             }
         }
@@ -170,7 +168,7 @@ jQuery(function () {
 
     var defaultSettings = {
         readonly: false,
-        preSelected: [] // [{"label": "Licence Administration publique", "value": "UP1-PROG35376", "path": "03_UP1-PROG35376", "nature": "p"}, ]
+        preSelected: [] // [{"label": "Licence Administration publique", "path": "03_UP1-PROG35376", "nature": "p"}, ]
     };
 
      $.fn.autocompleteRof = function (options) {
@@ -182,7 +180,7 @@ jQuery(function () {
                 acg.fillSelection(settings.preSelected, settings.readonly);
             }
         });
-     }
+     };
 
     function autocompleteRof(settings, elem) {
         this.settings = settings;
@@ -199,15 +197,13 @@ jQuery(function () {
                 buildSelectedBlock(items[i], readonly);
             }
         }
-    }
+    };
 
     function buildSelectedBlock(item, readonly) {
-
-        var rofid = item.value;
 		var path =  item.path;
 		var intitule = item.label;
         var chemin = '';
-        if (typeof item.chemin != 'undefined') {
+        if (typeof item.chemin !== 'undefined') {
             chemin = item.chemin;
         }
         selected['select_'+path] = 1;
@@ -215,15 +211,15 @@ jQuery(function () {
         var rattachement = '#items-selected2';
         var tabItem = '';
 
-        if (item.nature=='s') {
+        if (item.nature === 's') {
             tabItem = 'item[s][]';
         } else {
             tabItem = 'item[p][]';
-            var rattachement = '#items-selected1';
+            rattachement = '#items-selected1';
             reference[0] = 'select_'+path;
         }
         selected['select_'+path] = 1;
-        $(rattachement).append(addElem(rofid, chemin, intitule, tabItem, path, readonly));
+        $(rattachement).append(addElem(path, chemin, intitule, tabItem, readonly));
     }
 
 });

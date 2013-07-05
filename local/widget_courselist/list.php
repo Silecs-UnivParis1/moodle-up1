@@ -2,8 +2,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->dirroot . '/course/batch_lib.php');
-require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
+require_once __DIR__ . '/locallib.php';
 
 global $OUTPUT, $PAGE;
 
@@ -11,12 +10,15 @@ $perpage = 10;
 $search = new stdClass();
 
 $format = optional_param('format', 'table', PARAM_ALPHA);
-$search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
-$search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
-$search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
-$search->topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
-$search->topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
-$search->enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+$search->search          = optional_param('search', '', PARAM_RAW_TRIMMED);
+$search->startdateafter  = optional_param('startdateafter', '', PARAM_RAW_TRIMMED);
+$search->startdatebefore = optional_param('startdatebefore', '', PARAM_RAW_TRIMMED);
+$search->createdafter    = optional_param('createdafter', '', PARAM_RAW_TRIMMED);
+$search->createdbefore   = optional_param('createdbefore', '', PARAM_RAW_TRIMMED);
+$search->category        = optional_param('category', 0, PARAM_INT); // category where to search for courses
+$search->topcategory     = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses (recursively)
+$search->node            = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses (recursively)
+$search->enrolled        = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 if (isset($_REQUEST['enrolledroles'])) {
     if (is_array($_REQUEST['enrolledroles'])) {
         $search->enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);
@@ -42,29 +44,4 @@ if (!empty($_GET['custom'])) {
 
 $PAGE->set_context(context_system::instance());
 
-$totalcount = 0;
-$courses = null;
-if ($search) {
-    $search->visible = 1;
-    $courses = get_courses_batch_search($search, "c.fullname ASC", 0, 9999, $totalcount);
-}
-
-if (empty($courses)) {
-    if ($search) {
-        echo "Aucun cours ne correspond aux critères.";
-    }
-} else {
-    $courseformatter = new courselist_format($format);
-    echo $courseformatter->get_header();
-    foreach ($courses as $course) {
-        echo $courseformatter->format_course($course, true) . "\n";
-    }
-    echo $courseformatter->get_footer() . "\n";
-}
-
-function isoDateToTs($date) {
-    if (preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {
-        return make_timestamp($m[1], $m[2], $m[3]);
-    }
-    return false;
-}
+echo widget_courselist_query($format, $search);

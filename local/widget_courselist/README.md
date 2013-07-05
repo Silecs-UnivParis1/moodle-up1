@@ -41,11 +41,18 @@ une structure de données qui configure le formulaire :
         startdateafter: "",
         startdatebefore: "",
 
+        // Date as YYYY-MM-DD
+        createdafter: "",
+        createdbefore: "",
+
+        // limit the search to courses directly under this category ID
+        category: 2,
+
         // limit the search to courses under this category ID (recursively)
         topcategory: 22,
 
         // limit the search to courses under this ROF path (recursively)
-        topnode: "/02/UP1-PROG39308/UP1-PROG24870",
+        node: "/02/UP1-PROG39308/UP1-PROG24870",
 
         // search on a part of the name of persons enrolled in the course 
         enrolled: "Dupond",
@@ -57,7 +64,7 @@ une structure de données qui configure le formulaire :
         // criteria on custom course fields
         "custom": {
             up1code: "xyz",
-            demandeurid: 4
+            up1demandeurid: 4
         }
     }
 
@@ -78,7 +85,7 @@ Exemple complet (HTML + JS, avec configuration du formulaire) :
         format: "list",
         enrolled: "Dupond",
         "custom": {
-            demandeurid: 4
+            up1demandeurid: 4
         }
       });
     </script>

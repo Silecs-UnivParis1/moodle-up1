@@ -18,6 +18,8 @@ function wizard_get_course($id) {
         $SESSION->wizard['init_course'] = (array) $course;
 
         $SESSION->wizard['form_step2']['up1datefermeture'] = $course->profile_field_up1datefermeture;
+        $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
+        $SESSION->wizard['form_step2']['summary_editor'] = $summary;
 
         $case = wizard_get_generateur($course);
         if ($case == 0) {
@@ -27,8 +29,6 @@ function wizard_get_course($id) {
         }
 
         if ($SESSION->wizard['wizardcase'] == 2) {
-            $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
-            $SESSION->wizard['form_step2']['summary_editor'] = $summary;
             $idcategory = $SESSION->wizard['form_step2']['category'];
             $tabpath = wizard_get_categorypath($idcategory);
             $SESSION->wizard['form_step2']['category'] = $tabpath[2];
@@ -36,15 +36,14 @@ function wizard_get_course($id) {
             $SESSION->wizard['form_step2']['rofyear'] = wizard_get_wizard_get_categoryname($tabpath[1]);
             $SESSION->wizard['form_step2']['complement'] = $course->profile_field_up1complement;
             $SESSION->wizard['form_step2']['fullname'] = $course->profile_field_up1rofname;
+            if (strpos($course->profile_field_up1rofid, ';') && strpos($course->profile_field_up1rofname, ';')) {
+                $SESSION->wizard['form_step2']['fullname'] = substr($course->profile_field_up1rofname, 0, strpos($course->profile_field_up1rofname, ';'));
+            }
 
             // on peut vérifier si le premier rattachement est cohérent avec le reste des données
             wizard_rof_connection($course->profile_field_up1rofpathid);
             $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
-
             $SESSION->wizard['init_course']['form_step2']['item'] = $SESSION->wizard['form_step2']['item'];
-            $SESSION->wizard['init_course']['form_step2']['path'] = $SESSION->wizard['form_step2']['path'];
-
-
 
         } elseif($SESSION->wizard['wizardcase'] == 3) {
             if (isset($course->profile_field_up1categoriesbis)) {
@@ -61,7 +60,6 @@ function wizard_get_course($id) {
 
             $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
             $SESSION->wizard['init_course']['form_step3']['item'] = $SESSION->wizard['form_step3']['item'];
-            $SESSION->wizard['init_course']['form_step3']['path'] = $SESSION->wizard['form_step3']['path'];
         }
 
         //inscription cohortes
@@ -73,7 +71,6 @@ function wizard_get_course($id) {
         $SESSION->wizard['form_step6'] = wizard_get_keys($course->id, $course->timecreated);
         $SESSION->wizard['init_course']['key'] = $SESSION->wizard['form_step6'];
     }
-
 }
 
 /**
@@ -162,21 +159,15 @@ function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_st
         $rofid = substr(strrchr($path, '/'), 1);
         $newpath = strtr($path, '/', '_');
         if ($case2 && $pos == 0) {
-            $SESSION->wizard[$form_step]['item']['p'][] = $rofid;
-            $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
+            $SESSION->wizard[$form_step]['item']['p'][substr($newpath, 1)] = $rofid;
         } else {
-            $SESSION->wizard[$form_step]['item']['s'][] = $rofid;
+            $idpath = $newpath;
             if (substr($newpath, 0, 1) == '_') {
-                $SESSION->wizard[$form_step]['path'][$rofid] = substr($newpath, 1);
-            } else {
-                $SESSION->wizard[$form_step]['path'][$rofid] = $newpath;
+                 $idpath = substr($newpath, 1);
             }
+            $SESSION->wizard[$form_step]['item']['s'][$idpath] = $rofid;
             if ($case2 == FALSE && $rofid !== FALSE) {
-                $rofpath = $SESSION->wizard[$form_step]['path'][$rofid];
-                $tabpath = explode('_', $rofpath);
-                $tabrof = rof_get_combined_path($tabpath);
-                $chemin = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
-                $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $chemin;
+                $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $idpath;
             }
         }
     }

@@ -23,7 +23,7 @@ echo $OUTPUT->heading('Démo de la liste de cours par critères');
 jQuery(document).ready(function () {
     jQuery("#widget-courselist").courselist({
             "search": "",
-            "startdateafter": '2008-09-01',
+            "startdatebefore": '2013-09-01',
             //format: "list", // default: "table"
             //enrolled: "Dupont",
             //enrolledroles: [3],

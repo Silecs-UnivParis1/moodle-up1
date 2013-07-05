@@ -105,8 +105,7 @@ switch ($stepin) {
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             if ($wizardcase == 2) {
-                 $SESSION->wizard['form_step2']['item'] = $_POST['item'];
-                 $SESSION->wizard['form_step2']['path'] = $_POST['path'];
+                 $SESSION->wizard['form_step2']['item'] = wizard_get_array_item($_POST['item']);
                  $SESSION->wizard['form_step2']['all-rof'] = wizard_get_rof();
                  $SESSION->wizard['form_step2']['complement'] = $_POST['complement'];
             }
@@ -135,10 +134,8 @@ switch ($stepin) {
                 if ($hybridattachment_permission === false) {
                     $init_course_form3 = $SESSION->wizard['init_course']['form_step3'];
                     $data->item = (isset($init_course_form3['item']) ? $init_course_form3['item'] : array());
-                    $data->path = (isset($init_course_form3['path']) ? $init_course_form3['path'] : array());
                 } else {
-                    $data->item = (isset($_POST['item']) ? $_POST['item'] : array());
-                    $data->path = (isset($_POST['path']) ? $_POST['path'] : array());
+                    $data->item = (isset($_POST['item']) ? wizard_get_array_item($_POST['item']) : array());
                 }
 
                 $data->rattachements = array_unique(array_filter($data->rattachements));

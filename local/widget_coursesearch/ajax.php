@@ -9,7 +9,7 @@ require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
 global $PAGE;
 
 $topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
-$topnode   = optional_param('topnode', 0, PARAM_INT);  // virtual table node where to search for courses
+$node   = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses
 $enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 $fieldset  = optional_param('fieldset', '', PARAM_TEXT); // legend of the main fieldset
 
@@ -41,21 +41,20 @@ if (isset($_REQUEST['fieldsjson'])) {
 } else if (isset($_REQUEST['fields'])) {
     $searchconfig['fields'] = $_REQUEST['fields'];
 }
+$enrolledroles = array(3);
 if (isset($_REQUEST['enrolledroles'])) {
     if (is_array($_REQUEST['enrolledroles'])) {
         $enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);
     } else {
         $enrolledroles = explode(',', optional_param('enrolledroles', '', PARAM_SEQUENCE));
     }
-} else if (isset($_REQUEST['fields'])) {
-    $enrolledroles = array(3);
 }
 
 $form = new course_batch_search_form(null, $searchconfig, 'get');
 $form->set_data(
         (object) array(
             'topcategory' => $topcategory,
-            'topnode' => $topnode,
+            'node' => $node,
             'enrolled' => $enrolled,
             'enrolledroles' => join(',', $enrolledroles),
         )

@@ -19,7 +19,7 @@ class courselist_common {
     public static function get_courses_from_pseudopath($pseudopath) {
 
         if ( preg_match('/^\/cat(\d+)$/', $pseudopath, $matches) ) { // limited to a course category
-            $cat = (int) $matches[1];
+            $cat = (int) $matches[1];  // catid = 0 special value for all courses
             $crs = courselist_cattools::get_descendant_courses($cat);
             if ($crs) {
                 $courses = array_combine($crs, $crs); //
@@ -101,7 +101,7 @@ class courselist_format {
                 $this->cellelem = 'td';
                 $this->sep = '';
                 $this->header = <<<EOL
-<table class="generaltable" style="width: 100%;">
+<table class="generaltable sortable" style="width: 100%;">
 <thead>
     <tr>
         <th>Code</th>
@@ -230,7 +230,7 @@ EOL;
     public function format_icons($dbcourse, $class) {
         global $OUTPUT;
         $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
-        $icons = '<' .$this->cellelem. ' class="' . $class. '" style="text-align: right;">';
+        $icons = '<' .$this->cellelem. ' class="' . $class. '">';
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
             foreach ($myicons as $pix_icon) {
@@ -290,17 +290,22 @@ class courselist_cattools {
     /**
      * recherche les rattachements principaux aux catégories (standard moodle)
      * @global moodle_database $DB
-     * @param int $catid
+     * @param int $catid ; 0 is accepted as a special value for all courses
      * @return array array(int crsid)
      */
     protected static function get_descendant_courses_from_category($catid) {
         global $DB;
 
-        $sql = "SELECT cco.instanceid FROM {context} cco "
+        if ($catid === 0) {
+            $res = $DB->get_fieldset_select('course', 'id', '');
+            return $res;
+        } else {
+            $sql = "SELECT cco.instanceid FROM {context} cco "
                 . "JOIN {context} cca ON (cco.path LIKE CONCAT(cca.path, '/%') ) "
                 . "WHERE cca.instanceid=? AND cco.contextlevel=? and cca.contextlevel=? ";
-        $res = $DB->get_fieldset_sql($sql, array($catid, CONTEXT_COURSE, CONTEXT_COURSECAT));
-        return $res;
+            $res = $DB->get_fieldset_sql($sql, array($catid, CONTEXT_COURSE, CONTEXT_COURSECAT));
+            return $res;
+        }
     }
 
     /**

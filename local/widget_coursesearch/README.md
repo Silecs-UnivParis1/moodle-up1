@@ -36,7 +36,7 @@ une structure de données qui configure le formulaire :
         topcategory: 22,
 
         // limit the search to courses under this ROF path (recursively)
-        topnode: "/02/UP1-PROG39308/UP1-PROG24870",
+        node: "/02/UP1-PROG39308/UP1-PROG24870",
 
         // search on a part of the name of persons enrolled in the course 
         enrolled: "Dupond",

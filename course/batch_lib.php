@@ -93,30 +93,44 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         $searchcond[] = "c.visible >= " . ((int) $criteria->visible);
     }
     if (!empty($criteria->startdateafter)) {
-        $searchcond[] = "c.startdate >= " . ((int) $criteria->startdateafter);
+        $time = isoDateToTs($criteria->startdateafter);
+        if ($time) {
+            $searchcond[] = "c.startdate >= " . $time;
+        }
     }
     if (!empty($criteria->startdatebefore)) {
-        $searchcond[] = "c.startdate <= " . ((int) $criteria->startdatebefore);
+        $time = isoDateToTs($criteria->startdatebefore);
+        if ($time) {
+            $searchcond[] = "c.startdate <= " . $time;
+        }
     }
     if (!empty($criteria->createdafter)) {
-        $searchcond[] = "c.timecreated >= " . ((int) $criteria->createdafter);
+        $time = isoDateToTs($criteria->createdafter);
+        if ($time) {
+            $searchcond[] = "c.timecreated >= " . $time;
+        }
     }
     if (!empty($criteria->createdbefore)) {
-        $searchcond[] = "c.timecreated <= " . ((int) $criteria->createdbefore);
+        $time = isoDateToTs($criteria->createdbefore);
+        if ($time) {
+            $searchcond[] = "c.timecreated <= " . $time;
+        }
     }
     if (!empty($criteria->topcategory)) {
         $category = $DB->get_record('course_categories', array('id' => $criteria->topcategory));
         if ($category) {
-            $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("$category->path/%"));
-            if ($subcats) {
-                list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED, "paramcat");
-                $searchcond[] = "c.category $inSql";
-                $params = $params + $inParams;
+            $subcats = $DB->get_fieldset_select('course_categories', 'id', "path LIKE ?", array("{$category->path}/%"));
+            if (!$subcats) {
+                $subcats = array();
             }
+            $subcats[] = $category->id;
+            list ($inSql, $inParams) = $DB->get_in_or_equal($subcats, SQL_PARAMS_NAMED, "paramcat");
+            $searchcond[] = "c.category $inSql";
+            $params = $params + $inParams;
         }
     }
-    if (!empty($criteria->topnode)) {
-        $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->topnode);
+    if (!empty($criteria->node)) {
+        $coursesId =  courselist_common::get_courses_from_pseudopath($criteria->node);
         if ($coursesId) {
             list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED, "paramnode");
             $searchcond[] = "c.id $inSql";
@@ -127,7 +141,11 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         if (empty($criteria->enrolledroles)) {
             $criteria->enrolledroles = array(3);
         }
-        list ($inSql, $inParams) = $DB->get_in_or_equal($criteria->enrolledroles, SQL_PARAMS_NAMED, "paramrole");
+        $roles = $criteria->enrolledroles;
+        if (is_string($criteria->enrolledroles)) {
+            $roles = explode(',', $roles);
+        }
+        list ($inSql, $inParams) = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, "paramrole");
         $searchjoin[] = "JOIN {context} context ON (context.instanceid = c.id AND context.contextlevel = " . CONTEXT_COURSE . ") "
                 . "JOIN {role_assignments} ra ON (context.id = ra.contextid) "
                 . "JOIN {user} u ON (u.id = ra.userid)";
@@ -140,13 +158,24 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     }
 
     // custominfo fields
-    $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
-    if ($fields) {
-        $i = 0;
-        foreach ($fields as $field) {
-            $formfield = custominfo_field_factory('course', $field->datatype, $field->id, null);
-            if (!empty($criteria->{$formfield->inputname})) {
+    $inputFields = array();
+    foreach ($criteria as $c => $v) {
+        if (preg_match('/^profile_field_(.+)$/', $c, $m) && $v !== '') {
+            $inputFields[$m[1]] = $v;
+        }
+    }
+    if ($inputFields) {
+        $fields = $DB->get_records('custom_info_field', array('objectname' => 'course'));
+        if ($fields) {
+            $i = 0;
+            foreach ($fields as $field) {
+                // hack to speed up things
+                if (empty($inputFields[$field->shortname])) {
+                    continue;
+                }
                 $i++;
+                // normal behaviour
+                $formfield = custominfo_field_factory('course', $field->datatype, $field->id, null);
                 $formfield->edit_data($criteria);
                 $searchjoin[] = "JOIN {custom_info_data} d$i "
                     ."ON (d$i.objectid = c.id AND d$i.objectname='course' AND d$i.fieldid={$field->id})";
@@ -203,4 +232,11 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     // array, and an updated $totalcount
     $totalcount = $c;
     return $courses;
+}
+
+function isoDateToTs($date) {
+    if (preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {
+        return make_timestamp($m[1], $m[2], $m[3]);
+    }
+    return (int) $date;
 }
