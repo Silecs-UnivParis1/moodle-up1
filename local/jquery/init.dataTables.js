@@ -75,7 +75,7 @@ initDataTables = false;
         (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
 
         jQuery(function () {
-            $('table.sortable').dataTable({
+            $('table.sortable:not(.dataTable)').dataTable({
                 "oLanguage": {
                     "sProcessing":     "Traitement en cours...",
                     "sSearch":         "Rechercher&nbsp;:",
