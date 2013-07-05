@@ -5,11 +5,13 @@ initDataTables = false;
 
 (function() {
    var rootUrl = findScriptUrl('init.dataTables.js');
+   var ieWait = 2; // number of scripts, for IE < 9
 
     if (window.jQuery === undefined) {
         loadJs(rootUrl + "../jquery/jquery.js");
         loadJs(rootUrl + "../jquery/jquery.dataTables.min.js", true);
     } else if (window.jQuery.fn.dataTable === undefined) {
+        ieWait--;
         loadJs(rootUrl + "../jquery/jquery.dataTables.min.js", true);
     } else {
         onLoad();
@@ -31,15 +33,32 @@ initDataTables = false;
         script_tag.setAttribute("src", url);
         (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(script_tag);
         if (last !== undefined) {
-            if (script_tag.readyState) {
+            if (script_tag.readyState) { // IE < 9
                 script_tag.onreadystatechange = function () {
                     if (this.readyState === 'complete' || this.readyState === 'loaded') {
-                        onLoad();
+                        script_tag.onreadystatechange = null; // bug IE8
+                        ieWait--;
+                        if (ieWait === 0) {
+                            onLoad();
+                        }
+                    }
+                };
+            } else {
+                ieWait = 0;
+                script_tag.onload = onLoad;
+            }
+        } else {
+            if (script_tag.readyState) { // IE < 9, bug on async script loading
+                script_tag.onreadystatechange = function () {
+                    if (this.readyState === 'complete' || this.readyState === 'loaded') {
+                        script_tag.onreadystatechange = null; // bug IE8
+                        ieWait--;
+                        if (ieWait === 0) {
+                            onLoad();
+                        }
                     }
                 };
             }
-        } else {
-            script_tag.onload = onLoad;
         }
     }
 
