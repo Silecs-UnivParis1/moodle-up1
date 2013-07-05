@@ -17,16 +17,16 @@ jQuery(function () {
 		var codeid = select.attr('id');
 
 		if (codeid) {
-			var niv = select.data('deep');
-			var rofid = select.data('rofid');
-			var path = select.data('path');
+			var niv = select.attr('data-deep');
+			var rofid = select.attr('data-rofid');
+			var path = select.attr('data-path');
 			if (niv < 3) {
 				var format = 1;
 			} else {
 				var format = 0;
 			}
 
-            var typedip = select.data('typedip');
+            var typedip = select.attr('data-typedip');
             if (typeof typedip === 'undefined')  {
                 visited[rofid] = select.text();
             }
@@ -47,10 +47,10 @@ jQuery(function () {
         if ($(this).parent(".dip-sel").size()) {
             return false;
         }
-		var niv = $(this).data('deep');
+		var niv = $(this).attr('data-deep');
 		var codeid = $(this).attr('id');
-		var rofid = $(this).data('rofid');
-		var path = $(this).data('path');
+		var rofid = $(this).attr('data-rofid');
+		var path = $(this).attr('data-path');
 
         if (typeof visited[rofid] === 'undefined') {
             var intitule = $(this).siblings('span.intitule').text();
@@ -93,8 +93,8 @@ jQuery(function () {
 
 
 	$('div.item-select').on("click", ".element", function(event) {
-		var rofid = $(this).prevAll('span.collapse').data('rofid');
-		var path =  $(this).prevAll('span.collapse').data('path');
+		var rofid = $(this).prevAll('span.collapse').attr('data-rofid');
+		var path =  $(this).prevAll('span.collapse').attr('data-path');
 		var intitule = $(this).prevAll('span.intitule').text();
 
         if (typeof visited[rofid] === 'undefined') {
