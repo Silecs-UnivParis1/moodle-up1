@@ -3,8 +3,9 @@ require_once($CFG->dirroot . '/local/roftools/roflib.php');
 
 /**
  * renvoie la liste des components
+ *
  * @return array of objects
- **/
+ */
 function getRofComponents() {
     global $DB;
     $components = $DB->get_records('rof_component');
@@ -12,6 +13,7 @@ function getRofComponents() {
 }
 /**
  * construit la liste html des components
+ *
  * @return string code html
  */
 function treeComponent () {
@@ -43,6 +45,7 @@ function treeComponent () {
 /**
  * construit l'arbre du rof (arbre selected) avec des select pour
  * component, program et subprogram
+ *
  * @return string code html
  */
 function print_rof() {
@@ -69,8 +72,9 @@ function print_rof() {
 	return $list;
 }
 
-/*
+/**
  * réécrit la liste les éléments fils en suivant le format "'fils_1', 'fils2'"
+ *
  * @param string $sub : "fils_1, fils2"
  * @return sting
  */
@@ -82,8 +86,10 @@ function subToString ($sub) {
 	}
 	return substr($mysub, 0, -1);
 }
+
 /**
  * renvoie le nombre d'identifiant rof contenu dans $sub
+ *
  * @param string $sub : "fils_1, fils2"
  * @return int
  */
@@ -173,6 +179,7 @@ class rof_browser {
 
 	/**
 	 * Construit un élément d'une liste
+     *
 	 * @param $object $sp correspond à l'objet à afficher
 	 * @param $niveau
 	 * @return string
@@ -222,6 +229,7 @@ class rof_browser {
 
 	/**
 	 * Construit et renvoie le block de code html correspondant aux élément fils d'un élément
+     *
 	 * @return string code html
 	 */
 	function createBlock() {
@@ -309,9 +317,10 @@ class rof_browser {
 
 	/**
 	 * construit le code HTML listant les elements $subList
+     *
 	 * @param array() $subList
 	 * @param int $nivEnf
-	 * return string
+	 * @return string
 	 */
 	function afficheListe($subList, $nivEnf) {
 		$list = '';
@@ -362,9 +371,10 @@ class rof_browser {
 
 	/**
 	 * construit le code HTML sous forme d'un élement select des les elements $subList
+     *
 	 * @param array() $subList
 	 * @param int $nivEnf
-	 * return string code HTML d'un élément select
+	 * @return string code HTML d'un élément select
 	 */
 	function print_select($subList, $nivEnf) {
 		$list = '';
@@ -428,6 +438,7 @@ class rof_browser {
 
 	/**
 	 * Construit un item d'une liste (arbre selected)
+     *
 	 * @param $object $sp correspond à l'objet à afficher
 	 * @param $niveau
 	 * @return string
@@ -494,8 +505,9 @@ class rof_browser {
 		return $element;
 	}
 
-	/*
+	/**
 	 * Construit un item d'une liste (arbre selected)
+     *
 	 * @param $object $sp correspond à l'objet à afficher
 	 * @param $niveau
 	 * @return string
@@ -545,6 +557,7 @@ class rof_browser {
     /**
      * Construit le tableau intermédiaire faisant correspondre à chaque rof_program.typedip
      * le code interne de $this->constant_diplome_key
+     *
      * @return array $tabkey
      */
     function generate_tabconstantkey()
@@ -561,6 +574,7 @@ class rof_browser {
     /**
      * renvoie la liste des rof_program.typedip classés
      * dans le regroupement de diplôme divers
+     *
      * @return string $list de format "cide1, code2, ..."
      */
     function gettypedipdivers()
