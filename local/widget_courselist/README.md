@@ -64,7 +64,7 @@ une structure de données qui configure le formulaire :
         // criteria on custom course fields
         "custom": {
             up1code: "xyz",
-            demandeurid: 4
+            up1demandeurid: 4
         }
     }
 
@@ -85,7 +85,7 @@ Exemple complet (HTML + JS, avec configuration du formulaire) :
         format: "list",
         enrolled: "Dupond",
         "custom": {
-            demandeurid: 4
+            up1demandeurid: 4
         }
       });
     </script>
