@@ -47,7 +47,7 @@ jQuery(function () {
         if ($(this).parent(".dip-sel").size()) {
             return false;
         }
-		var niv = ParseInt($(this).attr('data-deep'));
+		var niv = parseInt($(this).attr('data-deep'));
 		var codeid = $(this).attr('id');
 		var rofid = $(this).attr('data-rofid');
 		var path = $(this).attr('data-path');
