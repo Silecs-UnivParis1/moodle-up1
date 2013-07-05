@@ -12,7 +12,7 @@ defined('MOODLE_INTERNAL') || die;
 
 
 function xmldb_filter_courseup1_upgrade($oldversion) {
-    global $CFG, $DB;
+    //global $CFG, $DB;
 
     if ( $oldversion < 2013070402 ) {
         echo "Correction des contenus pages :<br />\n";
@@ -29,11 +29,11 @@ function update_coursetree_pages() {
     $substpages = 0;
     $substoccur = 0;
     foreach ($pages as $page) {
-        if ( preg_match('/\[courselist format=tree/', $page->content) ) {
+        $cnt = 0;
+        $page->content = preg_replace('/\[courselist format=(\w+)\b/', '[course$1', $page->content, -1, $cnt);
+        if ($cnt) {
             $substpages++;
-            $newcontent = str_replace('[courselist format=tree', '[coursetree', $page->content, $cnt);
             $substoccur += $cnt;
-            $page->content = $newcontent;
             $DB->update_record('page', $page);
         }
     }
