@@ -180,7 +180,7 @@ jQuery(function () {
                 acg.fillSelection(settings.preSelected, settings.readonly);
             }
         });
-     }
+     };
 
     function autocompleteRof(settings, elem) {
         this.settings = settings;
@@ -197,7 +197,7 @@ jQuery(function () {
                 buildSelectedBlock(items[i], readonly);
             }
         }
-    }
+    };
 
     function buildSelectedBlock(item, readonly) {
 		var path =  item.path;
@@ -215,7 +215,7 @@ jQuery(function () {
             tabItem = 'item[s][]';
         } else {
             tabItem = 'item[p][]';
-            var rattachement = '#items-selected1';
+            rattachement = '#items-selected1';
             reference[0] = 'select_'+path;
         }
         selected['select_'+path] = 1;
