@@ -18,6 +18,8 @@ function wizard_get_course($id) {
         $SESSION->wizard['init_course'] = (array) $course;
 
         $SESSION->wizard['form_step2']['up1datefermeture'] = $course->profile_field_up1datefermeture;
+        $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
+        $SESSION->wizard['form_step2']['summary_editor'] = $summary;
 
         $case = wizard_get_generateur($course);
         if ($case == 0) {
@@ -27,8 +29,6 @@ function wizard_get_course($id) {
         }
 
         if ($SESSION->wizard['wizardcase'] == 2) {
-            $summary = array('text' => $course->summary, 'format' => $course->summaryformat);
-            $SESSION->wizard['form_step2']['summary_editor'] = $summary;
             $idcategory = $SESSION->wizard['form_step2']['category'];
             $tabpath = wizard_get_categorypath($idcategory);
             $SESSION->wizard['form_step2']['category'] = $tabpath[2];
@@ -71,7 +71,6 @@ function wizard_get_course($id) {
         $SESSION->wizard['form_step6'] = wizard_get_keys($course->id, $course->timecreated);
         $SESSION->wizard['init_course']['key'] = $SESSION->wizard['form_step6'];
     }
-
 }
 
 /**
