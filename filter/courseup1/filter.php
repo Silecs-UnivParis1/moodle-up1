@@ -62,6 +62,7 @@ class filter_courseup1 extends moodle_text_filter {
      */
     protected static function parse_parameters($str) {
         $params = array();
+        $coursefields = array();
         while ($str) {
             $str .= " ";
             $all = '';
@@ -71,14 +72,22 @@ class filter_courseup1 extends moodle_text_filter {
                 list ($all, $key, $value) = $m;
             }
             if ($all) {
-                $params[$key] = $value;
+                if (strncmp($key, 'up1', 3) === 0) {
+                    $coursefields[$key] = $value;
+                    $params['profile_field_' . $key] = $value;
+                } else {
+                    $params[$key] = $value;
+                }
                 $str = str_replace($all, '', $str);
             } else {
                 if (trim($str) !== "") {
                     /// @todo Error: no more parameter found, yet the string isn't empty
                 }
-                return $params;
+                break;
             }
+        }
+        if ($coursefields) {
+            $params['custom'] = $coursefields;
         }
         return $params;
     }
