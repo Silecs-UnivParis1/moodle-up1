@@ -10,12 +10,15 @@ $perpage = 10;
 $search = new stdClass();
 
 $format = optional_param('format', 'table', PARAM_ALPHA);
-$search->search = optional_param('search', '', PARAM_RAW_TRIMMED);
-$search->startdateafter = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
+$search->search          = optional_param('search', '', PARAM_RAW_TRIMMED);
+$search->startdateafter  = isoDateToTs(optional_param('startdateafter', '', PARAM_RAW_TRIMMED));
 $search->startdatebefore = isoDateToTs(optional_param('startdatebefore', '', PARAM_RAW_TRIMMED));
-$search->topcategory = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses
-$search->node   = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses
-$search->enrolled  = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+$search->createdafter    = isoDateToTs(optional_param('createdafter', '', PARAM_RAW_TRIMMED));
+$search->createdbefore   = isoDateToTs(optional_param('createdbefore', '', PARAM_RAW_TRIMMED));
+$search->category        = optional_param('category', 0, PARAM_INT); // category where to search for courses
+$search->topcategory     = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses (recursively)
+$search->node            = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses (recursively)
+$search->enrolled        = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
 if (isset($_REQUEST['enrolledroles'])) {
     if (is_array($_REQUEST['enrolledroles'])) {
         $search->enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);

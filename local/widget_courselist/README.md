@@ -41,6 +41,13 @@ une structure de données qui configure le formulaire :
         startdateafter: "",
         startdatebefore: "",
 
+        // Date as YYYY-MM-DD
+        createdafter: "",
+        createdbefore: "",
+
+        // limit the search to courses directly under this category ID
+        category: 2,
+
         // limit the search to courses under this category ID (recursively)
         topcategory: 22,
 
