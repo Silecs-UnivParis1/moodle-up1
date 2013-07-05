@@ -27,7 +27,7 @@ jQuery(function () {
 			}
 
             var typedip = select.attr('data_typedip');
-            if (typeof typedip == 'undefined')  {
+            if (typeof typedip === 'undefined')  {
                 visited[rofid] = select.text();
             }
 
@@ -52,14 +52,14 @@ jQuery(function () {
 		var rofid = $(this).attr('data_rofid');
 		var path = $(this).attr('data_path');
 
-        if (typeof visited[rofid] == 'undefined') {
+        if (typeof visited[rofid] === 'undefined') {
             var intitule = $(this).siblings('span.intitule').text();
             visited[rofid] = intitule;
         }
 
 		var plus = $(this).text();
 		$(this).empty();
-		if (plus==' + ') {
+		if (plus === ' + ') {
             $(this).removeClass('collapsed');
             $(this).addClass('expanded');
 			plus = ' - ';
@@ -73,14 +73,14 @@ jQuery(function () {
 		$(this).append(plus);
 
 		var fr = $(this).parent('.elem-li').siblings('ul').size();
-		if (fr == 0) {
-		// creation liste ul
+		if (fr === 0) {
+            // creation liste ul
 			$.get(rootUrl + 'roffinal.php', {niveau: niv, rofid: rofid, selected: 1, path: path, readonly: readonly},  function(data){
 				$("#"+codeid+'-elem').parent('.elem-li').after(data);
 			}, 'html');
 		}
 		else {
-			if (niv==2) {
+			if (niv === 2) {
 				var ulEnf = '.cont-deep'+niv;
 				$(this).siblings(ulEnf).toggleClass('rof-hidden');
 			} else {
@@ -97,7 +97,7 @@ jQuery(function () {
 		var path =  $(this).prevAll('span.collapse').attr('data_path');
 		var intitule = $(this).prevAll('span.intitule').text();
 
-        if (typeof visited[rofid] == 'undefined') {
+        if (typeof visited[rofid] === 'undefined') {
             var intitule = $(this).siblings('span.intitule').text();
             visited[rofid] = intitule;
         }
@@ -106,7 +106,7 @@ jQuery(function () {
         chemin = createChemin(path, visited);
         chemin = chemin.substr(3);
 
-        if (typeof selected['select_'+path] != 'undefined' && selected['select_'+path] == 1) {
+        if (typeof selected['select_'+path] !== 'undefined' && selected['select_'+path] === 1) {
 			alert('"'+intitule+'" fait déjà partie de la sélection.');
 		} else {
             /** patch si uniquement rattachements secondaires (cours hybrides) **/
@@ -133,7 +133,7 @@ jQuery(function () {
 		if (confirm('Confirmez-vous la suppression de cet élément de la sélection ?')) {
             var rofpath = $(this).siblings('input[type=hidden]').eq(0).val();
             selected['select_'+rofpath] = 0;
-            if (reference[0]=='select_'+rofpath) {
+            if (reference[0] === 'select_'+rofpath) {
                 reference.splice(0, 1);
             }
 			$(this).parent('div.item-selected').remove();
@@ -142,7 +142,7 @@ jQuery(function () {
 
     function addElem(path, chemin, intitule, tabItem, readonly) {
         var suppr = '<div class="selected-remove" title="Supprimer la sélection">&#10799;</div>';
-        if (readonly==true) {
+        if (readonly === true) {
             suppr = '';
         }
         var elem = '<div class="item-selected" id="select_'+path+'">'
@@ -159,7 +159,7 @@ jQuery(function () {
         var tableau=path.split(regtab);
         for (var i=0; i<tableau.length; i++) {
             var c = tableau[i];
-            if (typeof visited[c] != 'undefined') {
+            if (typeof visited[c] !== 'undefined') {
                 chemin = chemin+' > '+visited[c];
             }
         }
@@ -203,7 +203,7 @@ jQuery(function () {
 		var path =  item.path;
 		var intitule = item.label;
         var chemin = '';
-        if (typeof item.chemin != 'undefined') {
+        if (typeof item.chemin !== 'undefined') {
             chemin = item.chemin;
         }
         selected['select_'+path] = 1;
@@ -211,7 +211,7 @@ jQuery(function () {
         var rattachement = '#items-selected2';
         var tabItem = '';
 
-        if (item.nature=='s') {
+        if (item.nature === 's') {
             tabItem = 'item[s][]';
         } else {
             tabItem = 'item[p][]';
