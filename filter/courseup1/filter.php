@@ -75,11 +75,9 @@ class filter_courseup1 extends moodle_text_filter {
                 $str = str_replace($all, '', $str);
             } else {
                 if (trim($str) !== "") {
-                    // no more parameter found, yet the string isn't empty
-                    return null;
-                } else {
-                    return $params;
+                    /// @todo Error: no more parameter found, yet the string isn't empty
                 }
+                return $params;
             }
         }
         return $params;
