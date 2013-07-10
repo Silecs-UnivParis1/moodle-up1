@@ -12,12 +12,15 @@ require_once $CFG->dirroot . '/local/up1_courselist/courselist_tools.php';
  *
  * @param string $format "table" | "list"
  * @param stdClass $criteria
+ * @param boolean  $visible (opt, true) Only show public courses
  * @return string HTML
  */
-function widget_courselist_query($format, $criteria) {
+function widget_courselist_query($format, $criteria, $visible=true) {
     $courses = null;
     if ($criteria) {
-        $criteria->visible = 1;
+        if ($visible) {
+            $criteria->visible = 1;
+        }
         $totalcount = 0;
 
         // 'search', 'startdateafter', 'startdatebefore', 'createdafter', 'createdbefore',
