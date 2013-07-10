@@ -43,7 +43,7 @@ function widget_courselist_query($format, $criteria, $visible=true) {
         foreach ($courses as $course) {
             $html .= $courseformatter->format_course($course, true) . "\n";
         }
-        $html .= $courseformatter->get_footer() . "\n";
+        $html .= $courseformatter->get_footer() . '<div style="clear:both;"></div>' . "\n";
         return $html;
     }
 }
