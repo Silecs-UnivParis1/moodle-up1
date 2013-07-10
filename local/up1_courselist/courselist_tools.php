@@ -79,6 +79,7 @@ class courselist_format {
     private $footer;
 
     private $role;
+    private $courseboard; /** bool : only if supervalidator */
 
     /**
      * Constructor.
@@ -128,6 +129,7 @@ EOL;
         }
 
         $this->role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+        $this->courseboard = has_capability('local/crswizard:supervalidator', context_system::instance());
     }
 
     /**
@@ -229,7 +231,8 @@ EOL;
 
     public function format_icons($dbcourse, $class) {
         global $OUTPUT;
-        $url = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
+
+        $urlsynopsis = new moodle_url('/course/report/synopsis/index.php', array('id' => $dbcourse->id));
         $icons = '<' .$this->cellelem. ' class="' . $class. '">';
         $myicons = enrol_get_course_info_icons($dbcourse);
         if ($myicons) { // enrolment access icons
@@ -240,7 +243,11 @@ EOL;
         if ( $dbcourse->visible == 0 ) {
             $icons .= $OUTPUT->render(new pix_icon('t/block', 'Fermé aux étudiants'));
         }
-        $icons .= $OUTPUT->action_icon($url, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+        $icons .= $OUTPUT->action_icon($urlsynopsis, new pix_icon('i/info', 'Afficher le synopsis du cours'));
+        if ($this->courseboard) {
+            $urlboard = new moodle_url('/local/courseboard/view.php', array('id' => $dbcourse->id));
+            $icons .= $OUTPUT->action_icon($urlboard, new pix_icon('i/settings', 'Afficher le tableau de bord'));
+        }
         $icons .= '</' . $this->cellelem . '>';
         return $icons;
     }
