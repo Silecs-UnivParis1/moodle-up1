@@ -156,6 +156,7 @@ $string['shortnamecourse'] = 'Nom abrégé de l\'espace : ';
 $string['summaryof'] = 'Récapitulatif de la demande';
 $string['student'] = 'Étudiant';
 $string['stepkey'] = 'Étape 6 - configuration des clés d\'inscription';
+$string['stepredirect'] = 'Étape 8 - espace créé - redirection';
 $string['studentkey'] = 'Clé d\'inscription pour le rôle "étudiant"';
 $string['teachername'] = 'Nom de l\'enseignant';
 $string['teacher'] = 'Enseignant';
