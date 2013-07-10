@@ -135,6 +135,9 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
             list ($inSql, $inParams) = $DB->get_in_or_equal($coursesId, SQL_PARAMS_NAMED, "paramnode");
             $searchcond[] = "c.id $inSql";
             $params = array_merge($params, $inParams);
+        } else {
+            $totalCount = 0;
+            return array();
         }
     }
     if (!empty($criteria->enrolled)) {
