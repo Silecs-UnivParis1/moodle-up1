@@ -43,7 +43,7 @@ class filter_courseup1 extends moodle_text_filter {
                         // simple case, static HTML
                         $replace = courselist_common::list_courses_html($params['node'], $format) . $jsscript;
                     } else {
-                        $replace = widget_courselist_query($format, (object) $params) . $jsscript;
+                        $replace = widget_courselist_query($format, (object) $params, false) . $jsscript;
                     }
                     break;
                 default:
