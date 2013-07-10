@@ -6,6 +6,8 @@ et appliquer le widget à un ou plusieurs éléments HTML.
 Dans les exemples qui suivent, on suppose que la page HTML contient
 un block ("div" ou autre) d'identifiant "widget-courselist".
 
+Seuls les cours visibles sont listés.
+
 Par exemple, dans Moodle :
 
     $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js')); // facultatif
