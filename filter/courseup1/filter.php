@@ -16,7 +16,7 @@ require_once $CFG->dirroot . '/local/widget_courselist/locallib.php';
 class filter_courseup1 extends moodle_text_filter {
 
     public function filter($text, array $options = array()) {
-        while ( preg_match('#\[course(tree|list|table|search)\s+([^\]]+?)\]#', $text, $matches) ) {
+        while ( preg_match('#\[course(tree|list|table|search)\s*(\S?[^\]]*?)\]#', $text, $matches) ) {
             list ($replace, $format, $paramstr) = $matches;
             $params = self::parse_parameters($paramstr);
 
@@ -39,8 +39,9 @@ class filter_courseup1 extends moodle_text_filter {
                 case 'list':
                     $jsurl = new moodle_url('/local/jquery/init.dataTables.js');
                     $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>';
-                    if (isset($params['node']) && count($params) === 2) {
-                        // simple case, static HTML
+                    /** @todo Simplify by using only one function in every case? */
+                    if (isset($params['node']) && count($params) === 1) {
+                        // simple case, without an extended search
                         $replace = courselist_common::list_courses_html($params['node'], $format) . $jsscript;
                     } else {
                         $replace = widget_courselist_query($format, (object) $params, false) . $jsscript;
