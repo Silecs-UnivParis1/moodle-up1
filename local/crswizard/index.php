@@ -233,7 +233,7 @@ switch ($stepin) {
         if (wizard_has_edit_course($corewizard->course->id, $USER->id)) {
             $urlredirect = new moodle_url('/course/view.php',array('id' => $corewizard->course->id));
         }
-        redirect($urlredirect, $msgredirect, 5);
+        wizard_redirect_creation($urlredirect, $msgredirect, 5);
         break;
 }
 

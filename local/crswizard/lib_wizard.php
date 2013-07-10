@@ -4,6 +4,73 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Fonction de redirection ad hoc avec message en dernière étape de création
+ * Reprise partielle des fonctions redirect() et $OUTPUT->redirect_message()
+ * @param string $url
+ * @param string $message
+ * @param int $delay
+ */
+function wizard_redirect_creation($url, $message='', $delay=5) {
+    global $OUTPUT, $PAGE, $SESSION, $CFG;
+
+    $localoutput = $OUTPUT;
+    $localoutput->page = $PAGE;
+
+    if ($url instanceof moodle_url) {
+        $url = $url->out(false);
+    }
+    $debugdisableredirect = false;
+
+    $url = preg_replace('/[\x00-\x1F\x7F]/', '', $url);
+    $url = str_replace('"', '%22', $url);
+    $encodedurl = preg_replace("/\&(?![a-zA-Z0-9#]{1,8};)/", "&amp;", $url);
+    $encodedurl = preg_replace('/^.*href="([^"]*)".*$/', "\\1", clean_text('<a href="'.$encodedurl.'" />', FORMAT_HTML));
+    $url = str_replace('&amp;', '&', $encodedurl);
+
+
+    if (!empty($message)) {
+        if ($delay === -1 || !is_numeric($delay)) {
+            $delay = 3;
+        }
+        $message = clean_text($message);
+    } else {
+        $message = get_string('pageshouldredirect');
+        $delay = 0;
+    }
+
+    $CFG->docroot = false;
+
+    if (!$debugdisableredirect) {
+        // Don't use exactly the same time here, it can cause problems when both redirects fire at the same time.
+        $localoutput->metarefreshtag = '<meta http-equiv="refresh" content="'. $delay .'; url='. $encodedurl .'" />'."\n";
+        $localoutput->page->requires->js_function_call('document.location.replace', array($url), false, ($delay + 3));
+    }
+    $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+
+    $site = get_site();
+    $straddnewcourse = get_string("addnewcourse");
+    $PAGE->navbar->add($straddnewcourse);
+
+    $PAGE->set_title("$site->shortname: $straddnewcourse");
+    $PAGE->set_heading($site->fullname);
+
+
+    $output = $localoutput->header();
+
+    $output .= $localoutput->box(get_string('wizardcourse', 'local_crswizard'), 'titlecrswizard');
+    $output .= $localoutput->box(get_string('stepredirect', 'local_crswizard'), 'titlecrswizard');
+
+    $output .= $localoutput->notification($message, 'redirectmessage');
+    $output .= '<div class="continuebutton">(<a href="'. $encodedurl .'">'. get_string('continue') .'</a>)</div>';
+    if ($debugdisableredirect) {
+        $output .= '<p><strong>Error output, so disabling automatic redirect.</strong></p>';
+    }
+    $output .= $localoutput->footer();
+    echo $output;
+    exit;
+}
+
+/**
  * Reconstruit le tableau de chemins (période/é/c/niveau) pour le plugin jquery select-into-subselects.js
  * @return array
  * */
