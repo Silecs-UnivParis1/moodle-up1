@@ -23,6 +23,7 @@ class course_tree {
     public $pseudopath;
     public $parentcatid;
     public $parentcat;
+    public $component; // component ('01' to ... ; or NULL if level=1,2)
 
     const DEPTH_ROF_BEGIN = 4;
 
@@ -72,6 +73,11 @@ class course_tree {
             $this->pseudopath = array('0');
         }
         $this->parentcat = $DB->get_record('course_categories', array('id' => $this->parentcatid));
+        if ($this->parentcat && $this->parentcat->depth >= 3) {
+            $this->component = courselist_cattools::get_component_from_category($this->parentcatid);
+        } else {
+            $this->component = null;
+        }
     }
 
     /**
@@ -89,9 +95,10 @@ class course_tree {
                 $result = $this->get_entries_from_categories($categories);
                 break;
             case self::LEVEL_CATEGORY_AND_ROF:
-                // CASE 2 node=category and children = ROF entries or courses
+                // CASE 2 node=category ($this->parentcatid)
+                // and children = ROF entries (component 01 to ...) or courses (if no ROF rattachment)
                 $courses = courselist_cattools::get_descendant_courses($this->parentcatid);
-                list($rofcourses, $catcourses) = courselist_roftools::split_courses_from_rof($courses);
+                list($rofcourses, $catcourses) = courselist_roftools::split_courses_from_rof($courses, $this->component);
                 foreach ($catcourses as $crsid) {
                     $result[] = $this->get_entry_from_course($crsid, 1 + self::DEPTH_ROF_BEGIN);
                 }
