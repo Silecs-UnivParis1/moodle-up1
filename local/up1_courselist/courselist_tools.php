@@ -371,22 +371,42 @@ class courselist_roftools {
     /**
      * split courses as 2 arrays : the ones with a ROF rattachement (rofcourses), and the ones without (catcourses)
      * @param array $courses array of course objects (from DB)
+     * @param string $component '01' to ... '99'
      * @return array array($rofcourses, $catcourses)
      */
-    public static function split_courses_from_rof($courses) {
+    public static function split_courses_from_rof($courses, $component) {
         $rofcourses = array();
         $catcourses = array();
         foreach ($courses as $crsid) {
-            $rofpathid = up1_meta_get_text($crsid, 'rofpathid', false);
-            if ($rofpathid) {
-                $rofpath = explode(';', $rofpathid);
-                $rofcourses[$crsid] = $rofpath[0]; // main rofpath only //** @todo CHECK THIS
+            $rofpathids = up1_meta_get_text($crsid, 'rofpathid', false);
+            if ($rofpathids) {
+                $arrofpathids = explode(';', $rofpathids);
+                foreach ($arrofpathids as $rofpathid) {
+                    if (courselist_roftools::rofpath_match_component($rofpathid, $component)) {
+                        $rofcourses[$crsid] = $rofpathid;
+                        break; // exit foreach
+                    }
+                }
             } else {
                 $catcourses[$crsid] = $crsid;
             }
         }
         return array($rofcourses, $catcourses);
     }
+    
+    /**
+     * return true if $component is the first item of the path
+     * @param string $rofpath ex. '/02/UP1-PROG1234'
+     * @param string $component ex . '02', between 01 and 99
+     */
+    public static function rofpath_match_component($rofpath, $component) {
+        $pattern = '|^/' . $component . '/|';
+        if ( preg_match($pattern, $rofpath) === 1 ) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * sort courses by annee / semestre / fullname
