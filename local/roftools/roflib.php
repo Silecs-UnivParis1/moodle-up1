@@ -101,15 +101,21 @@ function rof_combined_name($localname, $refname) {
  * returns link to view rofid
  * @param string $rofid
  * @param string $support link support, or false (in which case the support will be the rofid)
+ * @param string $title the title (tooltip) on the link, optional
  * @return string url
  */
-function rof_rofid_link($rofid, $support=false) {
+function rof_rofid_link($rofid, $support=false, $title='') {
     $url = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
-    if ($support) {
-        return html_writer::link($url, $support);
-    } else {
-        return html_writer::link($url, $rofid);
+    $attributes = null;
+    if ($title) {
+        $attributes = array('title' => $title);
     }
+    if ($support) {
+        $link = html_writer::link($url, $support, $attributes);
+    } else {
+        $link = html_writer::link($url, $rofid, $attributes);
+    }
+    return $link;
 }
 
 /**

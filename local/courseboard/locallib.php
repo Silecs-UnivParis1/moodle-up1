@@ -56,7 +56,12 @@ function print_table_course_vs_rof($crsid, $rofdata) {
                 );
             }
             foreach ($rofdata as $ind => $rofcolumn) { // columns 2+
-                $row->cells[2 + $ind] = (isset($rofcolumn[$category][$shortname]) ? $rofcolumn[$category][$shortname] : '(NA)');
+                $cell = (isset($rofcolumn[$category][$shortname]) ? $rofcolumn[$category][$shortname] : '(NA)');
+                if ($shortname == 'up1rofpathid') {
+                    $rofpathid = array_filter(explode('/', $cell));
+                    $cell = rof_format_path(rof_get_combined_path($rofpathid), 'rofid', true, '/');
+                }
+                $row->cells[2 + $ind] = $cell;
             }
             $table->data[] = $row;
         }
@@ -64,6 +69,7 @@ function print_table_course_vs_rof($crsid, $rofdata) {
         echo html_writer::table($table);
     } // categories
 }
+
 
 /**
  *

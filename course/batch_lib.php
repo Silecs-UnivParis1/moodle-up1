@@ -219,7 +219,7 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
     foreach($rs as $course) {
         context_instance_preload($course);
         $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
-        if (!$criteria->visible || $course->visible) { // ignore: has_capability('moodle/course:viewhiddencourses', $coursecontext)
+        if (empty($criteria->visible) || $course->visible) { // ignore: has_capability('moodle/course:viewhiddencourses', $coursecontext)
             // Don't exit this loop till the end
             // we need to count all the visible courses
             // to update $totalcount

@@ -54,6 +54,12 @@ echo "<h2>" . $course->fullname . "</h2>\n";
 
 echo '<div id="synopsis-bigbutton">' . "\n";
 html_button_join($course);
+if ( has_capability('local/crswizard:supervalidator', context_system::instance()) )
+{
+    $urlboard = new moodle_url('/local/courseboard/view.php', array('id' => $course->id));
+    $icon = $OUTPUT->action_icon($urlboard, new pix_icon('i/settings', 'Afficher le tableau de bord'));
+    echo $icon;
+}
 echo '</div>' . "\n";
 
 // Description

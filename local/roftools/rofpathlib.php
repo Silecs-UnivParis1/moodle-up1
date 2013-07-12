@@ -128,7 +128,7 @@ function rof_format_path($pathArray, $format='rofid', $roflink=false, $separator
     $formats = array('rofid', 'name', 'combined', 'ul');
     $ret = '';
     foreach ($pathArray as $rofid => $name) {
-        $linkrofid = ($roflink ? rof_rofid_link($rofid) : $rofid);
+        $linkrofid = ($roflink ? rof_rofid_link($rofid, false, $name) : $rofid);
         switch($format) {
             case 'rofid':
                 $ret .= $separator . $linkrofid;
