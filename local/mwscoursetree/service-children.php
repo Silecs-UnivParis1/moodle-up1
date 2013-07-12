@@ -4,7 +4,7 @@ define('NO_OUTPUT_BUFFERING', true);
 require('../../config.php');
 require_once(__DIR__ . '/lib.php');
 
-$node = optional_param('node', '/0', PARAM_RAW);
+$node = optional_param('node', '/cat0', PARAM_RAW);
 
 $tree  = course_tree::from_node($node);
 
