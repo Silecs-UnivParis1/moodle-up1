@@ -129,7 +129,10 @@ EOL;
         }
 
         $this->role = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $this->courseboard = has_capability('local/crswizard:supervalidator', context_system::instance());
+        // disabled for complete compatibility with filter cache, which cannot depend upon user
+        // $this->courseboard = has_capability('local/crswizard:supervalidator', context_system::instance());
+        $this->courseboard = false;
+        /** @todo disabled only if displayed via a filter */
     }
 
     /**
