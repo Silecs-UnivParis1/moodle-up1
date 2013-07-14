@@ -48,7 +48,7 @@ class filter_courseup1 extends moodle_text_filter {
                     }
                     break;
                 default:
-                    $replace = '[course' . $format . ' INCONNU]';
+                    $replace = '[course ' . $format . ' INCONNU]';
             }
             $text = str_replace($matches[0], $replace, $text);
         }
