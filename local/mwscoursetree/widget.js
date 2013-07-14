@@ -68,9 +68,7 @@
         linkTag.setAttribute("href", rootUrl + 'assets/jqtree.css');
         (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(linkTag);
 
-        (function () {
-            var $ = this.jQuery;
-
+        jQuery(function () {
             var teachersWidth = 0;
             var iconsWidth = 0;
             $('.coursetree').each(function(){
@@ -113,7 +111,7 @@
                     $(this).width(w);
                 });
             });
-        })(window);
+        })();
     }
 
 })();
