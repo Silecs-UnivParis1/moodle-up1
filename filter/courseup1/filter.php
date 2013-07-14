@@ -18,10 +18,10 @@ class filter_courseup1 extends moodle_text_filter {
     public function filter($text, array $options = array()) {
         while ( preg_match('#\[course(tree|list|table|search)\s*(\S?[^\]]*?)\]#', $text, $matches) ) {
             list ($replace, $format, $paramstr) = $matches;
-            $params = self::parse_parameters($paramstr);
 
             switch ($format) {
                 case 'tree':
+                    $params = self::parse_parameters($paramstr, false);
                     if (empty($params['node'])) {
                         $replace = "<p>Erreur [course$format] : le paramètre requis 'node' n'est pas présent.</p>";
                     } else if (courselist_common::get_courses_from_pseudopath($params['node'])) {
@@ -37,6 +37,7 @@ class filter_courseup1 extends moodle_text_filter {
                     break;
                 case 'table':
                 case 'list':
+                    $params = self::parse_parameters($paramstr, true);
                     $jsurl = new moodle_url('/local/jquery/init.dataTables.js');
                     $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>';
                     /** @todo Simplify by using only one function in every case? */
@@ -46,6 +47,18 @@ class filter_courseup1 extends moodle_text_filter {
                     } else {
                         $replace = widget_courselist_query($format, (object) $params, false) . $jsscript;
                     }
+                    break;
+                case 'search':
+                    $params = self::parse_parameters($paramstr, false);
+                    $rand = random_string(10);
+                    $json = self::encodeParameters($params);
+                    $jsurl = new moodle_url('/local/widget_coursesearch/coursesearch.js');
+                    $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>'
+                            .'<script type="text/javascript">'
+                            . "YUI().use('node', function(Y) { window.jQuery('#coursesearch-$rand').coursesearch($json); });"
+                            . '</script>';
+                    $init = "<div id=\"coursesearch-$rand\" class=\"widget-coursesearch\"></div>";
+                    $replace = $init . $jsscript;
                     break;
                 default:
                     $replace = '[course ' . $format . ' INCONNU]';
@@ -59,13 +72,15 @@ class filter_courseup1 extends moodle_text_filter {
      * Parses a string containing attributes like « k=v id="hop"  k2='v2'»
      *
      * @param string $str
+     * @param bool   $inject_fields Insert up1* fields into profile_fields_*
      * @return array assoc array of parameters
      */
-    protected static function parse_parameters($str) {
+    protected static function parse_parameters($str, $inject_fields) {
         $params = array();
         $coursefields = array();
+        $str = trim($str);
         while ($str) {
-            $str .= " ";
+            $str = trim($str) . " ";
             $all = '';
             if (preg_match('/^\s*(\S+?)=([\'"])(.+?)\\1\s/', $str, $m)) {
                 list ($all, $key, , $value) = $m;
@@ -74,8 +89,11 @@ class filter_courseup1 extends moodle_text_filter {
             }
             if ($all) {
                 if (strncmp($key, 'up1', 3) === 0) {
-                    $coursefields[$key] = $value;
-                    $params['profile_field_' . $key] = $value;
+                    if ($inject_fields) {
+                        $params['profile_field_' . $key] = $value;
+                    } else {
+                        $coursefields[$key] = $value;
+                    }
                 } else {
                     $params[$key] = $value;
                 }
@@ -88,9 +106,14 @@ class filter_courseup1 extends moodle_text_filter {
             }
         }
         if ($coursefields) {
-            $params['custom'] = $coursefields;
+            $params['fields'] = $coursefields;
         }
         return $params;
     }
 
+    protected static function encodeParameters($params) {
+        if (isset($params['custom'])) {
+
+        }
+    }
 }
