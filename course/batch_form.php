@@ -17,8 +17,6 @@ class course_batch_search_form extends moodleform {
 
         $mform    = $this->_form;
 
-        $systemcontext   = get_context_instance(CONTEXT_SYSTEM);
-
         if (!empty($this->_customdata['fieldset'])) {
             $mform->addElement('header', 'main_settings', format_string($this->_customdata['fieldset']));
         }
