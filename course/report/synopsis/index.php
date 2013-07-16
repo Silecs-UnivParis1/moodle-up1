@@ -45,12 +45,16 @@ $PAGE->requires->css(new moodle_url('/course/report/synopsis/styles.css'));
 
 $site = get_site();
 $strreport = get_string('pluginname', 'coursereport_synopsis');
+$pagename = up1_meta_get_text($course->id, 'up1nomnorme', false);
+if ( ! $pagename ) {
+    $pagename = $course->fullname;
+}
 $PAGE->set_context($context);
-$PAGE->set_title($course->shortname .': '. $strreport);
+$PAGE->set_title($pagename); // $course->shortname .': '. $strreport); // tab title
 $PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
 
-echo "<h2>" . $course->fullname . "</h2>\n";
+echo "<h2>" . $pagename . "</h2>\n";
 
 echo '<div id="synopsis-bigbutton">' . "\n";
 html_button_join($course);
