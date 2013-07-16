@@ -232,8 +232,10 @@ EOL;
         $dispteachers = array_slice($teachers, 0, $number);
         $headteachers = join(', ', array_map('fullname', $dispteachers)) . (count($teachers) > $number ? ', …' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
-        $fullteachers = '<' . $this->cellelem . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
+        $fullteachers = '<' . $this->cellelem . ' class="' . $class . '">'
+                . '<span style="cursor: default;" title="' . $titleteachers . '">'
                 . $headteachers
+                . '</span>'
                 . '</' . $this->cellelem . '>';
         return $fullteachers;
     }

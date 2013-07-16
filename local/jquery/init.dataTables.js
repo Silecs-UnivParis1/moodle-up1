@@ -107,6 +107,9 @@ initDataTables = false;
                     }
                 }
             };
+            $.fn.dataTableExt.ofnSearch['html'] = function(sData) { // insert the title's content
+                return sData.replace(/[\r\n]/g," ").replace(/title="(.*?)".*?>/, '>$1 ').replace(/<.*?>/g, "");
+            };
             $('table.sortable:not(.dataTable)').each(function(){
                 var t = $(this);
                 var config = $.extend(true, defaultConfig, t.data('tableconfig'));
