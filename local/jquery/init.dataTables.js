@@ -76,8 +76,7 @@ initDataTables = false;
 
         (function () {
             var $ = this.jQuery;
-
-            $('table.sortable:not(.dataTable)').dataTable({
+            var defaultConfig = {
                 "bFilter": false,
                 "iDisplayLength": 100,
                 "bPaginate": false,
@@ -107,6 +106,11 @@ initDataTables = false;
                         "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
                     }
                 }
+            };
+            $('table.sortable:not(.dataTable)').each(function(){
+                var t = $(this);
+                var config = $.extend(true, defaultConfig, t.data('tableconfig'));
+                t.dataTable(config);
             });
         })(window);
     }

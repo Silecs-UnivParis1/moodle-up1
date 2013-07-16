@@ -23,6 +23,13 @@ function widget_courselist_query($format, $criteria, $visible=true) {
         }
         $totalcount = 0;
 
+        if ($format === 'table' && !empty($criteria->tableconfig)) {
+            $tableconfig = 'data-tableconfig="' . htmlspecialchars($criteria->tableconfig) . '"';
+            unset($criteria->tableconfig);
+        } else {
+            $tableconfig = '';
+        }
+
         // 'search', 'startdateafter', 'startdatebefore', 'createdafter', 'createdbefore',
         // 'topcategory', 'node', 'enrolled', 'enrolledroles'
         if (empty($criteria->search)) {
@@ -39,7 +46,7 @@ function widget_courselist_query($format, $criteria, $visible=true) {
         return '';
     } else {
         $courseformatter = new courselist_format($format);
-        $html = $courseformatter->get_header();
+        $html = $courseformatter->get_header($tableconfig);
         foreach ($courses as $course) {
             $html .= $courseformatter->format_course($course, true) . "\n";
         }
