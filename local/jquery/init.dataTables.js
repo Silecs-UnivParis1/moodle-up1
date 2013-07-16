@@ -78,6 +78,13 @@ initDataTables = false;
             var $ = this.jQuery;
 
             $('table.sortable:not(.dataTable)').dataTable({
+                "bFilter": false,
+                "iDisplayLength": 100,
+                "bPaginate": false,
+                "aaSorting": [], // no initial sorting
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 5 ] }
+                ],
                 "oLanguage": {
                     "sProcessing":     "Traitement en cours...",
                     "sSearch":         "Rechercher&nbsp;:",
