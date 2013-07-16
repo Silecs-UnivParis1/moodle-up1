@@ -29,6 +29,7 @@ require_once($CFG->dirroot.'/course/report/synopsis/locallib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
 global $DB, $PAGE, $OUTPUT;
+ /* @var $PAGE moodle_page */
 
 $id = required_param('id', PARAM_INT);       // course id
 $layout = optional_param('layout', 'report', PARAM_ALPHA); // default layout=report
@@ -36,8 +37,8 @@ if ($layout != 'popup') {
     $layout = 'report';
 }
 
-$course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$PAGE->set_course($course);
 
 $PAGE->set_url('/course/report/synopsis/index.php', array('id'=>$id));
 $PAGE->set_pagelayout($layout);
@@ -49,7 +50,7 @@ $pagename = up1_meta_get_text($course->id, 'up1nomnorme', false);
 if ( ! $pagename ) {
     $pagename = $course->fullname;
 }
-$PAGE->set_context($context);
+
 $PAGE->set_title($pagename); // $course->shortname .': '. $strreport); // tab title
 $PAGE->set_heading($site->fullname);
 echo $OUTPUT->header();
