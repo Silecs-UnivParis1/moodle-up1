@@ -14,7 +14,7 @@ initDataTables = false;
         ieWait--;
         loadJs(rootUrl + "../jquery/jquery.dataTables.min.js", true);
     } else {
-        onLoad();
+        onLoadFinished();
     }
 
     function findScriptUrl(name) {
@@ -39,13 +39,13 @@ initDataTables = false;
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
             } else {
                 ieWait = 0;
-                script_tag.onload = onLoad;
+                script_tag.onload = onLoadFinished;
             }
         } else {
             if (script_tag.readyState) { // IE < 9, bug on async script loading
@@ -54,7 +54,7 @@ initDataTables = false;
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
@@ -62,7 +62,7 @@ initDataTables = false;
         }
     }
 
-    function onLoad() {
+    function onLoadFinished() {
         if (initDataTables) {
             return;
         }
@@ -76,8 +76,14 @@ initDataTables = false;
 
         (function () {
             var $ = this.jQuery;
-
-            $('table.sortable:not(.dataTable)').dataTable({
+            var defaultConfig = {
+                "bFilter": false,
+                "iDisplayLength": 100,
+                "bPaginate": false,
+                "aaSorting": [], // no initial sorting
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 5 ] }
+                ],
                 "oLanguage": {
                     "sProcessing":     "Traitement en cours...",
                     "sSearch":         "Rechercher&nbsp;:",
@@ -100,6 +106,14 @@ initDataTables = false;
                         "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
                     }
                 }
+            };
+            $.fn.dataTableExt.ofnSearch['html'] = function(sData) { // insert the title's content
+                return sData.replace(/[\r\n]/g," ").replace(/title="(.*?)".*?>/, '>$1 ').replace(/<.*?>/g, "");
+            };
+            $('table.sortable:not(.dataTable)').each(function(){
+                var t = $(this);
+                var config = $.extend(true, defaultConfig, t.data('tableconfig'));
+                t.dataTable(config);
             });
         })(window);
     }

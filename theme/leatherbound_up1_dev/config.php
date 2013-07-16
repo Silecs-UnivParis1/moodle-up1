@@ -27,6 +27,7 @@ $THEME->name = 'leatherbound_up1_dev';
 $THEME->parents = array(
     'canvas',
     'base',
+    'leatherbound_up1'
 );
 
 /////////////////////////////////////////////////////

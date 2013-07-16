@@ -76,13 +76,15 @@ class filter_courseup1 extends moodle_text_filter {
      * @return array assoc array of parameters
      */
     protected static function parse_parameters($str, $inject_fields) {
+        $toJs = array('true' => true, 'false' => false);
         $params = array();
         $coursefields = array();
+        $table = array();
         $str = trim($str);
         while ($str) {
             $str = trim($str) . " ";
             $all = '';
-            if (preg_match('/^\s*(\S+?)=([\'"])(.+?)\\1\s/', $str, $m)) {
+            if (preg_match('/^\s*(\S+?)=([\'"])(.+?)\\2\s/', $str, $m)) {
                 list ($all, $key, , $value) = $m;
             } else if (preg_match('/^\s*(\S+?)=([^\'"]\S*)\s/', $str, $m)) {
                 list ($all, $key, $value) = $m;
@@ -94,6 +96,11 @@ class filter_courseup1 extends moodle_text_filter {
                     } else {
                         $coursefields[$key] = $value;
                     }
+                } else if (strncmp($key, 'table-', 6) === 0) {
+                    if (isset($toJs[$value])) {
+                        $value = $toJs[$value];
+                    }
+                    $table[substr($key, 6)] = $value;
                 } else {
                     $params[$key] = $value;
                 }
@@ -107,6 +114,9 @@ class filter_courseup1 extends moodle_text_filter {
         }
         if ($coursefields) {
             $params['fields'] = $coursefields;
+        }
+        if ($table) {
+            $params['tableconfig'] = json_encode($table);
         }
         return $params;
     }

@@ -102,7 +102,7 @@ class courselist_format {
                 $this->cellelem = 'td';
                 $this->sep = '';
                 $this->header = <<<EOL
-<table class="generaltable sortable" style="width: 100%;">
+<table class="generaltable sortable" style="width: 100%;" %%DATA%%>
 <thead>
     <tr>
         <th>Code</th>
@@ -188,8 +188,14 @@ EOL;
         }
     }
 
-    public function get_header() {
-        return $this->header;
+    /**
+     * Returns the header appropriate to the format.
+     *
+     * @param string $data (opt) attributes to insert into the table header
+     * @return string HTML header
+     */
+    public function get_header($data = '') {
+        return str_replace('%%DATA%%', $data, $this->header);
     }
 
     public function get_footer() {
@@ -226,8 +232,10 @@ EOL;
         $dispteachers = array_slice($teachers, 0, $number);
         $headteachers = join(', ', array_map('fullname', $dispteachers)) . (count($teachers) > $number ? ', …' : '');
         $titleteachers = join(', ', array_map('fullname', $teachers));
-        $fullteachers = '<' . $this->cellelem . ' class="' . $class . '" style="cursor: default;" title="' . $titleteachers . '">'
+        $fullteachers = '<' . $this->cellelem . ' class="' . $class . '">'
+                . '<span style="cursor: default;" title="' . $titleteachers . '">'
                 . $headteachers
+                . '</span>'
                 . '</' . $this->cellelem . '>';
         return $fullteachers;
     }
