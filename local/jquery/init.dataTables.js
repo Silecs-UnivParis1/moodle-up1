@@ -14,7 +14,7 @@ initDataTables = false;
         ieWait--;
         loadJs(rootUrl + "../jquery/jquery.dataTables.min.js", true);
     } else {
-        onLoad();
+        onLoadFinished();
     }
 
     function findScriptUrl(name) {
@@ -39,13 +39,13 @@ initDataTables = false;
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
             } else {
                 ieWait = 0;
-                script_tag.onload = onLoad;
+                script_tag.onload = onLoadFinished;
             }
         } else {
             if (script_tag.readyState) { // IE < 9, bug on async script loading
@@ -54,7 +54,7 @@ initDataTables = false;
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
@@ -62,7 +62,7 @@ initDataTables = false;
         }
     }
 
-    function onLoad() {
+    function onLoadFinished() {
         if (initDataTables) {
             return;
         }

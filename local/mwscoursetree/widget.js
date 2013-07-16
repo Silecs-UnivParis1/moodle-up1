@@ -13,7 +13,7 @@
         ieWait--;
         loadJs(rootUrl + "assets/tree.jquery.js", true);
     } else {
-        onLoad();
+        onLoadFinished();
     }
 
     function findScriptUrl(name) {
@@ -38,13 +38,13 @@
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
             } else {
                 ieWait = 0;
-                script_tag.onload = onLoad;
+                script_tag.onload = onLoadFinished;
             }
         } else {
             if (script_tag.readyState) { // IE < 9, bug on async script loading
@@ -53,7 +53,7 @@
                         script_tag.onreadystatechange = null; // bug IE8
                         ieWait--;
                         if (ieWait === 0) {
-                            onLoad();
+                            onLoadFinished();
                         }
                     }
                 };
@@ -61,7 +61,7 @@
         }
     }
 
-    function onLoad() {
+    function onLoadFinished() {
         var linkTag = document.createElement('link');
         linkTag.setAttribute("type","text/css");
         linkTag.setAttribute("rel","stylesheet");
@@ -111,7 +111,7 @@
                     $(this).width(w);
                 });
             });
-        })();
+        });
     }
 
 })();
