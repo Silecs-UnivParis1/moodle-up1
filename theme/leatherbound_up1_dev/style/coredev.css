@@ -1,0 +1,21 @@
+/********************************************************
+**
+** Theme name: Leatherbound UP1 - DEV (red-ified)
+** Description: A GPL theme derived from Leatherbound by Patrick Malley
+** Author: Universit� Paris 1 (UP1), France
+**
+*********************************************************/
+
+
+/* Header
+-----------------------*/
+
+#page-header {
+	background-color: #f4cecd;
+}
+
+
+.block .header {
+    	background: #f4cecd;
+}
+
