@@ -25,6 +25,12 @@ echo $OUTPUT->doctype() ?>
 <head>
     <title><?php echo $PAGE->title ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
+    <?php
+    $metaauthor = meta_author_teachers();
+    if ($metaauthor) {
+        echo $metaauthor;
+    }
+    ?>
     <?php echo $OUTPUT->standard_head_html() ?>
 </head>
 
