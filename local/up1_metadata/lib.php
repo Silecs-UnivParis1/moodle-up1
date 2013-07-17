@@ -48,7 +48,7 @@ function up1_meta_html_multi($courseid, $field, $error=false, $prefix = '') {
     $items = array_filter(array_unique(explode(';', $text)));
 
     if (count($items) == 0) {
-        return '';
+        return '—';
     }
     if (count($items) == 1) {
         return '<span>' . $prefix . $items[0] . '</span>';
