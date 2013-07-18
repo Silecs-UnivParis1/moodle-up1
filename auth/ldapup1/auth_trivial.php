@@ -6,8 +6,8 @@
  * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * derived from official auth_ldap
- * this file contains all the trivial methods, simplified from the original auth.php
- * which are necessary to the Moodle auth_plugin interface
+ * this file contains all the trivial methods (ie which returns TRUE or FALSE),
+ * simplified from the original auth.php, which are necessary to the Moodle auth_plugin interface
  */
 
 
