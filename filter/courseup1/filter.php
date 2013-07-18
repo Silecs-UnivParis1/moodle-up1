@@ -51,7 +51,7 @@ class filter_courseup1 extends moodle_text_filter {
                 case 'search':
                     $params = self::parse_parameters($paramstr, false);
                     $rand = random_string(10);
-                    $json = self::encodeParameters($params);
+                    $json = json_encode($params);
                     $jsurl = new moodle_url('/local/widget_coursesearch/coursesearch.js');
                     $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>'
                             .'<script type="text/javascript">'
@@ -94,7 +94,7 @@ class filter_courseup1 extends moodle_text_filter {
                     if ($inject_fields) {
                         $params['profile_field_' . $key] = $value;
                     } else {
-                        $coursefields[$key] = $value;
+                        $coursefields[] = $key;
                     }
                 } else if (strncmp($key, 'table-', 6) === 0) {
                     if (isset($toJs[$value])) {
@@ -119,11 +119,5 @@ class filter_courseup1 extends moodle_text_filter {
             $params['tableconfig'] = json_encode($table);
         }
         return $params;
-    }
-
-    protected static function encodeParameters($params) {
-        if (isset($params['custom'])) {
-
-        }
     }
 }

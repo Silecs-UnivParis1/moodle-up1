@@ -3,6 +3,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+/* @var $DB moodle_database */
+
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir.'/custominfo/lib.php');
 
@@ -44,52 +46,36 @@ class course_batch_search_form extends moodleform {
         // Next the customisable fields
         $this->custominfo = new custominfo_form_extension('course');
         if (empty($this->_customdata['fields']) || $this->_customdata['fields'] === '*') {
-            $categories = $DB->get_records('custom_info_category', array('objectname' => 'course'), 'sortorder ASC');
+            $fields_by_cat = self::getFieldsFromCategories(array());
         } else {
-            list ($sqlin, $sqlparams) = $DB->get_in_or_equal(array_keys($this->_customdata['fields']));
-            if ($sqlin) {
-                $categories = $DB->get_records_select(
-                        'custom_info_category', "objectname = 'course' AND name " . $sqlin, $sqlparams, 'sortorder ASC'
-                );
+            if (isset($this->_customdata['fields'][0]) && strncmp($this->_customdata['fields'][0], 'up1', 3) === 0) {
+                $fields_by_cat = self::getFieldsFromNames($this->_customdata['fields']);
             } else {
-                $categories = array();
+                $fields_by_cat = self::getFieldsFromCategories($this->_customdata['fields']);
             }
-        }
-        if ($categories) {
-            foreach ($categories as $category) {
-                if (isset($this->_customdata['fields'][$category->name]) && $this->_customdata['fields'][$category->name] !== '*') {
-                    $fields = array();
-                    if (!empty($this->_customdata['fields'][$category->name])) {
-                        list ($sqlin, $sqlparams) = $DB->get_in_or_equal($this->_customdata['fields'][$category->name]);
-                        if ($sqlin) {
-                            $sqlparams[] = $category->id;
-                            $fields = $DB->get_records_select(
-                                    'custom_info_field', "shortname $sqlin AND categoryid = ?", $sqlparams, 'sortorder ASC'
-                            );
-                        }
+       }
+
+        if ($fields_by_cat) {
+            foreach ($fields_by_cat as $catid => $fields) {
+                $catname = $fields['name'];
+                unset($fields['name']);
+                // display the header and the fields
+                $mform->addElement('header', 'category_'.$catid, format_string($catname));
+                foreach ($fields as $field) {
+                    // do not display the normal field when a search criteria is expected
+                    if (in_array($field->datatype, array('datetime', 'textarea'))) {
+                        $field->param1 = '';
+                        $field->param2 = '';
+                        $field->param3 = '';
+                        $field->datatype = 'text';
                     }
-                } else {
-                    $fields = $DB->get_records('custom_info_field', array('categoryid' => $category->id), 'sortorder ASC');
-                }
-                if ($fields) {
-                    // display the header and the fields
-                    $mform->addElement('header', 'category_'.$category->id, format_string($category->name));
-                    foreach ($fields as $field) {
-                        // do not display the normal field when a search criteria is expected
-                        if (in_array($field->datatype, array('datetime', 'textarea'))) {
-                            $field->param1 = '';
-                            $field->param2 = '';
-                            $field->param3 = '';
-                            $field->datatype = 'text';
-                        }
-                        //var_dump($field); die();
-                        // add the custom field
-                        $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
-                        $formfield->load_data($field);
-                        $formfield->options[''] = '';
-                        $formfield->edit_field($mform);
-                        $mform->setDefault($formfield->inputname, '');
-                    }
+                    //var_dump($field); die();
+                    // add the custom field
+                    $formfield = custominfo_field_factory('course', $field->datatype, $field->id);
+                    $formfield->load_data($field);
+                    $formfield->options[''] = '';
+                    $formfield->edit_field($mform);
+                    $mform->setDefault($formfield->inputname, '');
                 }
             }
         }
@@ -102,6 +88,50 @@ class course_batch_search_form extends moodleform {
             $mform->addElement('hidden', 'fieldsjson');
             $mform->setDefault('fieldsjson', json_encode($this->_customdata['fields']));
         }
+    }
+
+    private static function getFieldsFromCategories($cats) {
+        global $DB;
+        $cond = array();
+        $params = array();
+        foreach ($cats as $catname => $fieldnames) {
+            if (empty($fieldnames) || $fieldnames === '*') {
+                $cond[] = 'c.name = ?';
+                $params[] = $catname;
+            } else {
+                list ($sqlin, $sqlparams) = $DB->get_in_or_equal($fieldnames);
+                $cond[] = "f.shortname " . $sqlin;
+                $params = array_merge($params, $sqlparams);
+            }
+        }
+        return self::getFieldsFrom(join(' OR ', $cond), $params);
+    }
+
+    private static function getFieldsFromNames($fieldnames) {
+        global $DB;
+        list ($sqlin, $sqlparams) = $DB->get_in_or_equal($fieldnames);
+        return self::getFieldsFrom("f.shortname " . $sqlin, $sqlparams);
+    }
+
+    private static function getFieldsFrom($cond, $params) {
+        global $DB;
+        $sql = "SELECT f.*, c.name AS catname "
+                . "FROM {custom_info_field} f "
+                . "JOIN {custom_info_category} c on f.categoryid = c.id "
+                . "WHERE f.objectname = 'course' " . ($cond ? "AND ($cond) " : "")
+                . "ORDER BY c.sortorder, f.sortorder";
+        $fields = $DB->get_records_sql($sql, $params);
+        $by_categoryId = array();
+        foreach ($fields as $f) {
+            if (isset($by_categoryId[$f->categoryid])) {
+                $by_categoryId[$f->categoryid][] = $f;
+            } else {
+                $catname = $f->catname;
+                unset($f->catname);
+                $by_categoryId[$f->categoryid] = array('name' => $catname, $f);
+            }
+        }
+        return $by_categoryId;
     }
 
     /// perform some extra moodle validation
