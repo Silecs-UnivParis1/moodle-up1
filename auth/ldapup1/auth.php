@@ -339,7 +339,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         if ($do_updates and !empty($updatekeys)) { // run updates only if relevant
             $users = $DB->get_records_sql('SELECT u.username, u.id
                                              FROM {user} u
-                                             JOIN {tmp_extuser} te ON (u.username = te.username AND u.mnethostid = e.mnethostid)
+                                             JOIN {tmp_extuser} te ON (u.username = te.username AND u.mnethostid = te.mnethostid)
                                             WHERE u.deleted = 0 AND u.auth = ? ',
                                           array('shibboleth'));
             if (!empty($users)) {
