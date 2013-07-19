@@ -41,7 +41,7 @@ function widget_courselist_query($format, $criteria, $visible=true) {
 
     if (empty($courses)) {
         if ($criteria) {
-            return "<p>Aucun espace de cours ne correspond aux critères de sélection indiqués.</p>";
+            return "<p>Aucun espace de cours n'est pour le moment référencé avec les critères indiqués.</p>";
         }
         return '';
     } else {

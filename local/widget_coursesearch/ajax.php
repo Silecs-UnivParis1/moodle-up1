@@ -74,7 +74,7 @@ if ($data) {
 
 if (empty($courses)) {
     if (is_array($courses)) {
-        echo "Aucun espace de cours ne correspond aux critères de sélection indiqués.";
+        echo "Aucun espace de cours n'est pour le moment référencé avec les critères indiqués.";
     }
 } else {
     $courseformatter = new courselist_format('table');
