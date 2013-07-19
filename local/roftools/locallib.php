@@ -299,7 +299,7 @@ EOL
     private static $tpl_contentmain = <<< EOL
 <h3>Espaces de cours de {niveaulmda}</h3>
 <p>
-    [courselist format={format} node={node}]
+    [course{format} node={node}]
 </p>
 <p></p>
 EOL;
