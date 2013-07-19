@@ -298,24 +298,20 @@ EOL
     );
     private static $tpl_contentmain = <<< EOL
 <h3>Espaces de cours de {niveaulmda}</h3>
-<p>
+<div>
     [course{format} node={node}]
-</p>
-<p></p>
+</div>
+<p style="clear:both"></p>
 EOL;
     private static $tpl_contentfoot = <<< EOL
-<p>
-    <span style="font-size: x-small;">
+<p style="font-size: x-small;">
         Les Espaces pédagogiques interactifs proposent des informations et des ressources pédagogiques en accompagnement des cours.
         Les enseignants les publient à l’intention des étudiants inscrits aux enseignements concernés pour guider leur travail personnel,
         approfondir certaines questions, préparer les travaux et devoirs ou encore réviser les examens.
-    </span>
 </p>
-<p>
-    <span style="font-size: x-small;">
+<p style="font-size: x-small;">
         Les documents, quelle que soit leur nature, publiés dans les Espaces pédagogiques interactifs de l'Université Paris 1 Panthéon-Sorbonne,
         sont protégés par le <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a> (Article L 111-1). Toute reproduction partielle ou totale sans autorisation écrite de l\'auteur est interdite, sauf celles prévues à l'article L 122-5 du <a title="Code de la propriété intellectuelle - Legifrance" href="http://www.legifrance.gouv.fr/affichCode.do?cidTexte=LEGITEXT000006069414">Code de la propriété intellectuelle</a>.
-    </span>
     <span style="font-size: small;">
         <a href="http://www.celog.fr/cpi/lv1_tt2.htm"><br /> </a>
     </span>
