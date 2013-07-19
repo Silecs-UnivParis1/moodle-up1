@@ -30,9 +30,9 @@ class filter_courseup1 extends moodle_text_filter {
                         $div = '<div class="coursetree" data-root="' . $params['node'] .'"></div>';
                         $replace = $div . $script;
                     } else {
-                        $replace = '<p><b>'
-                                . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.\n"
-                                . '</b></p>';
+                        $replace = '<p>'
+                                . get_string('nomatchingcourse', 'local_up1_courselist')
+                                . '</p>';
                     }
                     break;
                 case 'table':

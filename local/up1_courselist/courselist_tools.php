@@ -53,7 +53,7 @@ class courselist_common {
             }
             $res .= $courseformatter->get_footer() . "\n";
         } else { // no course
-            $res = "<p>Aucun espace de cours n'est pour le moment référencé avec les critères indiqués.</p>";
+            $res = "<p>" . get_string('nomatchingcourse', 'local_up1_courselist') . "</p>";
         }
         return $res;
     }
