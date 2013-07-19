@@ -7,6 +7,9 @@
     var ieWait = 3; // number of scripts, for IE < 9
 
     var initParams;
+        window.coursesearch = function (params) {
+            initParams = params;
+        };
 
     if (window.jQuery === undefined) {
         loadJs(rootUrl + "../jquery/jquery.js");
@@ -83,9 +86,6 @@
     }
 
     function onLoadFinished() {
-        jQuery.fn.coursesearch = function (params) {
-            initParams = params;
-        };
 
         jQuery(function () {
             $('.widget-coursesearch').each(function(){

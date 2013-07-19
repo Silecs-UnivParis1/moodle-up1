@@ -7,5 +7,4 @@
  */
 
 $string['pluginname'] = 'UP1 course list';
-
-
+$string['nomatchingcourse'] = "<i>No course with the selected criteria.</i>";

@@ -7,3 +7,4 @@
  */
 
 $string['pluginname'] = 'Liste des cours UP1';
+$string['nomatchingcourse'] = "<i>Aucun espace n'est pour le moment référencé avec les critères indiqués.</i>";

@@ -30,9 +30,9 @@ class filter_courseup1 extends moodle_text_filter {
                         $div = '<div class="coursetree" data-root="' . $params['node'] .'"></div>';
                         $replace = $div . $script;
                     } else {
-                        $replace = '<p><b>'
-                                . "Aucun espace n'est pour le moment référencé avec les critères de sélection indiqués.\n"
-                                . '</b></p>';
+                        $replace = '<p>'
+                                . get_string('nomatchingcourse', 'local_up1_courselist')
+                                . '</p>';
                     }
                     break;
                 case 'table':
@@ -55,7 +55,7 @@ class filter_courseup1 extends moodle_text_filter {
                     $jsurl = new moodle_url('/local/widget_coursesearch/coursesearch.js');
                     $jsscript = '<script type="text/javascript" src="' . $jsurl . '"></script>'
                             .'<script type="text/javascript">'
-                            . "YUI().use('node', function(Y) { window.jQuery('#coursesearch-$rand').coursesearch($json); });"
+                            . "window.coursesearch($json);"
                             . '</script>';
                     $init = "<div id=\"coursesearch-$rand\" class=\"widget-coursesearch\"></div>";
                     $replace = $init . $jsscript;
