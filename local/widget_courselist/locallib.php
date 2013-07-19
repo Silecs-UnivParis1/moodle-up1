@@ -41,7 +41,7 @@ function widget_courselist_query($format, $criteria, $visible=true) {
 
     if (empty($courses)) {
         if ($criteria) {
-            return "<p>Aucun espace de cours ne correspond aux critères de sélection indiqués.</p>";
+            return "<p>Aucun espace de cours n'est pour le moment référencé avec les critères indiqués.</p>";
         }
         return '';
     } else {
@@ -50,7 +50,7 @@ function widget_courselist_query($format, $criteria, $visible=true) {
         foreach ($courses as $course) {
             $html .= $courseformatter->format_course($course, true) . "\n";
         }
-        $html .= $courseformatter->get_footer() . '<div style="clear:both;"></div>' . "\n";
+        $html .= $courseformatter->get_footer() . "\n";
         return $html;
     }
 }
