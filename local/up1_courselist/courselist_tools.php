@@ -117,7 +117,8 @@ class courselist_format {
 </thead>
 <tbody>
 EOL;
-                $this->footer = '</tbody></table>';
+                $this->footer = '</tbody></table>
+<div class="clear: both;"></div>';
                 break;
             case 'list':
                 $this->cellelem = 'span';
