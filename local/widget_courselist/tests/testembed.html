@@ -1,0 +1,36 @@
+<head>
+<title>test widget</title>
+</head>
+
+<!-- doc src
+http://paris1-dev.silecs.info/wiki/doku.php/catalogue_des_cours:liste_des_cours?&#integration_javascript_hors_moodle
+-->
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+  <h2>Cours de la catégorie 1442 UFR02 Licences</h2>
+  <div id="widget-courselist-cat"></div>
+  <script src="https://moodle-test.univ-paris1.fr/local/widget_courselist/courselist.js" />
+    <script>
+      jQuery("#widget-courselist-cat").courselist({topcategory: 1442});
+  </script>
+  
+
+  <h2>Cours où BRoques est inscrit</h2>
+  <div id="widget-courselist-misc"></div>
+
+
+  <!--
+  <script>
+    jQuery("#widget-courselist-cat").courselist({
+      format: "table",
+      topcategory: 1442
+    });
+    jQuery("#widget-courselist-misc").courselist({
+      format: "list",
+      enrolled: "broques"
+    });
+  </script>
+  -->
+</body>
+</html>
