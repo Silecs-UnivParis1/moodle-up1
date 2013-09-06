@@ -25,8 +25,10 @@ echo $OUTPUT->doctype() ?>
 <head>
     <title><?php echo $PAGE->title ?></title>
     <link rel="shortcut icon" href="<?php echo $OUTPUT->pix_url('favicon', 'theme')?>" />
-    <?php echo $OUTPUT->standard_head_html() ?>
-    <script type="text/javascript" src="<?php echo new moodle_url('/local/jquery/jquery.js'); ?>"></script>
+    <?php
+    $PAGE->requires->js(new moodle_url('/local/widget_courselist/courselist.js'), true);
+    echo $OUTPUT->standard_head_html();
+    ?>
 </head>
 
 <body id="<?php p($PAGE->bodyid) ?>" class="<?php p($PAGE->bodyclasses.' '.join(' ', $bodyclasses)) ?>">
