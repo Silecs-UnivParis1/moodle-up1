@@ -154,7 +154,8 @@ function wizard_get_keys($courseid, $coursetimecreated) {
  */
 function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_step2') {
     global $SESSION;
-    $tabpath = explode(';', trim($up1rofpathid));
+    $up1rofpathid = trim($up1rofpathid);
+    $tabpath = explode(';', $up1rofpathid);
     foreach ($tabpath as $pos => $path) {
         $rofid = substr(strrchr($path, '/'), 1);
         $newpath = strtr($path, '/', '_');
@@ -165,7 +166,11 @@ function wizard_rof_connection($up1rofpathid, $case2=TRUE, $form_step = 'form_st
             if (substr($newpath, 0, 1) == '_') {
                  $idpath = substr($newpath, 1);
             }
-            $SESSION->wizard[$form_step]['item']['s'][$idpath] = $rofid;
+            if ($idpath == '') {
+                $SESSION->wizard[$form_step]['item'] = array();
+            } else {
+                $SESSION->wizard[$form_step]['item']['s'][$idpath] = $rofid;
+            }
             if ($case2 == FALSE && $rofid !== FALSE) {
                 $SESSION->wizard['init_course']['form_step3']['rattachement2'][] = $idpath;
             }
