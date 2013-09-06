@@ -5,7 +5,7 @@ require(dirname(dirname(dirname(__DIR__))).'/config.php'); // global moodle conf
 require(__DIR__ . '/../roflib.php');
 
 
-echo rof_typeDiplome_ordered_list() . "\n\n";
+// echo rof_typeDiplome_ordered_list() . "\n\n";
 /*
 echo rof_format_path(rof_get_course_first_path($argv[1]), 'combined') . "\n\n";
  *
@@ -65,7 +65,7 @@ echo "*****\n";
 print_r(rof_get_metadata($bug[2]));
 echo "*****\n";
 */
-print_r(rof_get_metadata_concat($bug));
+// print_r(rof_get_metadata_concat($bug));
 echo "*****\n";
 
 
@@ -77,5 +77,10 @@ echo "*****\n";
 //print_r(rof_get_metadata($path));
 //print_r(rof_get_metadata($cpath));
 //print_r(rof_get_metadata('UP1-C25379'));
+
+list($referencenb, $referencefirst) = rof_get_referenced_objects();
+print_r ($referencenb);
+print_r ($referencefirst);
+
 
 return 0;
