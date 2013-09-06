@@ -124,7 +124,8 @@ class course_wizard_step3_form extends moodleform {
                                 . get_string('labelE7ratt2', 'local_crswizard')
                                 . '</label></div></div>';
                             foreach ($rof2 as $chemin) {
-                                $htmlrof2 .= '<div class="felement fstatic">' . $racine . ' / ' . $chemin . '</div>';
+                                $htmlrof2 .= '<div class="felement fstatic">' . $racine
+                                    . ' / ' . $SESSION->wizard['form_step3']['all-rof'][$chemin]['chemin'] . '</div>';
                             }
                             $htmlrof2 .= '</div>';
                             $mform->addElement('html', $htmlrof2);

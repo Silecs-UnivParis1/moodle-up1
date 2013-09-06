@@ -493,6 +493,8 @@ function wizard_get_rof($form_step = 'form_step2') {
             $list[$rofpath]['nature'] = $nature;
             $list[$rofpath]['rofid'] = $rofid;
             $list[$rofpath]['path'] = $rofpath;
+            $tabrof = rof_get_combined_path(explode('_', $rofpath));
+            $list[$rofpath]['chemin'] = substr(rof_format_path($tabrof, 'name', false, ' / '), 3);
 
             $tabSource = '';
             if (substr($rofid, 0, 5) == 'UP1-P') {
