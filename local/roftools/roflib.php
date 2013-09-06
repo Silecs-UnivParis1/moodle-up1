@@ -252,7 +252,6 @@ function rof_insert_paths_statistics($verb=0) {
 
 
 /**
- * WARNING ONLY for 2012-2013 / UP1 /... categories
  * Prerequisite: standard categories have been created from ROF by local/rof_categories
  * @global type $DB
  * @param array $rofpath ROF path as usual ('02', 'UP1-PROG12345', 'UP1-PROG45678', 'UP1-C98765' ...)
