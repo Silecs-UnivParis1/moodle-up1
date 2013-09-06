@@ -489,7 +489,10 @@ $CFG->defaultblocks_override = 'course_opennow:search_forums,news_items,calendar
 // $CFG->debugusers = '2';
 //
 // Prevent theme caching
-// $CFG->themerev = -1; // NOT FOR PRODUCTION SERVERS!
+// $CFG->themedesignermode = true; // NOT FOR PRODUCTION SERVERS!
+//
+// Prevent JS caching
+// $CFG->cachejs = false; // NOT FOR PRODUCTION SERVERS!
 //
 // Prevent core_string_manager on-disk cache
 // $CFG->langstringcache = false; // NOT FOR PRODUCTION SERVERS!
