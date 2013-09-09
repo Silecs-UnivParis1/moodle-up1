@@ -54,6 +54,7 @@ function up1_course_metadata() {
             'approbateurpropid' => array('name' => 'Approbateur proposé Id', 'datatype' => 'text', 'locked' => 0,  'init' => null),
             'approbateureffid' => array('name' => 'Approbateur effectif Id', 'datatype' => 'text', 'locked' => 0,  'init' => null),
             'datevalid' => array('name' => 'Date validation', 'datatype' => 'datetime', 'locked' => 0,  'init' => null),
+            'commentairecreation' => array('name' => 'Commentaire creation', 'datatype' => 'text', 'locked' => 0,  'init' => null),
         ),
          'Cycle de vie - gestion' => array(
             'datefermeture' => array('name' => 'Date fermeture', 'datatype' => 'datetime', 'locked' => 0,  'init' => null),
@@ -96,7 +97,7 @@ function update_categoriesbisrof() {
             }
             $data = join(';', $categoriesbisrof);
             echo "up1categoriesbisrof = $data <br />\n";
-            $record = $DB->get_record('custom_info_data', 
+            $record = $DB->get_record('custom_info_data',
                     array('fieldid' => $catbisrofid, 'objectid' => $rofpathid->objectid, 'objectname' => 'course'));
             $record->data = $data;
             $DB->update_record('custom_info_data', $record);
