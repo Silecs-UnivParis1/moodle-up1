@@ -875,6 +875,8 @@ class core_wizard {
     public function create_course_to_validate() {
         // créer cours
         $mydata = $this->prepare_course_to_validate();
+        // ajout commentaire de creation
+        $mydata->profile_field_up1commentairecreation = strip_tags($this->formdata['form_step7']['remarques']);
         $course = create_course($mydata);
         add_to_log($course->id, 'crswizard', 'create', 'view.php?id='.$course->id, 'previous (ID '.$course->id.')');
         $this->course = $course;
