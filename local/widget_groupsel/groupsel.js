@@ -21,6 +21,7 @@
         minLength: 4,
         wsParams: { maxRows: 10 }, // default parameters for the web service (cf userMaxRows, groupMaxRows)
         moreRows: 50, // when requesting more results, larger than maxRows
+        maxTextWidth: 80, // shorten displayed names to this width (removing the center part)
         dataType: "jsonp",
         labelMaker: function(item) { return item.label; }, // will build the label from the selected item
         inputSelector: 'input.group-selector', // class of the input field where completion takes place
@@ -199,10 +200,10 @@
                         transformUserItems(data.users);
                         response($.merge(
                             $this.prepareList(groups, 'Groupes', function (item) {
-                                    return { label: groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre, category: item.category };
+                                    return { label: $this.groupItemToLabel(item), value: item.key, source: 'groups', pre: item.pre, category: item.category };
                             }, settings.wsParams.groupMaxRows),
                             $this.prepareList(data.users, 'Personnes', function (item) {
-                                    return { label: userItemToLabel(item), value: item.uid, source: 'users' };
+                                    return { label: $this.userItemToLabel(item), value: item.uid, source: 'users' };
                             }, settings.wsParams.userMaxRows)
                         ));
                     }
@@ -234,6 +235,43 @@
                 r.push({ label: "Toutes les réponses sont listées", source: "title" });
             }
             return r;
+        },
+
+        groupItemToLabel: function(item) {
+            var $this = this;
+            var $s = '';
+            if ('name' in item) {
+                if ($this.settings.maxTextWidth > 0 && item.name.length > $this.settings.maxTextWidth) {
+                    var subsize = Math.floor($this.settings.maxTextWidth / 2) - 1;
+                    $s = '<b>' + item.name.substr(0, subsize) + "…" + item.name.substr(item.name.length - subsize) + '</b>';
+                } else {
+                    $s = '<b>' + item.name + '</b>';
+                }
+            } else {
+                $s = '[' + item.key + ']';
+            }
+            var description = '';
+            if ('description' in item && item.name !== item.description) {
+                description = item.description;
+            }
+            if ('size' in item) {
+                description += ' (' + item.size + ' inscrits)';
+            }
+            if (description) {
+                $s += '<div class="autocompletegroup-descr">' + description + '</div>';
+            }
+            return $s;
+        },
+
+        userItemToLabel: function (item) {
+            var $s = item.displayName;
+            if ('duplicate' in item && item.duplicate) {
+                $s += ' (' + item.uid + ' )';
+            }
+            if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
+                $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
+            }
+            return $s;
         }
     }
 
@@ -285,37 +323,6 @@
             previousUserItemName = items[i].displayName;
         }
       }
-    }
-
-    function groupItemToLabel(item) {
-        var $s = '';
-        if ('name' in item) {
-            $s = '<b>' + item.name + '</b>';
-        } else {
-            $s = '[' + item.key + ']';
-        }
-        var description = '';
-        if ('description' in item && item.name !== item.description) {
-            description = item.description;
-        }
-        if ('size' in item) {
-            description += ' (' + item.size + ' inscrits)';
-        }
-        if (description) {
-            $s += '<div class="autocompletegroup-descr">' + description + '</div>';
-        }
-        return $s;
-    }
-
-    function userItemToLabel(item) {
-        var $s = item.displayName;
-        if ('duplicate' in item && item.duplicate) {
-            $s += ' (' + item.uid + ' )';
-        }
-        if ('supannEntiteAffectation' in item && item.supannEntiteAffectation.length) {
-            $s += ' [' + item.supannEntiteAffectation.join(', ') + ']';
-        }
-        return $s;
     }
 
     function buildSelectedBlock(item, inputName, labelMaker) {
