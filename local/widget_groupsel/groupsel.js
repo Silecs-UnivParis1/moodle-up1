@@ -8,7 +8,7 @@
     $("<link/>", {
         rel: "stylesheet",
         type: "text/css",
-        href: "http://code.jquery.com/ui/1.8.22/themes/base/jquery-ui.css"
+        href: "//code.jquery.com/ui/1.8.24/themes/base/jquery-ui.css"
     }).appendTo("head");
 
     // load the custom CSS
