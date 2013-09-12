@@ -24,16 +24,20 @@ class block_course_opennow extends block_base {
 			$open = $this->page->course->visible;
 			$this->content->text = '<div class="">' . get_string('startdate', 'block_course_opennow');
 			$this->content->text .= ' : '. $startDate;
+            $buttonname = get_string('opencourse', 'block_course_opennow');
+            $message = get_string('close', 'block_course_opennow');
 			if ($open) {
-				$this->content->text .= '<div>' . get_string('open', 'block_course_opennow') . '</div>';
-			} else {
-				$this->content->text .= '<form action="' . $CFG->wwwroot . '/blocks/course_opennow/open.php" method="post">'
-					. '<input type="hidden" value="'.$this->page->course->id.'" name="courseid" />'
-					. '<input type="hidden" value="'.sesskey().'" name="sesskey" />'
-					. '<button type="submit" name="datenow" value="open">'
-					. get_string('opencourse', 'block_course_opennow') . '</button>'
-					.'</form>';
+                $message = get_string('open', 'block_course_opennow');
+                $buttonname = get_string('closecourse', 'block_course_opennow');
 			}
+            $this->content->text .= '<div>' . $message . '</div>';
+            $this->content->text .= '<form action="' . $CFG->wwwroot . '/blocks/course_opennow/open.php" method="post">'
+                . '<input type="hidden" value="'.$this->page->course->id.'" name="courseid" />'
+                . '<input type="hidden" value="'.sesskey().'" name="sesskey" />'
+                . '<input type="hidden" value="'.$open.'" name="visible" />'
+                . '<button type="submit" name="datenow" value="open">'
+                . $buttonname . '</button>'
+                .'</form>';
 			$this->content->text .= '</div>';
 		}
         $this->content->footer = '';

@@ -8,7 +8,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['close'] = 'This course is close';
+$string['closecourse'] = 'Course close';
+$string['open'] = 'This course is open';
+$string['opencourse'] = 'Course open';
 $string['pluginname'] = 'course_opennow';
 $string['startdate'] = 'Course start';
-$string['opencourse'] = 'Couse open';
-$string['open'] = 'This course is open';
