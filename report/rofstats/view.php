@@ -3,6 +3,7 @@
 define('NO_OUTPUT_BUFFERING', true);
 require(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot.'/report/rofstats/locallib.php');
+require_once($CFG->dirroot.'/local/roftools/rofcourselib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
@@ -41,6 +42,7 @@ if ( ! $record ) {
     rof_view_record($rofid);
     if ($table == 'rof_program' || $table == 'rof_course') {
 
+        /******************/
         echo "<h3>Chemins</h3>\n";
         if (isset($path)) {
             echo "Chemin d'accès : <br />\n";
@@ -58,10 +60,22 @@ if ( ! $record ) {
         }
         echo '</ol>';
 
+        /******************/
         if ($table == 'rof_course') {
             echo "<h3>Métadonnées</h3>\n";
             echo rof_format_metadata(rof_get_metadata($rofid));
         }
+
+        /******************/
+        echo "<h3>Cours référençant cet objet</h3>";
+        $referencingcourses = rof_object_is_referenced_by($rofid);
+        echo "\n<ul>\n";
+        foreach ($referencingcourses as $crsid => $name) {
+            $url = new moodle_url('/course/view.php', array('id' => $crsid));
+            $link = html_writer::link($url, $name);
+            echo "<li>$link</li>\n";
+        }
+        echo "</ul>\n";
     }
 }
 

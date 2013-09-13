@@ -67,3 +67,22 @@ function rof_get_broken_references($referencedrof) {
     $brokenreffirst = array();
 
 }
+
+/**
+ * return the list of courses referencing a given ROF object
+ * @param type $rofid string ROFid
+ * @return array( $courseid => $name )
+ */
+function rof_object_is_referenced_by($rofid) {
+    global $DB;
+
+    $rpiid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1rofpathid', 'objectname' => 'course'), MUST_EXIST);
+    $sql = "SELECT c.id, c.fullname "
+         . "FROM {custom_info_data} cid "
+         . "JOIN {course} c ON (cid.objectid = c.id)"
+         . "WHERE objectname='course' AND fieldid = ? AND data LIKE '%" . $rofid . "%'" ;
+    $courses = $DB->get_records_sql_menu($sql, array($rpiid));
+    return $courses;
+}
+
+
