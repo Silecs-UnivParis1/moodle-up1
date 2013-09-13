@@ -78,9 +78,4 @@ echo "*****\n";
 //print_r(rof_get_metadata($cpath));
 //print_r(rof_get_metadata('UP1-C25379'));
 
-list($referencenb, $referencefirst) = rof_get_referenced_objects();
-print_r ($referencenb);
-print_r ($referencefirst);
-
-
 return 0;
