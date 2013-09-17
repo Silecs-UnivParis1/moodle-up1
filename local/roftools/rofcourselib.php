@@ -19,10 +19,31 @@ require_once(__DIR__ . '/locallib.php');
  * display a table with broken ROF references (courses referring a non-existing ROF object)
  */
 function rof_check_courses_references() {
-    $referencedrof = rof_get_referenced_objects();
-    $brokenrefs = rof_get_broken_references($referencedrof);
+    global $DB;
 
-    // table output
+    $referencedRof = rof_get_referenced_objects();
+    $brokenRefs = rof_get_broken_references($referencedRof);
+
+    if (count($brokenRefs[0]) > 0) { //there are broken references
+        $row = array();
+        foreach ($brokenRefs[0] as $rofid => $brokenNb) {
+            $crsid = $brokenRefs[1][$rofid];
+            $urlrof = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
+            // urlrof = dumb link, as the rof object is listed as non-existent
+            $urlcrs = new moodle_url('/course/view.php', array('id' => $crsid));
+            $coursename = $DB->get_field('course', 'fullname', array('id' => $crsid), 'MUST_EXIST');
+            $row[] = array(html_writer::link($urlrof, $rofid), $brokenNb, html_writer::link($urlcrs, $coursename));
+        }
+        // table output
+        $table = new html_table();
+        $table->head = array('ROFid', 'Nb. réfs', 'Premier cours');
+        $table->data = $row;
+        echo html_writer::table($table);
+        return true;
+    } else { //No broken references
+        echo "<p>Aucune référence cassée.</p>\n";
+        return false;
+    }
 }
 
 /**
@@ -61,11 +82,21 @@ function rof_get_referenced_objects() {
  * @return filtered input
  */
 function rof_get_broken_references($referencedrof) {
-    $referencenb = $referencedrof[0];
-    $referencefirst = $referencedrof[1];
-    $brokenrefnb = array();
-    $brokenreffirst = array();
+    global $DB;
 
+    $referenceNb = $referencedrof[0];
+    $referenceFirst = $referencedrof[1];
+    $brokenRefNb = array();
+    $brokenRefFirst = array();
+
+    foreach ($referenceNb as $rofid => $refs) {
+        $res = rof_get_record($rofid);
+        if ($res[0] === FALSE) {
+            $brokenRefNb[$rofid] = $referenceNb[$rofid];
+            $brokenRefFirst[$rofid] = $referenceFirst[$rofid];
+        }
+    }
+    return array($brokenRefNb, $brokenRefFirst);
 }
 
 /**
