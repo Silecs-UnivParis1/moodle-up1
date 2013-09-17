@@ -13,6 +13,7 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require('../../config.php');
 require_once($CFG->dirroot.'/report/rofstats/locallib.php');
+require_once($CFG->dirroot.'/local/roftools/rofcourselib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
@@ -72,6 +73,9 @@ $table->head = array('Objet', 'ROFid', 'Nom ROF', 'Nom local');
 $table->data = report_rofstats_localname_not_empty();
 echo html_writer::table($table);
 
+echo "<h3>Références cassées</h3>";
+echo "<p>Liste les cours faisant référence à un objet ROF absent des tables de cache ROF.</p>";
+rof_check_courses_references();
 
 /*  $table->head  = array($strissue, $strstatus, $strdesc, $strconfig);
     $table->size  = array('30%', '10%', '50%', '10%' );
