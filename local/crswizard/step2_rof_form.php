@@ -15,11 +15,11 @@ class course_wizard_step2_rof_form extends moodleform {
 
     function definition() {
         global $OUTPUT, $SESSION, $USER;
+        $isnew = TRUE;
 
         $mform = $this->_form;
 
         $editoroptions = $this->_customdata['editoroptions'];
-        $courseconfig = get_config('moodlecourse');
 
         $bockhelpE2 = get_string('bockhelpE2Rof1', 'local_crswizard');
         $bockhelpE2 .= '&nbsp;«&nbsp;<span class="collapsed">&nbsp;+&nbsp;</span>&nbsp;»&nbsp;et&nbsp;«&nbsp;<span class="expanded">&nbsp;-&nbsp;&nbsp;</span>&nbsp;»&nbsp;';
@@ -35,6 +35,7 @@ class course_wizard_step2_rof_form extends moodleform {
         $rofeditor_permission = true;
         if (isset($SESSION->wizard['idcourse'])) {
             $rofeditor_permission = wizard_has_rofreferenceeditor_permission($SESSION->wizard['idcourse'], $USER->id);
+            $isnew = FALSE;
         }
         if ($rofeditor_permission) {
             $default_cat = get_config('local_crswizard','cas2_default_etablissement');
@@ -149,57 +150,61 @@ class course_wizard_step2_rof_form extends moodleform {
          * liste des paramètres de cours ayant une valeur par défaut
          */
         // si demande de validation à 0
-        $mform->addElement('hidden', 'visible', null);
-        $mform->setType('visible', PARAM_INT);
-        $mform->setConstant('visible', 0);
+        if ($isnew) {
+            $courseconfig = get_config('moodlecourse');
 
-        $mform->addElement('hidden', 'format', null);
-        $mform->setType('format', PARAM_ALPHANUM);
-        $mform->setConstant('format', $courseconfig->format);
+            $mform->addElement('hidden', 'visible', null);
+            $mform->setType('visible', PARAM_INT);
+            $mform->setConstant('visible', 0);
 
-        $mform->addElement('hidden', 'coursedisplay', null);
-        $mform->setType('coursedisplay', PARAM_INT);
-        $mform->setConstant('coursedisplay', COURSE_DISPLAY_SINGLEPAGE);
+            $mform->addElement('hidden', 'format', null);
+            $mform->setType('format', PARAM_ALPHANUM);
+            $mform->setConstant('format', $courseconfig->format);
 
-        $mform->addElement('hidden', 'numsections', null);
-        $mform->setType('numsections', PARAM_INT);
-        $mform->setConstant('numsections', $courseconfig->numsections);
+            $mform->addElement('hidden', 'coursedisplay', null);
+            $mform->setType('coursedisplay', PARAM_INT);
+            $mform->setConstant('coursedisplay', COURSE_DISPLAY_SINGLEPAGE);
 
-        $mform->addElement('hidden', 'hiddensections', null);
-        $mform->setType('hiddensections', PARAM_INT);
-        $mform->setConstant('hiddensections', $courseconfig->hiddensections);
+            $mform->addElement('hidden', 'numsections', null);
+            $mform->setType('numsections', PARAM_INT);
+            $mform->setConstant('numsections', $courseconfig->numsections);
 
-        $mform->addElement('hidden', 'newsitems', null);
-        $mform->setType('newsitems', PARAM_INT);
-        $mform->setConstant('newsitems', $courseconfig->newsitems);
+            $mform->addElement('hidden', 'hiddensections', null);
+            $mform->setType('hiddensections', PARAM_INT);
+            $mform->setConstant('hiddensections', $courseconfig->hiddensections);
 
-        $mform->addElement('hidden', 'showgrades', null);
-        $mform->setType('showgrades', PARAM_INT);
-        $mform->setConstant('showgrades', $courseconfig->showgrades);
+            $mform->addElement('hidden', 'newsitems', null);
+            $mform->setType('newsitems', PARAM_INT);
+            $mform->setConstant('newsitems', $courseconfig->newsitems);
 
-        $mform->addElement('hidden', 'showreports', null);
-        $mform->setType('showreports', PARAM_INT);
-        $mform->setConstant('showreports', $courseconfig->showreports);
+            $mform->addElement('hidden', 'showgrades', null);
+            $mform->setType('showgrades', PARAM_INT);
+            $mform->setConstant('showgrades', $courseconfig->showgrades);
 
-        $mform->addElement('hidden', 'maxbytes', null);
-        $mform->setType('maxbytes', PARAM_INT);
-        $mform->setConstant('maxbytes', $courseconfig->maxbytes);
+            $mform->addElement('hidden', 'showreports', null);
+            $mform->setType('showreports', PARAM_INT);
+            $mform->setConstant('showreports', $courseconfig->showreports);
 
-        $mform->addElement('hidden', 'groupmode', null);
-        $mform->setType('groupmode', PARAM_INT);
-        $mform->setConstant('groupmode', $courseconfig->groupmode);
+            $mform->addElement('hidden', 'maxbytes', null);
+            $mform->setType('maxbytes', PARAM_INT);
+            $mform->setConstant('maxbytes', $courseconfig->maxbytes);
 
-        $mform->addElement('hidden', 'groupmodeforce', null);
-        $mform->setType('groupmodeforce', PARAM_INT);
-        $mform->setConstant('groupmodeforce', $courseconfig->groupmodeforce);
+            $mform->addElement('hidden', 'groupmode', null);
+            $mform->setType('groupmode', PARAM_INT);
+            $mform->setConstant('groupmode', $courseconfig->groupmode);
 
-        $mform->addElement('hidden', 'defaultgroupingid', null);
-        $mform->setType('defaultgroupingid', PARAM_INT);
-        $mform->setConstant('defaultgroupingid', 0);
+            $mform->addElement('hidden', 'groupmodeforce', null);
+            $mform->setType('groupmodeforce', PARAM_INT);
+            $mform->setConstant('groupmodeforce', $courseconfig->groupmodeforce);
 
-        $mform->addElement('hidden', 'lang', null);
-        $mform->setType('lang', PARAM_INT);
-        $mform->setConstant('lang', $courseconfig->lang);
+            $mform->addElement('hidden', 'defaultgroupingid', null);
+            $mform->setType('defaultgroupingid', PARAM_INT);
+            $mform->setConstant('defaultgroupingid', 0);
+
+            $mform->addElement('hidden', 'lang', null);
+            $mform->setType('lang', PARAM_INT);
+            $mform->setConstant('lang', $courseconfig->lang);
+        }
 
         // à supprimer ?
         $mform->addElement('hidden', 'id', null);
@@ -211,7 +216,7 @@ class course_wizard_step2_rof_form extends moodleform {
 
 //--------------------------------------------------------------------------------
         $labelprevious = get_string('previousstage', 'local_crswizard');
-        if (isset($SESSION->wizard['idcourse'])) {
+        if (!$isnew) {
             $labelprevious = get_string('upcancel', 'local_crswizard');
         }
         $buttonarray = array();
