@@ -277,4 +277,20 @@ function get_cohort_last_sync($synctype = 'sync') {
             'end' => $end,
         );
         return $res;
+}
+
+function truncate_str($str, $bytes=254, $end=true) {
+    if (strlen($str) <= $bytes) {
+        return $str;
     }
+    if ($end) {
+        $strend = substr($str, -$bytes);
+        $pos = strpos($strend, " ");
+        $new = substr($strend, $pos);
+    } else {
+        $pos = strrpos(substr($str, $bytes), " ");
+        $new = substr($str, 0, $pos - 1);
+    }
+    return $new;
+}
+
