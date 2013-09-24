@@ -279,6 +279,13 @@ function get_cohort_last_sync($synctype = 'sync') {
         return $res;
 }
 
+/**
+ * Cleanly truncates a string on a word boundary, if possible
+ * @param string $str string to truncate
+ * @param int $bytes number of bytes to keep (warning: bytes, not chars)
+ * @param bool $end : true = keep the end ; false = keep the beginning
+ * @return type
+ */
 function truncate_str($str, $bytes=254, $end=true) {
     if (strlen($str) <= $bytes) {
         return $str;
@@ -288,8 +295,12 @@ function truncate_str($str, $bytes=254, $end=true) {
         $pos = strpos($strend, " ");
         $new = substr($strend, $pos);
     } else {
-        $pos = strrpos(substr($str, $bytes), " ");
-        $new = substr($str, 0, $pos - 1);
+        $pos = strrpos(substr($str, 0, $bytes), " ");
+        if ( ! $pos ) { // no space found => blunt truncate
+            $new = substr($str, 0, $bytes);
+        } else { // clean truncate
+            $new = substr($str, 0, $pos);
+        }
     }
     return $new;
 }
