@@ -140,7 +140,7 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
             return array();
         }
     }
-    if (!empty($criteria->enrolled)) {
+    if (!empty($criteria->enrolled || !empty($criteria->enrolledexact)) {
         if (empty($criteria->enrolledroles)) {
             $criteria->enrolledroles = array(3);
         }
@@ -152,11 +152,17 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
         $searchjoin[] = "JOIN {context} context ON (context.instanceid = c.id AND context.contextlevel = " . CONTEXT_COURSE . ") "
                 . "JOIN {role_assignments} ra ON (context.id = ra.contextid) "
                 . "JOIN {user} u ON (u.id = ra.userid)";
-        $searchcond[] = '('
-                . $DB->sql_like("CONCAT(u.firstname,' ',u.lastname)", ":uname", false, false)
-                . " AND ra.roleid $inSql"
-                . ')';
-        $params['uname'] = "%{$criteria->enrolled}%";
+        if (!empty($criteria->enrolledexact)) {
+            $searchcond[] = 'u.username = :uname';
+            $params['uname'] = $criteria->enrolledexact;
+        } else {
+            $searchcond[] = '('
+                    . $DB->sql_like("CONCAT(u.firstname,' ',u.lastname)", ":uname", false, false)
+                    . " AND ra.roleid $inSql"
+                    . ')';
+            $params['uname'] = "%{$criteria->enrolled}%";
+        }
+
         $params = array_merge($params, $inParams);
     }
 
