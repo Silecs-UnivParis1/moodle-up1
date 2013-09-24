@@ -26,6 +26,7 @@ jQuery(document).ready(function () {
             "startdatebefore": '2013-09-01',
             //format: "list", // default: "table"
             //enrolled: "Dupont",
+            enrolledexact: "admin",
             //enrolledroles: [3],
             custom: {
                 // "UP1DemandeurId": "4"
