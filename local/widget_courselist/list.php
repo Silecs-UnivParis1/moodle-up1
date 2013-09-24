@@ -18,7 +18,8 @@ $search->createdbefore   = optional_param('createdbefore', '', PARAM_RAW_TRIMMED
 $search->category        = optional_param('category', 0, PARAM_INT); // category where to search for courses
 $search->topcategory     = optional_param('topcategory', 0, PARAM_INT); // category where to search for courses (recursively)
 $search->node            = optional_param('node', 0, PARAM_INT);  // virtual table node where to search for courses (recursively)
-$search->enrolled        = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such name
+$search->enrolled        = optional_param('enrolled', '', PARAM_TEXT); // has a teacher with such full name (partial search)
+$search->enrolledexact   = optional_param('enrolledexact', '', PARAM_TEXT); // has a teacher with such username (exact match)
 if (isset($_REQUEST['enrolledroles'])) {
     if (is_array($_REQUEST['enrolledroles'])) {
         $search->enrolledroles = optional_param_array('enrolledroles', array(), PARAM_INT);

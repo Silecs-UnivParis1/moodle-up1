@@ -140,7 +140,7 @@ function get_courses_batch_search($criteria, $sort='fullname ASC', $page=0, $rec
             return array();
         }
     }
-    if (!empty($criteria->enrolled || !empty($criteria->enrolledexact)) {
+    if (!empty($criteria->enrolled) || !empty($criteria->enrolledexact)) {
         if (empty($criteria->enrolledroles)) {
             $criteria->enrolledroles = array(3);
         }
