@@ -24,9 +24,12 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/lib.php');
 
 
 // now get cli options
-list($options, $unrecognized) = cli_get_params(array('help'=>false, 'init'=>false, 'cleanall'=>false, 'allGroups'=>false,
-                                               'since'=>false, 'verb'=>1, 'printlast'=>false),
-                                               array('h'=>'help', 'i'=>'init'));
+list($options, $unrecognized) = cli_get_params(array(
+        'help'=>false, 'verb'=>1, 'printlast'=>false,
+        'cleanall'=>false, 'force'=>false,
+        'allGroups'=>false,
+        'since'=>false, 'init'=>false ),
+    array('h'=>'help', 'i'=>'init'));
 
 if ($unrecognized) {
     $unrecognized = implode("\n  ", $unrecognized);
@@ -43,6 +46,7 @@ Options:
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
 --cleanall            Empty cohort_members, then cohort
+  --force             Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
 --printlast           Display last syncs (diagnostic)
 
 If you want to force initialization, you should execute --cleanall first but it may be faster
@@ -65,7 +69,7 @@ if ( ! empty($options['help']) ) {
 $CFG->debug = DEBUG_NORMAL;
 
 if ( $options['cleanall'] ) {
-    cohorts_cleanall();
+    cohorts_cleanall($options['force']);
     return 0;
 }
 

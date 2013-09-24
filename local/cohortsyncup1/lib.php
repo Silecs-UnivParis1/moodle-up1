@@ -10,8 +10,21 @@
 
 require_once($CFG->dirroot . '/cohort/lib.php');
 
-function cohorts_cleanall() {
+/**
+ * deletes all cohorts members, then all cohorts.
+ * @global type $DB
+ * @param bool $force execution even if it breaks enrolments
+ */
+function cohorts_cleanall($force) {
     global $DB;
+
+    $sql="SELECT COUNT(courseid) FROM {enrol} e LEFT JOIN {cohort} c ON
+        (c.id = e.customint1) WHERE e.enrol='cohort' AND c.component='local_cohortsyncup1'";
+    $n = $DB->count_records_sql($sql);
+    if ($n > 0 && ! $force) {
+        echo "Sorry, there are $n cohort enrolments. Can't do that.\n\n";
+        return false;
+    }
 
     echo "Deleting cohort_members...\n";
     $select = "cohortid IN (SELECT id FROM {cohort} WHERE component='local_cohortsyncup1')";
@@ -19,6 +32,7 @@ function cohorts_cleanall() {
 
     echo "Deleting cohorts...\n";
     $DB->delete_records('cohort', array('component' => 'local_cohortsyncup1'));
+    return true;
 }
 
 
