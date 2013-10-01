@@ -27,10 +27,11 @@ function wizard_get_course_list_teacher() {
  * @return array $course_list
  */
 function wizard_get_course_model_list() {
+    global $DB;
     $course_list = array();
     $category_model = get_config('local_crswizard','category_model');
     if ($category_model != 0) {
-        $courses = get_courses($category_model);
+        $courses = $DB->get_records('course', array('category'=> $category_model), 'id, shortname');
         if (count($courses)) {
             foreach ($courses as $course) {
                 $course_list[$course->id] = $course->shortname;
