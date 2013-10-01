@@ -28,6 +28,7 @@ require_once('../../course/lib.php');
 require_once(__DIR__ . '/lib_wizard.php');
 require_once(__DIR__ . '/libaccess.php');
 require_once(__DIR__ . '/step1_form.php');
+require_once(__DIR__ . '/step_model.php');
 require_once(__DIR__ . '/step2_form.php');
 require_once(__DIR__ . '/step2_rof_form.php');
 require_once(__DIR__ . '/step3_form.php');
@@ -48,8 +49,8 @@ wizard_require_permission('creator', $USER->id);
 $stepin = optional_param('stepin', 0, PARAM_INT);
 if (!$stepin) {
     // new wizard process
-    $stepin = 1;
-    $stepgo = 1;
+    $stepin = 0;
+    $stepgo = 0;
     if (isset($SESSION->wizard)) {
         unset($SESSION->wizard);
     }
@@ -66,10 +67,20 @@ if ($wizardcase) {
 }
 
 switch ($stepin) {
-    case 1:
+    case 0:
         $SESSION->wizard['wizardurl'] = '/local/crswizard/index.php';
         $steptitle = get_string('selectcourse', 'local_crswizard');
         $editform = new course_wizard_step1_form();
+        break;
+    case 1:
+        $steptitle = "Étape 1 : modalité de création";
+        $editform = new course_wizard_step_model();
+
+        $data = $editform->get_data();
+        if ($data){
+            $SESSION->wizard['form_step' . $stepin] = (array) $data;
+            redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        }
         break;
     case 2:
         $steptitle = get_string('coursedefinition', 'local_crswizard');

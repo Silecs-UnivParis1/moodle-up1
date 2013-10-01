@@ -4,6 +4,43 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Construit la liste des cours dans lesquels $USER est inscrits avec la capacité course:update
+ * @return array $course_list
+ */
+function wizard_get_course_list_teacher() {
+    global $USER;
+    $course_list = array();
+    if ($courses = enrol_get_my_courses(NULL, 'visible DESC, fullname ASC')) {
+        foreach ($courses as $course) {
+            $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+            if ( has_capability('moodle/course:update', $coursecontext, $USER->id) ) {
+                $course_list[$course->id] = $course->shortname;
+            }
+        }
+    }
+    return $course_list;
+}
+
+/**
+ * construit la liste des cours de la catégorie désignée comme catégorie modèle.
+ * Utilise le paramètre category_model des settings du plugin crswizard
+ * @return array $course_list
+ */
+function wizard_get_course_model_list() {
+    $course_list = array();
+    $category_model = get_config('local_crswizard','category_model');
+    if ($category_model != 0) {
+        $courses = get_courses($category_model);
+        if (count($courses)) {
+            foreach ($courses as $course) {
+                $course_list[$course->id] = $course->shortname;
+            }
+        }
+    }
+    return $course_list;
+}
+
+/**
  * Fonction construsiant la liste des catégories de cours
  * @return array $wizard_make_categories_model_list
  */
