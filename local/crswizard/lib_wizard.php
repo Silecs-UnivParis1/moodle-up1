@@ -4,6 +4,21 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Fonction construsiant la liste des catégories de cours
+ * @return array $wizard_make_categories_model_list
+ */
+function wizard_make_categories_model_list() {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist, 'moodle/course:create');
+    $wizard_make_categories_model_list = array(0 => 'Aucune');
+    foreach ($displaylist as $key => $value) {
+        $wizard_make_categories_model_list[$key] = $value;
+    }
+    return $wizard_make_categories_model_list;
+}
+
+/**
  * Fonction de redirection ad hoc avec message en dernière étape de création
  * Reprise partielle des fonctions redirect() et $OUTPUT->redirect_message()
  * @param string $url
