@@ -969,6 +969,8 @@ class core_wizard {
             $duplicate = new wizard_modele_duplicate($this->formdata['form_step1']['coursedmodelid'], $mydata, $options);
             $duplicate->create_backup();
             $course = $duplicate->retore_backup();
+            $mydata->profile_field_up1modele = '[' . $this->formdata['form_step1']['coursedmodelid'] . ']'
+                . $this->formdata['form_step1']['coursemodelshortname'];
         } else {
             $course = create_course($mydata);
         }
