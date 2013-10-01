@@ -44,6 +44,16 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $helpdesk_user->plugin = 'local_crswizard';
     $settings->add($helpdesk_user);
 
+    $categories_list = wizard_make_categories_model_list();
+    $category_model = new admin_setting_configselect(
+        'category_model',
+            'Sélection de la catégorie modèle',
+            'Valeur de la catégorie des cours modèles',
+            0,
+            $categories_list);
+    $category_model->plugin = 'local_crswizard';
+    $settings->add($category_model);
+
     $settings->add(new admin_setting_heading('wizardcas2defaults', 'Valeurs par défaut des réglages (cas 2)', ''));
 
     $etab = wizard_get_catlevel2();

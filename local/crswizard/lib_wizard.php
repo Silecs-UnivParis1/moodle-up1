@@ -4,6 +4,59 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Construit la liste des cours dans lesquels $USER est inscrits avec la capacité course:update
+ * @return array $course_list
+ */
+function wizard_get_course_list_teacher() {
+    global $USER;
+    $course_list = array();
+    if ($courses = enrol_get_my_courses(NULL, 'visible DESC, fullname ASC')) {
+        foreach ($courses as $course) {
+            $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+            if ( has_capability('moodle/course:update', $coursecontext, $USER->id) ) {
+                $course_list[$course->id] = $course->shortname;
+            }
+        }
+    }
+    return $course_list;
+}
+
+/**
+ * construit la liste des cours de la catégorie désignée comme catégorie modèle.
+ * Utilise le paramètre category_model des settings du plugin crswizard
+ * @return array $course_list
+ */
+function wizard_get_course_model_list() {
+    global $DB;
+    $course_list = array();
+    $category_model = get_config('local_crswizard','category_model');
+    if ($category_model != 0) {
+        $courses = $DB->get_records('course', array('category'=> $category_model), 'id, shortname');
+        if (count($courses)) {
+            foreach ($courses as $course) {
+                $course_list[$course->id] = $course->shortname;
+            }
+        }
+    }
+    return $course_list;
+}
+
+/**
+ * Fonction construsiant la liste des catégories de cours
+ * @return array $wizard_make_categories_model_list
+ */
+function wizard_make_categories_model_list() {
+    $displaylist = array();
+    $parentlist = array();
+    make_categories_list($displaylist, $parentlist, 'moodle/course:create');
+    $wizard_make_categories_model_list = array(0 => 'Aucune');
+    foreach ($displaylist as $key => $value) {
+        $wizard_make_categories_model_list[$key] = $value;
+    }
+    return $wizard_make_categories_model_list;
+}
+
+/**
  * Fonction de redirection ad hoc avec message en dernière étape de création
  * Reprise partielle des fonctions redirect() et $OUTPUT->redirect_message()
  * @param string $url
@@ -861,6 +914,38 @@ function wizard_get_rattachement_fieldup1($tabcat, $tabcategories) {
     return $fieldup1;
 }
 
+/**
+ * Stocke si besoin dans $SESSION->wizard['form_step1'] les informations relavives au cours modèle
+ * sélectionné et crée le backup associé
+ */
+function get_selected_model() {
+    global $SESSION,$USER, $DB;
+    $form_model = $SESSION->wizard['form_step1'];
+    $coursemodelid = 0;
+    $go = true;
+
+    if ($form_model['modeletype'] != '0') {
+        if (array_key_exists($form_model['modeletype'], $form_model)) {
+            $coursemodelid = $form_model[$form_model['modeletype']];
+            if (isset($SESSION->wizard['form_step1']['coursedmodelid']) &&
+                $SESSION->wizard['form_step1']['coursedmodelid'] == $coursemodelid) {
+                    $go = false;
+            }
+            if ($go) {
+                $coursemodel = $DB->get_record('course', array('id' => $coursemodelid), '*', MUST_EXIST);
+                if ($coursemodel) {
+                    $SESSION->wizard['form_step1']['coursedmodelid'] = $coursemodelid;
+                    $SESSION->wizard['form_step1']['coursemodelfullname'] = $coursemodel->fullname;
+                    $SESSION->wizard['form_step1']['coursemodelshortname'] = $coursemodel->shortname;
+                }
+            }
+        }
+    } else {
+        $SESSION->wizard['form_step1']['mybackup'] = array();
+        $SESSION->wizard['form_step1']['coursedmodelid'] = 0;
+    }
+}
+
 class core_wizard {
     private $formdata;
     private $user;
@@ -877,7 +962,17 @@ class core_wizard {
         $mydata = $this->prepare_course_to_validate();
         // ajout commentaire de creation
         $mydata->profile_field_up1commentairecreation = strip_tags($this->formdata['form_step7']['remarques']);
-        $course = create_course($mydata);
+
+        if (isset($this->formdata['form_step1']['coursedmodelid']) && $this->formdata['form_step1']['coursedmodelid'] != '0') {
+            $options = array();
+            $options[] = array('name' => 'users', 'value' => 0);
+            $duplicate = new wizard_modele_duplicate($this->formdata['form_step1']['coursedmodelid'], $mydata, $options);
+            $duplicate->create_backup();
+            $course = $duplicate->retore_backup();
+        } else {
+            $course = create_course($mydata);
+        }
+
         add_to_log($course->id, 'crswizard', 'create', 'view.php?id='.$course->id, 'previous (ID '.$course->id.')');
         $this->course = $course;
 
@@ -1370,6 +1465,12 @@ class core_wizard {
 
         $mg .= get_string('coursestartdate', 'local_crswizard') . date('d-m-Y', $form2['startdate']) . "\n";
         $mg .= get_string('up1datefermeture', 'local_crswizard') . date('d-m-Y', $form2['up1datefermeture']) . "\n";
+
+        if (!empty($this->formdata['form_step1']['coursedmodelid']) && $this->formdata['form_step1']['coursedmodelid'] != '0') {
+            $mg .= get_string('coursemodel', 'local_crswizard') . '[' . $this->formdata['form_step1']['coursemodelshortname']
+            . ']' . $this->formdata['form_step1']['coursemodelfullname'] . "\n";
+        }
+
         $mg .= 'Mode de création : ' .  $this->mydata->profile_field_up1generateur . "\n";
 
         // validateur si il y a lieu
@@ -1867,4 +1968,156 @@ class my_elements_config {
         '3' => 'Composante',
         '4' => 'Niveau',
     );
+}
+
+/**
+ * cette classe utilise le compte "administrateur principal" (renvoyé par
+ * get_admin()) pour créer le backup et effectuer la restauration. Besoin des
+ * permissions moodle/course:create, moodle/restore:restorecourse et
+ * moodle/backup:backupcourse au niveau de la plateforme
+ */
+class wizard_modele_duplicate {
+
+    protected $adminuser;
+    public $courseid;
+    public $newcoursedata;
+    public $backupid;
+    public $backupbasepath;
+    public $file;
+    public $backupsettings = array();
+
+    public $backupdefaults = array(
+        'activities' => 1,
+        'blocks' => 1,
+        'filters' => 1,
+        'users' => 0,
+        'role_assignments' => 0,
+        'comments' => 0,
+        'userscompletion' => 0,
+        'logs' => 0,
+        'grade_histories' => 0
+    );
+
+    public function __construct($courseid, $mydata, $options) {
+        $this->courseid = $courseid;
+        $this->mydata = $mydata;
+        $this->options = $options;
+        $this->adminuser = get_admin();
+    }
+
+    public function create_backup() {
+        global $CFG;
+        require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+
+        // Check for backup and restore options.
+        if (!empty($this->options)) {
+            foreach ($this->options as $option) {
+
+                // Strict check for a correct value (allways 1 or 0, true or false).
+                $value = clean_param($option['value'], PARAM_INT);
+
+                if ($value !== 0 and $value !== 1) {
+                    throw new moodle_exception('invalidextparam', 'webservice', '', $option['name']);
+                }
+
+                if (!isset($this->backupdefaults[$option['name']])) {
+                    throw new moodle_exception('invalidextparam', 'webservice', '', $option['name']);
+                }
+
+                $this->backupsettings[$option['name']] = $value;
+            }
+        }
+
+        $bc = new backup_controller(backup::TYPE_1COURSE, $this->courseid, backup::FORMAT_MOODLE,
+        backup::INTERACTIVE_NO, backup::MODE_SAMESITE, $this->adminuser->id);
+
+        foreach ($this->backupsettings as $name => $value) {
+            $bc->get_plan()->get_setting($name)->set_value($value);
+        }
+
+        $this->backupid       = $bc->get_backupid();
+        $this->backupbasepath = $bc->get_plan()->get_basepath();
+
+        $bc->execute_plan();
+        $results = $bc->get_results();
+        $this->file = $results['backup_destination'];
+
+        $bc->destroy();
+
+    }
+
+
+    public function retore_backup() {
+        global $CFG,$DB;
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+        // Check if we need to unzip the file because the backup temp dir does not contains backup files.
+        if (!file_exists($this->backupbasepath . "/moodle_backup.xml")) {
+            $this->file->extract_to_pathname(get_file_packer(), $this->backupbasepath);
+        }
+
+         // Create new course.
+
+        $newcourseid = restore_dbops::create_new_course($this->mydata->fullname,
+            $this->mydata->shortname, $this->mydata->category);
+
+        $rc = new restore_controller($this->backupid, $newcourseid,
+                backup::INTERACTIVE_NO, backup::MODE_SAMESITE, $this->adminuser->id, backup::TARGET_NEW_COURSE);
+
+        foreach ($this->backupsettings as $name => $value) {
+            $setting = $rc->get_plan()->get_setting($name);
+            if ($setting->get_status() == backup_setting::NOT_LOCKED) {
+                $setting->set_value($value);
+            }
+        }
+
+        if (!$rc->execute_precheck()) {
+            $precheckresults = $rc->get_precheck_results();
+            if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
+                if (empty($CFG->keeptempdirectoriesonbackup)) {
+                    fulldelete($backupbasepath);
+                }
+
+                $errorinfo = '';
+
+                foreach ($precheckresults['errors'] as $error) {
+                    $errorinfo .= $error;
+                }
+
+                if (array_key_exists('warnings', $precheckresults)) {
+                    foreach ($precheckresults['warnings'] as $warning) {
+                        $errorinfo .= $warning;
+                    }
+                }
+
+                throw new moodle_exception('backupprecheckerrors', 'webservice', '', $errorinfo);
+            }
+        }
+
+        $rc->execute_plan();
+        $rc->destroy();
+
+        $course = $DB->get_record('course', array('id' => $newcourseid), '*', MUST_EXIST);
+
+        $course->fullname = $this->mydata->fullname;
+        $course->shortname = $this->mydata->shortname;
+        $course->visible = $this->mydata->visible;
+        $course->startdate = $this->mydata->startdate;
+        $course->summary       = $this->mydata->summary_editor['text'];
+        $course->summaryformat = $this->mydata->summary_editor['format'];
+
+
+
+        // Set shortname and fullname back.
+        $DB->update_record('course', $course);
+
+        if (empty($CFG->keeptempdirectoriesonbackup)) {
+            fulldelete($this->backupbasepath);
+        }
+
+        // Delete the course backup file created by this WebService. Originally located in the course backups area.
+        $this->file->delete();
+
+        return $course;
+
+    }
 }

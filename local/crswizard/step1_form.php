@@ -20,23 +20,25 @@ class course_wizard_step1_form {
 <div align="center" style="margin:50px;">
     <div style="margin:5px;">
         <?php
+        /**
         echo $OUTPUT->single_button(
                 new moodle_url($url, array('stepin' => 2, 'wizardcase' => 1)), get_string('wizardcase1', 'local_crswizard'),
                     'get', array('disabled' => 'disabled')
         );
+        **/
         ?>
     </div>
     <div style="margin:5px;">
         <?php
         echo $OUTPUT->single_button(
-                new moodle_url($url, array('stepin' => 2, 'wizardcase' => 2)), get_string('wizardcase2', 'local_crswizard'), 'get'
+                new moodle_url($url, array('stepin' => 1, 'wizardcase' => 2)), get_string('wizardcase2', 'local_crswizard'), 'get'
         );
         ?>
     </div>
     <div style="margin:5px;">
         <?php
         echo $OUTPUT->single_button(
-                new moodle_url($url, array('stepin' => 2, 'wizardcase' => 3)), get_string('wizardcase3', 'local_crswizard'), 'get'
+                new moodle_url($url, array('stepin' => 1, 'wizardcase' => 3)), get_string('wizardcase3', 'local_crswizard'), 'get'
         );
         ?>
     </div>
