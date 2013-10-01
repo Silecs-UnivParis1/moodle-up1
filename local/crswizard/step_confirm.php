@@ -95,6 +95,13 @@ class course_wizard_step_confirm extends moodleform {
 
         $mform->addElement('date_selector', 'up1datefermeture', get_string('up1datefermeture', 'local_crswizard'));
 
+        if (!empty($SESSION->wizard['form_step1']['coursedmodelid']) && $SESSION->wizard['form_step1']['coursedmodelid'] != '0') {
+            $mform->addElement('text', 'coursemodel', get_string('coursemodel', 'local_crswizard'), 'maxlength="300" size="60"');
+            $mform->setConstant('coursemodel' , '[' . $SESSION->wizard['form_step1']['coursemodelshortname']
+                . ']' . $SESSION->wizard['form_step1']['coursemodelfullname']
+            );
+        }
+
         $mform->addElement('text', 'profile_field_up1generateur', "Mode de création :", 'maxlength="100" size="40"');
 
         // validateur pour le cas 2

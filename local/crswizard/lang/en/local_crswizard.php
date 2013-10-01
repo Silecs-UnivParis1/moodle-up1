@@ -120,6 +120,7 @@ $string['coursegeneralhelpRof'] = '<p>Le nom complet de l\'espace est affiché e
     . 'vous le jugez nécessaire, de modifier le texte figurant dans la zone « Complément ».<br/>'
     . 'Le texte de présentation est en accès public : il est affiché sur la fiche signalétique de '
     . 'l\'espace accessible à partir de la page d\'accueil de la plateforme et dans les résultats d\'une recherche.</p>';
+$string['coursemodel'] = 'Modèle de création : ';
 $string['courserequestdate'] = 'Date de la demande de création : ';
 $string['coursesettingsblock'] = 'Paramétrage de l\'espace de cours';
 $string['coursesettingshelp'] = 'Les dates ci-dessous sont purement informatives et correspondent au début '
