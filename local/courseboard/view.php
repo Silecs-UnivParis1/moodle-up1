@@ -13,7 +13,7 @@ global $CFG, $DB, $PAGE, $OUTPUT;
 require('../../config.php');
 require_once($CFG->dirroot . '/local/roftools/roflib.php'); // to get ROF data
 require_once($CFG->dirroot . '/local/roftools/rofcourselib.php'); // to get ROF reference checking
-//require_once($CFG->dirroot . '/local/up1_metadata/lib.php'); // to get prepared metadata
+require_once($CFG->dirroot . '/local/up1_courselist/courselist_tools.php'); // get categories path
 require_once($CFG->libdir . '/adminlib.php');
 require_once('locallib.php');
 
@@ -33,7 +33,9 @@ $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
 $PAGE->requires->js(new moodle_url('/local/courseboard/js/cell_update.js'), true);
 
 echo $OUTPUT->header();
+
 echo $OUTPUT->heading('Tableau de bord ' . $course->shortname);
+echo '<div class="breadcrumb">' . $OUTPUT->navbar() . "</div>\n" ;
 
 // $url = "$CFG->wwwroot/local/courseboard/view.php";
 $browserurl = "$CFG->wwwroot/local/rof_browser/rof_browser.php";
@@ -48,6 +50,8 @@ echo "<ul>\n";
 echo "<li>Nom complet : " . $course->fullname . "</li>\n";
 echo "<li>Nom abrégé : " . $course->shortname . "</li>\n";
 echo "<li>No identification : " . (!empty($course->idnumber) ? $course->idnumber : '<b>NON renseigné</b>') . "</li>\n";
+$catpath = courselist_cattools::get_coursecat_path_from_course($crsid);
+echo "<li>Catégorie : " . $catpath . "</li>\n";
 echo "</ul>\n";
 
 // ROF data
