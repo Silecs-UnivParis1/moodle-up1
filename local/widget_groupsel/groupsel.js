@@ -162,7 +162,7 @@
                     transformGroupItems(groups);
                     var items = $this.prepareList(groups, 'est membre des ' + groups.length + ' groupes :', function (item) {
                         return {
-                            label: groupItemToLabel(item),
+                            label: $this.groupItemToLabel(item),
                             value: item.key,
                             source: 'groups',
                             pre: item.pre
