@@ -110,7 +110,11 @@ function rof_get_combined_path($rofidpath) {
     $res = array();
     foreach ($rofidpath as $rofid) {
         list($record, $ignore) = rof_get_record($rofid);
-        $res[$rofid] = rof_combined_name($record->localname, $record->name);
+        if ( $record == false ) {
+            $res[$rofid] = '<b>' . $rofid. ' Référence cassée';
+        } else {
+            $res[$rofid] = rof_combined_name($record->localname, $record->name);
+        }
     }
     return $res;
 }
