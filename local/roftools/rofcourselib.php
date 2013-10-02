@@ -47,16 +47,47 @@ function rof_check_courses_references() {
 }
 
 /**
+ * prepare a list <ul>...</ul> of broken ROF references for a given course
+ * @param integer $crsid target course id
+ * @return string html list block OR false = none
+ */
+function rof_check_course_references($crsid) {
+    $referencedRof = rof_get_referenced_objects();
+    $brokenRefs = rof_get_broken_references($referencedRof);
+
+    if (count($brokenRefs[0]) > 0) { //there are broken references
+        $output = "<ul>\n";
+        foreach ($brokenRefs[0] as $rofid => $brokenNb) {
+            $crsid = $brokenRefs[1][$rofid];
+            $urlrof = new moodle_url('/report/rofstats/view.php', array('rofid' => $rofid));
+            // urlrof = dumb link, as the rof object is listed as non-existent
+            $output .= '<li>' . html_writer::link($urlrof, $rofid) . "</li>\n";
+        }
+        $output .= "</ul>\n";
+        return $output;
+    } else { //No broken references
+        return false;
+    }
+}
+
+
+/**
  * get all referenced ROF objects (components + programs + courses) by actual courses
+ * @param integer $crsid for a specific course ; NULL for all courses
  * @return array($referencenb, $referencefirst), both associative arrays with ROFids as keys
  */
-function rof_get_referenced_objects() {
+function rof_get_referenced_objects($crsid = null) {
     global $DB;
 
     $referencenb = array();
     $referencefirst = array();
 	$rpiid = $DB->get_field('custom_info_field', 'id', array('shortname' => 'up1rofpathid', 'objectname' => 'course'), MUST_EXIST);
-    $rofpathidset = $DB->get_records_menu('custom_info_data', array('fieldid' => $rpiid), '', 'objectid, data');
+
+    $conds = array('fieldid' => $rpiid);
+    if (isset($crsid) && is_integer($crsid)) {
+        $conds['objectid'] = $crsid;
+    }
+    $rofpathidset = $DB->get_records_menu('custom_info_data', $conds, '', 'objectid, data');
 
     foreach ($rofpathidset as $courseid => $rofpathids) {
         $tabrofpathids = explode(';', $rofpathids);

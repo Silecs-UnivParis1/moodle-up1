@@ -348,7 +348,44 @@ class courselist_cattools {
         $res = $DB->get_fieldset_sql($sql, array($catid, $fieldid));
         return $res;
     }
+    
+    
+    /**
+     * compute the associative array category path for a given course
+     * @param int $crsid
+     * @return assoc. array ($catid => $catname)
+     */
+    public static function get_coursecat_array_from_course($crsid) {
+        global $DB;
+        $sql = "SELECT cc.path FROM {course_categories} cc "
+            . "JOIN {course} c ON (c.category = cc.id) "
+            . "WHERE c.id = ?";
+        $pathid = $DB->get_field_sql($sql, array($crsid), MUST_EXIST);
+        $pathidarray = array_filter(explode('/', $pathid));
+        $catpath = array();
+        foreach ($pathidarray as $catid) {
+            $catpath[$catid] = $DB->get_field('course_categories', 'name', array('id' => $catid) );
+        }
+        return $catpath;
+    }
+
+    /**
+     * prepare an html category path for a given course
+     * @param int $crsid
+     * @return human-readable categories path, with links
+     */
+    public static function get_coursecat_path_from_course($crsid) {
+        $patharray = self::get_coursecat_array_from_course($crsid);
+        $out = '';
+        foreach ($patharray as $catid => $name) {
+            $url = new moodle_url('/course/category.php', array('id' => $catid));
+            $out .= " / " . html_writer::link($url, $name);
+        }
+        return $out;
+    }
+
 }
+
 
 class courselist_roftools {
 

@@ -37,6 +37,35 @@ function cohorts_cleanall($force) {
 
 
 /**
+ * check if the given cohort is enrolled
+ * @global type $DB
+ * @param integer $cohortid
+ * @return boolean true is cohort is enrolled
+ */
+function cohort_is_enrolled($cohortid) {
+    global $DB;
+    return $DB->record_exists('enrol', array('enrol' => 'cohort', 'status' => 0, 'customint1' => $cohortid));
+}
+
+/**
+ * delete a cohort only if it is not enrolled
+ * @global type $DB
+ * @param integer $cohortid
+ * @return boolean true = deleted ; false = not deleted
+ */
+function safe_delete_cohort($cohortid) {
+    global $DB;
+    if (cohort_is_enrolled($cohortid)) {
+        return false;
+    } else {
+        $cohort = $DB->get_record('cohort', array('id' => $cohortid), '*', MUST_EXIST);
+        cohort_delete_cohort($cohort);
+        return true;
+    }
+}
+
+
+/**
  * auxiliary function, based on WS  allGroups
  * useful to get empty groups and name/description changes in cohorts
  * @global type $CFG
