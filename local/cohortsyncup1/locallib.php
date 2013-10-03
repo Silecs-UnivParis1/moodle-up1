@@ -94,9 +94,9 @@ function get_ws_data($webservice) {
  */
 function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 {
-    global $CFG, $DB;
     // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $cnt = array('create' => 0, 'modify' => 0, 'pass' => 0, 'noop' => 0);
+    $progressbar = array('create' => '+', 'modify' => 'M', 'pass' => 'P', 'noop' => '=');
     $count = 0;
     date_default_timezone_set('UTC');
     $ldaptimelast = date("YmdHis", $timelast) . 'Z';
@@ -104,39 +104,18 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 
     list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
     // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
-
     if ($data) {
         if ($verbose >= 2) echo "Parsing " . count($data) . " cohorts ; since $ldaptimelast. \n";
 
         foreach ($data as $cohort) {
             $count++;
             if ($limit > 0 && $count > $limit) break;
-            if ($verbose >= 2) echo '.'; // progress bar
-            if (property_exists($cohort,'modifyTimestamp') && $cohort->modifyTimestamp < $ldaptimelast) {
-                if ($verbose >= 3) echo 'P'; // progress bar ; passed due to modifyTimestamp
-                $cnt['pass']++;
-                continue;
-            }
 
-            if (! $DB->record_exists('cohort', array('idnumber' => $cohort->key))) { // cohort doesn't exist yet
-                $newcohort = define_cohort($cohort);
-                $newid = cohort_add_cohort($newcohort);
-                if ( $newid > 0 ) {
-                    $cnt['create']++;
-                }
-                if ($verbose >= 3) echo '+'; // cohort created -> progress bar
-            } else { // cohort exists ; must be modified
-                list($update, $thiscohort) = update_cohort($cohort);
-                if ($update) { // modified => to update
-                    cohort_update_cohort($thiscohort);
-                    $cnt['modify']++;
-                    if ($verbose >= 3) echo 'M'; // cohort modified -> progress bar
-                } else { // nothing modified since last sync !
-                    $cnt['noop']++;
-                    if ($verbose >= 3) echo '='; // cohort not modified (noop) -> progress bar
-                }
-            }
+            $action = process_cohort($cohort, $verbose, $ldaptimelast); // real processing here
+            $cnt[$action]++;
+            if ($verbose >= 3) echo $progressbar[$action];
         } // foreach($data)
+
         $logmsg = "\nAll cohorts : " . $cnt['pass']. " passed, " . $cnt['noop']. " noop, "
                 . $cnt['modify']. " modified, " . $cnt['create']. " created.\n";
     } else {
@@ -145,6 +124,40 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:end', '', "From users. " . $logmsg);
 }
+
+
+/**
+ * process individual cohort during sync
+ * @param object $cohort
+ * @param integer $verbose
+ * @param string $ldaptimelast
+ * @return action among ('create', 'modify', 'pass', 'noop')
+ */
+function process_cohort($cohort, $verbose, $ldaptimelast) {
+    global $DB;
+
+    if ($verbose >= 2) echo '.'; // progress bar
+
+    if (property_exists($cohort,'modifyTimestamp') && $cohort->modifyTimestamp < $ldaptimelast) {
+        return 'pass'; // passed due to modifyTimestamp
+    }
+    if (! $DB->record_exists('cohort', array('idnumber' => $cohort->key))) { // cohort doesn't exist yet
+        $newcohort = define_cohort($cohort);
+        $newid = cohort_add_cohort($newcohort);
+        if ( $newid > 0 ) {
+            return 'create';
+            }
+    } else { // cohort exists ; must be modified
+        list($update, $thiscohort) = update_cohort($cohort);
+        if ($update) { // modified => to update
+            cohort_update_cohort($thiscohort);
+            return 'modify';
+        } else { // nothing modified since last sync !
+            return 'noop';
+        }
+    }
+}
+
 
 /**
  * Debug / display results of webservice
