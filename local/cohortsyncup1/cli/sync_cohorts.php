@@ -25,7 +25,7 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/locallib.php');
 
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array(
-        'help'=>false, 'verb'=>1, 'printlast'=>false,
+        'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false,
         'cleanall'=>false, 'force'=>false,
         'allGroups'=>false,
         'since'=>false, 'init'=>false ),
@@ -48,6 +48,7 @@ Options:
 --cleanall            Empty cohort_members, then cohort
   --force             Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
 --printlast           Display last syncs (diagnostic)
+--testws              Test the webservice (data download), to use with --verb= 1 to 3
 
 If you want to force initialization, you should execute --cleanall first but it may be faster
 to manually empty tables cohort and cohort_members with the following MySQL command:
@@ -67,6 +68,12 @@ if ( ! empty($options['help']) ) {
 
 // Ensure errors are well explained
 $CFG->debug = DEBUG_NORMAL;
+
+
+if ( $options['testws'] ) {
+    display_cohorts_all_groups($options['verb']);
+    return 0;
+}
 
 if ( $options['cleanall'] ) {
     cohorts_cleanall($options['force']);

@@ -66,6 +66,24 @@ function safe_delete_cohort($cohortid) {
 
 
 /**
+ * Get data from webservice - a wrapper around curl_exec
+ * @param string $webservice URL of the webservice
+ * @return array($curlinfo, $data)
+ */
+function get_ws_data($webservice) {
+    $wstimeout = 5;
+    //$timestart = microtime(true);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
+    curl_setopt($ch, CURLOPT_URL, $webservice);
+    //$timeend = microtime(true);
+    $data = json_decode(curl_exec($ch));
+    $curlinfo = curl_getinfo($ch);
+    return array($curlinfo, $data);
+}
+
+/**
  * auxiliary function, based on WS  allGroups
  * useful to get empty groups and name/description changes in cohorts
  * @global type $CFG
@@ -77,20 +95,15 @@ function safe_delete_cohort($cohortid) {
 function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 {
     global $CFG, $DB;
-    $ws_allGroups = get_config('local_cohortsyncup1', 'ws_allGroups');
     // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $cnt = array('create' => 0, 'modify' => 0, 'pass' => 0, 'noop' => 0);
     $count = 0;
-    $wstimeout = 5;
-
     date_default_timezone_set('UTC');
     $ldaptimelast = date("YmdHis", $timelast) . 'Z';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
-    curl_setopt($ch, CURLOPT_URL, $ws_allGroups);
-    $data = json_decode(curl_exec($ch));
     add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:begin', '', "From allGroups since $timelast");
+
+    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
+    // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
 
     if ($data) {
         if ($verbose >= 2) echo "Parsing " . count($data) . " cohorts ; since $ldaptimelast. \n";
@@ -134,6 +147,42 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 }
 
 /**
+ * Debug / display results of webservice
+ * @global type $CFG
+ * @global type $DB
+ * @param integer $verbose
+ */
+function display_cohorts_all_groups($verbose=2)
+{
+    global $CFG, $DB;
+    // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
+    $count = 0;
+    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
+    // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
+
+    if ($data) {
+        if ($verbose >= 1) {
+            echo "\nParsing " . count($data) . " cohorts. \n";            
+        }        
+        foreach ($data as $cohort) {
+            $count++;
+            if ($verbose >= 2) echo '.'; // progress bar
+            if ($verbose >= 3) echo $cohort->key . "\n";
+        } // foreach($data)
+        echo "\nAll cohorts parsed.\n";
+    } else {
+        echo "\nUnable to fetch data from: " . $ws_allGroups . "\n" ;
+    }
+    if ($verbose >= 2) {
+        echo "\n\nCurl diagnostic:\n";
+        print_r($curlinfo);
+    }
+}
+
+
+
+
+/**
  * original function, linking users to cohorts, based on modified users and ws userGroupsAndRoles
  * @global type $CFG
  * @global type $DB
@@ -148,8 +197,6 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     add_to_log(0, 'local_cohortsyncup1', 'sync:begin', '', "From users since $timelast");
     $ws_userGroupsAndRoles = get_config('local_cohortsyncup1', 'ws_userGroupsAndRoles');
     // $ws_userGroupsAndRoles = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
-    // $ws_userGroupsAndRoles = 'http://wsgroups.univ-paris1.fr/userGroupsAndRoles';
-    $wstimeout = 5;
     $ref_plugin = 'auth_ldapup1';
     $param = 'uid';   // ex. parameter '?uid=e0g411g01n6'
 
@@ -157,9 +204,6 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
          . 'WHERE us.ref_plugin = ? AND us.timemodified > ?';
     $users = $DB->get_records_sql_menu($sql, array($ref_plugin, $timelast), 0, $limit);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
     $cntCohortUsers = array(); // users added in each cohort
     $cntCrcohorts = 0;
     $cntAddmembers = 0;
@@ -174,7 +218,6 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     foreach ($allcohorts as $cohort) {
         $idcohort[$cohort->idnumber] = $cohort->id;
     }
-// var_dump($idcohort); die();
 
     $prevpercent = '';
     foreach ($users as $userid => $username) {
@@ -183,8 +226,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
         $requrl = $ws_userGroupsAndRoles . '?uid=' . $localusername;
         $memberof = array(); //to compute memberships to be removed
 
-        curl_setopt($ch, CURLOPT_URL, $requrl);
-        $data = json_decode(curl_exec($ch));
+        list($curlinfo, $data) = get_ws_data($requrl);
         if ($verbose >= 2) echo ':'; // progress bar user
         $percent = sprintf("%3.0f", ($cntUsers / $totalUsers * 100)) ;
         if ( $verbose>=1 && $percent != $prevpercent ) {
@@ -228,7 +270,6 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
         . "Membership: +$cntAddmembers  -$cntRemovemembers.";
     echo "\n\n$logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', "From users. " . $logmsg);
-    // print_r($cntCohortUsers);
 }
 
 

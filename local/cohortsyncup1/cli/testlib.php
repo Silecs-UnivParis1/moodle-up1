@@ -14,6 +14,7 @@ require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global m
 require_once($CFG->libdir.'/clilib.php');      // cli only functions
 require_once($CFG->dirroot.'/local/cohortsyncup1/locallib.php');
 
+
 echo "\nchecking cohorts \n";
 var_dump(cohort_is_enrolled(44861));
 var_dump(cohort_is_enrolled(44862));
