@@ -30,6 +30,9 @@ jQuery(document).ready(function () {
             //enrolledroles: [3],
             custom: {
                 // "UP1DemandeurId": "4"
+            },
+            table: {
+                bFilter: false
             }
     });
 });
