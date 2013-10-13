@@ -178,7 +178,7 @@ class course_tree {
      */
     public function get_entries_from_rof_courses($rofcourses, $depth) {
         //$component = $this->coursetree->get_component_from_category($this->coursetree->parentcatid);
-        //$parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
+        $parentrofpath = '/' . join('/', array_slice($this->pseudopath, 1)); // le chemin sans la catégorie
 
         $prenodes = array();
         $directcourse = array();
@@ -206,11 +206,21 @@ class course_tree {
 
             $item['load_on_demand'] = !empty($unfold[$node]);
             if (isset($directcourse[$node]) && $directcourse[$node]) {
-                foreach ($directcourse[$node] as $crsid) {
+                foreach ($directcourse[$node] as $crsid) { // tous les cours directement rattachés au noeud
+                    $item['load_on_demand'] = false;
                     $item['label'] = $courseformatter->format_entry($crsid, !$item['load_on_demand']);
                     $item['id'] = $node . '/' . $crsid;
                     $item['depth'] = $depth;
                     $items[] = $item;
+                }
+                // maintenant le sous-arbre partant du noeud
+                $childcourses = courselist_roftools::get_courses_from_parent_rofpath($parentrofpath);
+                if ($childcourses) { // au moins un fils
+                    $itemsub['load_on_demand'] = true;
+                    $itemsub['label'] = $this->display_entry_name($name, $node, false);
+                    $itemsub['id'] = $node ;
+                    $itemsub['depth'] = $depth;
+                    $items[] = $itemsub;
                 }
             } else {
                 $item['label'] = $this->display_entry_name($name, $node, !$item['load_on_demand']);
