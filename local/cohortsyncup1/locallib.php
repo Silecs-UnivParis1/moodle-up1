@@ -114,11 +114,11 @@ function delete_missing_cohorts($data, $verbose) {
     $cnt = array ('delete' => 0, 'keep' => 0);
     $progressbar = array ('delete' => 'D', 'keep' => 'K');
 
-    $dbcohorts = $DB->get_fieldset_select('cohort', 'idnumber', '');
+    $dbcohorts = $DB->get_fieldset_select('cohort', 'idnumber', "component='local_cohortsyncup1'");
     $cohortsid = $DB->get_records_menu('cohort', null, null, 'idnumber, id');
     $wscohorts = array_map('project_key', $data);
     $todelete = array_diff($dbcohorts, $wscohorts);
-    echo "There are " . count($todelete) . " missing cohorts.\n";
+    echo "\nThere are " . count($todelete) . " missing cohorts.\n";
 
     foreach ($todelete as $idnumber) {
         $cohortid = $cohortsid[$idnumber];
