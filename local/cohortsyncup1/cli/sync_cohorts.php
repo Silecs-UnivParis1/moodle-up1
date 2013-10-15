@@ -26,7 +26,7 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/locallib.php');
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array(
         'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false,
-        'cleanall'=>false, 'force'=>false,
+        'cleanall'=>false, 'force'=>false, 'delete-old'=>false,
         'allGroups'=>false,
         'since'=>false, 'init'=>false ),
     array('h'=>'help', 'i'=>'init'));
@@ -40,15 +40,18 @@ $help =
 "Synchronize cohorts from PAGS webservice. Normally, to be executed by a cron job.
 
 Options:
---verb=N              Verbosity (0 to 3), 1 by default
 --since=(timestamp)   Apply only to users synchronized since given timestamp. If not set, use last cohort sync.
 --allGroups           Uses 'allGroups' webservice instead of the standard one (from users)
 -i, --init            Apply to all users ever synchronized (like --since=0)
 -h, --help            Print out this help
---cleanall            Empty cohort_members, then cohort
-  --force             Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
+
 --printlast           Display last syncs (diagnostic)
 --testws              Test the webservice (data download), to use with --verb= 1 to 3
+--verb=N              Verbosity (0 to 3), 1 by default
+
+--delete-old   /!\    Delete cohorts still in database but not in webservice results anymore. One shot.
+--cleanall            Empty cohort_members, then cohort
+  --force      /!\    Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
 
 If you want to force initialization, you should execute --cleanall first but it may be faster
 to manually empty tables cohort and cohort_members with the following MySQL command:
@@ -78,6 +81,11 @@ if ( $options['testws'] ) {
 if ( $options['cleanall'] ) {
     cohorts_cleanall($options['force']);
     return 0;
+}
+
+if ( $options['delete-old'] ) {
+    $res = cli_delete_missing_cohorts($options['verb']);
+    return $res;
 }
 
 if ( $options['printlast'] ) {

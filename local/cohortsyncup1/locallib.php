@@ -79,8 +79,65 @@ function get_ws_data($webservice) {
     curl_setopt($ch, CURLOPT_URL, $webservice);
     //$timeend = microtime(true);
     $data = json_decode(curl_exec($ch));
+    // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime', $description => '...')
+
     $curlinfo = curl_getinfo($ch);
+    curl_close($ch);
     return array($curlinfo, $data);
+}
+
+/**
+ * wrapper around delete_lacking_cohorts() to execute it by CLI one-shot
+ * @return boolean
+ */
+function cli_delete_missing_cohorts($verbose) {
+    echo "Connect webservice... ";
+    add_to_log(0, 'local_cohortsyncup1', 'delMissingCohorts:begin', '', "");
+    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
+    echo "OK. \n";
+
+    $cnt = delete_missing_cohorts($data, $verbose);
+    $logmsg = "parsed cohorts : " . $cnt['delete']. " deleted, " . $cnt['keep']. " kept.";
+    echo "\n =>  $logmsg\n\n";
+    add_to_log(0, 'local_cohortsyncup1', 'delMissingCohorts:end', '', $logmsg);
+    return true;
+}
+
+/**
+ * delete base cohorts which are not present in the webservice results anymore
+ * @param array $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime', $description => '...')
+ * @return array (int $deleted, int $kept) : # of deleted and kept cohorts
+ */
+function delete_missing_cohorts($data, $verbose) {
+    global $DB;
+    $action = array (true => 'delete', false => 'keep');
+    $cnt = array ('delete' => 0, 'keep' => 0);
+    $progressbar = array ('delete' => 'D', 'keep' => 'K');
+
+    $dbcohorts = $DB->get_fieldset_select('cohort', 'idnumber', '');
+    $cohortsid = $DB->get_records_menu('cohort', null, null, 'idnumber, id');
+    $wscohorts = array_map('project_key', $data);
+    $todelete = array_diff($dbcohorts, $wscohorts);
+    echo "There are " . count($todelete) . " missing cohorts.\n";
+
+    foreach ($todelete as $idnumber) {
+        $cohortid = $cohortsid[$idnumber];
+        $res = safe_delete_cohort($cohortid);
+
+        $act = $action[$res];
+        $cnt[$act]++;
+        if ($verbose >=1 ) {
+            echo $progressbar[$act];
+        }
+        if ($verbose >= 3) {
+            echo '=' . $idnumber . ' ';
+        }
+    }
+    return $cnt;
+}
+
+function project_key($datum) {
+    return $datum->key;
 }
 
 /**
@@ -105,7 +162,7 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
     list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
     // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
     if ($data) {
-        if ($verbose >= 2) echo "Parsing " . count($data) . " cohorts ; since $ldaptimelast. \n";
+        if ($verbose >= 1) echo "Parsing " . count($data) . " cohorts ; since $ldaptimelast. \n";
 
         foreach ($data as $cohort) {
             $count++;
@@ -113,16 +170,19 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 
             $action = process_cohort($cohort, $verbose, $ldaptimelast); // real processing here
             $cnt[$action]++;
-            if ($verbose >= 3) echo $progressbar[$action];
+            if ($verbose >= 2) echo $progressbar[$action];
         } // foreach($data)
 
-        $logmsg = "\nAll cohorts : " . $cnt['pass']. " passed, " . $cnt['noop']. " noop, "
-                . $cnt['modify']. " modified, " . $cnt['create']. " created.\n";
+        $logmsg = "\nAll cohorts: " . $cnt['pass']. " passed, " . $cnt['noop']. " noop, "
+                . $cnt['modify']. " modified, " . $cnt['create']. " created.";
+
+        $cnt = delete_missing_cohorts($data, $verbose);
+        $logmsg .= "   MISSING: " . $cnt['delete']. " deleted, " . $cnt['keep']. " kept.";
     } else {
         $logmsg = "\nUnable to fetch data from: " . $ws_allGroups . "\n" ;
     }
     echo "\n\n$logmsg\n\n";
-    add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:end', '', "From users. " . $logmsg);
+    add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:end', '', $logmsg);
 }
 
 
@@ -170,8 +230,7 @@ function display_cohorts_all_groups($verbose=2)
     global $CFG, $DB;
     // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $count = 0;
-    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
-    // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
+    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));    
 
     if ($data) {
         if ($verbose >= 1) {
@@ -207,7 +266,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
 {
     global $CFG, $DB;
 
-    add_to_log(0, 'local_cohortsyncup1', 'sync:begin', '', "From users since $timelast");
+    add_to_log(0, 'local_cohortsyncup1', 'syncFromUsers:begin', '', "since $timelast");
     $ws_userGroupsAndRoles = get_config('local_cohortsyncup1', 'ws_userGroupsAndRoles');
     // $ws_userGroupsAndRoles = 'http://ticetest.univ-paris1.fr/web-service-groups/userGroupsAndRoles';
     $ref_plugin = 'auth_ldapup1';
@@ -276,13 +335,12 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
             $cntRemovemembers += remove_memberships($userid, $memberof);
         }
     } // foreach ($users)
-    curl_close($ch);
 
     $logmsg = "$totalUsers parsed users.  "
         . "Cohorts : " . count($cntCohortUsers) . " encountered. $cntCrcohorts created.  "
         . "Membership: +$cntAddmembers  -$cntRemovemembers.";
     echo "\n\n$logmsg\n\n";
-    add_to_log(0, 'local_cohortsyncup1', 'sync:end', '', "From users. " . $logmsg);
+    add_to_log(0, 'local_cohortsyncup1', 'syncFromUsers:end', '', $logmsg);
 }
 
 
