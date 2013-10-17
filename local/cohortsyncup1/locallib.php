@@ -446,3 +446,34 @@ function truncate_str($str, $bytes=254, $end=true, $complete='…') {
     return $new . $complete;
 }
 
+function fix_user_sync($dryrun=false) {
+    global $DB;
+    $sql = "SELECT u.id, u.auth, u.username, u.timemodified "
+         . "FROM {user} u LEFT JOIN {user_sync} us ON (u.id=us.userid) "
+         . "WHERE us.userid IS NULL AND u.auth='shibboleth'";
+    $missingusers = $DB->get_records_sql($sql);
+    echo count($missingusers) . " missing users (exisiting in table user but not in table user_sync).\n";
+    //print_r($missingusers);
+    if ($dryrun) {
+        return true;
+    }
+
+    $diag = true;
+    foreach ($missingusers as $missing) {
+        $syncuser = new stdClass();
+        $syncuser->ref_plugin = 'auth_ldapup1';
+        $syncuser->ref_param = '';
+        $syncuser->timemodified = time();
+        $syncuser->userid = $missing->id;
+        
+        $id = $DB->insert_record('user_sync', $syncuser, true, false);
+        if ($id) {
+            echo "    " . $id . " " . $missing->username . "\n";
+        }
+        else {
+            echo "ERR " . $missing->username . "not inserted.\n";
+            $diag = false;
+        }
+    }
+    return $diag;
+}

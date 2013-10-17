@@ -26,7 +26,7 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/locallib.php');
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array(
         'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false,
-        'cleanall'=>false, 'force'=>false, 'delete-old'=>false,
+        'cleanall'=>false, 'force'=>false, 'delete-old'=>false, 'fix-sync'=>false, 'dryrun'=>false,
         'allGroups'=>false,
         'since'=>false, 'init'=>false ),
     array('h'=>'help', 'i'=>'init'));
@@ -52,6 +52,8 @@ Options:
 --delete-old   /!\    Delete cohorts still in database but not in webservice results anymore. One shot.
 --cleanall            Empty cohort_members, then cohort
   --force      /!\    Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
+--fix-sync            Fix user sync for created users without record in user_sync (catch-all)
+  --dryrun            Perform only a diagnostic instead of fix. No modification in database.
 
 If you want to force initialization, you should execute --cleanall first but it may be faster
 to manually empty tables cohort and cohort_members with the following MySQL command:
@@ -85,6 +87,11 @@ if ( $options['cleanall'] ) {
 
 if ( $options['delete-old'] ) {
     $res = cli_delete_missing_cohorts($options['verb']);
+    return $res;
+}
+
+if ( $options['fix-sync'] ) {
+    $res = fix_user_sync($options['dryrun']);
     return $res;
 }
 
