@@ -48,6 +48,15 @@ function xmldb_auth_ldapup1_upgrade($oldversion) {
         insert_user_metadata_fields(true);
     }
 
+    if ($oldversion < 2013012404) {
+        echo "Ajout index sur la table user_sync :<br />\n";
+
+        $table = new xmldb_table('user_sync');
+        if ( ! $dbman->index_exists('user_sync', 'userid') ) {
+            $dbman->add_index('user_sync', 'userid');
+        }
+    }
+
 
     return true;
 }
