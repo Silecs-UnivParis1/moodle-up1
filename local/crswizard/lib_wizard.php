@@ -10,7 +10,7 @@ require_once("$CFG->dirroot/local/roftools/roflib.php");
 function wizard_get_course_list_teacher() {
     global $USER;
     $course_list = array();
-    if ($courses = enrol_get_my_courses(NULL, 'visible DESC, fullname ASC')) {
+    if ($courses = enrol_get_my_courses(NULL, 'shortname ASC')) {
         foreach ($courses as $course) {
             $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
             if ( has_capability('moodle/course:update', $coursecontext, $USER->id) ) {
