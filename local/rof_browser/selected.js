@@ -64,6 +64,12 @@ jQuery(function () {
             $(this).addClass('expanded');
 			plus = ' - ';
             $(this).attr("title","Replier");
+            var idelemsel =  '#' + $(this).attr('id') + '-elem';
+            if ( $(idelemsel).hasClass("info") ) {
+                $(idelemsel).removeClass('info');
+                $(idelemsel).addClass('element pointer oplus');
+                $(idelemsel).attr("title","Sélectionner");
+            }
 		} else {
             $(this).removeClass('expanded');
             $(this).addClass('collapsed');
