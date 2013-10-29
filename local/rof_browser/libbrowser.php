@@ -481,21 +481,25 @@ class rof_browser {
 
 		$nbEnf = $nbSub + $nbCourses;
 
+        $titleSel = 'Sélectionner';
+        $classsel = 'element pointer oplus';
 		$style = 'collapse';
 		$collapse = '';
 		$listStyle = 'list-none list-item';
 		if ($nbEnf) {
 			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
+            $classsel = 'info';
+            $titleSel = 'Dépliez cet élément ...';
 		}
         $spancomp = '';
         if (isset($sp->composition)) {
             $spancomp .= '<span class="comp rof-hidden">'
             . $sp->composition . '</span>';
         }
-        $classsel = 'element pointer oplus';
         if ($this->readonly == 1) {
             $classsel = '';
+            $titleSel = '';
         }
 		$element .= '<li class="' . $listStyle . '"><div class="elem-li">'
 			. '<span class="' . $style . '" id="'. $id . '" title="Déplier" '
@@ -503,7 +507,7 @@ class rof_browser {
 			. '" data-path="' . $data_path . '">' . $collapse . '</span>'
 			. '<span class="intitule" title="' . $titleElem . '">' . $intitule . '</span>'
             . $spancomp
-			. '<span class="' . $classsel . '" title="Sélectionner" id="'
+			. '<span class="' . $classsel . '" title="' . $titleSel . '" id="'
 			. $idElem . '"></span>'
 			. '</div></li>';
 		return $element;

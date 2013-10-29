@@ -74,6 +74,15 @@ li.list-item span.oplus, div.dip-sel span.oplus {
     display: block; float: right; clear: right;
 }
 
+li.list-item span.info, div.dip-sel span.info {
+	font-size: 24px;
+    margin-top: -2px; margin-left: 4px;
+    width: 20px; height: 20px; background-image: url(pix/help.png); color: transparent;
+    background-repeat: no-repeat;
+    background-position: bottom;
+    display: block; float: right; clear: right;
+}
+
 /**
 li.list-item span.oplus, div.dip-sel span.oplus {
 	font-size: 24px;
