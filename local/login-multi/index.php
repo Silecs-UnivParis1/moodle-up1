@@ -149,7 +149,7 @@ echo $OUTPUT->heading("Les identifiants d'un autre établissement", 3);
     </div>
     <div class="form-input">
         <select name="idp" id="idp">
-            <option value="">                                        </option>
+            <option value="">Sélectionner un établissement…</option>
             <?php print_idp_list(); ?>
         </select>
     </div>

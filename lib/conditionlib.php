@@ -1297,7 +1297,7 @@ abstract class condition_info_base {
             // We'll also preload all of the other custom profile fields just in case and ensure we have the
             // default value available as well.
             if ($this->customprofilefields === null) {
-                $this->customprofilefields = $DB->get_records('object_info_field', array('objectname' => 'user'), 'sortorder ASC, id ASC', 'id, shortname, defaultdata');
+                $this->customprofilefields = $DB->get_records('custom_info_field', array('objectname' => 'user'), 'sortorder ASC, id ASC', 'id, shortname, defaultdata');
             }
             if (!array_key_exists($fieldid, $this->customprofilefields)) {
                 // No such field exists.
