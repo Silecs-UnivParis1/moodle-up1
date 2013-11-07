@@ -282,14 +282,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     $cntRemovemembers = 0;
     $cntUsers = 0;
     $totalUsers = count($users);
-
-    $res = cohort_get_cohorts(1, 0, 100000); //1 = context global, page, perpage
-    $allcohorts = $res['cohorts'];
-    $idcohort = array();
-
-    foreach ($allcohorts as $cohort) {
-        $idcohort[$cohort->idnumber] = $cohort->id;
-    }
+    $idcohort = $DB->get_records_menu('cohort', null, '', 'idnumber,id');
 
     $prevpercent = '';
     foreach ($users as $userid => $username) {
@@ -346,8 +339,8 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
 
 /**
  * compute memberships to be removed from database, and then actually do removing
- * @param type $userid
- * @param type $memberof
+ * @param integer $userid
+ * @param array $memberof array(int $cohort->idnumber ... )
  */
 function remove_memberships($userid, $memberof) {
     global $DB;
