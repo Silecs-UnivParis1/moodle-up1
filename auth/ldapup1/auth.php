@@ -323,8 +323,8 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
             $all_keys = array_keys(get_object_vars($this->config));
             $updatekeys = array();
             foreach ($all_keys as $key) {
-                if (preg_match('/^field_updatelocal_(.+)$/', $key, $match)) {
-                    // SILECS UP1 on force tous les champs à accepter l'update (type onlogin, pas oncreate)
+                if (preg_match('/^field_map_(.+)$/', $key, $match)) {
+                    // SILECS UP1 on force l'update sur tous les champs avec une correspondance LDAP (type onlogin, pas oncreate)
                     if ( ! empty($this->config->{'field_map_'.$match[1]}) ) {
                     array_push($updatekeys, $match[1]); // the actual key name
                     }
@@ -545,7 +545,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
                     $value = '';
                 }
 
-                if (!empty($this->config->{'field_updatelocal_' . $key})) {
+                if (!empty($this->config->{'field_map_' . $key})) {
                     if ($user->{$key} != $value) { // only update if it's changed
                         $DB->set_field('user', $key, $value, array('id'=>$userid));
                         $updated = true;
