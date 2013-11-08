@@ -136,6 +136,10 @@ switch ($stepin) {
                 $data->item =  (isset($_POST['item']) ? wizard_get_array_item($_POST['item']) : array());
 
                 $data->rattachements = array_unique(array_filter($data->rattachements));
+                $data->up1niveauannee = array_unique(array_filter($data->up1niveauannee));
+                $data->up1semestre = array_unique(array_filter($data->up1semestre));
+                $data->up1niveau = array_unique(array_filter($data->up1niveau));
+
                 $SESSION->wizard['form_step' . $stepin] = (array) $data;
                 $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
 

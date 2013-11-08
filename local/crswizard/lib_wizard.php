@@ -236,6 +236,47 @@ function get_list_category($idcategory) {
 }
 
 /**
+ * Renvoie le liste de valeurs pour la métadonnée de nom $type
+ * @param string $type : nom de la métaddonnée de cours
+ * @return array $list
+ */
+function get_list_metadonnees($type) {
+    $list = array();
+    switch ($type) {
+        case 'up1semestre':
+            $list[0] = 'Aucun';
+            $list['1'] = '1';
+            $list['2'] = '2';
+            $list['3'] = '3';
+            $list['4'] = '4';
+            $list['5'] = '5';
+            $list['6'] = '6';
+            break;
+        case 'up1niveauannee':
+            $list[0] = 'Aucun';
+            $list['1'] = '1';
+            $list['2'] = '2';
+            $list['3'] = '3';
+            $list['4'] = '4';
+            $list['5'] = '5';
+            $list['6'] = '6';
+            break;
+        case 'up1niveau':
+            $list[0] = 'Aucun';
+            $list['L1'] = 'L1';
+            $list['L2'] = 'L2';
+            $list['L3'] = 'L3';
+            $list['M1'] = 'M1';
+            $list['M2'] = 'M2';
+            $list['D'] = 'D';
+            $list['Autre'] = 'Autre';
+            break;
+    }
+
+    return $list;
+}
+
+/**
  * Envoie un email à l'adresse mail spécifiée
  * @param string $email
  * @param string $subject,
