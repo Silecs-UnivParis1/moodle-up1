@@ -10,7 +10,8 @@ var defaultConfig = {
     separator: " / ",
     labelOnEmpty: "Aucun",
     // labels: ["l1", "l2"],
-    required: true
+    required: true,
+    labelButton: "Ajouter une composante et un type de diplôme"
 };
 
 var getTree = function (options) {
@@ -155,7 +156,7 @@ $.fn.transformIntoSubselects = function (cfg) {
             theSelect.removeAttr('multiple').val(valuesSelected[0]);
             var duplicator = build_duplicator(theSelect, config);
 
-            var button = $('<button type="button">Ajouter une composante et un type de diplôme</button>');
+            var button = $('<button type="button">' + config.labelButton + '</button>');
             button.click(duplicator);
             $('<div class="fitem"><div class="felement fstatic"></div></div>').insertAfter(theSelect.parent().parent())
                 .children().first().append(button);
