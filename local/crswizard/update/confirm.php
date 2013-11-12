@@ -78,10 +78,12 @@ class course_wizard_confirm extends moodleform {
                 if (!empty($SESSION->wizard['form_step3'][$key])) {
                     $donnees = '';
                     foreach ($SESSION->wizard['form_step3'][$key] as $elem) {
-                        $donnees = $donnees . $elem . ';';
+                        if ($elem != '0') {
+                            $donnees = $donnees . $elem . ';';
+                        }
                     }
                     $donnees = substr($donnees, 0, -1);
-                    if ($donnees != '0') {
+                    if ($donnees != '' && $donnees != '0') {
                         $mform->addElement('text', $key, $label, 'maxlength="40" size="30", disabled="disabled"');
                         $mform->setConstant($key , $donnees);
                     }
