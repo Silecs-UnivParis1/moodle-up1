@@ -1041,6 +1041,27 @@ class core_wizard {
         // save custom fields data
         $mydata->id = $course->id;
         $custominfo_data = custominfo_data::type('course');
+
+        // metadata supp.
+        if ($this->formdata['wizardcase'] == 3) {
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $md) {
+                if (!empty($this->formdata['form_step3'][$md])) {
+                    $donnees = '';
+                    foreach ($this->formdata['form_step3'][$md] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $name = 'profile_field_' . $md;
+                    if (isset($this->mydata->$name) && $this->mydata->$name != '') {
+                        $this->mydata->$name .= ';' . $donnees;
+                    } else {
+                        $this->mydata->$name = $donnees;
+                    }
+                }
+            }
+        }
+
         $cleandata = $this->customfields_wash($mydata);
         $custominfo_data->save_data($cleandata);
 
@@ -1520,6 +1541,22 @@ class core_wizard {
             }
             $mg .=  "\n";
         }
+
+        //cas3 - métadonnées supplémentaires
+        if ($this->formdata['wizardcase'] == 3) {
+            $metadonnees = get_array_metadonees();
+            foreach ($metadonnees as $key => $label) {
+                if (!empty($form3[$key])) {
+                    $donnees = '';
+                    foreach ($form3[$key] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $mg .= $label . $donnees . "\n";
+                }
+            }
+        }
+
         $mg .= get_string('fullnamecourse', 'local_crswizard') . $this->mydata->fullname . "\n";
         $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
 
