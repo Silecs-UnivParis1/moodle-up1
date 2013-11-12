@@ -277,6 +277,23 @@ function get_list_metadonnees($type) {
 }
 
 /**
+ * renvoie le tableau des métadonnées ajouté dans le cas 3
+ * @param bool $label
+ * @return array $metadonnees
+ */
+function get_array_metadonees($label = TRUE) {
+    $metadonnees = array();
+    if ($label) {
+        $metadonnees = array('up1niveauannee' => 'Niveau année :',
+        'up1semestre' => 'Semestre :',
+        'up1niveau' => 'Niveau :');
+    } else {
+        $metadonnees = array('up1niveauannee', 'up1semestre', 'up1niveau');
+    }
+    return $metadonnees;
+}
+
+/**
  * Envoie un email à l'adresse mail spécifiée
  * @param string $email
  * @param string $subject,

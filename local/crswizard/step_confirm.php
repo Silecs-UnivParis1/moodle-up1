@@ -60,9 +60,7 @@ class course_wizard_step_confirm extends moodleform {
 
         // ajout métadonnée supp. indexation pour cas3
         if ($SESSION->wizard['wizardcase'] == 3) {
-            $metadonnees = array('up1niveauannee' => 'Niveau année :',
-                'up1semestre' => 'Semestre :',
-                'up1niveau' => 'Niveau :');
+            $metadonnees = get_array_metadonees();
             foreach ($metadonnees as $key => $label) {
                 if (!empty($SESSION->wizard['form_step3'][$key])) {
                     $donnees = '';
