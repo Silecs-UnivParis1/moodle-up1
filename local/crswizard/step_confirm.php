@@ -58,6 +58,24 @@ class course_wizard_step_confirm extends moodleform {
             }
         }
 
+        // ajout métadonnée supp. indexation pour cas3
+        if ($SESSION->wizard['wizardcase'] == 3) {
+            $metadonnees = array('up1niveauannee' => 'Niveau année :',
+                'up1semestre' => 'Semestre :',
+                'up1niveau' => 'Niveau :');
+            foreach ($metadonnees as $key => $label) {
+                if (!empty($SESSION->wizard['form_step3'][$key])) {
+                    $donnees = '';
+                    foreach ($SESSION->wizard['form_step3'][$key] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $mform->addElement('text', $key, $label, 'maxlength="40" size="30", disabled="disabled"');
+                    $mform->setConstant($key , $donnees);
+                }
+            }
+        }
+
         // rattachement secondaire - cas 2 + hybride
         if (isset($SESSION->wizard['form_step2']['rattachement2'])) {
             $rof2 = $SESSION->wizard['form_step2']['rattachement2'];
