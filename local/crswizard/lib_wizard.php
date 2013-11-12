@@ -1841,6 +1841,29 @@ class core_wizard {
                 }
             }
 
+            // metadonnees sup.
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $key) {
+                if (!empty($this->formdata['form_step3'][$key])) {
+                    $donnees = '';
+                    foreach ($this->formdata['form_step3'][$key] as $elem) {
+                        if ($elem != '0') {
+                            $donnees = $donnees . $elem . ';';
+                        }
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $name = 'profile_field_' . $key;
+
+                    if ($donnees != '' && $donnees != '0') {
+                        if (isset($this->mydata->$name) && $this->mydata->$name != '') {
+                            $this->mydata->$name .= ';' . $donnees;
+                        } else {
+                            $this->mydata->$name = $donnees;
+                        }
+                    }
+                }
+            }
+
             //log
             if ($form2['fullname'] != $initc['fullname'] || $form2['shortname'] != $initc['shortname'] ) {
                 $this->formdata['modif']['identification'] = true;
