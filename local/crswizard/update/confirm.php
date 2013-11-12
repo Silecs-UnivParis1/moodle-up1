@@ -71,6 +71,24 @@ class course_wizard_confirm extends moodleform {
             }
         }
 
+        // ajout métadonnée supp. indexation pour cas3
+        if ($SESSION->wizard['wizardcase'] == 3) {
+            $metadonnees = get_array_metadonees();
+            foreach ($metadonnees as $key => $label) {
+                if (!empty($SESSION->wizard['form_step3'][$key])) {
+                    $donnees = '';
+                    foreach ($SESSION->wizard['form_step3'][$key] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    if ($donnees != '0') {
+                        $mform->addElement('text', $key, $label, 'maxlength="40" size="30", disabled="disabled"');
+                        $mform->setConstant($key , $donnees);
+                    }
+                }
+            }
+        }
+
         $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'local_crswizard'), 'maxlength="254" size="100"');
 
         $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'local_crswizard'), 'maxlength="100" size="40"');
