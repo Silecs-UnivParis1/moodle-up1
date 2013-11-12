@@ -60,6 +60,31 @@ function wizard_get_course($id) {
 
             $SESSION->wizard['form_step3']['all-rof'] = wizard_get_rof('form_step3');
             $SESSION->wizard['init_course']['form_step3']['item'] = $SESSION->wizard['form_step3']['item'];
+
+            //metadonnees indexation pour cas 3 + gestion hybride
+            $tab_metadonnees = array();
+            $tab_metadonnees2 = array();
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $key) {
+                $name = 'profile_field_' . $key;
+                if (isset($course->$name)) {
+                    $tab_metadonnees[$key] = explode(';', $course->$name);
+                    $SESSION->wizard['form_step3'][$key] = $tab_metadonnees[$key];
+                }
+            }
+            if (isset($SESSION->wizard['form_step3']['all-rof']) && count($SESSION->wizard['form_step3']['all-rof'])) {
+                foreach ($SESSION->wizard['form_step3']['all-rof'] as $key => $obj) {
+                    $meta = rof_get_metadata(explode('_', $key));
+                    foreach ($metadonnees as $key) {
+                        $tab_metadonnees2[$key][] = $meta['Indexation'][$key];
+                    }
+                }
+            }
+            foreach ($metadonnees as $key) {
+                if (isset($tab_metadonnees[$key]) && isset($tab_metadonnees2[$key])) {
+                    $SESSION->wizard['form_step3'][$key] = array_diff($tab_metadonnees[$key], $tab_metadonnees2[$key]);
+                }
+            }
         }
 
         //inscription cohortes
