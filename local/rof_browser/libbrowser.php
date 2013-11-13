@@ -490,7 +490,7 @@ class rof_browser {
 			$style = 'collapse curser-point collapsed';
 			$collapse = ' + ';
             $classsel = 'info';
-            $titleSel = 'Dépliez cet élément ...';
+            $titleSel = 'Cliquer sur &#x25B6; pour développer l\'arborescence';
 		}
         $spancomp = '';
         if (isset($sp->composition)) {
