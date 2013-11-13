@@ -133,6 +133,36 @@ class course_wizard_step3_form extends moodleform {
                     }
                 }
             }
+            // ajout métadonnée supp. indexation
+            $mform->addElement('header', 'indexation', get_string('indexationE3', 'local_crswizard'));
+            // Niveau année
+
+            $mform->addElement('html', '<div>');
+
+            $selectAnnee = $mform->createElement(
+                'select', 'up1niveauannee', '', get_list_metadonnees('up1niveauannee'),
+                array('class' => 'niveauanneeRattachements')
+            );
+            $selectAnnee->setMultiple(true);
+            $mform->addElement($selectAnnee);
+            $mform->addElement('html', '</div>');
+            // Semestre
+            $mform->addElement('html', '<div>');
+            $selectSemestre = $mform->createElement(
+                'select', 'up1semestre', '', get_list_metadonnees('up1semestre'),
+                array('class' => 'semestreRattachements')
+            );
+            $selectSemestre->setMultiple(true);
+            $mform->addElement($selectSemestre);
+
+            $mform->addElement('html', '</div>');
+            // Niveau
+             $selectNiveau = $mform->createElement(
+                'select', 'up1niveau', '', get_list_metadonnees('up1niveau'),
+                array('class' => 'niveauRattachements')
+            );
+            $selectNiveau->setMultiple(true);
+            $mform->addElement($selectNiveau);
         }
 
         //*********************************************

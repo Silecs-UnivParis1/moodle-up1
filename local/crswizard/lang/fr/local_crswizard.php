@@ -139,6 +139,7 @@ $string['fullnamecourse'] = 'Nom complet de l\'espace : ';
 $string['generalinfoblock'] = 'Informations générales de l\'espace de cours';
 $string['guest'] = 'Visiteur anonyme';
 $string['guestkey'] = 'Clé d\'inscription pour le rôle "visiteur anonyme"';
+$string['indexationE3'] = 'Métadonnées d\'indexation';
 $string['labelE7ratt2'] = 'Autre(s) rattachement(s) de l\'espace : ';
 $string['managecourseblock'] = 'Informations concernant la demande';
 $string['msgredirect'] = 'L\'espace a bien a été créé.';

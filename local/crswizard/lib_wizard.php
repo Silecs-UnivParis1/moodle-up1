@@ -236,6 +236,64 @@ function get_list_category($idcategory) {
 }
 
 /**
+ * Renvoie le liste de valeurs pour la métadonnée de nom $type
+ * @param string $type : nom de la métaddonnée de cours
+ * @return array $list
+ */
+function get_list_metadonnees($type) {
+    $list = array();
+    switch ($type) {
+        case 'up1semestre':
+            $list[0] = 'Aucun';
+            $list['1'] = '1';
+            $list['2'] = '2';
+            $list['3'] = '3';
+            $list['4'] = '4';
+            $list['5'] = '5';
+            $list['6'] = '6';
+            break;
+        case 'up1niveauannee':
+            $list[0] = 'Aucun';
+            $list['1'] = '1';
+            $list['2'] = '2';
+            $list['3'] = '3';
+            $list['4'] = '4';
+            $list['5'] = '5';
+            $list['6'] = '6';
+            break;
+        case 'up1niveau':
+            $list[0] = 'Aucun';
+            $list['L1'] = 'L1';
+            $list['L2'] = 'L2';
+            $list['L3'] = 'L3';
+            $list['M1'] = 'M1';
+            $list['M2'] = 'M2';
+            $list['D'] = 'D';
+            $list['Autre'] = 'Autre';
+            break;
+    }
+
+    return $list;
+}
+
+/**
+ * renvoie le tableau des métadonnées ajouté dans le cas 3
+ * @param bool $label
+ * @return array $metadonnees
+ */
+function get_array_metadonees($label = TRUE) {
+    $metadonnees = array();
+    if ($label) {
+        $metadonnees = array('up1niveauannee' => 'Niveau année :',
+        'up1semestre' => 'Semestre :',
+        'up1niveau' => 'Niveau :');
+    } else {
+        $metadonnees = array('up1niveauannee', 'up1semestre', 'up1niveau');
+    }
+    return $metadonnees;
+}
+
+/**
  * Envoie un email à l'adresse mail spécifiée
  * @param string $email
  * @param string $subject,
@@ -983,6 +1041,27 @@ class core_wizard {
         // save custom fields data
         $mydata->id = $course->id;
         $custominfo_data = custominfo_data::type('course');
+
+        // metadata supp.
+        if ($this->formdata['wizardcase'] == 3) {
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $md) {
+                if (!empty($this->formdata['form_step3'][$md])) {
+                    $donnees = '';
+                    foreach ($this->formdata['form_step3'][$md] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $name = 'profile_field_' . $md;
+                    if (isset($this->mydata->$name) && $this->mydata->$name != '') {
+                        $this->mydata->$name .= ';' . $donnees;
+                    } else {
+                        $this->mydata->$name = $donnees;
+                    }
+                }
+            }
+        }
+
         $cleandata = $this->customfields_wash($mydata);
         $custominfo_data->save_data($cleandata);
 
@@ -1462,6 +1541,22 @@ class core_wizard {
             }
             $mg .=  "\n";
         }
+
+        //cas3 - métadonnées supplémentaires
+        if ($this->formdata['wizardcase'] == 3) {
+            $metadonnees = get_array_metadonees();
+            foreach ($metadonnees as $key => $label) {
+                if (!empty($form3[$key])) {
+                    $donnees = '';
+                    foreach ($form3[$key] as $elem) {
+                        $donnees = $donnees . $elem . ';';
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $mg .= $label . $donnees . "\n";
+                }
+            }
+        }
+
         $mg .= get_string('fullnamecourse', 'local_crswizard') . $this->mydata->fullname . "\n";
         $mg .= get_string('shortnamecourse', 'local_crswizard') . $this->mydata->shortname . "\n";
 
@@ -1743,6 +1838,29 @@ class core_wizard {
                 $this->formdata['modif']['attach'] = true;
                 if (count($newhyb) == 0) {
                     $this->formdata['modif']['attach2null'] = 1;
+                }
+            }
+
+            // metadonnees sup.
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $key) {
+                if (!empty($this->formdata['form_step3'][$key])) {
+                    $donnees = '';
+                    foreach ($this->formdata['form_step3'][$key] as $elem) {
+                        if ($elem != '0') {
+                            $donnees = $donnees . $elem . ';';
+                        }
+                    }
+                    $donnees = substr($donnees, 0, -1);
+                    $name = 'profile_field_' . $key;
+
+                    if ($donnees != '' && $donnees != '0') {
+                        if (isset($this->mydata->$name) && $this->mydata->$name != '') {
+                            $this->mydata->$name .= ';' . $donnees;
+                        } else {
+                            $this->mydata->$name = $donnees;
+                        }
+                    }
                 }
             }
 
