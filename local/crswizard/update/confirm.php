@@ -132,8 +132,17 @@ class course_wizard_confirm extends moodleform {
                 foreach ($clefs as $type => $clef) {
                     $mform->addElement('html', html_writer::tag('h4', $type . ' : '));
                     $c = $clef['code'];
-                    $mform->addElement('text', 'valeur' . $c, get_string('enrolkey', 'local_crswizard') . ' : ');
-                    $mform->setConstant('valeur' . $c, $clef['password']);
+                    if ($clef['password'] == '') {
+                        // accès libre
+                        $html = '<div class="fitem"><div class="fitemtitle">'
+                            . '<div class="fstaticlabel"><label>'
+                            . 'Accès libre</label></div></div>'
+                            . '<div class="felement fstatic"></div></div>';
+                        $mform->addElement('html', $html);
+                    } else {
+                        $mform->addElement('text', 'valeur' . $c, get_string('enrolkey', 'local_crswizard') . ' : ');
+                        $mform->setConstant('valeur' . $c, $clef['password']);
+                    }
                     if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
                         $mform->addElement('date_selector', 'enrolstartdate' . $c, get_string('enrolstartdate', 'enrol_self') . ' : ');
                         $mform->setConstant('enrolstartdate' . $c, $clef['enrolstartdate']);
