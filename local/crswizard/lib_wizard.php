@@ -751,9 +751,15 @@ function wizard_preselected_validators() {
 }
 
 function wizard_list_clef($form6) {
-    global $SESSION;
     $list = array();
-    $tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
+    if (isset($form6['libre']) && $form6['libre'] == 1) {
+        // pas de clef visiteur
+        $tabCle = array('u' => 'Etudiante');
+        $list['Visiteur'] = array('code' => 'v', 'password' => '');
+    } else {
+        $tabCle = array('u' => 'Etudiante', 'v' => 'Visiteur');
+    }
+
     foreach ($tabCle as $c => $type) {
         $password = 'password' . $c;
         $enrolstartdate = 'enrolstartdate' . $c;
@@ -1420,7 +1426,11 @@ class core_wizard {
         }
         // traitement des données
         foreach ($tabClefs as $type => $tabClef) {
-            $name = 'clef ' . $type;
+            $libre = FALSE;
+            if ($tabClef['password'] == '') {
+                $libre = TRUE;
+            }
+            $name = ($libre ? 'accès libre ' : 'clef ') . $type;
 
             if ($type == 'Etudiante') {
                 $enrol = 'self';

@@ -42,6 +42,11 @@ class course_wizard_step_cle extends moodleform {
             $mform->setDefault('enrolenddate' . $c, 0);
         }
 
+        $mform->addElement('header', 'generala', 'Accès libre pour le rôle visiteur');
+        $mform->addElement('html', html_writer::tag('div', 'Attention : créer un accès libre Visiteur supprime la clé d\'inscription visiteur.', array('class' => 'fitem')));
+        $mform->addElement('checkbox', 'libre', 'Accès libre' );
+        $mform->setDefault('libre', 0);
+
 //--------------------------------------------------------------------------------
         $mform->addElement('hidden', 'stepin', null);
         $mform->setType('stepin', PARAM_INT);
