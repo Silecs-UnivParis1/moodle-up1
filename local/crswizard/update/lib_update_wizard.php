@@ -82,9 +82,16 @@ function wizard_get_course($id) {
             }
             foreach ($metadonnees as $key) {
                 if (isset($tab_metadonnees[$key]) && isset($tab_metadonnees2[$key])) {
-                    $SESSION->wizard['form_step3'][$key] = array_diff($tab_metadonnees[$key], $tab_metadonnees2[$key]);
+                    foreach ($tab_metadonnees2[$key] as $v) {
+                        if (in_array($v, $tab_metadonnees[$key])) {
+                            $k = array_search($v, $tab_metadonnees[$key]);
+                            $tab_metadonnees[$key][$k] = NULL;
+                        }
+                    }
+                    $SESSION->wizard['form_step3'][$key] = $tab_metadonnees[$key];
                 }
             }
+        //fin metadonnees indexation pour cas 3 + gestion hybride
         }
 
         //inscription cohortes
