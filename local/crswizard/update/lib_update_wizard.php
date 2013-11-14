@@ -173,6 +173,9 @@ function wizard_get_keys($courseid, $coursetimecreated) {
             $list['enrolenddate'.$k] = $key->enrolenddate;
             $list['enrolstartdate'.$k] = $key->enrolstartdate;
             $list['idenrol'][$role] = $key->id;
+            if ($key->password == '') {
+                $list['libre'] = 1;
+            }
         }
     }
     return $list;
