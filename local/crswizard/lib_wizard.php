@@ -1644,7 +1644,7 @@ class core_wizard {
             $clefs = wizard_list_clef($form6);
             if (count($clefs)) {
                 foreach ($clefs as $type => $clef) {
-                    $mg .= '    ' . $type . ' : ' . $clef['password'] . "\n";
+                    $mg .= '    ' . $type . ' : ' . ($clef['password'] == ''? 'Accès libre' : $clef['password']) . "\n";
                     $mg .= '    ' . get_string('enrolstartdate', 'enrol_self') . ' : ';
                     if (isset($clef['enrolstartdate']) && $clef['enrolstartdate'] != 0) {
                         $mg .= date('d-m-Y', $clef['enrolstartdate']);
