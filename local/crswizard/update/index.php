@@ -179,6 +179,10 @@ switch ($stepin) {
             $steptitle = get_string('upstepkeycase3', 'local_crswizard');
         }
         $editform = new course_wizard_step_cle();
+        $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
+        $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/../js/include-for-key.js'));
+
         $data = $editform->get_data();
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
