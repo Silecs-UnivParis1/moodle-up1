@@ -118,6 +118,33 @@ function wizard_get_metadonnees_indexation($course) {
     //fin metadonnees indexation pour cas 3 + gestion hybride
 }
 
+/**
+ * Efface les métadonnées venant d'un cours modèle sélectionné
+ */
+function wizard_clear_metadonnees() {
+        global $SESSION;
+        if ($SESSION->wizard['wizardcase'] == 3) {
+            $SESSION->wizard['form_step3']['rattachements'] = NULL;
+            $SESSION->wizard['form_step3']['all-rof'] = NULL;
+            $SESSION->wizard['init_course']['form_step3']['item'] = NULL;
+            $metadonnees = get_array_metadonees(FALSE);
+            foreach ($metadonnees as $key) {
+                $name = 'profile_field_' . $key;
+                $SESSION->wizard['form_step3'][$key] = '';
+            }
+        } elseif ($SESSION->wizard['wizardcase'] == 2) {
+            $SESSION->wizard['form_step3']['item'] = NULL;
+            $SESSION->wizard['init_course']['form_step3']['rattachement2'] = NULL;
+
+            $SESSION->wizard['form_step2']['category'] = NULL;
+            $SESSION->wizard['form_step2']['rofestablishment']  = NULL;
+            $SESSION->wizard['form_step2']['rofyear'] = NULL;
+            $SESSION->wizard['form_step2']['fullname'] = '';
+            $SESSION->wizard['form_step2']['all-rof'] = NULL;
+            $SESSION->wizard['init_course']['form_step2']['item'] = NULL;
+            $SESSION->wizard['form_step2']['item'] = NULL;
+        }
+}
 
 /**
  * détermine si le cours est rattaché au ROF

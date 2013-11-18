@@ -35,6 +35,8 @@ require_once(__DIR__ . '/step3_form.php');
 require_once(__DIR__ . '/step_confirm.php');
 require_once(__DIR__ . '/step_cle.php');
 
+require_once(__DIR__ . '/update/lib_update_wizard.php');
+
 global $DB, $CFG, $PAGE, $OUTPUT, $SESSION, $USER;
 
 require_login();
@@ -83,6 +85,11 @@ switch ($stepin) {
         }
         break;
     case 2:
+        //vérifier si modele de cours
+        get_selected_model();
+        //fin vérifier si modele de cours
+        wizard_get_metadonnees();
+
         $steptitle = get_string('coursedefinition', 'local_crswizard');
         $editoroptions = array(
             'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false, 'noclean' => true
@@ -120,11 +127,10 @@ switch ($stepin) {
                 $idcourse = $SESSION->wizard['idcourse'];
             }
             $hybridattachment_permission = wizard_has_hybridattachment_permission($idcourse, $USER->id);
-            if (!isset($SESSION->wizard['form_step3'])) {
-                $SESSION->wizard['form_step3']['user_name'] = fullname($USER);
-                $SESSION->wizard['form_step3']['user_login'] = $USER->username;
-                $SESSION->wizard['form_step3']['requestdate'] = time();
-            }
+            $SESSION->wizard['form_step3']['user_name'] = fullname($USER);
+            $SESSION->wizard['form_step3']['user_login'] = $USER->username;
+            $SESSION->wizard['form_step3']['requestdate'] = time();
+
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
