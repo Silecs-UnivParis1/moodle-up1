@@ -81,7 +81,7 @@ function notification_send_all_email($ids, $msg, $infolog) {
     global $DB;
     $nb = 0;
     if ($ids != '') {
-        $sql = "SELECT firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
+        $sql = "SELECT id, firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
         $users = $DB->get_records_sql($sql);
 
         foreach ($users as $user) {
