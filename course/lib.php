@@ -3251,6 +3251,9 @@ function make_editing_buttons(stdClass $mod, $absolute_ignored = true, $movesele
         $str->forcedgroupsseparate = get_string('forcedmodeinbrackets', 'moodle', get_string("groupsseparate"));
         $str->forcedgroupsvisible  = get_string('forcedmodeinbrackets', 'moodle', get_string("groupsvisible"));
         $str->edittitle = get_string('edittitle', 'moodle');
+        //debut ajout SILECS
+        $str->notification = get_string("notifications");
+        //fin ajout SILECS
     }
 
     $baseurl = new moodle_url('/course/mod.php', array('sesskey' => sesskey()));
@@ -3414,6 +3417,15 @@ function make_editing_buttons(stdClass $mod, $absolute_ignored = true, $movesele
             array('class' => 'editing_assign', 'title' => $str->assign)
         );
     }
+
+    //debut ajout SILECS
+    $actions[] = new action_link(
+            new moodle_url('/local/up1_notificationcourse/notificationcourse.php', array('mod' => $mod->modname, 'id' => $mod->id)),
+            new pix_icon('t/email', $str->notification, 'moodle', array('class' => 'iconsmall', 'title' => '')),
+            null,
+            array('class' => 'editing_assign', 'title' => $str->notification)
+        );
+    //fin ajout SILECS
 
     // The space added before the <span> is a ugly hack but required to set the CSS property white-space: nowrap
     // and having it to work without attaching the preceding text along with it. Hopefully the refactoring of
