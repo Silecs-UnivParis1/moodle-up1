@@ -1,0 +1,5 @@
+# Unwanted bots
+
+## 80legs.com
+User-agent: 008
+Disallow: /
