@@ -354,7 +354,8 @@ class rof_browser {
                 . '<span class="expanded collapse" data-deep="'.$this->niveau.'" data-path="'
                 . $this->path . '" data-rofid="'.$this->rofid.'" id="'.$id.'"> - </span>'
                 . '<span class="intitule" title="'.$listeTitle.'">'.$intitule.'</span>'
-                . '<span class="' . $classsel . '" title="Sélectionner" id="'
+                . '<span class="' . $classsel . '" title="Cliquer ici pour un EPI de diplôme (portail)'
+                . '. Sinon, cliquer sur &#x25B6; pour descendre dans l\'arborescence." id="'
                 . $idElem . '"></span>'
                 . '</div>';
         }
