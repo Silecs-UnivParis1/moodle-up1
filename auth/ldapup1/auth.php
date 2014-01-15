@@ -306,7 +306,8 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         /// so as to avoid mass deletion of users; which is hard to undo
         $count = $DB->count_records_sql('SELECT COUNT(username) AS count, 1 FROM {tmp_extuser}');
         if ($count < 1) {
-            print_string('didntgetusersfromldap', 'auth_ldapup1');
+            //print_string('didntgetusersfromldap', 'auth_ldapup1');
+       $dbman->drop_table($table);
             add_to_log(0, 'auth_ldapup1', 'sync:end', '', 'temp table empty. Exit.');
             exit;
         } else {
