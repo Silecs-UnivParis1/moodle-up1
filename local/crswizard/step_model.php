@@ -21,7 +21,7 @@ class course_wizard_step_model extends moodleform {
         $mform->setType('stepin', PARAM_INT);
         $mform->setConstant('stepin', 1);
 
-        $mform->addElement('html', html_writer::tag('div', 'Texte d\'explication ...', array('class' => 'fitem')));
+        $mform->addElement('html', html_writer::tag('div', get_string('blocHelp1SModel', 'local_crswizard'), array('class' => 'fitem')));
 
         $mform->addElement('header', 'general', "Vous souhaitez créer un nouvel espace :");
 
