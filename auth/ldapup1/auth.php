@@ -504,6 +504,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
      * @param int $userid // same userid as user.id
      */
     function init_user_sync($userid) {
+        global $DB;
         //** @todo incorporer ceci à la table user
         $usersync = new stdClass;
         $usersync->userid = $userid; 
