@@ -70,13 +70,26 @@ function wizard_get_metadonnees() {
  * @return array $course_list
  */
 function wizard_get_course_list_teacher() {
-    global $USER;
+    global $USER, $DB;
     $course_list = array();
     if ($courses = enrol_get_my_courses(NULL, 'shortname ASC')) {
+
+        $course_list = array(' - / - ');
+        $periodes = $DB->get_records('course_categories', array(), 'sortorder ASC');
         foreach ($courses as $course) {
             $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
             if ( has_capability('moodle/course:update', $coursecontext, $USER->id) ) {
-                $course_list[$course->id] = $course->shortname;
+                $path = substr($periodes[$course->category]->path, 1);
+
+                if (strstr($path, '/')) {
+                    $idperiode = (int) trim(substr($path, 0, strpos($path, '/')));
+                } else {
+                    $idperiode = trim($path);
+                }
+                $periode = $periodes[$idperiode];
+                $course_list[$course->id] = $periode->name
+                    . ' / ' . $course->fullname
+                    . ($course->idnumber != '' ? ' (' . $course->idnumber . ')' : '');
             }
         }
     }

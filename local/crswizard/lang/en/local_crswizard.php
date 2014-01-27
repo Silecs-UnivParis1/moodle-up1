@@ -17,6 +17,14 @@ $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the
 $string['crswizard:rofreferenceeditor'] = 'Modifier les rattachements au ROF d\'un cours';
 $string['crswizard:hybridattachment'] = 'Ajouter/modifier des rattachements au ROF dans cours hybrides';
 
+$string['blocHelp1SModel'] = '<p>Trois modèles d\'EPI à aménager selon vos'
+    . 'besoins vous sont proposés :</p>'
+    . '<ul><li>EPI d\'enseignement avec une présentation thématique ou chronologique</li>'
+    . '<li>EPI d\'enseignement avec une présentation par typologie de documents</li>'
+    . '<li>EPI portail de diplôme</li></ul>'
+    . '<p>Vous pouvez aussi dupliquer et adapter un EPI existant dans lequel '
+    . 'vous êtes enseignant. Dans ce cas, les contenus seront conservés mais '
+    . 'pas les participants ni leurs contributions.</p>';
 $string['blocHelloS1'] = '<p>Bienvenue dans l\'assistant de création d\'espace de cours. '
     . 'Laissez-vous guider et définissez en quelques étapes les caractéristiques, les contributeurs '
     . 'et le public visé de votre EPI (Espace Pédagogique Interactif).</p>'
