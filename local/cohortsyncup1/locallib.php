@@ -395,12 +395,17 @@ function update_cohort($wscohort) {
 
 /**
  * returns the last sync from the logs
- * @param $synctype = 'sync'|'syncAllGroups'
+ * @param $synctype = 'syncFromUsers'|'syncAllGroups'
  * @return array('begin' => integer, 'end' => integer) as moodle timestamps
+ * @uses exit
  */
-function get_cohort_last_sync($synctype = 'sync') {
+function get_cohort_last_sync($synctype) {
     global $DB;
 
+    $allowedSyncs = array('syncFromUsers', 'syncAllGroups');
+    if ( ! in_array($synctype, $allowedSyncs)) {
+        throw new coding_exception('unknown sync type: ['. $synctype . '].');
+    }
     $sql = "SELECT MAX(time) FROM {log} WHERE module=? AND action=?";
     $begin = $DB->get_field_sql($sql, array('local_cohortsyncup1', $synctype.':begin'));
     if ($begin === null) $begin=0;
