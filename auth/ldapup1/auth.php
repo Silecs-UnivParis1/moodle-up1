@@ -360,6 +360,9 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
                         if ($usersync) {
                             $usersync->timemodified = time();
                             $DB->update_record('user_sync', $usersync);
+                        } else {
+                            // this is a catch-all fix because of users created by the shibboleth plugin - see M1945
+                            init_user_sync($user->id);
                         }
                     } else {
                         $this->do_log($output, '     - ' . get_string('skipped') . "\n");
@@ -412,14 +415,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
 
                 $id = $DB->insert_record('user', $user);
                 $this->do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
-
-                //** @todo incorporer ceci à la table user
-                $usersync = new stdClass;
-                $usersync->userid = $id; // same userid as new user
-                $usersync->ref_plugin = 'auth_ldapup1';
-                $usersync->ref_param = '';
-                $usersync->timemodified = time();
-                $DB->insert_record('user_sync', $usersync);
+                init_user_sync($id);
 
                 // BEGIN UP1 SILECS custom user data from Ldap
                 //** @todo faire une boucle sur toutes les propriétés qui commencent par up1 au lieu de ce code adhoc
@@ -502,6 +498,21 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         return true;
     }
 
+
+    /**
+     * Create a new record in the "user_sync table"
+     * @param int $userid // same userid as user.id
+     */
+    function init_user_sync($userid) {
+        //** @todo incorporer ceci à la table user
+        $usersync = new stdClass;
+        $usersync->userid = $userid; 
+        $usersync->ref_plugin = 'auth_ldapup1';
+        $usersync->ref_param = '';
+        $usersync->timemodified = time();
+        $newid = $DB->insert_record('user_sync', $usersync);
+        return $newid;
+    }
 
     /**
      * Update a local user record from an external source.
