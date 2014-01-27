@@ -36,13 +36,13 @@ class course_wizard_step_model extends moodleform {
             $mform->addGroup($m1array, 'm1array', "", array(' : ', ' '), false);
             $mform->disabledIf('selm1', 'modeletype', 'neq', 'selm1');
         }
-        $course_list_teacher = wizard_get_course_list_teacher();
 
+        $course_list_teacher = wizard_get_course_list_teacher();
         if (count($course_list_teacher)) {
-            $m2array = array();
-            $m2array[] = $mform->CreateElement('radio', 'modeletype', '', 'par duplication et réinitialisation de l\'espace', 'selm2');
-            $m2array[] = $mform->CreateElement('select', 'selm2', '', $course_list_teacher);
-            $mform->addGroup($m2array, 'm2array', "", array(' : ', ' '), false);
+            $mform->addElement('radio', 'modeletype', '', 'par duplication et réinitialisation de l\'espace', 'selm2');
+            $mform->addElement('select', 'selm2', '', $course_list_teacher,  array(
+                    'class' => 'transformIntoSubselects boitex',
+                ));
             $mform->disabledIf('selm2', 'modeletype', 'neq', 'selm2');
         }
 
@@ -56,4 +56,19 @@ class course_wizard_step_model extends moodleform {
         $mform->closeHeaderBefore('buttonar');
     }
 
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if (empty($errors)) {
+            $this->validation_category($data, $errors);
+        }
+        return $errors;
+    }
+
+    private function validation_category($data, &$errors) {
+
+        if ($data['modeletype'] == 'selm2' && ($data['selm2'] == 0) ) {
+            $errors['selm2'] = 'Veuillez sélectionner une période et un cours';
+        }
+        return $errors;
+    }
 }

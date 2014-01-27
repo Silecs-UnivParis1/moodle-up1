@@ -76,12 +76,16 @@ switch ($stepin) {
         break;
     case 1:
         $steptitle = "Étape 1 : modalité de création";
+        $PAGE->requires->js(new moodle_url('/local/jquery/jquery.js'), true);
         $editform = new course_wizard_step_model();
-
         $data = $editform->get_data();
         if ($data){
             $SESSION->wizard['form_step' . $stepin] = (array) $data;
             redirect($CFG->wwwroot . '/local/crswizard/index.php?stepin=' . $stepgo);
+        } else {
+            $PAGE->requires->css(new moodle_url('/local/crswizard/css/crswizard.css'));
+            $PAGE->requires->js(new moodle_url('/local/crswizard/js/select-into-subselects.js'), true);
+            $PAGE->requires->js_init_code(file_get_contents(__DIR__ . '/js/include-for-subselectsmodel.js'));
         }
         break;
     case 2:
