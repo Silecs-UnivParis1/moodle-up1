@@ -362,7 +362,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
                             $DB->update_record('user_sync', $usersync);
                         } else {
                             // this is a catch-all fix because of users created by the shibboleth plugin - see M1945
-                            init_user_sync($user->id);
+                            $this->init_user_sync($user->id);
                         }
                     } else {
                         $this->do_log($output, '     - ' . get_string('skipped') . "\n");
@@ -415,7 +415,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
 
                 $id = $DB->insert_record('user', $user);
                 $this->do_log($output, get_string('auth_dbinsertuser', 'auth_db', array('name'=>$user->username, 'id'=>$id)) . "\n");
-                init_user_sync($id);
+                $this->init_user_sync($id);
 
                 // BEGIN UP1 SILECS custom user data from Ldap
                 //** @todo faire une boucle sur toutes les propriétés qui commencent par up1 au lieu de ce code adhoc
