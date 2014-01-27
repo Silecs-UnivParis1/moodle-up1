@@ -72,16 +72,18 @@ function safe_delete_cohort($cohortid) {
  */
 function get_ws_data($webservice) {
     $wstimeout = 5;
-    //$timestart = microtime(true);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $wstimeout);
     curl_setopt($ch, CURLOPT_URL, $webservice);
-    //$timeend = microtime(true);
     $data = json_decode(curl_exec($ch));
     // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime', $description => '...')
 
     $curlinfo = curl_getinfo($ch);
+    if ($data === null) {
+        $dump = var_export($curlinfo, true);
+        throw new coding_exception("webservice does NOT work", $dump);
+    }
     curl_close($ch);
     return array($curlinfo, $data);
 }
@@ -228,9 +230,10 @@ function process_cohort($cohort, $verbose, $ldaptimelast) {
 function display_cohorts_all_groups($verbose=2)
 {
     global $CFG, $DB;
+    $ws_allGroups = get_config('local_cohortsyncup1', 'ws_allGroups');
     // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $count = 0;
-    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));    
+    list($curlinfo, $data) = get_ws_data($ws_allGroups, 'ws_allGroups');
 
     if ($data) {
         if ($verbose >= 1) {
@@ -298,7 +301,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
             echo "\n $percent % ";
             $prevpercent = $percent;
         }
-        if ( empty($data) ) continue;
+        if ( is_null($data) ) continue;
 
         foreach ($data as $cohort) {
             $ckey = $cohort->key;
@@ -324,9 +327,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
             }
         } // foreach($data)
 
-        if ($timelast > 0) {
-            $cntRemovemembers += remove_memberships($userid, $memberof);
-        }
+        $cntRemovemembers += remove_memberships($userid, $memberof);
     } // foreach ($users)
 
     $logmsg = "$totalUsers parsed users.  "
