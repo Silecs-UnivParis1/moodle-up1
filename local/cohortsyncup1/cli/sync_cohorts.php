@@ -97,7 +97,7 @@ if ( $options['fix-sync'] ) {
 
 if ( $options['printlast'] ) {
     echo "last sync from users = \n";
-    print_r(get_cohort_last_sync('sync'));
+    print_r(get_cohort_last_sync('syncFromUsers'));
     echo "last sync AllGroups = \n";
     print_r(get_cohort_last_sync('syncAllGroups'));
     return 0;
@@ -112,7 +112,7 @@ if ( $options['init'] ) {
     if ($options['allGroups']) {
         $last = get_cohort_last_sync('syncAllGroups');
     } else {
-        $last = get_cohort_last_sync('sync');
+        $last = get_cohort_last_sync('syncFromUsers');
     }
     $since = $last['begin'];
 }
