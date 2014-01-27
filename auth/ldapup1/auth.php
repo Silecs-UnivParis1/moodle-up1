@@ -253,7 +253,8 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         //// get user's list from ldap to sql in a scalable fashion
         ////
         // prepare some data we'll need
-        $filterAff = '(|(eduPersonAffiliation=teacher)(eduPersonAffiliation=student)(eduPersonAffiliation=staff))';
+        // GA - $filterAff refers also to accountStatus due to bug M2156
+        $filterAff = '(|(eduPersonAffiliation=teacher)(eduPersonAffiliation=student)(eduPersonAffiliation=staff)(accountStatus=disabled))';
         // $filterAff = '';
         // $filterAcc = '(accountStatus=active)';
         $filterAcc = '';
