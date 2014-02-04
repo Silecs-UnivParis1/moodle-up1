@@ -21,12 +21,4 @@ $(document).ready(function() {
                 $("#fitem_id_selm2").addClass('cache');
             }
     });
-
-     $("#id_modeletype_0").click(
-        function() {
-            if ($(this).attr("checked")) {
-                $("#fitem_id_selm2").addClass('cache');
-            }
-    });
-
 });

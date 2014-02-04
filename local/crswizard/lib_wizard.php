@@ -1062,25 +1062,20 @@ function get_selected_model() {
     $coursemodelid = 0;
     $go = true;
 
-    if ($form_model['modeletype'] != '0') {
-        if (array_key_exists($form_model['modeletype'], $form_model)) {
-            $coursemodelid = $form_model[$form_model['modeletype']];
-            if (isset($SESSION->wizard['form_step1']['coursedmodelid']) &&
-                $SESSION->wizard['form_step1']['coursedmodelid'] == $coursemodelid) {
-                    $go = false;
-            }
-            if ($go) {
-                $coursemodel = $DB->get_record('course', array('id' => $coursemodelid), '*', MUST_EXIST);
-                if ($coursemodel) {
-                    $SESSION->wizard['form_step1']['coursedmodelid'] = $coursemodelid;
-                    $SESSION->wizard['form_step1']['coursemodelfullname'] = $coursemodel->fullname;
-                    $SESSION->wizard['form_step1']['coursemodelshortname'] = $coursemodel->shortname;
-                }
+    if (array_key_exists($form_model['modeletype'], $form_model)) {
+        $coursemodelid = $form_model[$form_model['modeletype']];
+        if (isset($SESSION->wizard['form_step1']['coursedmodelid']) &&
+            $SESSION->wizard['form_step1']['coursedmodelid'] == $coursemodelid) {
+                $go = false;
+        }
+        if ($go) {
+            $coursemodel = $DB->get_record('course', array('id' => $coursemodelid), '*', MUST_EXIST);
+            if ($coursemodel) {
+                $SESSION->wizard['form_step1']['coursedmodelid'] = $coursemodelid;
+                $SESSION->wizard['form_step1']['coursemodelfullname'] = $coursemodel->fullname;
+                $SESSION->wizard['form_step1']['coursemodelshortname'] = $coursemodel->shortname;
             }
         }
-    } else {
-        $SESSION->wizard['form_step1']['mybackup'] = array();
-        $SESSION->wizard['form_step1']['coursedmodelid'] = 0;
     }
 }
 
