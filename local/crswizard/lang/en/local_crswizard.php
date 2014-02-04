@@ -17,7 +17,7 @@ $string['crswizard:localsupervalidator'] = 'Validate ANY course created with the
 $string['crswizard:rofreferenceeditor'] = 'Modifier les rattachements au ROF d\'un cours';
 $string['crswizard:hybridattachment'] = 'Ajouter/modifier des rattachements au ROF dans cours hybrides';
 
-$string['blocHelp1SModel'] = '<p>Trois modèles d\'EPI à aménager selon vos'
+$string['blocHelp1SModel'] = '<p>Trois modèles d\'EPI à aménager selon vos '
     . 'besoins vous sont proposés :</p>'
     . '<ul><li>EPI d\'enseignement avec une présentation thématique ou chronologique</li>'
     . '<li>EPI d\'enseignement avec une présentation par typologie de documents</li>'
