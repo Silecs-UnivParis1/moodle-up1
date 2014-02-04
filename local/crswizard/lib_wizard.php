@@ -88,8 +88,7 @@ function wizard_get_course_list_teacher() {
                 }
                 $periode = $periodes[$idperiode];
                 $course_list[$course->id] = $periode->name
-                    . ' / ' . $course->fullname
-                    . ($course->idnumber != '' ? ' (' . $course->idnumber . ')' : '');
+                    . ' / ' . $course->fullname . ' (' . $course->id . ')';
             }
         }
     }
