@@ -8,6 +8,9 @@ $(document).ready(function() {
         $("#fitem_id_selm2").addClass('cache');
     }
 
+    var selm1 = $("#id_selm1").val();
+    $("#id_selm1").parent('fieldset').attr("title", $("#id_course_summary").children('option[value='+selm1+']').text());
+
     $("#id_modeletype_selm2").click(
         function() {
             if ($(this).attr("checked")) {
@@ -22,11 +25,10 @@ $(document).ready(function() {
             }
     });
 
-     $("#id_modeletype_0").click(
+    $("#id_selm1").change(
         function() {
-            if ($(this).attr("checked")) {
-                $("#fitem_id_selm2").addClass('cache');
-            }
+            var sel = this.value;
+            var text = $("#id_course_summary").children('option[value='+sel+']').text();
+            $(this).parent('fieldset').attr("title", text);
     });
-
 });
