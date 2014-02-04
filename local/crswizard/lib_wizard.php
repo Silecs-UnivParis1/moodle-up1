@@ -108,7 +108,8 @@ function wizard_get_course_model_list() {
         $courses = $DB->get_records('course', array('category'=> $category_model), 'id, shortname');
         if (count($courses)) {
             foreach ($courses as $course) {
-                $course_list[$course->id] = $course->shortname;
+                $course_list['model_name'][$course->id] = $course->shortname;
+                $course_list['model_summary'][$course->id] = $course->summary;
             }
         }
     }

@@ -25,11 +25,15 @@ class course_wizard_step_model extends moodleform {
 
         $mform->addElement('header', 'general', "Vous souhaitez créer un nouvel espace :");
 
-        $course_model_list = wizard_get_course_model_list();
+        $course_model = wizard_get_course_model_list();
+        $course_model_list = $course_model['model_name'];
+        $course_summary = $course_model['model_summary'];
         if (count($course_model_list)) {
             $m1array = array();
             $m1array[] = $mform->CreateElement('radio', 'modeletype', '', 'à partir du modèle', 'selm1');
             $m1array[] = $mform->CreateElement('select', 'selm1', '', $course_model_list);
+            $m1array[] = $mform->CreateElement('select', 'course_summary', '',  $course_summary, array('class' => 'cache'));
+
             $mform->addGroup($m1array, 'm1array', "", array(' : ', ' '), false);
             $mform->disabledIf('selm1', 'modeletype', 'neq', 'selm1');
         }
