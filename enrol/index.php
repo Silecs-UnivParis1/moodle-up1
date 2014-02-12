@@ -77,6 +77,13 @@ if (is_enrolled($context, $USER, '', true)) {
     redirect($destination);   // Bye!
 }
 
+// M2182 PR force login for courses closed to guests, due to external use of widget_courselist
+if ( ! $forms ) {
+    if (isguestuser()) {
+        redirect(get_login_url());
+    }
+}
+
 $PAGE->set_title($course->shortname);
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('enrolmentoptions','enrol'));
