@@ -72,7 +72,7 @@ function wizard_get_metadonnees() {
 function wizard_get_course_list_teacher() {
     global $USER, $DB;
     $course_list = array();
-    if ($courses = enrol_get_my_courses(NULL, 'shortname ASC')) {
+    if ($courses = enrol_get_my_courses(NULL, 'id DESC')) {
 
         $course_list = array(' - / - ');
         $periodes = $DB->get_records('course_categories', array(), 'sortorder ASC');
