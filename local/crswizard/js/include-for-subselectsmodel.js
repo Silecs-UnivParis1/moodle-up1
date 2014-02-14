@@ -9,7 +9,8 @@ $(document).ready(function() {
     }
 
     var selm1 = $("#id_selm1").val();
-    $("#id_selm1").parent('fieldset').attr("title", $("#id_course_summary").children('option[value='+selm1+']').text());
+    var text = $("#id_course_summary").children('option[value='+selm1+']').text();
+    $("#id_selm1").parent('fieldset').after('<div id="text_summary" class="felement fselect text_summary"><span class="text_summary">'+text+'</div>');
 
     $("#id_modeletype_selm2").click(
         function() {
@@ -29,6 +30,9 @@ $(document).ready(function() {
         function() {
             var sel = this.value;
             var text = $("#id_course_summary").children('option[value='+sel+']').text();
-            $(this).parent('fieldset').attr("title", text);
+            if ($('#text_summary').size()) {
+                $('#text_summary').remove();
+            }
+            $(this).parent('fieldset').after('<div id="text_summary" class="felement fselect text_summary"><span class="text_summary">'+text+'</span></div>');
     });
 });

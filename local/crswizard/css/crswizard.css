@@ -54,3 +54,8 @@ span#fullnamelab {
 div#fitem_id_selm2 {
     padding-left: 80px;
 }
+
+.text_summary {
+    color: #606060;
+    padding: 4px;
+}
