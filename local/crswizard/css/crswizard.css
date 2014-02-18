@@ -57,5 +57,6 @@ div#fitem_id_selm2 {
 
 .text_summary {
     color: #606060;
-    padding: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
