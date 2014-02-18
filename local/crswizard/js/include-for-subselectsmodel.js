@@ -10,7 +10,7 @@ $(document).ready(function() {
 
     var selm1 = $("#id_selm1").val();
     var text = $("#id_course_summary").children('option[value='+selm1+']').text();
-    $("#id_selm1").parent('fieldset').after('<div id="text_summary" class="felement fselect text_summary"><span class="text_summary">'+text+'</div>');
+    $("#id_selm1").parent('fieldset').after('<div id="text_summary" class="felement fselect text_summary"><span class="text_summary">'+text+'</span></div>');
 
     $("#id_modeletype_selm2").click(
         function() {
