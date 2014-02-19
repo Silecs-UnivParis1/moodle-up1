@@ -5,7 +5,7 @@
  *
  * @package    report
  * @subpackage up1stats
- * @copyright  2012 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2014 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -118,7 +118,7 @@ function report_up1stats_cohorts_top_by_prefix($limit) {
 function report_up1stats_last_sync() {
     // $ldap = auth_plugin_ldapup1::get_last_sync(); // because non-static method
     $ldap = get_auth_plugin('ldapup1')->get_last_sync();
-    $cohorts = get_cohort_last_sync();
+    $cohorts = get_cohort_last_sync('syncAllGroups');
 
     $res = array(
         array('LDAP', $ldap['begin'], $ldap['end']),
@@ -134,15 +134,16 @@ function report_up1stats_syncs($plugin, $howmany) {
 
     $res = array();
     $sql = "SELECT * FROM log WHERE action LIKE ? AND module LIKE ? ORDER BY id DESC LIMIT ". (2*$howmany);
-    $logs = $DB->get_records_sql($sql, array('sync:%', $plugin));
+    $logs = $DB->get_records_sql($sql, array('sync%', $plugin));
+    $datebegin = '?';
 
     $logs = array_reverse($logs);
     foreach($logs as $log) {
-        if ($log->action == 'sync:begin') {
+        if (preg_match('/:begin/', $log->action)) {
             $datebegin = date('Y-m-d H:i:s ', $log->time);
         }
-        if ($log->action == 'sync:end') {
-            $res[] = array($datebegin, date('Y-m-d H:i:s ', $log->time), $log->module, $log->info);
+        if (preg_match('/(.*):end/', $log->action, $matches)) {
+            $res[] = array($datebegin, date('Y-m-d H:i:s ', $log->time), $matches[1], $log->info);
             $datebegin = '?';
         }
     }
