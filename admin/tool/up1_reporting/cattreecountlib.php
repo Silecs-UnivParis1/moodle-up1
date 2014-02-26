@@ -82,6 +82,42 @@ function cat_tree_smartcount_cohorts($parentcat) {
 }
 
 /**
+ * computes a count of courses from course categories ; only true for "leaf" categories (depth=4)
+ * for upper categories (depth=3) count=0 since there is no direct relation between categories and courses
+ * @param int $parentcat parent category id
+ * @param array $roles array of roles shortnames to be included in count
+ * @return object records from get_records_sql() with attributes : (cat) id, (cat) path, (cat) depth, (cat) name, count
+ */
+function cat_tree_rawcount_roles($parentcat, $roles) {
+    global $DB;
+
+
+    $parentpath = $DB->get_field('course_categories', 'path', array('id' => $parentcat));
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roles);
+    $sql = "SELECT cc.id, cc.path, cc.depth, cc.name, COUNT(DISTINCT ra.id) AS count  "
+         . "FROM {course_categories} cc "
+         . "LEFT JOIN {course} co ON (co.category = cc.id) "
+         . "LEFT JOIN {context} cx ON (cx.instanceid = co.id AND (cx.contextlevel = ?) ) "
+         . "LEFT JOIN {role_assignments} ra ON (ra.contextid = cx.id) "
+         . "LEFT JOIN {role} r ON (r.id = ra.roleid AND r.shortname $insql) "
+         . "WHERE cc.path LIKE ? "
+         . "GROUP BY cc.id";
+    $sqlparams = array_merge(array(CONTEXT_COURSE), $inparams, array($parentpath . '/%'));
+    $res = $DB->get_records_sql($sql, $sqlparams);
+
+    return $res;
+}
+
+function cat_tree_smartcount_roles($parentcat, $roles) {
+    $records = cat_tree_rawcount_roles($parentcat, $roles);
+    $totalcounts = cat_tree_compute_total($records);
+    return $totalcounts;
+}
+
+
+
+/**
  * computes the total count for categories of level 3, by summing up counts for levels 4
  * @param object $records :  records with AT LEAST attributes: (cat) id, (cat) path, (cat) depth, count
  * @return $records
@@ -110,10 +146,12 @@ function cat_tree_compute_total($records) {
 function cat_tree_display_table($parentid) {
 
     $table = new html_table();
-    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Cohortes');
+    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Étudiants', 'Enseignants', 'Cohortes');
 
     $totalcourses = cat_tree_smartcount_courses($parentid);
     $totalcohorts = cat_tree_smartcount_cohorts($parentid);
+    $totalstudents = cat_tree_smartcount_roles($parentid, array('student'));
+    $totalteachers = cat_tree_smartcount_roles($parentid, array('teacher', 'editingteacher'));
 
     $tablecontent = array();
     foreach($totalcourses as $catid => $coursecount) {
@@ -129,6 +167,8 @@ function cat_tree_display_table($parentid) {
             $indent . html_writer::tag($cellstyle, $coursecount->name),
             html_writer::tag($cellstyle, $coursecount->count),
             html_writer::tag($cellstyle, $totalcohorts[$catid]->count),
+            html_writer::tag($cellstyle, $totalstudents[$catid]->count),
+            html_writer::tag($cellstyle, $totalteachers[$catid]->count),
         );
     }
     $table->data = $tablecontent;
