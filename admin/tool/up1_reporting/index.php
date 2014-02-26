@@ -13,6 +13,8 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/up1_reporting/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/up1_reporting/cattreecountlib.php');
+
 require_once($CFG->libdir.'/adminlib.php');
 
 require_login();
@@ -31,14 +33,20 @@ if ( ! is_siteadmin() ) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'tool_up1_reporting'));
 
-echo "<h2>Comptages par UFR</h2>\n";
+$parentcat = get_config('local_crswizard','cas2_default_etablissement');
 
+echo "<h2>Comptages par catégories - niveaux 3 et 4</h2>\n";
+echo "<p>Note : les comptages sont dédoublonnés au niveau de chaque niveau-LMD (4) puis totalisés par Composante (3).</p>";
+
+echo cat_tree_display_table($parentcat);
+
+
+echo "<h2>Comptages par UFR</h2>\n";
 echo "<p>Note : les comptages sont faits au niveau de chaque cours, puis totalisés par Composante.</p>";
 
 $table = new html_table();
 $table->head = array('UFR', 'Espaces de cours', 'Étudiants inscrits', 'Enseignants inscrits');
-$table->data = report_base_counts();
+$table->data = report_base_counts($parentcat);
 echo html_writer::table($table);
-
 
 echo $OUTPUT->footer();
