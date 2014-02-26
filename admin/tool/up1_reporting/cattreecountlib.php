@@ -91,11 +91,13 @@ function cat_tree_smartcount_cohorts($parentcat) {
 function cat_tree_rawcount_roles($parentcat, $roles) {
     global $DB;
 
-
     $parentpath = $DB->get_field('course_categories', 'path', array('id' => $parentcat));
-
     list($insql, $inparams) = $DB->get_in_or_equal($roles);
-    $sql = "SELECT cc.id, cc.path, cc.depth, cc.name, COUNT(DISTINCT ra.id) AS count  "
+    // GA le CONCAT ci-dessous est une astuce pour faire prendre en compte le LEFT JOIN sur r.shortname IN ...
+    // ce n'est pas parfait car un utilisateur /pourrait théoriquement/ etre inscrit avec plusieurs roles,
+    // donc etre compté plusieurs fois (ex. teacher et editingteacher)
+    // @todo vérifier s'il n'y a pas moyen de faire autrement (tests unitaires indispensables)
+    $sql = "SELECT cc.id, cc.path, cc.depth, cc.name, COUNT(DISTINCT CONCAT(ra.userid,':',r.id)) AS count "
          . "FROM {course_categories} cc "
          . "LEFT JOIN {course} co ON (co.category = cc.id) "
          . "LEFT JOIN {context} cx ON (cx.instanceid = co.id AND (cx.contextlevel = ?) ) "
@@ -146,7 +148,7 @@ function cat_tree_compute_total($records) {
 function cat_tree_display_table($parentid) {
 
     $table = new html_table();
-    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Étudiants', 'Enseignants', 'Cohortes');
+    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Cohortes', 'Étudiants', 'Enseignants');
 
     $totalcourses = cat_tree_smartcount_courses($parentid);
     $totalcohorts = cat_tree_smartcount_cohorts($parentid);
