@@ -111,6 +111,37 @@ function cat_tree_rawcount_roles($parentcat, $roles) {
     return $res;
 }
 
+/**
+ * this is a variant of the previous one, where count is done independently for categoriers level 3
+ * and categories level 4, using an additional JOIN
+ * @param int $parentcat parent category id
+ * @param array $roles array of roles shortnames to be included in count
+ * @return object records from get_records_sql() with attributes : (cat) id, (cat) path, (cat) depth, (cat) name, count
+ */
+function cat_tree_rawcount_recurse_roles($parentcat, $roles) {
+    global $DB;
+
+    list($insql, $inparams) = $DB->get_in_or_equal($roles);
+    // GA le CONCAT ci-dessous est une astuce pour faire prendre en compte le LEFT JOIN sur r.shortname IN ...
+    // ce n'est pas parfait car un utilisateur /pourrait théoriquement/ etre inscrit avec plusieurs roles,
+    // donc etre compté plusieurs fois (ex. teacher et editingteacher)
+    // @todo vérifier s'il n'y a pas moyen de faire autrement (tests unitaires indispensables)
+    $sql = "SELECT COALESCE(cc4.id, cc3.id) AS id, "
+         . "COUNT(DISTINCT CONCAT(ra.userid,':',r.id)) AS count "
+         . "FROM {course_categories} cc3 "
+         . "LEFT JOIN {course_categories} cc4 ON (cc4.parent = cc3.id) "
+         . "LEFT JOIN {course} co ON (co.category = cc4.id) "
+         . "LEFT JOIN {context} cx ON (cx.instanceid = co.id AND (cx.contextlevel = ?) ) "
+         . "LEFT JOIN {role_assignments} ra ON (ra.contextid = cx.id) "
+         . "LEFT JOIN {role} r ON (r.id = ra.roleid AND r.shortname $insql) "
+         . "WHERE cc3.parent = ? "
+         . "GROUP BY cc3.id, cc4.id WITH ROLLUP";
+    $sqlparams = array_merge(array(CONTEXT_COURSE), $inparams, array($parentcat));
+    $res = $DB->get_records_sql($sql, $sqlparams);
+
+    return $res;
+}
+
 function cat_tree_smartcount_roles($parentcat, $roles) {
     $records = cat_tree_rawcount_roles($parentcat, $roles);
     $totalcounts = cat_tree_compute_total($records);
@@ -148,12 +179,15 @@ function cat_tree_compute_total($records) {
 function cat_tree_display_table($parentid) {
 
     $table = new html_table();
-    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Cohortes', 'Étudiants', 'Enseignants');
+    $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Cohortes', 
+        'Étudiants (tot. / dist.)', 'Enseignants (tot. / dist.)');
 
     $totalcourses = cat_tree_smartcount_courses($parentid);
     $totalcohorts = cat_tree_smartcount_cohorts($parentid);
     $totalstudents = cat_tree_smartcount_roles($parentid, array('student'));
+    $totalstudentsrec = cat_tree_rawcount_recurse_roles($parentid, array('student'));
     $totalteachers = cat_tree_smartcount_roles($parentid, array('teacher', 'editingteacher'));
+    $totalteachersrec = cat_tree_rawcount_recurse_roles($parentid, array('teacher', 'editingteacher'));
 
     $tablecontent = array();
     foreach($totalcourses as $catid => $coursecount) {
@@ -169,8 +203,8 @@ function cat_tree_display_table($parentid) {
             $indent . html_writer::tag($cellstyle, $coursecount->name),
             html_writer::tag($cellstyle, $coursecount->count),
             html_writer::tag($cellstyle, $totalcohorts[$catid]->count),
-            html_writer::tag($cellstyle, $totalstudents[$catid]->count),
-            html_writer::tag($cellstyle, $totalteachers[$catid]->count),
+            html_writer::tag($cellstyle, $totalstudents[$catid]->count .' / '. $totalstudentsrec[$catid]->count),
+            html_writer::tag($cellstyle, $totalteachers[$catid]->count .' / '. $totalteachersrec[$catid]->count),
         );
     }
     $table->data = $tablecontent;
