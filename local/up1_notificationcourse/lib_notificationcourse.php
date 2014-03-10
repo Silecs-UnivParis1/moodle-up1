@@ -29,7 +29,7 @@ function get_notificationcourse_message($formdata, $params) {
  */
 function get_users_from_course($course, $rolename) {
     global $DB;
-    $coursecontext = get_context_instance(CONTEXT_COURSE, $course->id);
+    $coursecontext = context_course::instance($course->id);
 
     $rolestudent = $DB->get_record('role', array('shortname'=> $rolename));
 

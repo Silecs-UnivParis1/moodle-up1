@@ -42,7 +42,6 @@ $PAGE->set_url($url);
 $infolog['cmurl'] = $url;
 $infolog['userid'] = $USER->id;
 
-$context = context_module::instance($cm->id);
 require_login($course, true, $cm);
 
 $msgresult = '';
