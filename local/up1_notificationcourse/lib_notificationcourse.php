@@ -147,12 +147,15 @@ function get_result_action_notificationcourse($infolog) {
  * @return false ou resultat de la fonction email_to_user()
  **/
 function notificationcourse_send_email($email, $subject, $message) {
+
+    global $CFG;
+
     if (!isset($email) && empty($email)) {
         return false;
     }
-    $supportuser = generate_email_supportuser();
+    $emailform = $CFG->noreplyaddress;
     $user = new stdClass();
     $user->email = $email;
-    return email_to_user($user, $supportuser, $subject, $message);
+    return email_to_user($user, $emailform, $subject, $message);
 }
 ?>
