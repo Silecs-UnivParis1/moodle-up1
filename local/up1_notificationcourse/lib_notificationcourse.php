@@ -6,17 +6,28 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function get_notificationcourse_message($formdata, $params) {
+/**
+ * construit l'objet $message contenant le sujet et le corps de message version texte et html
+ * @param string $subject
+ * @return object $message
+ */
+function get_notificationcourse_message($subject, $msgbodyinfo, $complement) {
     $message = new object();
-    $sitename = '[' . format_string(get_site()->shortname) . '] ';
-    $message->subject = $formdata->msgsubject;
-    $message->body = $formdata->msgbody;
+    $message->subject = $subject;
+    $message->from = $msgbodyinfo['shortnamesite'];
+    $comhtml = '';
+    $comtext = '';
+    if (trim($complement) !='') {
+        $comhtml .= '<p>' . $complement . '</p>';
+        $comtext .= "\n\n" . $complement;
+    }
+    $message->bodyhtml = '<p>' . get_email_body($msgbodyinfo, 'html') . '</p>' . $comhtml;
+    $message->bodytext = get_email_body($msgbodyinfo, 'text') . $comtext;
 
-    $message->subject = $sitename . $message->subject;
-    //interpolation variables si besoin
-    $message->subject = str_replace('[[nom_activite]]', $params['nom_activite'], $message->subject);
-    $message->body = str_replace('[[lien_activite]]', $params['lien_activite'], $message->body);
-
+    $message->bodyhtml .= '<p>' . $msgbodyinfo['coursepath']
+        . '<br/>' . $msgbodyinfo['urlactivite'] . '</p>';
+    $message->bodytext .= "\n\n" . $msgbodyinfo['coursepath']
+        . "\n" . $msgbodyinfo['urlactivite'];
     return $message;
 }
 
@@ -44,8 +55,6 @@ function get_users_from_course($course, $rolename) {
     }
     return $mystudents;
 }
-
-
 
 /**
  * Envoi une notification au user
@@ -81,7 +90,7 @@ function notificationcourse_send_all_message($ids, $msg, $infolog) {
         $users = $DB->get_records_sql($sql);
 
         foreach ($users as $user) {
-            $res = notificationcourse_send_email($user->email, $msg->subject, $msg->body);
+            $res = notificationcourse_send_email($user->email, $msg);
             if ($res) {
                 ++$nb;
             }
@@ -142,20 +151,75 @@ function get_result_action_notificationcourse($infolog) {
 /**
  * Envoie un email à l'adresse mail spécifiée
  * @param string $email
- * @param string $subject,
- * @param string $message
+ * @param object $msg
  * @return false ou resultat de la fonction email_to_user()
  **/
-function notificationcourse_send_email($email, $subject, $message) {
-
-    global $CFG;
+function notificationcourse_send_email($email, $msg) {
 
     if (!isset($email) && empty($email)) {
         return false;
     }
-    $emailform = $CFG->noreplyaddress;
+    $emailform = $msg->from;
     $user = new stdClass();
     $user->email = $email;
-    return email_to_user($user, $emailform, $subject, $message);
+    return email_to_user($user, $emailform, $msg->subject, $msg->bodytext, $msg->bodyhtml);
+}
+
+/**
+ * construit le sujet du mail envoyé
+ * @param string $siteshortname
+ * @param string $courseshortname
+ * @param string $activitename
+ * @return string
+ */
+function get_email_subject($siteshortname, $courseshortname, $activitename) {
+    $subject = '';
+    $subject .='['. $siteshortname . '] Notification : ' . $courseshortname
+        . ' - ' . $activitename;
+    return $subject;
+}
+
+/**
+ * construit le
+ * @param array $msgbodyinfo
+ * @param string $type
+ * return string
+ */
+function get_email_body($msgbodyinfo, $type) {
+    $res = '';
+    if ($type == 'html') {
+        $res .= $msgbodyinfo['user'] . ' souhaite attirer votre attention'
+            . ' sur l\'élément ' . '<a href="' . $msgbodyinfo['urlactivite'] . '">'
+            . $msgbodyinfo['nomactivite'] . '</a> proposé au sein de'
+            . ' l\'espace <a href="' . $msgbodyinfo['urlcourse'] . '">'
+            . $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'] . '</a>.';
+    } else {
+        $res .= $msgbodyinfo['user'] . ' souhaite attirer votre attention'
+            . ' sur l\'élément ' . $msgbodyinfo['nomactivite'] . ' proposé au sein de'
+            . ' l\'espace ' . $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'] . '.';
+    }
+    return $res;
+}
+
+/**
+ * Construit le chemin categories > cours
+ * @param array $categories tableau de tableaux
+ * @param object $course
+ * @return string $path
+ */
+function get_pathcategories_course($categories, $course) {
+    $path ='';
+    $tabcat = array();
+    if (count($categories)) {
+        foreach ($categories as $category) {
+            $tabcat[$category->depth] = $category->name;
+        }
+        ksort($tabcat);
+        foreach ($tabcat as $cat) {
+            $path .= $cat . ' > ';
+        }
+    }
+    $path .= $course->shortname;
+    return $path;
 }
 ?>
