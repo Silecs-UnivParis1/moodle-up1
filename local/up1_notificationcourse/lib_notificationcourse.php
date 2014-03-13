@@ -32,28 +32,59 @@ function get_notificationcourse_message($subject, $msgbodyinfo, $complement) {
 }
 
 /**
- * renvoie les identifiants des utilisateurs ayant le rôle 'rolename'
+ * construit le messsage d'interface du nombre et de la qualité des
+ * destinataires du message
+ * @param int $nbdest
+ * @param int $groupingid
+ * @param array $msgbodyinfo
+ * @return string $label
+ */
+function get_label_destinataire($nbdest, $groupingid, $msgbodyinfo) {
+    $label = '';
+    if ($nbdest == 0) {
+        return 'Aucun destinataire';
+    }
+    $x = '';
+    $s = '';
+    if ($nbdest > 1) {
+        $x = 'x';
+        $s = 's';
+    }
+    $label = 'Le message suivant sera transmis au' . $x . ' utilisateur' . $s;
+    if ($groupingid == 0) {
+        $label .= ' inscrit' . $s . ' à cet espace';
+    } else {
+        $label .= ' concerné' . $s . ' par <a href="' . $msgbodyinfo['urlactivite']
+            . '">' . $msgbodyinfo['nomactivite'] . '</a>';
+    }
+    return $label;
+}
+
+/**
+ * renvoie les utilisateurs ayant le rôle 'rolename'
  * dans le cours $course
  * @param object $course $course
  * @param string $rolename shortname du rôle
- * @return array iduser => iduser
+ * @return array de $user
  */
 function get_users_from_course($course, $rolename) {
     global $DB;
     $coursecontext = context_course::instance($course->id);
-
     $rolestudent = $DB->get_record('role', array('shortname'=> $rolename));
+    $studentcontext = get_users_from_role_on_context($rolestudent, $coursecontext);
 
-    $students = get_users_from_role_on_context($rolestudent, $coursecontext);
-
-    $mystudents = array();
-
-    if (isset($students) && count($students)) {
-        foreach ($students as $student) {
-            $mystudents[$student->userid] = $student->userid;
-        }
+    if ($studentcontext == 0) {
+        return $studentcontext;
     }
-    return $mystudents;
+    $ids = '';
+    foreach ($studentcontext as $sc) {
+        $ids .= $sc->userid . ',';
+    }
+    $ids = substr($ids, 0, -1);
+    $sql = "SELECT id, firstname, lastname, email, mailformat FROM {user} WHERE id IN ({$ids})";
+    $students = $DB->get_records_sql($sql);
+
+    return $students;
 }
 
 /**
@@ -63,66 +94,15 @@ function get_users_from_course($course, $rolename) {
  * @param array $infolog informations pour le log pour les envois de mails
  * @return string : message interface
  */
-function send_notificationcourse($idusers, $msg, $infolog) {
-    global $DB;
-    $ids = '';
-    if ($idusers && count($idusers)) {
-        foreach ($idusers as $id) {
-            $ids .= $id . ',';
-        }
-        $ids = substr($ids, 0, -1);
-    }
-    return notificationcourse_send_all_message($ids, $msg, $infolog);
-}
-
-/**
- * Envoi une notification au user dont l'identifiant apparait dans $ids
- * @param string $ids : liste des identifiants user (format : id1,id2,id3
- * @param object $msg
- * @param array $infolog informations pour le log pour les envois de mails
- * @return string : message interface
- */
-function notificationcourse_send_all_message($ids, $msg, $infolog) {
-    global $DB, $USER;
+function send_notificationcourse($users, $msg, $infolog) {
     $nb = 0;
-    if ($ids != '') {
-        $sql = "SELECT id, firstname, lastname, email FROM {user} WHERE id IN ({$ids})";
-        $users = $DB->get_records_sql($sql);
-
-        foreach ($users as $user) {
-            $res = notificationcourse_send_email($user->email, $msg);
-            if ($res) {
-                ++$nb;
-            }
+    foreach ($users as $user) {
+        $res = notificationcourse_send_email($user, $msg);
+        if ($res) {
+            ++$nb;
         }
-        /** pour messagerie interne cf http://docs.moodle.org/dev/Messaging_2.0#Message_dispatching
-        $userfrom = new object();
-        static $supportuser = null;
-        if (!empty($supportuser)) {
-            $userfrom = $supportuser;
-        } else {
-            $userfrom = $USER;
-        }
-        $eventdata = new object();
-        $eventdata->component = 'moodle';
-        $eventdata->name = 'courserequested';
-        $eventdata->userfrom = $userfrom;
-        $eventdata->subject = $msg->subject; //** @todo get_string()
-        $eventdata->fullmessageformat = FORMAT_PLAIN;   // text format
-        $eventdata->fullmessage = $msg->body;
-        $eventdata->fullmessagehtml = '';   //$messagehtml;
-        $eventdata->smallmessage = $msg->body; // USED BY DEFAULT !
-        foreach ($users as $user) {
-            $eventdata->userto = $user;
-            $res = message_send($eventdata);
-            if ($res) {
-                ++$nb;
-            }
-        }
-        **/
     }
     $infolog['nb'] = $nb;
-
     return get_result_action_notificationcourse($infolog);
 }
 
@@ -154,14 +134,11 @@ function get_result_action_notificationcourse($infolog) {
  * @param object $msg
  * @return false ou resultat de la fonction email_to_user()
  **/
-function notificationcourse_send_email($email, $msg) {
-
-    if (!isset($email) && empty($email)) {
+function notificationcourse_send_email($user, $msg) {
+    if (!isset($user->email) && empty($user->email)) {
         return false;
     }
     $emailform = $msg->from;
-    $user = new stdClass();
-    $user->email = $email;
     return email_to_user($user, $emailform, $msg->subject, $msg->bodytext, $msg->bodyhtml);
 }
 

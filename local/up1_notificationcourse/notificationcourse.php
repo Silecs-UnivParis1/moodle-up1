@@ -62,6 +62,23 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_title(format_string($module->name));
 $PAGE->requires->css(new moodle_url('/local/up1_notificationcourse/notificationcourse.css'));
 
+$labelDestinataires = '';
+$students = array();
+
+// le groupmode
+$groupmode = groups_get_activity_groupmode($cm);
+
+if ($groupmode == 0) {
+    // pas de groupe, envoyé à tous les étudiants
+    $students = get_users_from_course($course, 'student');
+    $labelDestinataires = get_label_destinataire(count($students), $cm->groupingid, $msgbodyinfo);
+} elseif ($cm->groupingid != 0) {
+    //envoyé au groupe
+    $students = groups_get_grouping_members($cm->groupingid);
+    $labelDestinataires = get_label_destinataire(count($students), $cm->groupingid, $msgbodyinfo);
+} else {
+    $labelDestinataires = 'Aucun destinataire';
+}
 
 $mform = new local_up1_notificationcourse_notificationcourse_form(null,
     array('urlactivite' => $urlactivite, 'coursepath' => $coursepath));
@@ -77,7 +94,6 @@ if ($mform->is_cancelled()) {
 
 if ($formdata) {
     $msg = get_notificationcourse_message($mailsubject, $msgbodyinfo, $formdata->complement);
-    $students = get_users_from_course($course, 'student');
     if (count($students)) {
         $msgresult = send_notificationcourse($students, $msg, $infolog);
     }
@@ -93,7 +109,7 @@ if ($msgresult != '') {
     echo '<p><a href="' . $urlcourse . '">Retour au cours</a></p>';
     echo $OUTPUT->box_end();
 } else {
-
+    echo '<p class="notificationlabel">' . $labelDestinataires . '</p>';
     echo '<p class="notificationlabel"><span class="notificationgras">Expéditeur : </span>'
         . $site->shortname . ' &#60;'. $CFG->noreplyaddress . '&#62; </p>';
     echo '<p class="notificationlabel">' . get_string('subject', 'local_up1_notificationcourse')
