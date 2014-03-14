@@ -25,7 +25,8 @@ function get_notificationcourse_message($subject, $msgbodyinfo, $complement) {
     $message->bodytext = get_email_body($msgbodyinfo, 'text') . $comtext;
 
     $message->bodyhtml .= '<p>' . $msgbodyinfo['coursepath']
-        . '<br/>' . $msgbodyinfo['urlactivite'] . '</p>';
+        . '<br/><a href="' . $msgbodyinfo['urlactivite']
+        . '">' . $msgbodyinfo['urlactivite'] . '</a></p>';
     $message->bodytext .= "\n\n" . $msgbodyinfo['coursepath']
         . "\n" . $msgbodyinfo['urlactivite'];
     return $message;
@@ -44,18 +45,19 @@ function get_label_destinataire($nbdest, $groupingid, $msgbodyinfo) {
     if ($nbdest == 0) {
         return 'Aucun destinataire';
     }
-    $x = '';
+    $x = 'à l\'';
     $s = '';
     if ($nbdest > 1) {
-        $x = 'x';
+        $x = 'aux ' . $nbdest . ' ';
         $s = 's';
     }
-    $label = 'Le message suivant sera transmis au' . $x . ' utilisateur' . $s;
+    $label = 'Le message suivant sera transmis ' . $x
+        . 'utilisateur' . $s;
     if ($groupingid == 0) {
-        $label .= ' inscrit' . $s . ' à cet espace';
+        $label .= ' inscrit' . $s . ' à cet espace.';
     } else {
         $label .= ' concerné' . $s . ' par <a href="' . $msgbodyinfo['urlactivite']
-            . '">' . $msgbodyinfo['nomactivite'] . '</a>';
+            . '">' . $msgbodyinfo['nomactivite'] . '.</a>';
     }
     return $label;
 }

@@ -28,8 +28,9 @@ class local_up1_notificationcourse_notificationcourse_form extends moodleform {
             'cols' => 80));
         $mform->setType('complement',PARAM_RAW);
 
-        $htmlinfo = '<br/><p class="notificationlabel">' . $this->_customdata['coursepath'] . '<br/>'
-            . $this->_customdata['urlactivite'] . '</p>';
+        $htmlinfo = '<br/><p class="notificationlabel">' . $this->_customdata['coursepath']
+            . '<br/><a href="' . $this->_customdata['urlactivite'] . '">'
+            . $this->_customdata['urlactivite'] . '</a></p>';
         $mform->addElement('html', $htmlinfo);
 
         //-------------------------------------------------------------------------------
