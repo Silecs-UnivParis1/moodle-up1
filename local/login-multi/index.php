@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../config.php';
 
 global $CFG, $PAGE, $OUTPUT, $USER;
 
-define('SHIBB_DEFAULT_IDP', 'urn:mace:cru.fr:federation:univ-paris1.fr');
+defined('SHIBB_DEFAULT_IDP') or define('SHIBB_DEFAULT_IDP', 'urn:mace:cru.fr:federation:univ-paris1.fr');
 
 require_once $CFG->dirroot . "/auth/shibboleth/auth.php";
 
