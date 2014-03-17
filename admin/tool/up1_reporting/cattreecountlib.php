@@ -180,7 +180,7 @@ function cat_tree_display_table($parentid) {
 
     $table = new html_table();
     $table->head = array('id', 'UFR / Diplômes', 'Espaces de cours', 'Cohortes', 
-        'Étudiants (tot. / dist.)', 'Enseignants (tot. / dist.)');
+        'Étudiants totalisés', 'Étudiants distincts', 'Enseignants totalisés', 'Enseignants distincts');
 
     $totalcourses = cat_tree_smartcount_courses($parentid);
     $totalcohorts = cat_tree_smartcount_cohorts($parentid);
@@ -203,8 +203,10 @@ function cat_tree_display_table($parentid) {
             $indent . html_writer::tag($cellstyle, $coursecount->name),
             html_writer::tag($cellstyle, $coursecount->count),
             html_writer::tag($cellstyle, $totalcohorts[$catid]->count),
-            html_writer::tag($cellstyle, $totalstudents[$catid]->count .' / '. $totalstudentsrec[$catid]->count),
-            html_writer::tag($cellstyle, $totalteachers[$catid]->count .' / '. $totalteachersrec[$catid]->count),
+            html_writer::tag($cellstyle, $totalstudents[$catid]->count),
+            html_writer::tag($cellstyle, $totalstudentsrec[$catid]->count),
+            html_writer::tag($cellstyle, $totalteachers[$catid]->count),
+            html_writer::tag($cellstyle, $totalteachersrec[$catid]->count),
         );
     }
     $table->data = $tablecontent;

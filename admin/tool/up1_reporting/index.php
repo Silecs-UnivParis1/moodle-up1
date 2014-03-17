@@ -36,13 +36,15 @@ echo $OUTPUT->heading(get_string('pluginname', 'tool_up1_reporting'));
 $parentcat = get_config('local_crswizard','cas2_default_etablissement');
 
 echo "<h2>Comptages par catégories - niveaux 3 et 4</h2>\n";
-echo "<p>Note : les comptages sont dédoublonnés au niveau de chaque niveau-LMD (4) puis totalisés par Composante (3).</p>";
+echo "<p>Note : pour les étudiants et les enseignants, les comptages sont dédoublonnés au niveau le plus bas (4 = niveau-LMD)
+      puis pour le regroupement par Composante (niveau 3), les deux informations sont affichées : inscrits totalisés,
+      et inscrits dédoublonnés.</p>";
 
 echo cat_tree_display_table($parentcat);
 
 
 echo "<h2>Comptages par UFR</h2>\n";
-echo "<p>Note : les comptages sont faits au niveau de chaque cours, puis totalisés par Composante.</p>";
+echo "<p>Note : pour les étudiants et les enseignants, les comptages sont faits au niveau de chaque cours, puis totalisés par Composante.</p>";
 
 $table = new html_table();
 $table->head = array('UFR', 'Espaces de cours', 'Étudiants inscrits', 'Enseignants inscrits');
