@@ -31,6 +31,8 @@ unset($CFG);  // Ignore this line
 global $CFG;  // This is necessary here for PHPUnit execution
 $CFG = new stdClass();
 
+define('SHIBB_DEFAULT_IDP', 'urn:mace:cru.fr:federation:univ-paris1.fr');
+
 //=========================================================================
 // 1. DATABASE SETUP
 //=========================================================================
