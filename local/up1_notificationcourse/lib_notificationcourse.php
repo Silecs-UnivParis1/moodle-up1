@@ -43,7 +43,7 @@ function get_notificationcourse_message($subject, $msgbodyinfo, $complement) {
 function get_label_destinataire($nbdest, $groupingid, $msgbodyinfo) {
     $label = '';
     if ($nbdest == 0) {
-        return 'Aucun destinataire';
+        return get_string('norecipient', 'local_up1_notificationcourse');
     }
     $x = 'à l\'';
     $s = '';
@@ -116,19 +116,13 @@ function send_notificationcourse($users, $msg, $infolog) {
  * @return string message interface
  */
 function get_result_action_notificationcourse($infolog) {
-    $s = '';
-
     if ($infolog['nb'] == 0) {
         return get_string('nomessagesend', 'local_up1_notificationcourse');
-    } elseif ($infolog['nb'] > 1) {
-        $s = 's';
     }
-
-    $message = $infolog['nb'] . ' notification' . $s . ' envoyée' . $s;
+    $message = get_string('numbernotification', 'local_up1_notificationcourse', $infolog['nb']);
     //log
     add_to_log($infolog['courseid'], 'up1_notif_course', 'send notification_course',
         $infolog['cmurl'], $message , $infolog['cmid'], $infolog['userid']);
-
     return $message;
 }
 
@@ -155,8 +149,8 @@ function notificationcourse_send_email($user, $msg) {
  */
 function get_email_subject($siteshortname, $courseshortname, $activitename) {
     $subject = '';
-    $subject .='['. $siteshortname . '] Notification : ' . $courseshortname
-        . ' - ' . $activitename;
+    $subject .='['. $siteshortname . '] '. get_string('notification', 'local_up1_notificationcourse')
+        . $courseshortname . ' - ' . $activitename;
     return $subject;
 }
 
@@ -168,17 +162,16 @@ function get_email_subject($siteshortname, $courseshortname, $activitename) {
  */
 function get_email_body($msgbodyinfo, $type) {
     $res = '';
+    $coursename = $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'];
+    $a = new stdClass();
+    $a->sender = $msgbodyinfo['user'];
+    $a->linkactivity = $msgbodyinfo['nomactivite'];
+    $a->linkcourse = $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'];
     if ($type == 'html') {
-        $res .= $msgbodyinfo['user'] . ' souhaite attirer votre attention'
-            . ' sur l\'élément ' . '<a href="' . $msgbodyinfo['urlactivite'] . '">'
-            . $msgbodyinfo['nomactivite'] . '</a> proposé au sein de'
-            . ' l\'espace <a href="' . $msgbodyinfo['urlcourse'] . '">'
-            . $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'] . '</a>.';
-    } else {
-        $res .= $msgbodyinfo['user'] . ' souhaite attirer votre attention'
-            . ' sur l\'élément ' . $msgbodyinfo['nomactivite'] . ' proposé au sein de'
-            . ' l\'espace ' . $msgbodyinfo['shortnamecourse'] . ' - ' . $msgbodyinfo['fullnamecourse'] . '.';
+        $a->linkactivity = html_Writer::link($msgbodyinfo['urlactivite'], $msgbodyinfo['nomactivite']);
+        $a->linkcourse = html_Writer::link($msgbodyinfo['urlcourse'], $coursename);
     }
+    $res .= get_string('msgsender', 'local_up1_notificationcourse', $a);
     return $res;
 }
 
