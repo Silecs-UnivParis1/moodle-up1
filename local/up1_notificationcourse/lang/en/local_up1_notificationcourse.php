@@ -6,16 +6,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['body'] = 'Corps du message';
-$string['labelcomplement'] = 'Complément de message';
-$string['label_envoyer'] = 'Envoyer';
-$string['noemptybody'] = 'Le corps du message est requis';
-$string['noemptysubject'] = 'Le sujet du message est requis';
-$string['notification'] = 'Notification';
-$string['pluginname'] = 'feedback notification';
-$string['sendnewnotification'] = 'Envoyer une nouvelle notification';
-$string['subject'] = 'Sujet';
-$string['msgsubject'] = 'Nouveauté concernant l\'activité [[nom_activite]]';
-$string['msgbody'] = "Nouveauté à l'adresse suivante :\n"
-    . "[[lien_activite]] \n";
-$string['nopostssend'] = 'Aucun message envoyé.';
+$string['body'] = 'Corps du message : ';
+$string['complement'] = 'Complément de message : ';
+$string['msgsender'] = '{$a->sender} ouhaite attirer votre attention sur l\'élément '
+    . '{$a->linkactivity} proposé au sein de l\'espace {$a->linkcourse}.';
+$string['nomessagesend'] = 'Aucun message envoyé.';
+$string['norecipient'] = 'Aucun destinataire';
+$string['notification'] = 'Notification : ';
+$string['numbernotification'] = 'Nombre de notifications envoyées : {$a}';
+$string['pluginname'] = 'Notification activité';
+$string['returncourse'] = 'Retour au cours';
+$string['sender'] = 'Expéditeur : ';
+$string['sendnotification'] = 'Envoyer une notification';
+$string['subject'] = 'Sujet : ';
+$string['submit'] = 'Envoyer';
