@@ -90,13 +90,14 @@ function get_users_from_course($course, $rolename) {
 }
 
 /**
- * Envoi une notification au user
+ * Envoi une notification aux $users + copie à $USER
  * @param array $idusers
  * @param object $msg
  * @param array $infolog informations pour le log pour les envois de mails
  * @return string : message interface
  */
 function send_notificationcourse($users, $msg, $infolog) {
+    global $USER;
     $nb = 0;
     foreach ($users as $user) {
         $res = notificationcourse_send_email($user, $msg);
@@ -104,6 +105,7 @@ function send_notificationcourse($users, $msg, $infolog) {
             ++$nb;
         }
     }
+    notificationcourse_send_email($USER, $msg);
     $infolog['nb'] = $nb;
     return get_result_action_notificationcourse($infolog);
 }
