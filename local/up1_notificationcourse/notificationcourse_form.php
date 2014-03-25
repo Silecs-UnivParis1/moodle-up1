@@ -28,13 +28,19 @@ class local_up1_notificationcourse_notificationcourse_form extends moodleform {
             'cols' => 80));
         $mform->setType('complement',PARAM_RAW);
 
-        $htmlinfo = '<br/><p class="notificationlabel">' . $this->_customdata['coursepath']
-            . '<br/><a href="' . $this->_customdata['urlactivite'] . '">'
-            . $this->_customdata['urlactivite'] . '</a></p>';
+        $urlactivity = html_Writer::link($this->_customdata['urlactivite'], $this->_customdata['urlactivite']);
+
+        $htmlinfo = html_Writer::empty_tag('br');
+        $htmlinfo .= html_Writer::tag(
+            'p',
+            $this->_customdata['coursepath'] .  html_Writer::empty_tag('br') . $urlactivity,
+            array('class' => 'notificationlabel')
+        );
+
         $mform->addElement('html', $htmlinfo);
 
         //-------------------------------------------------------------------------------
         // buttons
-        $this->add_action_buttons(true,  get_string('label_envoyer', 'local_up1_notificationcourse'));
+        $this->add_action_buttons(true,  get_string('submit', 'local_up1_notificationcourse'));
     }
 }

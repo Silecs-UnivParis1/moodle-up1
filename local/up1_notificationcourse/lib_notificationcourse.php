@@ -119,7 +119,7 @@ function get_result_action_notificationcourse($infolog) {
     $s = '';
 
     if ($infolog['nb'] == 0) {
-        return get_string('nopostssend', 'local_up1_notificationcourse');
+        return get_string('nomessagesend', 'local_up1_notificationcourse');
     } elseif ($infolog['nb'] > 1) {
         $s = 's';
     }
