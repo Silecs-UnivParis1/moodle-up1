@@ -8,7 +8,7 @@
 
 $string['body'] = 'Corps du message : ';
 $string['complement'] = 'Complément de message : ';
-$string['msgsender'] = '{$a->sender} ouhaite attirer votre attention sur l\'élément '
+$string['msgsender'] = '{$a->sender} souhaite attirer votre attention sur l\'élément '
     . '{$a->linkactivity} proposé au sein de l\'espace {$a->linkcourse}.';
 $string['nomessagesend'] = 'Aucun message envoyé.';
 $string['norecipient'] = 'Aucun destinataire';
