@@ -122,7 +122,7 @@ function create_rof_categories($verb=0) {
         $category = create_course_category($newcategory);
         $compCatId = $category->id;
         fix_course_sortorder();
-        list ($inSql, $inParams) = $DB->get_in_or_equal($component->sub);
+        list ($inSql, $inParams) = $DB->get_in_or_equal(explode(',', $component->sub));
         $sql = 'SELECT * FROM {rof_program} WHERE rofid ' . $inSql;
         $programs = $DB->get_records_sql($sql, $inParams);
 
