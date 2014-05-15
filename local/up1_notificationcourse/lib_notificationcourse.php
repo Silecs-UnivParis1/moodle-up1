@@ -75,7 +75,7 @@ function get_users_from_course($course, $rolename) {
     $rolestudent = $DB->get_record('role', array('shortname'=> $rolename));
     $studentcontext = get_users_from_role_on_context($rolestudent, $coursecontext);
 
-    if ($studentcontext == 0) {
+    if (count($studentcontext) == 0) {
         return $studentcontext;
     }
     $ids = '';

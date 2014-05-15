@@ -1325,13 +1325,19 @@ class core_wizard {
      * Création profile_field obligatoire
      */
     private function setup_mydata() {
-        $this->mydata->profile_field_up1approbateureffid = '';
-        $this->mydata->profile_field_up1rofname = '';
-        $this->mydata->profile_field_up1niveaulmda = '';
-        $this->mydata->profile_field_up1diplome = '';
-        $this->mydata->profile_field_up1generateur = '';
-        $this->mydata->profile_field_up1categoriesbis = '';
-        $this->mydata->profile_field_up1composante = '';
+        global $DB;
+        $sql = "SELECT shortname, datatype FROM {custom_info_field} WHERE objectname = 'course' AND shortname like 'up1%'";
+        $customfields = $DB->get_records_sql($sql);
+        if (count($customfields)) {
+            foreach($customfields as $label => $field) {
+                $champ = 'profile_field_'.$label;
+                $value = '';
+                if ($field->datatype != 'text') {
+                    $value = 0;
+                }
+                $this->mydata->$champ = $value;
+            }
+        }
     }
 
     private function set_metadata_cycle_life() {
