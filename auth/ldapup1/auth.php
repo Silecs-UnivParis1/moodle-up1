@@ -92,6 +92,7 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         $this->roleauth = 'auth_ldapup1';
         $this->errorlogtag = '[AUTH LDAPUP1] ';
         $this->init_plugin($this->authtype);
+        $this->config->{'field_map_emailstop'} = 'accountstatus';
     }
 
     /**
@@ -146,6 +147,11 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
                 $entry = array_change_key_case($user_entry[0], CASE_LOWER);
                 if (($value == 'dn') || ($value == 'distinguishedname')) {
                     $result[$key] = $user_dn;
+                    continue;
+                }
+                // mettre "emailstop" pour les personnes ayant accountStatus != active
+                if ($key == 'emailstop' && $value == 'accountstatus') {
+                    $result[$key] = @$entry[$value][0] != 'active';
                     continue;
                 }
                 if (!array_key_exists($value, $entry)) {
@@ -682,6 +688,8 @@ class auth_plugin_ldapup1 extends auth_plugin_trivial{
         foreach ($customattrs as $attr) {
             $moodleattributes['up1' . strtolower($attr)] = strtolower($attr); // le second strtolower est bien nécessaire !
         }
+
+        $moodleattributes['emailstop'] = 'accountstatus';
         // END addition
 
         return $moodleattributes;
