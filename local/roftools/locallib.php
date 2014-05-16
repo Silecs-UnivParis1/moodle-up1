@@ -74,9 +74,7 @@ function create_rof_categories($verb=0) {
     // Crée les niveaux issus du ROF : composantes (3) et types-diplômes simplifiés (4)
     $components = $DB->get_records('rof_component');
     foreach ($components as $component) {
-        if ($verb > 0) {
-            echo "\n$component->number $component->name \n";
-        }
+        progressBar($verb, 0, "\n$component->number $component->name \n");
         $newcategory = new stdClass();
         $newcategory->name = $component->name;
         $newcategory->idnumber = '3:' . $component->number;
@@ -90,12 +88,8 @@ function create_rof_categories($verb=0) {
 
         $diplomeCat = array();
         foreach ($programs as $program) {
-            if ($verb >= 1) {
-                echo '.';
-            }
-            if ($verb >= 2) {
-                echo " $program->rofid ";
-            }
+            progressBar($verb, 1, '.');
+            progressBar($verb, 2, " $program->rofid ");
             $typesimple = simplifyType($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
@@ -106,17 +100,13 @@ function create_rof_categories($verb=0) {
                 $newcategory->name = $classeDiplome;
                 $newcategory->idnumber = '4:' . $component->number .'/'. $classeDiplome;
                 $newcategory->parent = $compCatId;
-                if ($verb >= 1) {
-                    echo " $classeDiplome";
-                }
+                progressBar($verb, 1, " $classeDiplome");
                 $category = create_course_category($newcategory);
                 // $progCatId = $category->id;
                 fix_course_sortorder();
             }
         } // $dipOrdre
-        if ($verb >= 2) {
-            echo "\n";
-        }
+        progressBar($verb, 2, "\n");
     } // $components
 
 }
@@ -371,4 +361,16 @@ function delete_pages($firstpage, $lastpage) {
     $wherecs = "course = 1 AND section = 1 AND sequence LIKE '%," . $lastcm . "'";
     $DB->delete_record_select('page', $wherecs, null);
     
+}
+
+/**
+ * progress bar display
+ * @param int $verb verbosity
+ * @param int $verbmin minimal verbosity
+ * @param string $strig to display
+ */
+function progressBar($verb, $verbmin, $string) {
+    if ($verb >= $verbmin) {
+        echo $string;
+    }
 }
