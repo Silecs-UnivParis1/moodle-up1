@@ -269,10 +269,13 @@ function rof_rofpath_to_category($rofpath) {
         throw new coding_exception('composante non conforme' . $rofpath[0]);
         return false;
     }
+
     $typedip = $DB->get_field('rof_program', 'typedip', array('rofid' => $rofpath[1]), MUST_EXIST);
     if ($typedip) {
+        $yearcode = get_config('local_roftools', 'rof_year_code');
+        $etabcode = get_config('local_roftools', 'rof_etab_code');
         $eqvDiplomas = equivalent_diplomas();
-        $catcode = '4:' . $rofpath[0] .'/'. $eqvDiplomas[$typedip];
+        $catcode = '4:' . $yearcode .'/'. $etabcode .'/'. $rofpath[0] .'/'. $eqvDiplomas[$typedip];
 
         $res = $DB->get_field('course_categories', 'id', array('idnumber' => $catcode));
         return $res;
