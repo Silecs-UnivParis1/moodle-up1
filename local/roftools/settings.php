@@ -32,8 +32,8 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $rofyearcode = new admin_setting_configtext(
             'rof_year_code',
             'Code année',
-            'Code année préfixé par la profondeur des catégories de cours (ex. "1:2013-2014").',
-            '1:2013-2014',
+            'Code court année (ex. "2013-2014").',
+            '2013-2014',
             PARAM_NOTAGS);
     $rofyearcode->plugin = 'local_roftools';
     $settings->add($rofyearcode);
@@ -51,8 +51,8 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
     $rofetabcode = new admin_setting_configtext(
             'rof_etab_code',
             'Code établ.',
-            'Code établissement préfixé par la profondeur des catégories de cours (ex. "2:UP1").',
-            '2:UP1',
+            'Code court établissement (ex. "UP1").',
+            'UP1',
             PARAM_NOTAGS);
     $rofetabcode->plugin = 'local_roftools';
     $settings->add($rofetabcode);
