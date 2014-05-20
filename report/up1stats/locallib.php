@@ -80,6 +80,29 @@ function report_up1stats_cohorts_prefix() {
     return $res;
 }
 
+function report_up1stats_cohorts_category() {
+    global $DB;
+
+    $sql = "SELECT up1category, COUNT(id) AS cnt FROM cohort "
+    . "WHERE component LIKE 'local_cohortsyncup1%' GROUP BY up1category ORDER BY cnt DESC";
+    $rows = $DB->get_records_sql($sql);
+    $res = (array) $rows;
+    return $res;
+}
+
+
+function report_up1stats_cohorts_period() {
+    global $DB;
+
+    $sql = "SELECT IF(up1period<>'', up1period, '(none)') AS period, COUNT(id) AS cnt FROM cohort "
+    . "WHERE component LIKE 'local_cohortsyncup1%' GROUP BY up1period ORDER BY up1period ASC";
+    $rows = $DB->get_records_sql($sql);
+    $res = (array) $rows;
+    return $res;
+}
+
+
+
 function report_up1stats_cohorts_top($limit, $prefix=false) {
     global $DB;
     $res = array();
