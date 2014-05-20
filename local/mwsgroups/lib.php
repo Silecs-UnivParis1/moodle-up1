@@ -152,6 +152,24 @@ function groupKeyToCategory($key) {
 }
 
 /**
+ * returns an associative array, telling for each group category (see above) if it's yearly or not
+ * @return array( string => boolean)
+ */
+function groupYearlyPredicate() {
+    return array(
+        'structures' => false,
+        'affiliation' => false,
+        'diploma' => true,
+        'gpelp' => true,
+        'gpetp' => true,
+        'elp' => true,
+        'other' => false,
+        null => false
+    );
+}
+
+
+/**
  * sort of reciprocal from groupKeyToCategory
  * return array assoc. array of WHERE conditions in the SQL syntax
  */

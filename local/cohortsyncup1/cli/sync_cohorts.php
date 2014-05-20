@@ -21,13 +21,13 @@ define('CLI_SCRIPT', true);
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global moodle config file.
 require_once($CFG->libdir.'/clilib.php');      // cli only functions
 require_once($CFG->dirroot.'/local/cohortsyncup1/locallib.php');
-
+require_once($CFG->dirroot.'/local/cohortsyncup1/upgradelib.php');
 
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array(
         'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false,
         'cleanall'=>false, 'force'=>false, 'delete-old'=>false, 'fix-sync'=>false, 'dryrun'=>false,
-        'allGroups'=>false,
+        'allGroups'=>false, 'upgrade-period'=>false,
         'since'=>false, 'init'=>false ),
     array('h'=>'help', 'i'=>'init'));
 
@@ -52,6 +52,7 @@ Options:
 --delete-old   /!\    Delete cohorts still in database but not in webservice results anymore. One shot.
 --cleanall            Empty cohort_members, then cohort
   --force      /!\    Do cleanall, even if it breaks enrolments. DO NOT USE UNLESS EMERGENCY!
+--upgrade-period      One shot. Upgrade cohort table, sets period and category columns.
 --fix-sync            Fix user sync for created users without record in user_sync (catch-all)
   --dryrun            Perform only a diagnostic instead of fix. No modification in database.
 
@@ -103,6 +104,11 @@ if ( $options['printlast'] ) {
     return 0;
 }
 
+
+if ($options['upgrade-period']) {
+    upgrade_cohort_set_period($options['verb']);
+    return 0;
+}
 
 if ( $options['init'] ) {
     $since = 0;

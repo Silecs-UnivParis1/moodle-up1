@@ -2,7 +2,7 @@
 /**
  * @package    local
  * @subpackage cohortsyncup1
- * @copyright  2012-2013 Silecs {@link http://www.silecs.info/societe}
+ * @copyright  2012-2014 Silecs {@link http://www.silecs.info/societe}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,5 +31,14 @@ if (has_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM))) 
             PARAM_NOTAGS);
     $ws_userGroupsAndRoles->plugin = 'local_cohortsyncup1';
     $settings->add($ws_userGroupsAndRoles);
+
+    $cohortPeriod = new admin_setting_configtext(
+            'cohort_period',
+            'Cohorts implicit period (year)',
+            'Période implicite pour la période ou année, ex. 2013',
+            '',
+            PARAM_NOTAGS);
+    $cohortPeriod->plugin = 'local_cohortsyncup1';
+    $settings->add($cohortPeriod);
 
 }
