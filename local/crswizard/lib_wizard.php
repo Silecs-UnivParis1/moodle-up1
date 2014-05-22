@@ -926,7 +926,7 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
             $rof1['rofid'] = $rofid;
             $tabpath = explode('_', $rofpath);
             $rof1['tabpath'] = $tabpath;
-            $idcategory = rof_rofpath_to_category($tabpath);
+            $idcategory = rof_rofpath_to_category($tabpath, $form2['category']);
             if ($idcategory) {
                 $rof1['idcat'] = $idcategory;
                 $category = $DB->get_record('course_categories', array('id' => $idcategory));
