@@ -22,7 +22,7 @@ Options:
 --up-idnumber         action update. Mandatory.
   --year=...          year code, ex. '2012-2013'
   --etab=...          etablissement code, ex. 'UP1'
---list-old            list old idnumbers
+--list-old            action list old idnumbers
 -h, --help            Print out this help
 
 ";
@@ -47,4 +47,4 @@ if ( $options['list-old'] ) {
     return 0;
 }
 
-echo "OK.\n";
+echo "Aucune action indiquée.\n";

@@ -18,23 +18,28 @@ function update_categories_idnumber($yearcode, $etabcode) {
     global $DB;
 
     $yearid = $DB->get_field('course_categories', 'id', array('idnumber'=>'1:'.$yearcode, 'depth'=>1), MUST_EXIST);
-    $etabid = $DB->get_field('course_categories', 'id', array('idnumber'=>'2:'.$etabcode, 'depth'=>2), MUST_EXIST);
+    $etabid = $DB->get_field('course_categories', 'id', array('idnumber'=>'2:'.$etabcode, 'depth'=>2, 'parent'=>$yearid), MUST_EXIST);
     if ( ! $yearid || ! $etabid ) {
         die ('yearcode ou etabcode n\'existe pas.');
     }
     $catpath = '/' . $yearid . '/' . $etabid . '/%';
+    echo "catpath = $catpath \n";
 
     $sql = "UPDATE {course_categories} SET idnumber=? WHERE depth=2 AND id=?";
     $DB->execute($sql, array('2:' . $yearcode . '/' . $etabcode , $etabid));
+    echo "depth=2 OK.\n";
 
     $sql = "UPDATE {course_categories} SET idnumber=REPLACE(idnumber, '3:', ?) "
         . " WHERE depth=3 AND idnumber REGEXP '3:[^/]+$' AND path LIKE ? ";
-    $DB->execute($sql, array('3:' . $newyearcode . '/' . $newetabcode . '/',  $catpath ));
+    $DB->execute($sql, array('3:' . $yearcode . '/' . $etabcode . '/',  $catpath ));
+    echo "depth=3 OK.\n";
 
     $sql = "UPDATE {course_categories} SET idnumber=REPLACE(idnumber, '4:', ?) "
         . " WHERE depth=4 AND idnumber REGEXP '4:[^/]+/[^/]+$' AND path LIKE ? ";
-    $DB->execute($sql, array('4:' . $newyearcode . '/' . $newetabcode . '/',  $catpath ));
+    $DB->execute($sql, array('4:' . $yearcode . '/' . $etabcode . '/',  $catpath ));
+    echo "depth=4 OK.\n";
 
+    return true;
 }
 
 /** list all categories with idnumber matching the old scheme
