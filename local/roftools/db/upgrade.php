@@ -20,8 +20,6 @@ function xmldb_local_roftools_upgrade($oldversion) {
 
     if ($oldversion < 2014051901) {
 
-        echo "Updating course categories from ROF... <br />\n";
-        update_categories_idnumber();
         echo "Updating ROFtools settings... <br />\n";
         update_rof_settings();
     }
