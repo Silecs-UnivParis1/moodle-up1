@@ -38,7 +38,7 @@ $CFG->debug = DEBUG_NORMAL;
 
 
 if ( $options['up-idnumber'] ) {
-    update_categories_idnumber($options['year'], $option['etab']);
+    update_categories_idnumber($options['year'], $options['etab']);
     return 0;
 }
 
