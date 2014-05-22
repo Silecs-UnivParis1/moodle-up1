@@ -19,21 +19,32 @@ function upgrade_cohort_set_period($verb) {
          . " WHERE component LIKE 'local_cohortsyncup1%' AND up1category='' ";
     $records = $DB->get_records_sql($sql);
     $groupYearly = groupYearlyPredicate();
-    $count = array ('old' => 0, 'current' => 0, 'none' => 0);
+    $count = array ('old' => 0, 'current-up' => 0, 'current-noop' => 0, 'none' => 0);
 
     foreach ($records as $cohort) {
         progressBar($verb, 1, '.');
         $groupcategory = groupKeyToCategory($cohort->idnumber);
+        $curyear = get_config('local_cohortsyncup1', 'cohort_period');
 
         if ( preg_match('/-(201[0-9])$/', $cohort->idnumber, $matches) ) {
             $year = $matches[1];
-            $cohort->up1period = $year;
-            $count['old']++;
-        } elseif ( $groupYearly[$groupcategory] ) {
-            $year = get_config('local_cohortsyncup1', 'cohort_period');
-            $cohort->up1period = $year;
-            $count['current']++;
+            if ($year <> $curyear) {
+                $cohort->up1period = $year;
+                $cohort->up1key = '';
+                $count['old']++;
+            } else {
+                $cohort->up1period = $curyear;
+                $cohort->up1key = cohort_raw_idnumber($cohort->idnumber);
+                $count['current-noop']++;
+            }
+        } elseif ( $groupYearly[$groupcategory] ) {            
+            $cohort->up1period = $curyear;
+            $cohort->up1key = $cohort->idnumber;
+            $cohort->idnumber = $cohort->idnumber . '-' .$year;
+            $cohort->name = '['. $year . '] ' . $cohort->name;
+            $count['current-up']++;
         } else {
+            $cohort->up1key = $cohort->idnumber;
             $count['none']++;
         }
         $cohort->up1category = $groupcategory;
@@ -42,4 +53,13 @@ function upgrade_cohort_set_period($verb) {
 
     echo "Comptages : ";
     print_r($count);
+}
+
+
+function cohort_raw_idnumber($idnumber) {
+    if ( preg_match('/^(.+)-(201[0-9])$/', $idnumber, $matches) ) {
+        return $matches[1];
+    } else {
+        return $idnumber;
+    }
 }

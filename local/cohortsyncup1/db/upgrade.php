@@ -19,10 +19,9 @@ function xmldb_local_cohortsyncup1_upgrade($oldversion) {
     // Put any upgrade step following this
 
     if ($oldversion < 2014052001) {
-        // Add userid field
         $table = new xmldb_table('cohort');
-
         $field1 = new xmldb_field('up1category', XMLDB_TYPE_CHAR, '100', null, false, false, '');
+        // up1category is one of the cohort categories, as defined by the function groupKeyToCategory()
         $field2 = new xmldb_field('up1period', XMLDB_TYPE_CHAR, '100', null, false, false, '');
         if ( ! $dbman->field_exists($table, $field1)) {
             $dbman->add_field($table, $field1);
@@ -32,5 +31,13 @@ function xmldb_local_cohortsyncup1_upgrade($oldversion) {
         }
     }
 
+        if ($oldversion < 2014052200) {
+        $table = new xmldb_table('cohort');
+        $field1 = new xmldb_field('up1key', XMLDB_TYPE_CHAR, '100', null, false, false, '');
+        // up1key is exactly the upstream key if this cohort is to be synced, or '' otherwise
+        if ( ! $dbman->field_exists($table, $field1)) {
+            $dbman->add_field($table, $field1);
+        }
+    }
     return true;
 }
