@@ -135,6 +135,7 @@ switch ($stepin) {
             $SESSION->wizard['form_step3']['user_login'] = $USER->username;
             $SESSION->wizard['form_step3']['requestdate'] = time();
 
+            get_selected_etablissement_id();
             $editform = new course_wizard_step3_form();
 
             $data = $editform->get_data();
@@ -142,6 +143,7 @@ switch ($stepin) {
                 $data->user_name = $SESSION->wizard['form_step3']['user_name'];
                 $data->user_login = $SESSION->wizard['form_step3']['user_login'];
                 $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
+                $data->idetab = $SESSION->wizard['form_step3']['idetab'];
 
                 $data->item =  (isset($_POST['item']) ? wizard_get_array_item($_POST['item']) : array());
 

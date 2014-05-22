@@ -4,6 +4,15 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * récupère l'identifiant de la catégorie "établissement" (niveau 2) sélectionné en étape 2
+ **/
+function get_selected_etablissement_id() {
+    global $SESSION;
+    $tabpath = wizard_get_categorypath($SESSION->wizard['form_step2']['category']);
+    $SESSION->wizard['form_step3']['idetab'] = $tabpath[2];
+}
+
+/**
  * récupère des métadonnées du modèle si même cas
 */
 function wizard_get_metadonnees() {
@@ -950,12 +959,19 @@ function wizard_prepare_rattachement_rof_moodle($form2, $change=true) {
 function wizard_get_idcat_rof_secondaire($form) {
     global $DB;
     $rofidmoodle = '';
+    $idetab = null;
+    if (array_key_exists('category', $form)) {
+        $idetab = $form['category'];
+    } elseif (array_key_exists('idetab', $form)) {
+        $idetab = $form['idetab'];
+    }
+
     if (isset($form['item']) && count($form['item'])) {
         $allrof = $form['item'];
         if (isset($allrof['s']) && count($allrof['s'])) {
             foreach ($allrof['s'] as $rofpath => $rofid) {
                 $tabpath = explode('_', $rofpath);
-                $idcategory = rof_rofpath_to_category($tabpath);
+                $idcategory = rof_rofpath_to_category($tabpath, $idetab);
                 if ($idcategory) {
                     $rofidmoodle .= $idcategory . ';';
                 }
@@ -1303,7 +1319,7 @@ class core_wizard {
             $this->mydata->profile_field_up1generateur = 'Manuel via assistant (cas n°3 hors ROF)';
             //rattachement hybride
             $this->set_metadata_rof2('form_step3');
-            // id cacegory moodle rattachements secondaires
+            // id category moodle rattachements secondaires
             $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($this->formdata['form_step3']);
 
             if (count($this->formdata['rof2_tabpath'])) {
@@ -1907,8 +1923,7 @@ class core_wizard {
                     $this->mydata->profile_field_up1categoriesbis = '';
                 }
             }
-
-            // id cacegory moodle rattachements secondaires
+            // id category moodle rattachements secondaires
             $this->mydata->profile_field_up1categoriesbisrof = wizard_get_idcat_rof_secondaire($this->formdata['form_step3']);
 
             // log update rattach hybride
