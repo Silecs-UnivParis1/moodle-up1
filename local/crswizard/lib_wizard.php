@@ -4,6 +4,72 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Vérifie, lors de la mise à jour d'un cours Hors Rof si l'établissement à été modifié.
+ * Vérifie, lors de la création d'un cours HR à partir d'un modèle HR si l'établissement n'a pas
+ * été modifié.
+ * Dans ces cas, lance la méthode wizard_find_autres_rattachements()
+ */
+function wizard_autres_rattachements() {
+    global $SESSION;
+    $idetab = 0;
+    $idetab_selected = 0;
+    if (array_key_exists('form_step3', $SESSION->wizard) && array_key_exists('idetab', $SESSION->wizard['form_step3'])) {
+        $idetab_selected = $SESSION->wizard['form_step3']['idetab'];
+    } else {
+        return false;
+    }
+
+    if (array_key_exists('init_course', $SESSION->wizard) && array_key_exists('category', $SESSION->wizard['init_course'])) {
+        $init = $SESSION->wizard['init_course'];
+        $tabpath = wizard_get_categorypath($init['category']);
+        $idetab = $tabpath[2];
+    }
+
+    if ($idetab != $idetab_selected) {
+        if (array_key_exists('rattachements', $SESSION->wizard['form_step3'])) {
+            $rattachements = $SESSION->wizard['form_step3']['rattachements'];
+            if (count($rattachements) == 0) {
+                return false;
+            }
+            $SESSION->wizard['form_step3']['rattachements'] = wizard_find_autres_rattachements($rattachements, $idetab_selected);
+        }
+    }
+}
+
+/**
+ * Retrouve les catégories de $rattachements correspondant à l'établissement $idetab_selected
+ * @param array $rattachements contient les identifiants des catégories de rattachement secondaire
+ * @param id $idetab_selected identifiant se l'établissement sélectionné en étape 2
+ * @return array $mycategories
+ */
+function wizard_find_autres_rattachements($rattachements, $idetab_selected) {
+    global $DB;
+    $mycategories = $rattachements;
+    $idnumber = $DB->get_field('course_categories', 'idnumber', array('depth'=>2, 'id'=>$idetab_selected), MUST_EXIST);
+    if ( preg_match('@^2:([^/]+)/([^/]+)$@', $idnumber, $matches) ) {
+        $yearcode = $matches[1];
+        $etabcode = $matches[2];
+    } else {
+        return $rattachements;
+    }
+    foreach ($rattachements as $ra) {
+        if (isset($ra) && $ra != '') {
+            $category = $DB->get_record('course_categories', array('id'=>$ra), '*', MUST_EXIST);
+            if ($category) {
+                $eqvDiplomas = strstr(substr(strstr($category->idnumber, '/'), 1), '/');
+                $masque = $category->depth . ':' . $yearcode .'/'. $etabcode . $eqvDiplomas;
+                $res = $DB->get_field('course_categories', 'id', array('idnumber' => $masque));
+                if ($res) {
+                    $mycategories[] = $res;
+                }
+            }
+        }
+    }
+    return $mycategories;
+}
+
+
+/**
  * récupère l'identifiant de la catégorie "établissement" (niveau 2) sélectionné en étape 2
  **/
 function get_selected_etablissement_id() {
@@ -53,6 +119,7 @@ function wizard_get_metadonnees() {
                         break;
                     case 3:
                         $SESSION->wizard['form_step2']['category'] = $course->category;
+                        $SESSION->wizard['init_course']['category'] = $course->category;
                         if (isset($course->profile_field_up1categoriesbis)) {
                             $SESSION->wizard['form_step3']['rattachements'] = explode(';', $course->profile_field_up1categoriesbis);
                         }

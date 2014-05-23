@@ -21,6 +21,8 @@ class course_wizard_step3_form extends moodleform {
     function definition() {
         global $USER, $DB, $SESSION, $OUTPUT;
 
+        wizard_autres_rattachements();
+
         $tabfreeze = array();
         $mform = $this->_form;
 
