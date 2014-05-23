@@ -49,6 +49,43 @@ function high_level_categories() {
         );
 }
 
+
+function delete_rof_categories() {
+    global $DB;
+    
+    $yearcode = get_config('local_roftools', 'rof_year_code');
+    $etabcode = get_config('local_roftools', 'rof_etab_code');
+    
+    $catpath = $yearcode . '/' . $etabcode;
+    $sql = "DELETE FROM {course_categories} "
+        . " WHERE idnumber REGEXP '[234]:" . $catpath . ".*$'";
+    $DB->execute($sql);
+    $sql = "DELETE FROM {course_categories} "
+        . " WHERE depth=1 AND idnumber = '1:". $yearcode ."'";
+    $DB->execute($sql);
+}
+
+function list_rof_categories() {
+    global $DB;
+
+    $yearcode = get_config('local_roftools', 'rof_year_code');
+    $etabcode = get_config('local_roftools', 'rof_etab_code');
+
+    $catpath = $yearcode . '/' . $etabcode;
+    $sql = "SELECT id, idnumber, name FROM {course_categories} "
+        . " WHERE idnumber = '1:". $yearcode ."' OR idnumber REGEXP '[234]:" . $catpath . ".*$'";
+    $rows = $DB->get_records_sql($sql);
+    $count = 0;
+    if (! $rows ) {
+        echo "No rof categories for $catpath \n";
+    } else {
+        foreach ($rows as $row) {
+            $count++;
+            echo sprintf('%3d.  ',$count) . $row->id . "  [" . $row->idnumber . "]  " . $row->name . "\n";
+        }
+    }
+}
+
 function create_rof_categories($verb=0) {
     global $DB;
 
@@ -58,14 +95,17 @@ function create_rof_categories($verb=0) {
     $parentid=0;
 
     // Crée les deux niveaux supérieurs
+    $level = 0;
+    $catpath = '';
     foreach ($hlCategories as $hlcat) {
+        $level++;
         $newcategory = new stdClass();
         $newcategory->name = $hlcat['name'];
-        $newcategory->idnumber = $hlcat['idnumber'];
+        $newcategory->idnumber = $level .':'. $catpath . $hlcat['idnumber'];
         $newcategory->parent = $parentid;
-
         $category = create_course_category($newcategory);
         $parentid = $category->id;
+        $catpath = $hlcat['idnumber'] . '/';
         fix_course_sortorder();
      }
 
@@ -74,28 +114,22 @@ function create_rof_categories($verb=0) {
     // Crée les niveaux issus du ROF : composantes (3) et types-diplômes simplifiés (4)
     $components = $DB->get_records('rof_component');
     foreach ($components as $component) {
-        if ($verb > 0) {
-            echo "\n$component->number $component->name \n";
-        }
+        progressBar($verb, 0, "\n$component->number $component->name \n");
         $newcategory = new stdClass();
         $newcategory->name = $component->name;
-        $newcategory->idnumber = '3:' . $component->number;
+        $newcategory->idnumber = '3:' . $hlCategories[0]['idnumber'] . '/' . $hlCategories[1]['idnumber'] . '/' . $component->number;
         $newcategory->parent = $rofRootId;
         $category = create_course_category($newcategory);
         $compCatId = $category->id;
         fix_course_sortorder();
-        list ($inSql, $inParams) = $DB->get_in_or_equal($component->sub);
+        list ($inSql, $inParams) = $DB->get_in_or_equal(explode(',', $component->sub));
         $sql = 'SELECT * FROM {rof_program} WHERE rofid ' . $inSql;
         $programs = $DB->get_records_sql($sql, $inParams);
 
         $diplomeCat = array();
         foreach ($programs as $program) {
-            if ($verb >= 1) {
-                echo '.';
-            }
-            if ($verb >= 2) {
-                echo " $program->rofid ";
-            }
+            progressBar($verb, 1, '.');
+            progressBar($verb, 2, " $program->rofid ");
             $typesimple = simplifyType($program->typedip, $idxEqv);
             $diplomeCat[$typesimple] = TRUE;
         } // $programs
@@ -104,19 +138,15 @@ function create_rof_categories($verb=0) {
             if ( isset($diplomeCat[$classeDiplome]) ) {
                 $newcategory = new stdClass();
                 $newcategory->name = $classeDiplome;
-                $newcategory->idnumber = '4:' . $component->number .'/'. $classeDiplome;
+                $newcategory->idnumber = '4:' . $hlCategories[0]['idnumber'] . '/' . $hlCategories[1]['idnumber'] . '/' . $component->number .'/'. $classeDiplome;
                 $newcategory->parent = $compCatId;
-                if ($verb >= 1) {
-                    echo " $classeDiplome";
-                }
+                progressBar($verb, 1, " $classeDiplome");
                 $category = create_course_category($newcategory);
                 // $progCatId = $category->id;
                 fix_course_sortorder();
             }
         } // $dipOrdre
-        if ($verb >= 2) {
-            echo "\n";
-        }
+        progressBar($verb, 2, "\n");
     } // $components
 
 }
@@ -371,4 +401,16 @@ function delete_pages($firstpage, $lastpage) {
     $wherecs = "course = 1 AND section = 1 AND sequence LIKE '%," . $lastcm . "'";
     $DB->delete_record_select('page', $wherecs, null);
     
+}
+
+/**
+ * progress bar display
+ * @param int $verb verbosity
+ * @param int $verbmin minimal verbosity
+ * @param string $strig to display
+ */
+function progressBar($verb, $verbmin, $string) {
+    if ($verb >= $verbmin) {
+        echo $string;
+    }
 }

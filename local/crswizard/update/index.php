@@ -123,6 +123,7 @@ switch ($stepin) {
                 $idcourse = $SESSION->wizard['idcourse'];
             }
             $hybridattachment_permission = wizard_has_hybridattachment_permission($idcourse, $USER->id);
+            get_selected_etablissement_id();
 
             $editform = new course_wizard_step3_form();
 
@@ -131,6 +132,8 @@ switch ($stepin) {
                 $data->user_name = $SESSION->wizard['form_step3']['user_name'];
                 $data->user_login = $SESSION->wizard['form_step3']['user_login'];
                 $data->requestdate = $SESSION->wizard['form_step3']['requestdate'];
+                $data->idetab = $SESSION->wizard['form_step3']['idetab'];
+
                 if ($hybridattachment_permission === false) {
                     $init_course_form3 = $SESSION->wizard['init_course']['form_step3'];
                     $data->item = (isset($init_course_form3['item']) ? $init_course_form3['item'] : array());

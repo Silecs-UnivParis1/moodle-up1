@@ -12,6 +12,11 @@ require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php'); // global m
 require_once($CFG->libdir.'/clilib.php');      // cli only functions
 require_once($CFG->dirroot.'/local/up1_courselist/courselist_tools.php');
 
+foreach (array(2052, 2053, 2054, 2055, 2056, 2057, 2058) as $cat) {
+    echo " catid = $cat   component = ";
+    var_dump(courselist_cattools::get_component_from_category($cat));
+}
+
 $rofpathid = '/02/UP1-PROG3456/UP1-C12345';
 var_dump(courselist_roftools::rofpath_match_component($rofpathid, '02'));
 var_dump(courselist_roftools::rofpath_match_component($rofpathid, '06'));

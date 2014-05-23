@@ -255,12 +255,26 @@ function rof_insert_paths_statistics($verb=0) {
  * Prerequisite: standard categories have been created from ROF by local/rof_categories
  * @global type $DB
  * @param array $rofpath ROF path as usual ('02', 'UP1-PROG12345', 'UP1-PROG45678', 'UP1-C98765' ...)
+ * @param int $catid level 2 category which will host the created rof-course
  * @return int (category id) OR false if an error occurred
  * @throws coding_exception
  */
-function rof_rofpath_to_category($rofpath) {
+function rof_rofpath_to_category($rofpath, $catid=null) {
     global $DB;
 
+    if ($catid === null) {
+        $yearcode = get_config('local_roftools', 'rof_year_code');
+        $etabcode = get_config('local_roftools', 'rof_etab_code');
+    }
+    else {
+        $idnumber = $DB->get_field('course_categories', 'idnumber', array('depth'=>2, 'id'=>$catid), MUST_EXIST);
+        if ( preg_match('@^2:([^/]+)/([^/]+)$@', $idnumber, $matches) ) {
+            $yearcode = $matches[1];
+            $etabcode = $matches[2];
+        } else {
+            throw new coding_exception('idnumber ['. $idnumber .'] incohérent pour catid=' . $catid);
+        }
+    }
     if ( count($rofpath) < 2 || ! is_array($rofpath) ) {
         throw new coding_exception('rofpath trop court : 2 niveaux minimum');
         return false;
@@ -269,10 +283,12 @@ function rof_rofpath_to_category($rofpath) {
         throw new coding_exception('composante non conforme' . $rofpath[0]);
         return false;
     }
+
     $typedip = $DB->get_field('rof_program', 'typedip', array('rofid' => $rofpath[1]), MUST_EXIST);
     if ($typedip) {
+
         $eqvDiplomas = equivalent_diplomas();
-        $catcode = '4:' . $rofpath[0] .'/'. $eqvDiplomas[$typedip];
+        $catcode = '4:' . $yearcode .'/'. $etabcode .'/'. $rofpath[0] .'/'. $eqvDiplomas[$typedip];
 
         $res = $DB->get_field('course_categories', 'id', array('idnumber' => $catcode));
         return $res;

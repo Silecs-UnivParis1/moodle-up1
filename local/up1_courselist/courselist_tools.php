@@ -293,7 +293,11 @@ class courselist_cattools {
     public static function get_component_from_category($catid) {
         global $DB;
         $idnumber = $DB->get_field('course_categories', 'idnumber', array('id' => $catid), MUST_EXIST);
-        return substr($idnumber, 2, 2); // ex. '4:05/Masters' -> '05'
+        if ( preg_match('@[1234]:[^/]+/[^/]+/([^/]+)@', $idnumber, $matches) ) {
+            return $matches[1];   // ex. '4:2012-2013/UP1/05/Masters' -> '05'
+        } else {
+            return null;
+        }
     }
 
     /**
