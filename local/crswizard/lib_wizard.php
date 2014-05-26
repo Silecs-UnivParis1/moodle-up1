@@ -4,12 +4,111 @@
 require_once("$CFG->dirroot/local/roftools/roflib.php");
 
 /**
+ * Vérifie, lors de la mise à jour d'un cours Hors Rof si l'établissement à été modifié.
+ * Vérifie, lors de la création d'un cours HR à partir d'un modèle HR si l'établissement n'a pas
+ * été modifié.
+ * Dans ces cas, lance la méthode wizard_find_autres_rattachements()
+ */
+function wizard_autres_rattachements() {
+    global $SESSION;
+    $idetab = 0;
+    $idetab_selected = 0;
+    if (array_key_exists('form_step3', $SESSION->wizard) && array_key_exists('idetab', $SESSION->wizard['form_step3'])) {
+        $idetab_selected = $SESSION->wizard['form_step3']['idetab'];
+    } else {
+        return false;
+    }
+
+    if (array_key_exists('init_course', $SESSION->wizard) && array_key_exists('category', $SESSION->wizard['init_course'])) {
+        $init = $SESSION->wizard['init_course'];
+        $tabpath = wizard_get_categorypath($init['category']);
+        $idetab = $tabpath[2];
+    }
+
+    if ($idetab != $idetab_selected) {
+        if (array_key_exists('rattachements', $SESSION->wizard['form_step3'])) {
+            $rattachements = $SESSION->wizard['form_step3']['rattachements'];
+            if (count($rattachements) == 0) {
+                return false;
+            }
+            $SESSION->wizard['form_step3']['rattachements'] = wizard_find_autres_rattachements($rattachements, $idetab_selected);
+        }
+    }
+}
+
+/**
+ * Retrouve les catégories de $rattachements correspondant à l'établissement $idetab_selected
+ * @param array $rattachements contient les identifiants des catégories de rattachement secondaire
+ * @param id $idetab_selected identifiant se l'établissement sélectionné en étape 2
+ * @return array $mycategories
+ */
+function wizard_find_autres_rattachements($rattachements, $idetab_selected) {
+    global $DB;
+    $mycategories = $rattachements;
+    $idnumber = $DB->get_field('course_categories', 'idnumber', array('depth'=>2, 'id'=>$idetab_selected), MUST_EXIST);
+    if ( preg_match('@^2:([^/]+)/([^/]+)$@', $idnumber, $matches) ) {
+        $yearcode = $matches[1];
+        $etabcode = $matches[2];
+    } else {
+        return $rattachements;
+    }
+    foreach ($rattachements as $ra) {
+        if (isset($ra) && $ra != '') {
+            $category = $DB->get_record('course_categories', array('id'=>$ra), '*', MUST_EXIST);
+            if ($category) {
+                $eqvDiplomas = strstr(substr(strstr($category->idnumber, '/'), 1), '/');
+                $masque = $category->depth . ':' . $yearcode .'/'. $etabcode . $eqvDiplomas;
+                $res = $DB->get_field('course_categories', 'id', array('idnumber' => $masque));
+                if ($res) {
+                    $mycategories[] = $res;
+                }
+            }
+        }
+    }
+    return $mycategories;
+}
+
+
+/**
  * récupère l'identifiant de la catégorie "établissement" (niveau 2) sélectionné en étape 2
  **/
 function get_selected_etablissement_id() {
     global $SESSION;
     $tabpath = wizard_get_categorypath($SESSION->wizard['form_step2']['category']);
     $SESSION->wizard['form_step3']['idetab'] = $tabpath[2];
+}
+
+/**
+ * Récupère les utilisateurs ayant des rôles de type teachers dans le cours d'identifiant $courseid
+ * @param int $courseid : identifiant du cours
+ * @return array $users (utilisateurs non suspendus)
+ */
+function wizard_get_teachers($courseid) {
+    global $DB, $USER;
+    $users = array();
+    $myconfig = new my_elements_config();
+    $labels = $myconfig->role_teachers;
+    $roles = wizard_role($labels);
+    if (count($roles)) {
+        $context = context_course::instance($courseid);
+        foreach ($roles as $role) {
+            $ra = $DB->get_records('role_assignments', array('roleid' => $role['id'], 'contextid' => $context->id));
+            if (count($ra)) {
+                foreach ($ra as $r) {
+                   $user = $DB->get_record('user', array('id'=>$r->userid), '*', MUST_EXIST);
+                    if ($user && $user->deleted ==0 && $user->suspended == 0) {
+                        $users[$role['shortname']][$user->username] = $user;
+                    }
+                }
+            }
+        }
+    }
+    if (count($users)) {
+        $code = 'editingteacher';
+        $user = $DB->get_record('user', array('username' => $USER->username));
+        $users[$code][$user->username] = $user;
+    }
+    return $users;
 }
 
 /**
@@ -33,6 +132,12 @@ function wizard_get_metadonnees() {
             $custominfo_data = custominfo_data::type('course');
             $custominfo_data->load_data($course);
 
+            //inscriptions teachers
+            $teachers = wizard_get_teachers($course->id);
+            if (count($teachers)) {
+                $SESSION->wizard['form_step4']['all-users'] = $teachers;
+            }
+
             $case = wizard_get_generateur($course);
             if ($case == $SESSION->wizard['wizardcase']) {
                 switch ($case) {
@@ -53,6 +158,7 @@ function wizard_get_metadonnees() {
                         break;
                     case 3:
                         $SESSION->wizard['form_step2']['category'] = $course->category;
+                        $SESSION->wizard['init_course']['category'] = $course->category;
                         if (isset($course->profile_field_up1categoriesbis)) {
                             $SESSION->wizard['form_step3']['rattachements'] = explode(';', $course->profile_field_up1categoriesbis);
                         }
