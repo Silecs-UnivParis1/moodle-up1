@@ -96,10 +96,10 @@ function get_ws_data($webservice) {
 function cli_delete_missing_cohorts($verbose) {
     echo "Connect webservice... ";
     add_to_log(0, 'local_cohortsyncup1', 'delMissingCohorts:begin', '', "");
-    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
+    list($curlinfo, $wsdata) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
     echo "OK. \n";
 
-    $cnt = delete_missing_cohorts($data, $verbose);
+    $cnt = delete_missing_cohorts($wsdata, $verbose);
     $logmsg = "parsed cohorts : " . $cnt['delete']. " deleted, " . $cnt['keep']. " kept.";
     echo "\n =>  $logmsg\n\n";
     add_to_log(0, 'local_cohortsyncup1', 'delMissingCohorts:end', '', $logmsg);
@@ -108,33 +108,29 @@ function cli_delete_missing_cohorts($verbose) {
 
 /**
  * delete base cohorts which are not present in the webservice results anymore
- * @param array $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime', $description => '...')
+ * @param array $wsdata = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime', $description => '...')
  * @return array (int $deleted, int $kept) : # of deleted and kept cohorts
  */
-function delete_missing_cohorts($data, $verbose) {
+function delete_missing_cohorts($wsdata, $verbose) {
     global $DB;
     $action = array (true => 'delete', false => 'keep');
     $cnt = array ('delete' => 0, 'keep' => 0);
     $progressbar = array ('delete' => 'D', 'keep' => 'K');
 
-    $dbcohorts = $DB->get_fieldset_select('cohort', 'idnumber', "component='local_cohortsyncup1'");
-    $cohortsid = $DB->get_records_menu('cohort', null, null, 'idnumber, id');
-    $wscohorts = array_map('project_key', $data);
+    $dbcohorts = $DB->get_fieldset_select('cohort', 'up1key', "component='local_cohortsyncup1' AND up1key != ''");
+    $cohortsid = $DB->get_records_menu('cohort', null, null, 'up1key, id');
+    $wscohorts = array_map('project_key', $wsdata);
     $todelete = array_diff($dbcohorts, $wscohorts);
     echo "\nThere are " . count($todelete) . " missing cohorts.\n";
 
-    foreach ($todelete as $idnumber) {
-        $cohortid = $cohortsid[$idnumber];
+    foreach ($todelete as $up1key) {
+        $cohortid = $cohortsid[$up1key];
         $res = safe_delete_cohort($cohortid);
 
         $act = $action[$res];
         $cnt[$act]++;
-        if ($verbose >=1 ) {
-            echo $progressbar[$act];
-        }
-        if ($verbose >= 3) {
-            echo '=' . $idnumber . ' ';
-        }
+        progressBar($verbose, 1, $progressbar[$act]);
+        progressBar($verbose, 3, '=' . $up1key . ' ');     
     }
     return $cnt;
 }
@@ -154,6 +150,7 @@ function project_key($datum) {
  */
 function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 {
+    update_period($verbose);
     // $ws_allGroups = 'http://ticetest.univ-paris1.fr/wsgroups/allGroups';
     $cnt = array('create' => 0, 'modify' => 0, 'pass' => 0, 'noop' => 0);
     $progressbar = array('create' => '+', 'modify' => 'M', 'pass' => 'P', 'noop' => '=');
@@ -162,24 +159,24 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
     $ldaptimelast = date("YmdHis", $timelast) . 'Z';
     add_to_log(0, 'local_cohortsyncup1', 'syncAllGroups:begin', '', "From allGroups since $timelast");
 
-    list($curlinfo, $data) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
+    list($curlinfo, $wsdata) = get_ws_data(get_config('local_cohortsyncup1', 'ws_allGroups'));
     // $data = array( stdClass( $key => '...', $name => '...', $modifyTimestamp => 'ldapTime' $description => '...'
-    if ($data) {
-        if ($verbose >= 1) echo "Parsing " . count($data) . " cohorts ; since $ldaptimelast. \n";
+    if ($wsdata) {
+        progressBar($verbose, 1, "Parsing " . count($wsdata) . " cohorts ; since $ldaptimelast. \n");
 
-        foreach ($data as $cohort) {
+        foreach ($wsdata as $cohort) {
             $count++;
             if ($limit > 0 && $count > $limit) break;
 
             $action = process_cohort($cohort, $verbose, $ldaptimelast); // real processing here
             $cnt[$action]++;
-            if ($verbose >= 2) echo $progressbar[$action];
+            progressBar($verbose, 2, $progressbar[$action]);
         } // foreach($data)
 
         $logmsg = "\nAll cohorts: " . $cnt['pass']. " passed, " . $cnt['noop']. " noop, "
                 . $cnt['modify']. " modified, " . $cnt['create']. " created.";
 
-        $cnt = delete_missing_cohorts($data, $verbose);
+        $cnt = delete_missing_cohorts($wsdata, $verbose);
         $logmsg .= "   MISSING: " . $cnt['delete']. " deleted, " . $cnt['keep']. " kept.";
     } else {
         $logmsg = "\nUnable to fetch data from: " . $ws_allGroups . "\n" ;
@@ -199,12 +196,12 @@ function sync_cohorts_all_groups($timelast=0, $limit=0, $verbose=0)
 function process_cohort($cohort, $verbose, $ldaptimelast) {
     global $DB;
 
-    if ($verbose >= 2) echo '.'; // progress bar
+    progressBar($verbose, 2, '.');
 
     if (property_exists($cohort,'modifyTimestamp') && $cohort->modifyTimestamp < $ldaptimelast) {
         return 'pass'; // passed due to modifyTimestamp
     }
-    if (! $DB->record_exists('cohort', array('idnumber' => $cohort->key))) { // cohort doesn't exist yet
+    if (! $DB->record_exists('cohort', array('up1key' => $cohort->key))) { // cohort doesn't exist yet
         $newcohort = define_cohort($cohort);
         $newid = cohort_add_cohort($newcohort);
         if ( $newid > 0 ) {
@@ -237,25 +234,18 @@ function display_cohorts_all_groups($verbose=2)
     list($curlinfo, $data) = get_ws_data($ws_allGroups, 'ws_allGroups');
 
     if ($data) {
-        if ($verbose >= 1) {
-            echo "\nParsing " . count($data) . " cohorts. \n";            
-        }        
+        progressBar($verbose, 1, "\nParsing " . count($data) . " cohorts. \n");
         foreach ($data as $cohort) {
             $count++;
-            if ($verbose >= 2) echo '.'; // progress bar
-            if ($verbose >= 3) echo $cohort->key . "\n";
+            progressBar($verbose, 2, '.');
+            progressBar($verbose, 3, "$count." . $cohort->key . "\n");
         } // foreach($data)
         echo "\nAll cohorts parsed.\n";
     } else {
         echo "\nUnable to fetch data from: " . $ws_allGroups . "\n" ;
     }
-    if ($verbose >= 2) {
-        echo "\n\nCurl diagnostic:\n";
-        print_r($curlinfo);
-    }
+    progressBar($verbose, 2, "\n\nCurl diagnostic:\n" . print_r($curlinfo, true));
 }
-
-
 
 
 /**
@@ -286,7 +276,7 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
     $cntRemovemembers = 0;
     $cntUsers = 0;
     $totalUsers = count($users);
-    $idcohort = $DB->get_records_menu('cohort', null, '', 'idnumber,id');
+    $idcohort = $DB->get_records_select_menu('cohort', "up1key != ''", null, '', 'up1key, id');
 
     $prevpercent = '';
     foreach ($users as $userid => $username) {
@@ -295,19 +285,19 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
         $requrl = $ws_userGroupsAndRoles . '?uid=' . $localusername;
         $memberof = array(); //to compute memberships to be removed
 
-        list($curlinfo, $data) = get_ws_data($requrl);
-        if ($verbose >= 2) echo ':'; // progress bar user
+        list($curlinfo, $wsdata) = get_ws_data($requrl);
+        progressBar($verbose, 2, ':'); // user
         $percent = sprintf("%3.0f", ($cntUsers / $totalUsers * 100)) ;
         if ( $verbose>=1 && $percent != $prevpercent ) {
             echo "\n $percent % ";
             $prevpercent = $percent;
         }
-        if ( is_null($data) ) continue;
+        if ( is_null($wsdata) ) continue;
 
-        foreach ($data as $cohort) {
+        foreach ($wsdata as $cohort) {
             $ckey = $cohort->key;
             $memberof[] = $ckey;
-            if ($verbose >= 3) echo '.'; // progress bar membership
+            progressBar($verbose, 3, '.'); //membership
             if ( isset($cntCohortUsers[$ckey]) ) {
                 $cntCohortUsers[$ckey]++;
             } else {
@@ -342,17 +332,17 @@ function sync_cohorts_from_users($timelast=0, $limit=0, $verbose=0)
 /**
  * compute memberships to be removed from database, and then actually do removing
  * @param integer $userid
- * @param array $memberof array(int $cohort->idnumber ... )
+ * @param array $memberof array(int $cohort->up1key ... )
  */
 function remove_memberships($userid, $memberof) {
     global $DB;
     $cnt = 0;
 
-    $sql = "SELECT cm.cohortid, c.idnumber FROM {cohort_members} cm "
+    $sql = "SELECT cm.cohortid, c.up1key FROM {cohort_members} cm "
         . "INNER JOIN {cohort} c ON (c.id = cm.cohortid) WHERE (cm.userid=? AND c.component='local_cohortsyncup1')";
     $res = $DB->get_records_sql_menu($sql, array($userid));
-    foreach ($res as $cohortid => $idnumber) {
-        if ( ! in_array($idnumber, $memberof) ) {
+    foreach ($res as $cohortid => $up1key) {
+        if ( ! in_array($up1key, $memberof) ) {
             cohort_remove_member($cohortid, $userid);
             $cnt++;
         }
@@ -362,32 +352,52 @@ function remove_memberships($userid, $memberof) {
 
 /**
  * returns a "newcohort" object from the json-formatted webservice cohort
+ * reads the cohort_period parameter and uses it to set idnumber, period, name
  * @param type $wscohort
  * @return (object) $newcohort
  */
 function define_cohort($wscohort) {
+    $groupYearly = groupYearlyPredicate();
+    $curyear = get_config('local_cohortsyncup1', 'cohort_period');
+    $groupcategory = groupKeyToCategory($wscohort->key);
+
     $newcohort = array(
-                        'contextid' => 1,
-                        'name' => (property_exists($wscohort, 'name') ? truncate_str($wscohort->name, 250) : $wscohort->key),
-                        'idnumber' => $wscohort->key,
-                        'description' => (property_exists($wscohort, 'description') ? $wscohort->description : $wscohort->key),
-                        'descriptionformat' => 0, //** @todo check
-                        'component' => 'local_cohortsyncup1'
-                    );
+        'contextid' => 1,
+        'name' => (property_exists($wscohort, 'name') ? truncate_str($wscohort->name, 250) : $wscohort->key),
+        'idnumber' => $wscohort->key,
+        'description' => (property_exists($wscohort, 'description') ? $wscohort->description : $wscohort->key),
+        'descriptionformat' => 0, //** @todo check
+        'component' => 'local_cohortsyncup1',
+        'up1category' => $groupcategory,
+        'up1key' => $wscohort->key,
+    );
+
+    if ( $groupYearly[$groupcategory] ) {
+            $newcohort['up1period'] = $curyear;
+            $newcohort['idnumber'] = $newcohort['idnumber'] . '-' . $curyear;
+            $newcohort['name'] = '['. $curyear . '] ' . $newcohort['name'];
+        } else {
+        }
+
     return ((object) $newcohort);
 }
 
 /**
  * returns an "updated cohort" object from the json-formatted webservice cohort
+ * only 'name' and 'description' fields can be updated
  * @param type $wscohort
  * @return (object) $cohort
  */
 function update_cohort($wscohort) {
     global $DB;
-    $cohort = $DB->get_record('cohort', array('idnumber' => $wscohort->key));
+    $cohort = $DB->get_record('cohort', array('up1key' => $wscohort->key));
+    $groupYearly = groupYearlyPredicate();
+    $curyear = get_config('local_cohortsyncup1', 'cohort_period');
+    $groupcategory = groupKeyToCategory($wscohort->key);
 
     $oldcohort = clone $cohort;
-    $cohort->name = (property_exists($wscohort, 'name') ? truncate_str($wscohort->name, 250) : $wscohort->key);
+    $prename = (property_exists($wscohort, 'name') ? truncate_str($wscohort->name, 250) : $wscohort->key);
+    $cohort->name = ( $groupYearly[$groupcategory] ? '['. $curyear . '] ' : '') . $prename;
     $cohort->description = (property_exists($wscohort, 'description') ? $wscohort->description : $wscohort->key);
     $toUpdate = ! (bool) ($cohort->name == $oldcohort->name && $cohort->description == $oldcohort->description);
 
@@ -453,14 +463,85 @@ function fix_user_sync($dryrun=false) {
     return $diag;
 }
 
+
+function update_period($verb=1) {
+    global $DB;
+
+    $dbyear = $DB->get_field_sql(" SELECT MAX(up1period) FROM cohort", null, MUST_EXIST);
+    $curyear = get_config('local_cohortsyncup1', 'cohort_period');
+    if ($dbyear == $curyear) {
+        progressBar($verb, 2, "Period = $dbyear ; does not change.\n\n");
+        return 0;
+    } else {
+        progressBar($verb, 2, "/!\ Period change, from $dbyear to $curyear.\n\n");
+        $sql = "SELECT COUNT(id) FROM cohort WHERE up1period=? AND up1key != '' ";
+        $cnterased = $DB->get_field_sql($sql, array($dbyear), MUST_EXIST);
+        $DB->execute("UPDATE {cohort} SET up1key='' WHERE up1period=? AND up1key != ''", array($dbyear));
+        return $cnterased;
+    }
+}
+
+/**
+ * performs various checkings on the cohorts consistency and display results (intended for CLI)
+ */
+function check_database() {
+    $unique_key = check_up1key_unicity();
+    if ($unique_key === true) {
+        echo "Key cohort.up1key unicity OK.\n\n";
+    } else {
+        echo "/!\ Error: key cohort.up1key not unique for following cohorts: (up1key => count)\n";
+        print_r($unique_key);
+        echo "\n";
+    }
+}
+
+/**
+ * check if the field up1key is well unique (or empty)
+ * @return mixed : true if unique, or array of up1keys in error with their count
+ */
+function check_up1key_unicity() {
+    global $DB;
+    $sql = "SELECT up1key, COUNT(id) AS cnt FROM {cohort} WHERE up1key != '' GROUP BY up1key HAVING cnt > 1";
+    $res = $DB->get_records_sql_menu($sql);
+    if (count($res) == 0) {
+        return true;
+    } else {
+        return $res;
+    }
+}
+
+/**
+ * show various statistics on cohort records
+ */
+function cohort_statistics() {
+    $fields = array('up1period', 'up1category');
+    echo "\nCurrent year = " . get_config('local_cohortsyncup1', 'cohort_period') . "\n\n";
+    foreach ($fields as $field) {
+        echo "Statistics for $field : \n";
+        print_r(cohort_statistics_by($field));
+    }
+}
+
+/**
+ * performs mysql statistics based on GROUP BY ($field)
+ * @param string $field a column from table cohort
+ * @return array (field-value => count)
+ */
+function cohort_statistics_by($field) {
+    global $DB;
+    $sql = "SELECT " . $field .", COUNT(id) AS cnt FROM {cohort} GROUP BY " . $field;
+    $res = $DB->get_records_sql_menu($sql);
+    return $res;
+}
+
 /**
  * progress bar display
  * @param int $verb verbosity
  * @param int $verbmin minimal verbosity
- * @param string $strig to display
+ * @param string $text to display
  */
-function progressBar($verb, $verbmin, $string) {
+function progressBar($verb, $verbmin, $text) {
     if ($verb >= $verbmin) {
-        echo $string;
+        echo $text;
     }
 }

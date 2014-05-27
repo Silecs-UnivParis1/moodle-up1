@@ -19,6 +19,7 @@ function upgrade_cohort_set_period($verb) {
          . " WHERE component LIKE 'local_cohortsyncup1%' AND up1category='' ";
     $records = $DB->get_records_sql($sql);
     $groupYearly = groupYearlyPredicate();
+    $curyear = get_config('local_cohortsyncup1', 'cohort_period');
     $count = array ('old' => 0, 'current-up' => 0, 'current-noop' => 0, 'none' => 0);
 
     foreach ($records as $cohort) {
@@ -40,8 +41,8 @@ function upgrade_cohort_set_period($verb) {
         } elseif ( $groupYearly[$groupcategory] ) {            
             $cohort->up1period = $curyear;
             $cohort->up1key = $cohort->idnumber;
-            $cohort->idnumber = $cohort->idnumber . '-' .$year;
-            $cohort->name = '['. $year . '] ' . $cohort->name;
+            $cohort->idnumber = $cohort->idnumber . '-' .$curyear;
+            $cohort->name = '['. $curyear . '] ' . $cohort->name;
             $count['current-up']++;
         } else {
             $cohort->up1key = $cohort->idnumber;

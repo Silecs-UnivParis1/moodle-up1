@@ -25,7 +25,7 @@ require_once($CFG->dirroot.'/local/cohortsyncup1/upgradelib.php');
 
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array(
-        'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false,
+        'help'=>false, 'verb'=>1, 'printlast'=>false, 'testws'=>false, 'check'=>false, 'stats'=>false,
         'cleanall'=>false, 'force'=>false, 'delete-old'=>false, 'fix-sync'=>false, 'dryrun'=>false,
         'allGroups'=>false, 'upgrade-period'=>false,
         'since'=>false, 'init'=>false ),
@@ -48,6 +48,8 @@ Options:
 --printlast           Display last syncs (diagnostic)
 --testws              Test the webservice (data download), to use with --verb= 1 to 3
 --verb=N              Verbosity (0 to 3), 1 by default
+--check               Performs various checkings on database consistency and display results
+--stats               Display various statistics
 
 --delete-old   /!\    Delete cohorts still in database but not in webservice results anymore. One shot.
 --cleanall            Empty cohort_members, then cohort
@@ -78,6 +80,16 @@ $CFG->debug = DEBUG_NORMAL;
 
 if ( $options['testws'] ) {
     display_cohorts_all_groups($options['verb']);
+    return 0;
+}
+
+if ( $options['check'] ) {
+    check_database($options['verb']);
+    return 0;
+}
+
+if ( $options['stats'] ) {
+    cohort_statistics($options['verb']);
     return 0;
 }
 
