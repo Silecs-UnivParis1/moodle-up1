@@ -47,9 +47,21 @@ $table->data = report_up1stats_cohorts_generic();
 echo html_writer::table($table);
 
 $table = new html_table();
+$table->head = array('Catégorie', 'Nb');
+$table->data = report_up1stats_cohorts_category();
+echo html_writer::table($table);
+
+$table = new html_table();
+$table->head = array('Période', 'Nb');
+$table->data = report_up1stats_cohorts_period();
+echo html_writer::table($table);
+
+/*
+$table = new html_table();
 $table->head = array('Motif', 'Nb');
 $table->data = report_up1stats_cohorts_prefix();
 echo html_writer::table($table);
+*/
 
 
 //***** TOP NN cohorts
